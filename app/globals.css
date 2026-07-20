@@ -31,8 +31,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .brand-row { height: 38px; display: flex; align-items: center; gap: 10px; padding: 0 8px; }
 .brand-row strong { font-size: 21px; letter-spacing: 0; }
 .brand-row .icon-button { display: none; margin-left: auto; color: #fff; }
-.brand-mark { width: 30px; height: 30px; display: grid; place-items: center; }
-.brand-mark img { width: 100%; height: 100%; display: block; }
 .auth-logo span { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 7px; background: var(--coral); color: #fff; font-weight: 900; }
 .venue-switcher { min-height: 64px; display: grid; grid-template-columns: 34px 1fr 16px; align-items: center; gap: 10px; margin-top: 24px; padding: 10px; border: 1px solid #3b4540; border-radius: 7px; background: #29322e; }
 .venue-avatar { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 6px; background: #41554c; color: #dbe9e2; font-size: 15px; font-weight: 600; }
@@ -197,7 +195,6 @@ tbody tr { cursor: pointer; } tbody tr:hover { background: #fafbf9; }.muted-cell
 .brand-row { height: 40px; padding: 0 10px; }
 .brand-row strong { font-size: 19px; font-weight: 600; }
 .brand-row .icon-button { color: #555; }
-.brand-mark { width: 28px; height: 28px; background: transparent; }
 .venue-switcher {
   min-height: 58px;
   margin-top: 14px;
@@ -1458,17 +1455,52 @@ thead th {
   .metric { min-height: 108px; }
 }
 
+/* The logo becomes the desktop navigation control on hover. */
+.brand-toggle {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5b6872;
+  cursor: pointer;
+}
+
+.brand-toggle-logo,
+.brand-toggle-panel {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transition: opacity .15s ease, transform .15s ease;
+}
+
+.brand-toggle-logo img { width: 28px; height: 28px; display: block; }
+.brand-toggle-panel { opacity: 0; transform: scale(.88); }
+.brand-toggle:hover,
+.brand-toggle:focus-visible { background: #eef3f6; }
+.brand-toggle:hover .brand-toggle-logo,
+.brand-toggle:focus-visible .brand-toggle-logo { opacity: 0; transform: scale(.88); }
+.brand-toggle:hover .brand-toggle-panel,
+.brand-toggle:focus-visible .brand-toggle-panel { opacity: 1; transform: scale(1); }
+
+/* Role and account rows rely on hover state instead of permanent outlines. */
+.role-menu-trigger,
+.user-chip { border: 0; }
+.role-menu-trigger { background: transparent; }
+.role-menu-trigger:hover,
+.role-menu-trigger[aria-expanded="true"] { background: #f2f6f8; }
+
 /* Desktop navigation can collapse to an icon rail without changing mobile navigation. */
 @media (min-width: 901px) {
   .sidebar,
   .main-shell {
     transition: width .2s ease, margin-left .2s ease;
-  }
-
-  .brand-row .desktop-sidebar-toggle {
-    display: inline-grid;
-    margin-left: auto;
-    color: #66717a;
   }
 
   .brand-row .mobile-sidebar-close { display: none; }
@@ -1479,15 +1511,17 @@ thead th {
   }
 
   .sidebar-collapsed .main-shell { margin-left: 84px; }
-  .sidebar-collapsed .brand-row { gap: 4px; padding: 0; }
+  .sidebar-collapsed .brand-row { justify-content: center; gap: 0; padding: 0; }
   .sidebar-collapsed .brand-row strong { display: none; }
-  .sidebar-collapsed .brand-row .desktop-sidebar-toggle { width: 32px; height: 32px; }
 
   .sidebar-collapsed .venue-switcher {
+    width: 48px;
     min-height: 48px;
     grid-template-columns: 1fr;
     justify-items: center;
     gap: 0;
+    margin-right: auto;
+    margin-left: auto;
     padding: 7px;
   }
 
@@ -1508,14 +1542,18 @@ thead th {
 
   .sidebar-collapsed .side-nav button {
     position: relative;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     justify-content: center;
     gap: 0;
+    margin: 1px auto;
     padding: 0;
+    border-radius: 12px;
   }
 
   .sidebar-collapsed .side-nav button span { display: none; }
-  .sidebar-collapsed .side-nav button > svg { flex: 0 0 auto; }
+  .sidebar-collapsed .side-nav button > svg { flex: 0 0 auto; color: #52616d; }
+  .sidebar-collapsed .side-nav button.active > svg { color: var(--blue); }
   .sidebar-collapsed .side-nav button b {
     position: absolute;
     top: 4px;
@@ -1532,10 +1570,20 @@ thead th {
   }
 
   .sidebar-collapsed .role-menu-trigger {
-    min-height: 44px;
+    width: 48px;
+    min-height: 48px;
     grid-template-columns: 1fr;
     justify-items: center;
+    margin: 0 auto;
     padding: 5px;
+    border-radius: 12px;
+  }
+
+  .sidebar-collapsed .role-menu-trigger > span {
+    width: 24px;
+    height: 24px;
+    background: transparent;
+    color: #52616d;
   }
 
   .sidebar-collapsed .role-menu-trigger > div,
@@ -1549,11 +1597,14 @@ thead th {
   }
 
   .sidebar-collapsed .user-chip {
+    width: 48px;
+    min-height: 48px;
     grid-template-columns: 1fr;
     justify-items: center;
-    margin-top: 8px;
+    margin: 8px auto 0;
     padding: 7px;
     border-top: 0;
+    border-radius: 12px;
   }
 
   .sidebar-collapsed .user-chip > div,
@@ -1561,8 +1612,14 @@ thead th {
 }
 
 @media (max-width: 900px) {
-  .brand-row .desktop-sidebar-toggle { display: none; }
   .brand-row .mobile-sidebar-close { display: inline-grid; }
+  .brand-toggle { cursor: default; }
+  .brand-toggle:hover,
+  .brand-toggle:focus-visible { background: transparent; }
+  .brand-toggle:hover .brand-toggle-logo,
+  .brand-toggle:focus-visible .brand-toggle-logo { opacity: 1; transform: none; }
+  .brand-toggle:hover .brand-toggle-panel,
+  .brand-toggle:focus-visible .brand-toggle-panel { opacity: 0; transform: scale(.88); }
 }
 
 @media (prefers-reduced-motion: reduce) {

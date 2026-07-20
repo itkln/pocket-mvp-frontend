@@ -371,9 +371,13 @@ function Sidebar({ user, role, screen, navigation, venue, venues: availableVenue
 		setVenueMenuOpen(false);
 		onAddVenue();
 	};
+  const toggleNavigation = () => {
+    if (window.matchMedia("(min-width: 901px)").matches) onToggleCollapsed();
+    else onClose();
+  };
   return (
     <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
-      <div className="brand-row"><div className="brand-mark"><Image src="/logo.svg" alt="" width={28} height={28} priority /></div><strong>Pocket</strong><IconButton icon={collapsed ? PanelLeftOpen : PanelLeftClose} label={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"} onClick={onToggleCollapsed} className="desktop-sidebar-toggle" /><IconButton icon={X} label="Закрыть меню" onClick={onClose} className="mobile-sidebar-close" /></div>
+      <div className="brand-row"><button className="brand-toggle" onClick={toggleNavigation} aria-label={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"} title={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"}><span className="brand-toggle-logo"><Image src="/logo.svg" alt="" width={28} height={28} priority /></span><span className="brand-toggle-panel">{collapsed ? <PanelLeftOpen size={20} strokeWidth={1.9} /> : <PanelLeftClose size={20} strokeWidth={1.9} />}</span></button><strong>Pocket</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} className="mobile-sidebar-close" /></div>
 	  {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen} aria-label={collapsed ? `Заведение: ${venue.name}` : undefined}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover"><p className="venue-menu-label">Мои заведения</p>{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}<button className="add-venue-button" onClick={startVenueCreation}><span><Plus size={17} /></span><span><strong>Добавить заведение</strong><small>Создать новое пространство</small></span><ChevronRight size={16} /></button></div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
       <nav className="side-nav">
         {navigationGroups[role].map((group) => {
@@ -384,21 +388,21 @@ function Sidebar({ user, role, screen, navigation, venue, venues: availableVenue
 
           return <div className={`nav-group ${mobilePrimaryGroup ? "mobile-primary-group" : ""}`} key={group.label}>
             <p className="nav-label">{group.label}</p>
-            {items.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)} title={collapsed ? label : undefined} aria-label={collapsed ? `${label}${count ? `, ${count}` : ""}` : undefined}><Icon size={19} strokeWidth={screen === id ? 2.2 : 1.8} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
+            {items.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)} title={collapsed ? label : undefined} aria-label={collapsed ? `${label}${count ? `, ${count}` : ""}` : undefined}><Icon size={20} strokeWidth={1.9} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
           </div>;
         })}
       </nav>
       <div className="sidebar-bottom">
         <p className="nav-label">Текущая роль</p>
         <div className="role-menu">
-          <button className="role-menu-trigger" onClick={() => setRoleMenuOpen((open) => !open)} aria-expanded={roleMenuOpen} title={collapsed ? "Сменить роль" : undefined}><span><CurrentRoleIcon size={17} /></span><div><strong>{roleMeta.label}</strong><small>{roleMeta.detail}</small></div><ChevronDown size={16} /></button>
+          <button className="role-menu-trigger" onClick={() => setRoleMenuOpen((open) => !open)} aria-expanded={roleMenuOpen} title={collapsed ? "Сменить роль" : undefined}><span><CurrentRoleIcon size={20} strokeWidth={1.9} /></span><div><strong>{roleMeta.label}</strong><small>{roleMeta.detail}</small></div><ChevronDown size={16} strokeWidth={1.9} /></button>
           {roleMenuOpen && <div className="role-menu-popover">
-            <button className={role === "owner" ? "active" : ""} onClick={() => selectRole("owner")}><Store size={17} /><span><strong>Владелец</strong><small>Управление заведением</small></span>{role === "owner" && <Check size={16} />}</button>
-            <button className={role === "staff" ? "active" : ""} onClick={() => selectRole("staff")}><BadgeCheck size={17} /><span><strong>Сотрудник</strong><small>Рабочая смена</small></span>{role === "staff" && <Check size={16} />}</button>
-            <button className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}><UserRound size={17} /><span><strong>Гость</strong><small>Личный аккаунт Pocket</small></span>{role === "customer" && <Check size={16} />}</button>
+            <button className={role === "owner" ? "active" : ""} onClick={() => selectRole("owner")}><Store size={20} strokeWidth={1.9} /><span><strong>Владелец</strong><small>Управление заведением</small></span>{role === "owner" && <Check size={16} />}</button>
+            <button className={role === "staff" ? "active" : ""} onClick={() => selectRole("staff")}><BadgeCheck size={20} strokeWidth={1.9} /><span><strong>Сотрудник</strong><small>Рабочая смена</small></span>{role === "staff" && <Check size={16} />}</button>
+            <button className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}><UserRound size={20} strokeWidth={1.9} /><span><strong>Гость</strong><small>Личный аккаунт Pocket</small></span>{role === "customer" && <Check size={16} />}</button>
           </div>}
         </div>
-		<button className={`user-chip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} onClick={() => onNavigate(role === "customer" ? "profile" : "account")} title={collapsed ? "Управление аккаунтом" : undefined} aria-label={collapsed ? "Управление аккаунтом" : undefined}><span>{userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong><small>Управление аккаунтом</small></div><Settings size={17} /></button>
+		<button className={`user-chip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} onClick={() => onNavigate(role === "customer" ? "profile" : "account")} title={collapsed ? "Управление аккаунтом" : undefined} aria-label={collapsed ? "Управление аккаунтом" : undefined}><span>{userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong><small>Управление аккаунтом</small></div><Settings size={20} strokeWidth={1.9} /></button>
       </div>
     </aside>
   );
@@ -407,7 +411,7 @@ function Sidebar({ user, role, screen, navigation, venue, venues: availableVenue
 function MobileBottomNavigation({ role, screen, navigation, onNavigate }: { role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon }[]; onNavigate: (id: string) => void }) {
   const primaryItems = navigation.filter((item) => mobilePrimaryNavigation[role].includes(item.id));
   return <nav className="mobile-bottom-nav" aria-label="Основная навигация">
-    {primaryItems.map(({ id, label, icon: Icon }) => <button key={id} className={screen === id ? "active" : ""} onClick={() => onNavigate(id)}><Icon size={21} strokeWidth={screen === id ? 2.3 : 1.9} /><span>{label === "План зала" ? "Зал" : label === "Мои заказы" ? "Заказы" : label}</span></button>)}
+    {primaryItems.map(({ id, label, icon: Icon }) => <button key={id} className={screen === id ? "active" : ""} onClick={() => onNavigate(id)}><Icon size={20} strokeWidth={1.9} /><span>{label === "План зала" ? "Зал" : label === "Мои заказы" ? "Заказы" : label}</span></button>)}
   </nav>;
 }
 
