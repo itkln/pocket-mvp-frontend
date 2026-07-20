@@ -37,6 +37,8 @@ import {
   MessageSquareText,
   Minus,
   PackageCheck,
+  PanelLeftClose,
+  PanelLeftOpen,
   Pencil,
   Plus,
   QrCode,
@@ -80,6 +82,7 @@ type Venue = {
 
 const savedVenuesKey = (userID: string) => `pocket:venues:${userID}`;
 const selectedVenueKey = (userID: string) => `pocket:selected-venue:${userID}`;
+const sidebarCollapsedKey = "pocket:sidebar-collapsed";
 
 const loadSavedVenues = (userID: string) => {
 	try {
@@ -184,8 +187,8 @@ function Button({ children, icon: Icon, kind = "primary", onClick, type = "butto
   return <button type={type} className={`button ${kind} ${className}`} onClick={onClick} disabled={disabled}>{Icon && <Icon size={17} />}{children}</button>;
 }
 
-function IconButton({ icon: Icon, label, onClick, active = false }: { icon: LucideIcon; label: string; onClick?: () => void; active?: boolean }) {
-  return <button className={`icon-button ${active ? "active" : ""}`} onClick={onClick} aria-label={label} title={label}><Icon size={19} /></button>;
+function IconButton({ icon: Icon, label, onClick, active = false, className = "" }: { icon: LucideIcon; label: string; onClick?: () => void; active?: boolean; className?: string }) {
+  return <button className={`icon-button ${active ? "active" : ""} ${className}`} onClick={onClick} aria-label={label} title={label}><Icon size={19} /></button>;
 }
 
 function StatusPill({ status }: { status: string }) {
@@ -212,6 +215,14 @@ export default function PocketApp() {
 	const [modal, setModal] = useState<"item" | "invite" | "order" | "venue" | null>(null);
   const [toast, setToast] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setSidebarCollapsed(window.localStorage.getItem(sidebarCollapsedKey) === "true");
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
 	useEffect(() => {
 		let active = true;
@@ -255,6 +266,14 @@ export default function PocketApp() {
   const navigate = (next: string) => {
     setScreen(next);
     setMobileNav(false);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      window.localStorage.setItem(sidebarCollapsedKey, String(next));
+      return next;
+    });
   };
 
   const notify = (message: string) => {
@@ -302,8 +321,8 @@ export default function PocketApp() {
 	if (!authReady || !currentUser) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
 
   return (
-    <div className="app-shell">
-	  <Sidebar user={currentUser} role={role} screen={screen} navigation={navigation} venue={venue} venues={availableVenues} mobileNav={mobileNav} onNavigate={navigate} onRole={changeRole} onVenue={selectVenue} onAddVenue={() => setModal("venue")} onClose={() => setMobileNav(false)} />
+    <div className={`app-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
+	  <Sidebar user={currentUser} role={role} screen={screen} navigation={navigation} venue={venue} venues={availableVenues} mobileNav={mobileNav} collapsed={sidebarCollapsed} onNavigate={navigate} onRole={changeRole} onVenue={selectVenue} onAddVenue={() => setModal("venue")} onClose={() => setMobileNav(false)} onToggleCollapsed={toggleSidebar} />
       <main className="main-shell">
         <Topbar role={role} screen={screen} navigation={navigation} venueName={venue.name} cartCount={cartCount} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} />
         <div className={`page-area ${role === "customer" ? "customer-area" : ""}`}>
@@ -339,7 +358,7 @@ export default function PocketApp() {
   );
 }
 
-function Sidebar({ user, role, screen, navigation, venue, venues: availableVenues, mobileNav, onNavigate, onRole, onVenue, onAddVenue, onClose }: { user: AuthUser; role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue; venues: Venue[]; mobileNav: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onAddVenue: () => void; onClose: () => void }) {
+function Sidebar({ user, role, screen, navigation, venue, venues: availableVenues, mobileNav, collapsed, onNavigate, onRole, onVenue, onAddVenue, onClose, onToggleCollapsed }: { user: AuthUser; role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue; venues: Venue[]; mobileNav: boolean; collapsed: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onAddVenue: () => void; onClose: () => void; onToggleCollapsed: () => void }) {
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [venueMenuOpen, setVenueMenuOpen] = useState(false);
   const roleMeta = role === "owner" ? { label: "Владелец", detail: "Управление заведением", icon: Store } : role === "staff" ? { label: "Сотрудник", detail: "Рабочая смена", icon: BadgeCheck } : { label: "Гость", detail: "Личный аккаунт Pocket", icon: UserRound };
@@ -354,8 +373,8 @@ function Sidebar({ user, role, screen, navigation, venue, venues: availableVenue
 	};
   return (
     <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
-      <div className="brand-row"><div className="brand-mark"><Image src="/logo.svg" alt="" width={28} height={28} priority /></div><strong>Pocket</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} /></div>
-	  {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover"><p className="venue-menu-label">Мои заведения</p>{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}<button className="add-venue-button" onClick={startVenueCreation}><span><Plus size={17} /></span><span><strong>Добавить заведение</strong><small>Создать новое пространство</small></span><ChevronRight size={16} /></button></div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
+      <div className="brand-row"><div className="brand-mark"><Image src="/logo.svg" alt="" width={28} height={28} priority /></div><strong>Pocket</strong><IconButton icon={collapsed ? PanelLeftOpen : PanelLeftClose} label={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"} onClick={onToggleCollapsed} className="desktop-sidebar-toggle" /><IconButton icon={X} label="Закрыть меню" onClick={onClose} className="mobile-sidebar-close" /></div>
+	  {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen} aria-label={collapsed ? `Заведение: ${venue.name}` : undefined}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover"><p className="venue-menu-label">Мои заведения</p>{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}<button className="add-venue-button" onClick={startVenueCreation}><span><Plus size={17} /></span><span><strong>Добавить заведение</strong><small>Создать новое пространство</small></span><ChevronRight size={16} /></button></div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
       <nav className="side-nav">
         {navigationGroups[role].map((group) => {
           const items = group.ids
@@ -365,21 +384,21 @@ function Sidebar({ user, role, screen, navigation, venue, venues: availableVenue
 
           return <div className={`nav-group ${mobilePrimaryGroup ? "mobile-primary-group" : ""}`} key={group.label}>
             <p className="nav-label">{group.label}</p>
-            {items.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)}><Icon size={19} strokeWidth={screen === id ? 2.2 : 1.8} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
+            {items.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)} title={collapsed ? label : undefined} aria-label={collapsed ? `${label}${count ? `, ${count}` : ""}` : undefined}><Icon size={19} strokeWidth={screen === id ? 2.2 : 1.8} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
           </div>;
         })}
       </nav>
       <div className="sidebar-bottom">
         <p className="nav-label">Текущая роль</p>
         <div className="role-menu">
-          <button className="role-menu-trigger" onClick={() => setRoleMenuOpen((open) => !open)} aria-expanded={roleMenuOpen}><span><CurrentRoleIcon size={17} /></span><div><strong>{roleMeta.label}</strong><small>{roleMeta.detail}</small></div><ChevronDown size={16} /></button>
+          <button className="role-menu-trigger" onClick={() => setRoleMenuOpen((open) => !open)} aria-expanded={roleMenuOpen} title={collapsed ? "Сменить роль" : undefined}><span><CurrentRoleIcon size={17} /></span><div><strong>{roleMeta.label}</strong><small>{roleMeta.detail}</small></div><ChevronDown size={16} /></button>
           {roleMenuOpen && <div className="role-menu-popover">
             <button className={role === "owner" ? "active" : ""} onClick={() => selectRole("owner")}><Store size={17} /><span><strong>Владелец</strong><small>Управление заведением</small></span>{role === "owner" && <Check size={16} />}</button>
             <button className={role === "staff" ? "active" : ""} onClick={() => selectRole("staff")}><BadgeCheck size={17} /><span><strong>Сотрудник</strong><small>Рабочая смена</small></span>{role === "staff" && <Check size={16} />}</button>
             <button className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}><UserRound size={17} /><span><strong>Гость</strong><small>Личный аккаунт Pocket</small></span>{role === "customer" && <Check size={16} />}</button>
           </div>}
         </div>
-		<button className={`user-chip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} onClick={() => onNavigate(role === "customer" ? "profile" : "account")}><span>{userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong><small>Управление аккаунтом</small></div><Settings size={17} /></button>
+		<button className={`user-chip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} onClick={() => onNavigate(role === "customer" ? "profile" : "account")} title={collapsed ? "Управление аккаунтом" : undefined} aria-label={collapsed ? "Управление аккаунтом" : undefined}><span>{userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong><small>Управление аккаунтом</small></div><Settings size={17} /></button>
       </div>
     </aside>
   );

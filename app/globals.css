@@ -1457,3 +1457,115 @@ thead th {
   .metric-grid { gap: 2px; padding: 3px; }
   .metric { min-height: 108px; }
 }
+
+/* Desktop navigation can collapse to an icon rail without changing mobile navigation. */
+@media (min-width: 901px) {
+  .sidebar,
+  .main-shell {
+    transition: width .2s ease, margin-left .2s ease;
+  }
+
+  .brand-row .desktop-sidebar-toggle {
+    display: inline-grid;
+    margin-left: auto;
+    color: #66717a;
+  }
+
+  .brand-row .mobile-sidebar-close { display: none; }
+
+  .sidebar-collapsed .sidebar {
+    width: 84px;
+    padding: 16px 10px 12px;
+  }
+
+  .sidebar-collapsed .main-shell { margin-left: 84px; }
+  .sidebar-collapsed .brand-row { gap: 4px; padding: 0; }
+  .sidebar-collapsed .brand-row strong { display: none; }
+  .sidebar-collapsed .brand-row .desktop-sidebar-toggle { width: 32px; height: 32px; }
+
+  .sidebar-collapsed .venue-switcher {
+    min-height: 48px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0;
+    padding: 7px;
+  }
+
+  .sidebar-collapsed .venue-switcher > div,
+  .sidebar-collapsed .venue-switcher > svg { display: none; }
+
+  .sidebar-collapsed .venue-menu-popover {
+    top: 0;
+    right: auto;
+    left: calc(100% + 10px);
+    width: 260px;
+  }
+
+  .sidebar-collapsed .side-nav { margin-top: 16px; padding: 0; }
+  .sidebar-collapsed .nav-group + .nav-group { margin-top: 8px; }
+  .sidebar-collapsed .nav-group .nav-label,
+  .sidebar-collapsed .sidebar-bottom > .nav-label { display: none; }
+
+  .sidebar-collapsed .side-nav button {
+    position: relative;
+    height: 42px;
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+  }
+
+  .sidebar-collapsed .side-nav button span { display: none; }
+  .sidebar-collapsed .side-nav button > svg { flex: 0 0 auto; }
+  .sidebar-collapsed .side-nav button b {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    min-width: 14px;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border-radius: 7px;
+    background: var(--blue);
+    color: #fff;
+    font-size: 8px;
+    font-weight: 600;
+  }
+
+  .sidebar-collapsed .role-menu-trigger {
+    min-height: 44px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    padding: 5px;
+  }
+
+  .sidebar-collapsed .role-menu-trigger > div,
+  .sidebar-collapsed .role-menu-trigger > svg { display: none; }
+
+  .sidebar-collapsed .role-menu-popover {
+    right: auto;
+    bottom: 0;
+    left: calc(100% + 10px);
+    width: 244px;
+  }
+
+  .sidebar-collapsed .user-chip {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    margin-top: 8px;
+    padding: 7px;
+    border-top: 0;
+  }
+
+  .sidebar-collapsed .user-chip > div,
+  .sidebar-collapsed .user-chip > svg { display: none; }
+}
+
+@media (max-width: 900px) {
+  .brand-row .desktop-sidebar-toggle { display: none; }
+  .brand-row .mobile-sidebar-close { display: inline-grid; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .main-shell { transition: none; }
+}
