@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -63,9 +63,12 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
 
 type Role = "owner" | "customer" | "staff";
 type Status = "Новый" | "Готовится" | "Готов" | "Подан";
+
+const userInitials = (user: AuthUser) => `${user.first_name.at(0) ?? ""}${user.last_name.at(0) ?? ""}`.toUpperCase();
 
 type Venue = {
   id: string;
@@ -166,6 +169,8 @@ function EmptyIllustration({ icon: Icon, title, text }: { icon: LucideIcon; titl
 
 export default function PocketApp() {
   const router = useRouter();
+	const [authReady, setAuthReady] = useState(false);
+	const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [role, setRole] = useState<Role>("owner");
   const [screen, setScreen] = useState("overview");
   const [venue, setVenue] = useState(venues[0]);
@@ -173,6 +178,31 @@ export default function PocketApp() {
   const [modal, setModal] = useState<"item" | "invite" | "order" | null>(null);
   const [toast, setToast] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
+
+	useEffect(() => {
+		let active = true;
+		getCurrentUser()
+			.then((user) => {
+				if (!active) return;
+				setRole(user.role === "venue_owner" ? "owner" : "customer");
+				setScreen(user.role === "venue_owner" ? "overview" : "discover");
+				setCurrentUser(user);
+				setAuthReady(true);
+			})
+			.catch((error) => {
+				if (!active) return;
+				if (error instanceof AuthAPIError && error.status === 401) router.replace("/login");
+				else router.replace("/login?error=unavailable");
+			});
+		return () => { active = false; };
+	}, [router]);
+
+	const signOut = async () => {
+		try { await logout(); } finally {
+			router.replace("/login");
+			router.refresh();
+		}
+	};
 
   const navigation = role === "owner" ? ownerNavigation : role === "customer" ? customerNavigation : staffNavigation;
   const cartCount = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
@@ -208,9 +238,11 @@ export default function PocketApp() {
     });
   };
 
+	if (!authReady || !currentUser) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
+
   return (
     <div className="app-shell">
-      <Sidebar role={role} screen={screen} navigation={navigation} venue={venue} venues={venues} mobileNav={mobileNav} onNavigate={navigate} onRole={changeRole} onVenue={(nextVenue) => { setVenue(nextVenue); notify(`Выбрано заведение ${nextVenue.name}`); }} onClose={() => setMobileNav(false)} />
+	  <Sidebar user={currentUser} role={role} screen={screen} navigation={navigation} venue={venue} venues={venues} mobileNav={mobileNav} onNavigate={navigate} onRole={changeRole} onVenue={(nextVenue) => { setVenue(nextVenue); notify(`Выбрано заведение ${nextVenue.name}`); }} onClose={() => setMobileNav(false)} />
       <main className="main-shell">
         <Topbar role={role} screen={screen} navigation={navigation} venueName={venue.name} cartCount={cartCount} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} />
         <div className={`page-area ${role === "customer" ? "customer-area" : ""}`}>
@@ -230,12 +262,12 @@ export default function PocketApp() {
           {role === "customer" && screen === "checkout" && <Checkout cart={cart} total={cartTotal} updateQty={updateQty} onBack={() => navigate("browse-menu")} onDone={() => { setCart({}); navigate("history"); notify("Заказ #1049 принят"); }} />}
           {role === "customer" && screen === "reservation" && <ReservationScreen onMenu={() => navigate("browse-menu")} notify={notify} />}
           {role === "customer" && screen === "history" && <HistoryScreen notify={notify} />}
-          {role === "customer" && screen === "profile" && <ProfileScreen notify={notify} onLogout={() => router.push("/login")} />}
+		  {role === "customer" && screen === "profile" && <ProfileScreen user={currentUser} notify={notify} onLogout={signOut} />}
 
           {role === "staff" && screen === "service" && <ServiceBoard notify={notify} />}
           {role === "staff" && screen === "kitchen" && <KitchenScreen notify={notify} />}
           {role === "staff" && screen === "staff-floor" && <FloorPlan mode="staff" venueName={venue.name} notify={notify} />}
-          {role !== "customer" && screen === "account" && <AccountScreen notify={notify} onLogout={() => router.push("/login")} />}
+		  {role !== "customer" && screen === "account" && <AccountScreen user={currentUser} notify={notify} onLogout={signOut} />}
         </div>
       </main>
       <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />
@@ -245,7 +277,7 @@ export default function PocketApp() {
   );
 }
 
-function Sidebar({ role, screen, navigation, venue, venues: availableVenues, mobileNav, onNavigate, onRole, onVenue, onClose }: { role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue; venues: Venue[]; mobileNav: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onClose: () => void }) {
+function Sidebar({ user, role, screen, navigation, venue, venues: availableVenues, mobileNav, onNavigate, onRole, onVenue, onClose }: { user: AuthUser; role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue; venues: Venue[]; mobileNav: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onClose: () => void }) {
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [venueMenuOpen, setVenueMenuOpen] = useState(false);
   const roleMeta = role === "owner" ? { label: "Владелец", detail: "Управление заведением", icon: Store } : role === "staff" ? { label: "Сотрудник", detail: "Рабочая смена", icon: BadgeCheck } : { label: "Гость", detail: "Личный аккаунт Pocket", icon: UserRound };
@@ -272,7 +304,7 @@ function Sidebar({ role, screen, navigation, venue, venues: availableVenues, mob
             <button className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}><UserRound size={17} /><span><strong>Гость</strong><small>Личный аккаунт Pocket</small></span>{role === "customer" && <Check size={16} />}</button>
           </div>}
         </div>
-        <button className={`user-chip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} onClick={() => onNavigate(role === "customer" ? "profile" : "account")}><span>DI</span><div><strong>Денис Иткин</strong><small>Управление аккаунтом</small></div><Settings size={17} /></button>
+		<button className={`user-chip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} onClick={() => onNavigate(role === "customer" ? "profile" : "account")}><span>{userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong><small>Управление аккаунтом</small></div><Settings size={17} /></button>
       </div>
     </aside>
   );
@@ -533,8 +565,8 @@ function SubscriptionScreen({ venueCount, notify }: { venueCount: number; notify
   return <><PageHeader title="Подписка" subtitle="Выберите тариф для всего рабочего пространства Pocket." /><section className={`subscription-status ${activated ? "active" : ""}`}><span><Sparkles size={22} /></span><div><strong>{activated ? `Pocket ${plan.name} активен` : "Пробный период активен"}</strong><p>{activated ? `Следующее списание ${billing === "yearly" ? "19 июля 2027" : "19 августа 2026"}.` : "Все возможности Business доступны до 28 июля без списаний."}</p></div><b>{activated ? "Оплачено" : "9 дней"}</b></section><div className="subscription-heading"><div><h2>Выберите тариф</h2><p>Тариф можно изменить или отменить в любой момент.</p></div><div className="segmented billing-toggle"><button className={billing === "monthly" ? "active" : ""} onClick={() => { setBilling("monthly"); setActivated(false); }}>Ежемесячно</button><button className={billing === "yearly" ? "active" : ""} onClick={() => { setBilling("yearly"); setActivated(false); }}>Ежегодно <b>−17%</b></button></div></div><section className="subscription-plans">{subscriptionPlans.map((item) => { const incompatible = item.venueLimit < venueCount; return <button className={`subscription-plan ${planId === item.id ? "selected" : ""} ${incompatible ? "incompatible" : ""}`} key={item.id} disabled={incompatible} onClick={() => { setPlanId(item.id); setActivated(false); }}><div className="plan-title"><div><strong>{item.name}</strong><span>{item.description}</span></div>{planId === item.id && <Check size={18} />}</div><div className="plan-price"><strong>{money(item.price)}</strong><span>/ месяц</span></div><p>{billing === "yearly" ? `€${item.price * 10} в год · 2 месяца бесплатно` : "Оплата каждый месяц"}</p><ul>{item.features.map((feature) => <li key={feature}><Check size={15} />{feature}</li>)}</ul><small className={incompatible ? "plan-limit-warning" : ""}><Store size={14} />{incompatible ? `Не подходит для ${venueCount} заведений` : item.venues}</small></button>; })}</section><div className="subscription-checkout"><section className="panel subscription-details"><PanelTitle title="Данные для оплаты" subtitle="Счет будет оформлен на владельца рабочего пространства." /><div className="subscription-methods"><button className={method === "card" ? "active" : ""} onClick={() => setMethod("card")}><span><CreditCard size={19} /></span><div><strong>Visa •••• 4242</strong><small>Срок действия 08/29</small></div><i /></button><button className={method === "new" ? "active" : ""} onClick={() => setMethod("new")}><span><Plus size={19} /></span><div><strong>Новая карта</strong><small>Добавить другой способ оплаты</small></div><i /></button></div>{method === "new" && <div className="form-grid subscription-card-form"><Field label="Номер карты" wide><input placeholder="0000 0000 0000 0000" /></Field><Field label="Срок действия"><input placeholder="ММ / ГГ" /></Field><Field label="CVC"><input placeholder="123" /></Field></div>}<hr /><PanelTitle title="Платежные реквизиты" /><div className="form-grid"><Field label="Компания"><input defaultValue="Pocket Hospitality s.r.o." /></Field><Field label="VAT ID"><input defaultValue="SK2026123456" /></Field><Field label="E-mail для счетов" wide><input defaultValue="billing@pocket.app" /></Field></div></section><aside className="panel subscription-summary"><PanelTitle title="Ваш заказ" /><div className="subscription-summary-plan"><span><Sparkles size={18} /></span><div><strong>Pocket {plan.name}</strong><small>{billing === "yearly" ? "Ежегодная оплата" : "Ежемесячная оплата"}</small></div><b>{money(subtotal)}</b></div><dl><div><dt>Заведений в аккаунте</dt><dd>{venueCount}</dd></div><div><dt>Стоимость</dt><dd>{money(subtotal)}</dd></div><div><dt>VAT 20%</dt><dd>{money(tax)}</dd></div></dl><div className="subscription-total"><span>К оплате сегодня</span><strong>{money(total)}</strong></div><Button className="full" icon={ShieldCheck} disabled={activated || !planFitsVenueCount} onClick={activate}>{activated ? "Подписка подключена" : !planFitsVenueCount ? "Выберите подходящий тариф" : `Оплатить ${money(total)}`}</Button><p className="secure-note"><ShieldCheck size={14} />Безопасная оплата. Отмена в любой момент.</p></aside></div></>;
 }
 
-function AccountScreen({ notify, onLogout }: { notify: (message: string) => void; onLogout: () => void }) {
-  return <><PageHeader title="Аккаунт" subtitle="Личные данные, безопасность и настройки входа." actions={<Button icon={Check} onClick={() => notify("Настройки аккаунта сохранены")}>Сохранить</Button>} /><div className="account-layout"><aside className="panel account-summary"><span>DI</span><h2>Денис Иткин</h2><p>Владелец Pocket</p><small>denis@pocket.app</small></aside><section className="panel settings-form"><PanelTitle title="Личные данные" subtitle="Используются для входа и рабочих уведомлений." /><div className="form-grid"><Field label="Имя"><input defaultValue="Денис" /></Field><Field label="Фамилия"><input defaultValue="Иткин" /></Field><Field label="E-mail"><input defaultValue="denis@pocket.app" /></Field><Field label="Телефон"><input defaultValue="+421 900 123 456" /></Field></div><hr /><PanelTitle title="Безопасность" subtitle="Пароль и активные рабочие сессии." /><div className="account-security"><span><ShieldCheck size={20} /></span><div><strong>Пароль обновлен</strong><p>Последнее изменение 12 июня 2026</p></div><Button kind="secondary" onClick={() => notify("Ссылка для смены пароля отправлена")}>Изменить пароль</Button></div><Button className="account-logout" kind="danger" icon={LogOut} onClick={onLogout}>Выйти из аккаунта</Button></section></div></>;
+function AccountScreen({ user, notify, onLogout }: { user: AuthUser; notify: (message: string) => void; onLogout: () => void }) {
+	return <><PageHeader title="Аккаунт" subtitle="Личные данные, безопасность и настройки входа." actions={<Button icon={Check} onClick={() => notify("Настройки аккаунта сохранены")}>Сохранить</Button>} /><div className="account-layout"><aside className="panel account-summary"><span>{userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>Владелец Pocket</p><small>{user.email}</small></aside><section className="panel settings-form"><PanelTitle title="Личные данные" subtitle="Используются для входа и рабочих уведомлений." /><div className="form-grid"><Field label="Имя"><input defaultValue={user.first_name} /></Field><Field label="Фамилия"><input defaultValue={user.last_name} /></Field><Field label="E-mail"><input type="email" defaultValue={user.email} /></Field><Field label="Телефон"><input type="tel" defaultValue={user.phone ?? ""} placeholder="Добавить телефон" /></Field></div><hr /><PanelTitle title="Безопасность" subtitle="Пароль и активные рабочие сессии." /><div className="account-security"><span><ShieldCheck size={20} /></span><div><strong>Пароль установлен</strong><p>Данные входа актуальны</p></div><Button kind="secondary" onClick={() => notify("Смена пароля появится в следующей версии")}>Изменить пароль</Button></div><Button className="account-logout" kind="danger" icon={LogOut} onClick={onLogout}>Выйти из аккаунта</Button></section></div></>;
 }
 
 function PaymentsScreen({ notify }: { notify: (message: string) => void }) {
@@ -579,8 +611,8 @@ function HistoryScreen({ notify }: { notify: (message: string) => void }) {
   return <><PageHeader title="Мои заказы" subtitle="История визитов, заказов и оплат." /><div className="history-list"><article className="panel active-order"><div className="order-venue"><span className="venue-mini" /><div><small>СЕГОДНЯ · В ЗАЛЕ</small><h3>North & Vine</h3><p>Заказ #1049 · Стол 08</p></div><StatusPill status="Готовится" /></div><div className="progress-track"><i className="done"><Check size={13} /></i><span /><i className="done"><Check size={13} /></i><span /><i className="current"><Coffee size={13} /></i><span /><i><PackageCheck size={13} /></i></div><div className="progress-labels"><span>Принят</span><span>Подтвержден</span><span>Готовится</span><span>Готов</span></div><footer><div><strong>€58.50</strong><span>3 позиции</span></div><Button kind="secondary" icon={Share2} onClick={() => notify("Ссылка на заказ скопирована")}>Поделиться</Button><Button icon={Eye}>Следить за заказом</Button></footer></article>{[["14 июля","North & Vine","€76.50","5 позиций"],["8 июля","Casa Forma","€41.20","3 позиции"],["28 июня","Mizu Table","€64.00","4 позиции"]].map((row,index) => <article className="panel past-order" key={row[0]}><span className={`past-thumb pos-${index}`} /><div><small>{row[0]} · ОПЛАЧЕН</small><h3>{row[1]}</h3><p>{row[3]} · Карта •••• 4242</p></div><strong>{row[2]}</strong><Button kind="quiet" icon={MessageSquareText} onClick={() => notify("Форма отзыва открыта")}>Оставить отзыв</Button><IconButton icon={ChevronRight} label="Подробнее" /></article>)}</div></>;
 }
 
-function ProfileScreen({ notify, onLogout }: { notify: (message: string) => void; onLogout: () => void }) {
-  return <><PageHeader title="Профиль" subtitle="Ваш аккаунт, предпочтения и способы оплаты." /><div className="profile-layout"><aside className="panel profile-card"><span className="profile-avatar">DI</span><h2>Денис Иткин</h2><p>Участник с июля 2026</p><div><span><strong>12</strong><small>заказов</small></span><span><strong>4</strong><small>отзыва</small></span><span><strong>6</strong><small>мест</small></span></div><Button kind="quiet" icon={LogOut} onClick={onLogout}>Выйти</Button></aside><section className="panel settings-form"><PanelTitle title="Личные данные" action={<Button kind="secondary" icon={Edit3} onClick={() => notify("Профиль сохранен")}>Изменить</Button>} /><div className="form-grid"><Field label="Имя"><input defaultValue="Денис" /></Field><Field label="Фамилия"><input defaultValue="Иткин" /></Field><Field label="E-mail"><input defaultValue="denis@pocket.app" /></Field><Field label="Телефон"><input defaultValue="+421 900 123 456" /></Field></div><hr /><PanelTitle title="Оплата" /><div className="saved-card"><span><CreditCard size={20} /></span><div><strong>Visa •••• 4242</strong><small>Срок действия 08/29</small></div><BadgeCheck size={18} /><IconButton icon={Ellipsis} label="Настройки карты" /></div><Button kind="quiet" icon={Plus}>Добавить способ оплаты</Button><hr /><PanelTitle title="Предпочтения" /><div className="setting-toggles"><ToggleRow title="Безлактозные блюда" text="Показывать подсказки в меню." checked /><ToggleRow title="Новости любимых мест" text="Редкие и полезные письма от заведений." /></div></section></div></>;
+function ProfileScreen({ user, notify, onLogout }: { user: AuthUser; notify: (message: string) => void; onLogout: () => void }) {
+	return <><PageHeader title="Профиль" subtitle="Ваш аккаунт, предпочтения и способы оплаты." /><div className="profile-layout"><aside className="panel profile-card"><span className="profile-avatar">{userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>Аккаунт Pocket</p><div><span><strong>12</strong><small>заказов</small></span><span><strong>4</strong><small>отзыва</small></span><span><strong>6</strong><small>мест</small></span></div><Button kind="quiet" icon={LogOut} onClick={onLogout}>Выйти</Button></aside><section className="panel settings-form"><PanelTitle title="Личные данные" action={<Button kind="secondary" icon={Edit3} onClick={() => notify("Профиль сохранен")}>Изменить</Button>} /><div className="form-grid"><Field label="Имя"><input defaultValue={user.first_name} /></Field><Field label="Фамилия"><input defaultValue={user.last_name} /></Field><Field label="E-mail"><input type="email" defaultValue={user.email} /></Field><Field label="Телефон"><input type="tel" defaultValue={user.phone ?? ""} placeholder="Добавить телефон" /></Field></div><hr /><PanelTitle title="Оплата" /><div className="saved-card"><span><CreditCard size={20} /></span><div><strong>Visa •••• 4242</strong><small>Срок действия 08/29</small></div><BadgeCheck size={18} /><IconButton icon={Ellipsis} label="Настройки карты" /></div><Button kind="quiet" icon={Plus}>Добавить способ оплаты</Button><hr /><PanelTitle title="Предпочтения" /><div className="setting-toggles"><ToggleRow title="Безлактозные блюда" text="Показывать подсказки в меню." checked /><ToggleRow title="Новости любимых мест" text="Редкие и полезные письма от заведений." /></div></section></div></>;
 }
 
 function ServiceBoard({ notify }: { notify: (message: string) => void }) {

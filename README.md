@@ -9,6 +9,16 @@ npm install
 npm run dev
 ```
 
+Set `NEXT_PUBLIC_API_URL` to the API root when it is not available at
+`http://localhost:8080/api/v1`. Authentication uses a server-issued HttpOnly
+cookie and does not store session secrets in browser storage.
+
+Run the UI and API-client tests:
+
+```bash
+npm test
+```
+
 ## Production container
 
 Build and run the standalone Next.js image:
