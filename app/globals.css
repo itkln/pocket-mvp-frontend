@@ -893,6 +893,7 @@ td { height: 58px; }
 .view-toggle .icon-button.active { background: #e8f5fb; color: #168acd; }
 
 .mobile-category-select { display: none; }
+.mobile-create-fab { display: none; }
 .menu-create-menu { position: relative; }
 .menu-create-popover {
   position: absolute;
@@ -972,16 +973,64 @@ td { height: 58px; }
     font-weight: 600;
   }
   .mobile-category-select > svg { pointer-events: none; }
-  .menu-create-menu { flex: 1 1 145px; }
-  .menu-create-menu > .button { width: 100%; }
-  .menu-create-popover {
+  .menu-create-menu { display: none; }
+  .mobile-create-fab {
     position: fixed;
-    top: auto;
-    right: 12px;
-    bottom: calc(76px + env(safe-area-inset-bottom));
-    left: 12px;
-    width: auto;
+    z-index: 38;
+    right: 16px;
+    bottom: calc(80px + env(safe-area-inset-bottom));
+    display: block;
   }
+  .mobile-create-trigger {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(34, 158, 217, .34);
+    cursor: pointer;
+    transition: transform .18s ease, background .18s ease;
+  }
+  .mobile-create-trigger:active { transform: scale(.95); }
+  .mobile-create-fab.open .mobile-create-trigger { background: #4d9fd3; }
+  .mobile-create-popover {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 12px);
+    width: min(286px, calc(100vw - 32px));
+    overflow: hidden;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, .98);
+    box-shadow: 0 12px 34px rgba(23, 33, 43, .18);
+    backdrop-filter: blur(16px);
+  }
+  .mobile-create-popover button {
+    width: 100%;
+    min-height: 60px;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+  }
+  .mobile-create-popover button + button { border-top: 1px solid var(--line); }
+  .mobile-create-popover button > svg { color: #747d85; }
+  .mobile-create-popover strong,
+  .mobile-create-popover small { display: block; }
+  .mobile-create-popover strong { font-size: 15px; font-weight: 600; }
+  .mobile-create-popover small { margin-top: 2px; color: var(--muted); font-size: 11px; }
   .menu-view-row {
     justify-content: space-between;
     margin: 8px 0 12px;
