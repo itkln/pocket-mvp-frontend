@@ -1,6 +1,7 @@
 .env
 .env.*
 .next/
+*.tsbuildinfo
 .idea/
 node_modules/
 out/
