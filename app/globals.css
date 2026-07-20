@@ -1416,3 +1416,44 @@ thead th {
     padding: 12px;
   }
 }
+
+/* Practical navigation: task groups and Telegram-like active rows. */
+:root {
+  --canvas: #f5f7f9;
+  --sidebar: #ffffff;
+}
+
+.sidebar { background: var(--sidebar); }
+.side-nav { margin-top: 18px; padding-right: 2px; }
+.nav-group + .nav-group { margin-top: 14px; }
+.nav-group .nav-label { margin: 0 10px 4px; color: #8b97a1; font-size: 10px; letter-spacing: 0; }
+.side-nav button { height: 40px; gap: 12px; margin: 1px 0; border-radius: 8px; color: #4b5964; }
+.side-nav button:hover { background: #f2f6f8; color: #17212b; }
+.side-nav button.active { background: #e7f3fa; color: #168acd; }
+.side-nav button.active span { font-weight: 600; }
+.side-nav button b { min-width: 18px; width: auto; height: 18px; padding: 0 5px; background: #dce6ec; color: #60717c; font-size: 10px; font-weight: 600; }
+.side-nav button.active b { background: #229ed9; color: #fff; }
+
+.metric-grid { gap: 0; padding: 4px; border-radius: 8px; background: #fff; }
+.metric { min-height: 116px; padding: 16px; border-radius: 6px; background: transparent; }
+.metric:hover { background: #f8fafb; }
+.metric-icon { width: 32px; height: 32px; background: transparent; }
+
+.panel { border-radius: 8px; }
+.topbar { box-shadow: 0 1px 0 rgba(23, 33, 43, .04); }
+
+@media (max-width: 640px) {
+  .nav-group.mobile-primary-group { display: none; }
+  .nav-group + .nav-group { margin-top: 12px; }
+  .settings-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    overflow: visible;
+    padding: 4px;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .settings-nav button { min-width: 0; text-align: center; }
+  .metric-grid { gap: 2px; padding: 3px; }
+  .metric { min-height: 108px; }
+}

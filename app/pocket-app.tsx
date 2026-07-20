@@ -162,6 +162,20 @@ const mobilePrimaryNavigation: Record<Role, string[]> = {
   staff: ["service", "kitchen", "staff-floor"],
 };
 
+const navigationGroups: Record<Role, { label: string; ids: string[] }[]> = {
+  owner: [
+    { label: "Сегодня", ids: ["overview", "orders"] },
+    { label: "Операции", ids: ["menu", "floor", "team"] },
+    { label: "Контроль", ids: ["analytics", "reviews", "payments"] },
+    { label: "Настройки", ids: ["venue", "subscription"] },
+  ],
+  customer: [
+    { label: "Главное", ids: ["discover", "browse-menu"] },
+    { label: "Мои действия", ids: ["reservation", "history"] },
+  ],
+  staff: [{ label: "Смена", ids: ["service", "kitchen", "staff-floor"] }],
+};
+
 function money(value: number) {
   return `€${value.toFixed(2)}`;
 }
@@ -293,7 +307,7 @@ export default function PocketApp() {
       <main className="main-shell">
         <Topbar role={role} screen={screen} navigation={navigation} venueName={venue.name} cartCount={cartCount} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} />
         <div className={`page-area ${role === "customer" ? "customer-area" : ""}`}>
-          {role === "owner" && screen === "overview" && <OwnerOverview onNavigate={navigate} onOrder={() => setModal("order")} />}
+          {role === "owner" && screen === "overview" && <OwnerOverview ownerName={currentUser.first_name} onNavigate={navigate} onOrder={() => setModal("order")} />}
           {role === "owner" && screen === "orders" && <OrdersScreen onOrder={() => setModal("order")} />}
           {role === "owner" && screen === "menu" && <MenuManager venueName={venue.name} onAdd={() => setModal("item")} notify={notify} />}
           {role === "owner" && screen === "floor" && <FloorPlan mode="owner" venueName={venue.name} notify={notify} />}
@@ -343,8 +357,17 @@ function Sidebar({ user, role, screen, navigation, venue, venues: availableVenue
       <div className="brand-row"><div className="brand-mark"><Image src="/logo.svg" alt="" width={28} height={28} priority /></div><strong>Pocket</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} /></div>
 	  {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover"><p className="venue-menu-label">Мои заведения</p>{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}<button className="add-venue-button" onClick={startVenueCreation}><span><Plus size={17} /></span><span><strong>Добавить заведение</strong><small>Создать новое пространство</small></span><ChevronRight size={16} /></button></div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
       <nav className="side-nav">
-        <p className="nav-label">Рабочее пространство</p>
-        {navigation.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)}><Icon size={18} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
+        {navigationGroups[role].map((group) => {
+          const items = group.ids
+            .map((id) => navigation.find((item) => item.id === id))
+            .filter((item): item is NonNullable<typeof item> => Boolean(item));
+          const mobilePrimaryGroup = items.every((item) => mobilePrimaryNavigation[role].includes(item.id));
+
+          return <div className={`nav-group ${mobilePrimaryGroup ? "mobile-primary-group" : ""}`} key={group.label}>
+            <p className="nav-label">{group.label}</p>
+            {items.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)}><Icon size={19} strokeWidth={screen === id ? 2.2 : 1.8} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
+          </div>;
+        })}
       </nav>
       <div className="sidebar-bottom">
         <p className="nav-label">Текущая роль</p>
@@ -378,9 +401,9 @@ function PageHeader({ eyebrow, title, subtitle, actions }: { eyebrow?: string; t
   return <div className="page-header"><div>{eyebrow && <p className="eyebrow">{eyebrow}</p>}<h1>{title}</h1>{subtitle && <p>{subtitle}</p>}</div>{actions && <div className="header-actions">{actions}</div>}</div>;
 }
 
-function OwnerOverview({ onNavigate, onOrder }: { onNavigate: (screen: string) => void; onOrder: () => void }) {
+function OwnerOverview({ ownerName, onNavigate, onOrder }: { ownerName: string; onNavigate: (screen: string) => void; onOrder: () => void }) {
   return <>
-    <PageHeader eyebrow="Воскресенье, 19 июля" title="Добрый день, Денис" subtitle="Зал открыт. Сейчас 7 активных столов и 3 онлайн-заказа." actions={<Button icon={Download} kind="secondary">Отчет</Button>} />
+    <PageHeader eyebrow="Воскресенье, 19 июля" title={`Добрый день, ${ownerName}`} subtitle="Зал открыт. Сейчас 7 активных столов и 3 онлайн-заказа." actions={<Button icon={Download} kind="secondary">Отчет</Button>} />
     <section className="metric-grid">
       <Metric label="Выручка сегодня" value="€2,846" change="+12.4%" icon={CircleDollarSign} tone="coral" />
       <Metric label="Заказы" value="84" change="+8 сегодня" icon={ShoppingBag} tone="green" />
