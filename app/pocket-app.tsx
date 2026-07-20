@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -69,6 +69,7 @@ type Role = "owner" | "customer" | "staff";
 type Status = "Новый" | "Готовится" | "Готов" | "Подан";
 
 const userInitials = (user: AuthUser) => `${user.first_name.at(0) ?? ""}${user.last_name.at(0) ?? ""}`.toUpperCase();
+const makeVenueSlug = (name: string) => name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "venue";
 
 type Venue = {
   id: string;
@@ -77,7 +78,25 @@ type Venue = {
   location: string;
 };
 
-const venues: Venue[] = [
+const savedVenuesKey = (userID: string) => `pocket:venues:${userID}`;
+const selectedVenueKey = (userID: string) => `pocket:selected-venue:${userID}`;
+
+const loadSavedVenues = (userID: string) => {
+	try {
+		const stored = JSON.parse(window.localStorage.getItem(savedVenuesKey(userID)) ?? "[]") as unknown;
+		const customVenues = Array.isArray(stored) ? stored.filter((item): item is Venue => {
+			if (!item || typeof item !== "object") return false;
+			const candidate = item as Record<string, unknown>;
+			return ["id", "name", "initials", "location"].every((field) => typeof candidate[field] === "string");
+		}) : [];
+		return [...initialVenues, ...customVenues];
+	} catch {
+		window.localStorage.removeItem(savedVenuesKey(userID));
+		return initialVenues;
+	}
+};
+
+const initialVenues: Venue[] = [
   { id: "north-vine", name: "North & Vine", initials: "NV", location: "Братислава · Центр" },
   { id: "casa-forma", name: "Casa Forma", initials: "CF", location: "Братислава · Старый город" },
   { id: "mizu-table", name: "Mizu Table", initials: "MT", location: "Братислава · Ружинов" },
@@ -173,9 +192,10 @@ export default function PocketApp() {
 	const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [role, setRole] = useState<Role>("owner");
   const [screen, setScreen] = useState("overview");
-  const [venue, setVenue] = useState(venues[0]);
+	const [availableVenues, setAvailableVenues] = useState<Venue[]>(initialVenues);
+	const [venue, setVenue] = useState(initialVenues[0]);
   const [cart, setCart] = useState<Record<number, number>>({ 1: 1, 3: 1 });
-  const [modal, setModal] = useState<"item" | "invite" | "order" | null>(null);
+	const [modal, setModal] = useState<"item" | "invite" | "order" | "venue" | null>(null);
   const [toast, setToast] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
 
@@ -184,9 +204,13 @@ export default function PocketApp() {
 		getCurrentUser()
 			.then((user) => {
 				if (!active) return;
+				const restoredVenues = loadSavedVenues(user.id);
+				const selectedID = window.localStorage.getItem(selectedVenueKey(user.id));
 				setRole(user.role === "venue_owner" ? "owner" : "customer");
 				setScreen(user.role === "venue_owner" ? "overview" : "discover");
 				setCurrentUser(user);
+				setAvailableVenues(restoredVenues);
+				setVenue(restoredVenues.find((item) => item.id === selectedID) ?? restoredVenues[0]);
 				setAuthReady(true);
 			})
 			.catch((error) => {
@@ -238,11 +262,34 @@ export default function PocketApp() {
     });
   };
 
+	const createVenue = (newVenue: Venue) => {
+		if (!currentUser) return;
+		const userID = currentUser.id;
+		setAvailableVenues((current) => {
+			const next = [...current, newVenue];
+			window.localStorage.setItem(savedVenuesKey(userID), JSON.stringify(next.slice(initialVenues.length)));
+			return next;
+		});
+		window.localStorage.setItem(selectedVenueKey(userID), newVenue.id);
+		setVenue(newVenue);
+		setScreen("venue");
+		setModal(null);
+		setMobileNav(false);
+		notify(`${newVenue.name} добавлено`);
+	};
+
+	const selectVenue = (nextVenue: Venue) => {
+		if (!currentUser) return;
+		setVenue(nextVenue);
+		window.localStorage.setItem(selectedVenueKey(currentUser.id), nextVenue.id);
+		notify(`Выбрано заведение ${nextVenue.name}`);
+	};
+
 	if (!authReady || !currentUser) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
 
   return (
     <div className="app-shell">
-	  <Sidebar user={currentUser} role={role} screen={screen} navigation={navigation} venue={venue} venues={venues} mobileNav={mobileNav} onNavigate={navigate} onRole={changeRole} onVenue={(nextVenue) => { setVenue(nextVenue); notify(`Выбрано заведение ${nextVenue.name}`); }} onClose={() => setMobileNav(false)} />
+	  <Sidebar user={currentUser} role={role} screen={screen} navigation={navigation} venue={venue} venues={availableVenues} mobileNav={mobileNav} onNavigate={navigate} onRole={changeRole} onVenue={selectVenue} onAddVenue={() => setModal("venue")} onClose={() => setMobileNav(false)} />
       <main className="main-shell">
         <Topbar role={role} screen={screen} navigation={navigation} venueName={venue.name} cartCount={cartCount} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} />
         <div className={`page-area ${role === "customer" ? "customer-area" : ""}`}>
@@ -255,7 +302,7 @@ export default function PocketApp() {
           {role === "owner" && screen === "reviews" && <ReviewsScreen notify={notify} />}
           {role === "owner" && screen === "venue" && <VenueScreen key={venue.id} venue={venue} notify={notify} />}
           {role === "owner" && screen === "payments" && <PaymentsScreen notify={notify} />}
-          {role === "owner" && screen === "subscription" && <SubscriptionScreen venueCount={venues.length} notify={notify} />}
+		  {role === "owner" && screen === "subscription" && <SubscriptionScreen venueCount={availableVenues.length} notify={notify} />}
 
           {role === "customer" && screen === "discover" && <DiscoverScreen onVenue={() => navigate("browse-menu")} />}
           {role === "customer" && screen === "browse-menu" && <CustomerMenu cart={cart} onAdd={addItem} onCart={() => navigate("checkout")} />}
@@ -272,12 +319,13 @@ export default function PocketApp() {
       </main>
       <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />
       {toast && <div className="toast"><CheckCircle2 size={18} />{toast}</div>}
-      {modal && <Modal type={modal} onClose={() => setModal(null)} notify={(message) => { setModal(null); notify(message); }} />}
+	  {modal === "venue" && <NewVenueModal onClose={() => setModal(null)} onCreate={createVenue} />}
+	  {modal && modal !== "venue" && <Modal type={modal} onClose={() => setModal(null)} notify={(message) => { setModal(null); notify(message); }} />}
     </div>
   );
 }
 
-function Sidebar({ user, role, screen, navigation, venue, venues: availableVenues, mobileNav, onNavigate, onRole, onVenue, onClose }: { user: AuthUser; role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue; venues: Venue[]; mobileNav: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onClose: () => void }) {
+function Sidebar({ user, role, screen, navigation, venue, venues: availableVenues, mobileNav, onNavigate, onRole, onVenue, onAddVenue, onClose }: { user: AuthUser; role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue; venues: Venue[]; mobileNav: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onAddVenue: () => void; onClose: () => void }) {
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [venueMenuOpen, setVenueMenuOpen] = useState(false);
   const roleMeta = role === "owner" ? { label: "Владелец", detail: "Управление заведением", icon: Store } : role === "staff" ? { label: "Сотрудник", detail: "Рабочая смена", icon: BadgeCheck } : { label: "Гость", detail: "Личный аккаунт Pocket", icon: UserRound };
@@ -286,10 +334,14 @@ function Sidebar({ user, role, screen, navigation, venue, venues: availableVenue
     onRole(nextRole);
     setRoleMenuOpen(false);
   };
+	const startVenueCreation = () => {
+		setVenueMenuOpen(false);
+		onAddVenue();
+	};
   return (
     <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
       <div className="brand-row"><div className="brand-mark"><Image src="/logo.svg" alt="" width={28} height={28} priority /></div><strong>Pocket</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} /></div>
-      {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover">{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}</div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
+	  {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover"><p className="venue-menu-label">Мои заведения</p>{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}<button className="add-venue-button" onClick={startVenueCreation}><span><Plus size={17} /></span><span><strong>Добавить заведение</strong><small>Создать новое пространство</small></span><ChevronRight size={16} /></button></div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
       <nav className="side-nav">
         <p className="nav-label">Рабочее пространство</p>
         {navigation.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)}><Icon size={18} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
@@ -456,7 +508,7 @@ function FloorPlan({ mode, venueName, notify }: { mode: "owner" | "staff"; venue
 
 function QrCodesDialog({ venueName, onClose, notify }: { venueName: string; onClose: () => void; notify: (message: string) => void }) {
   const [versions, setVersions] = useState<Record<string, number>>({});
-  const venueSlug = venues.find((item) => item.name === venueName)?.id ?? "venue";
+	const venueSlug = makeVenueSlug(venueName);
   const regenerate = (tableId: string) => {
     setVersions((current) => ({ ...current, [tableId]: (current[tableId] ?? 1) + 1 }));
     notify(`QR-код стола ${tableId} перегенерирован`);
@@ -627,6 +679,28 @@ function ServiceBoard({ notify }: { notify: (message: string) => void }) {
 function KitchenScreen({ notify }: { notify: (message: string) => void }) {
   const tickets = liveOrders.filter((o)=>o.status !== "Подан");
   return <><PageHeader title="Кухня" subtitle="Очередь блюд по времени приготовления." actions={<div className="kitchen-clock"><Clock3 size={17} />14:32</div>} /><div className="kitchen-grid">{tickets.map((order,index) => <article className={`kitchen-ticket ${index === 0 ? "urgent" : ""}`} key={order.id}><header><div><strong>{order.source}</strong><span>{order.id}</span></div><b>{order.time}</b></header><div className="kitchen-lines">{(index%2 ? [[1,"Сибас на гриле"],[1,"Тирамису"]] : [[2,"Тальятелле"],[1,"Буррата и томаты"],[3,"Красный апельсин"]]).map((line) => <p key={String(line[1])}><b>{line[0]}×</b><span>{line[1]}</span><button><Check size={15} /></button></p>)}</div><Button className="full" kind={index === 0 ? "primary" : "secondary"} onClick={() => notify(`${order.id} готов к выдаче`)} icon={PackageCheck}>Заказ готов</Button></article>)}</div></>;
+}
+
+function NewVenueModal({ onClose, onCreate }: { onClose: () => void; onCreate: (venue: Venue) => void }) {
+	const [name, setName] = useState("");
+	const [city, setCity] = useState("Братислава");
+	const [area, setArea] = useState("");
+	const cleanName = name.trim();
+	const initials = cleanName.split(/\s+/).slice(0, 2).map((part) => part.at(0)).join("").toUpperCase();
+	const location = [city.trim(), area.trim()].filter(Boolean).join(" · ");
+
+	const submit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		if (!cleanName || !city.trim()) return;
+		onCreate({
+			id: `${makeVenueSlug(cleanName)}-${Date.now()}`,
+			name: cleanName,
+			initials: initials || cleanName.at(0)?.toUpperCase() || "V",
+			location,
+		});
+	};
+
+	return <div className="modal-backdrop" onMouseDown={onClose}><section className="modal venue-create-modal" onMouseDown={(event) => event.stopPropagation()}><header><div className="venue-create-heading"><span><Store size={21} /></span><div><p className="eyebrow">НОВОЕ ПРОСТРАНСТВО</p><h2>Добавить заведение</h2></div></div><IconButton icon={X} label="Закрыть" onClick={onClose} /></header><form className="venue-create-form" onSubmit={submit}><div className="modal-body"><p className="venue-create-intro">Начните с основного. Меню, расписание и команду можно добавить позже.</p><Field label="Название" wide><input autoFocus value={name} onChange={(event) => setName(event.target.value)} placeholder="Например, Mokka Bistro" maxLength={80} required /></Field><div className="venue-create-location"><Field label="Город"><input value={city} onChange={(event) => setCity(event.target.value)} placeholder="Город" maxLength={80} required /></Field><Field label="Район или улица"><input value={area} onChange={(event) => setArea(event.target.value)} placeholder="Необязательно" maxLength={120} /></Field></div><div className="venue-create-preview" aria-live="polite"><span>{initials || <Store size={18} />}</span><div><strong>{cleanName || "Название заведения"}</strong><small>{location || "Местоположение"}</small></div></div></div><footer><Button kind="quiet" onClick={onClose}>Отмена</Button><Button type="submit" icon={Plus} disabled={!cleanName || !city.trim()}>Добавить заведение</Button></footer></form></section></div>;
 }
 
 function Modal({ type, onClose, notify }: { type: "item" | "invite" | "order"; onClose: () => void; notify: (message: string) => void }) {
