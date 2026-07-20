@@ -1214,3 +1214,61 @@ textarea,
 .auth-role > div {
   border-radius: var(--control-radius);
 }
+
+/* Keep content surfaces calm and borderless; controls retain their affordances. */
+:root { --canvas: #f7f8fa; }
+
+.sidebar,
+.topbar,
+.mobile-bottom-nav {
+  border: 0;
+}
+
+.panel,
+.metric,
+.manager-item,
+.food-card,
+.venue-card,
+.category-list,
+.saved-row,
+.saved-card,
+.account-security,
+.subscription-status,
+.subscription-plan,
+.reviews-toolbar,
+.qr-grid article,
+.preview-menu-grid article,
+.discover-hero,
+.payment-banner,
+.shift-strip {
+  border: 0;
+}
+
+.settings-nav button.active {
+  background: var(--surface-soft);
+  box-shadow: none;
+}
+
+.subscription-plan:hover:not(.incompatible),
+.subscription-plan.selected {
+  border: 0;
+}
+
+.subscription-plan.selected {
+  background: var(--blue-soft);
+  box-shadow: none;
+}
+
+.ticket {
+  border-color: transparent;
+  border-left-color: var(--blue);
+}
+
+.kitchen-ticket {
+  border-color: transparent;
+  border-top-color: var(--gold);
+}
+
+.kitchen-ticket.urgent {
+  border-top-color: var(--coral);
+}
