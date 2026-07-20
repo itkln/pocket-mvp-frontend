@@ -9,6 +9,18 @@ npm install
 npm run dev
 ```
 
+## Production container
+
+Build and run the standalone Next.js image:
+
+```bash
+docker build -t pocket-mvp-frontend .
+docker run --rm -p 3000:3000 pocket-mvp-frontend
+```
+
+The full frontend, API, migrations, and PostgreSQL stack is orchestrated by
+`docker-compose.yml` in the sibling backend repository.
+
 ## Product documentation
 
 - [Roles and permissions](./docs/roles/README.md)
