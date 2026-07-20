@@ -133,6 +133,12 @@ const staffNavigation = [
   { id: "staff-floor", label: "Столы", icon: Table2 },
 ];
 
+const mobilePrimaryNavigation: Record<Role, string[]> = {
+  owner: ["overview", "orders", "menu", "floor"],
+  customer: ["discover", "browse-menu", "reservation", "history"],
+  staff: ["service", "kitchen", "staff-floor"],
+};
+
 function money(value: number) {
   return `€${value.toFixed(2)}`;
 }
@@ -231,6 +237,7 @@ export default function PocketApp() {
           {role !== "customer" && screen === "account" && <AccountScreen notify={notify} onLogout={() => router.push("/login")} />}
         </div>
       </main>
+      <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />
       {toast && <div className="toast"><CheckCircle2 size={18} />{toast}</div>}
       {modal && <Modal type={modal} onClose={() => setModal(null)} notify={(message) => { setModal(null); notify(message); }} />}
     </div>
@@ -252,7 +259,7 @@ function Sidebar({ role, screen, navigation, venue, venues: availableVenues, mob
       {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover">{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}</div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
       <nav className="side-nav">
         <p className="nav-label">Рабочее пространство</p>
-        {navigation.map(({ id, label, icon: Icon, count }) => <button key={id} className={screen === id ? "active" : ""} onClick={() => onNavigate(id)}><Icon size={18} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
+        {navigation.map(({ id, label, icon: Icon, count }) => <button key={id} className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""}`} onClick={() => onNavigate(id)}><Icon size={18} /><span>{label}</span>{count && <b>{count}</b>}</button>)}
       </nav>
       <div className="sidebar-bottom">
         <p className="nav-label">Текущая роль</p>
@@ -268,6 +275,13 @@ function Sidebar({ role, screen, navigation, venue, venues: availableVenues, mob
       </div>
     </aside>
   );
+}
+
+function MobileBottomNavigation({ role, screen, navigation, onNavigate }: { role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon }[]; onNavigate: (id: string) => void }) {
+  const primaryItems = navigation.filter((item) => mobilePrimaryNavigation[role].includes(item.id));
+  return <nav className="mobile-bottom-nav" aria-label="Основная навигация">
+    {primaryItems.map(({ id, label, icon: Icon }) => <button key={id} className={screen === id ? "active" : ""} onClick={() => onNavigate(id)}><Icon size={21} strokeWidth={screen === id ? 2.3 : 1.9} /><span>{label === "План зала" ? "Зал" : label === "Мои заказы" ? "Заказы" : label}</span></button>)}
+  </nav>;
 }
 
 function Topbar({ role, screen, navigation, venueName, cartCount, onMenu, onCart }: { role: Role; screen: string; navigation: { id: string; label: string }[]; venueName: string; cartCount: number; onMenu: () => void; onCart: () => void }) {
@@ -322,13 +336,14 @@ function OrdersScreen({ onOrder }: { onOrder: () => void }) {
 function MenuManager({ venueName, onAdd, notify }: { venueName: string; onAdd: () => void; notify: (message: string) => void }) {
   const [category, setCategory] = useState("Все позиции");
   const [categories, setCategories] = useState(["Все позиции", "Закуски", "Паста", "Основное", "Десерты", "Напитки"]);
-  const [mobileSection, setMobileSection] = useState<"items" | "categories">("items");
   const [categoryDraft, setCategoryDraft] = useState("");
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [createMenuOpen, setCreateMenuOpen] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [actionsItem, setActionsItem] = useState<number | null>(null);
   const visible = category === "Все позиции" ? menuItems : menuItems.filter((item) => item.category === category);
+  const positionWord = visible.length % 10 === 1 && visible.length % 100 !== 11 ? "позиция" : visible.length % 10 >= 2 && visible.length % 10 <= 4 && (visible.length % 100 < 12 || visible.length % 100 > 14) ? "позиции" : "позиций";
   const counts: Record<string, number> = { "Все позиции": 32, "Закуски": 5, "Паста": 6, "Основное": 9, "Десерты": 5, "Напитки": 7 };
   const addCategory = () => {
     const nextCategory = categoryDraft.trim();
@@ -343,23 +358,25 @@ function MenuManager({ venueName, onAdd, notify }: { venueName: string; onAdd: (
     setActionsItem(null);
     notify(message);
   };
-  const pageActions = mobileSection === "categories"
-    ? <Button icon={Plus} onClick={() => setCategoryDialogOpen(true)}>Добавить категорию</Button>
-    : <><Button kind="secondary" icon={Eye} onClick={() => setPreviewOpen(true)}>Предпросмотр</Button><Button icon={Plus} onClick={onAdd}>Добавить позицию</Button></>;
+  const addMenuItem = () => {
+    setCreateMenuOpen(false);
+    onAdd();
+  };
+  const openCategoryDialog = () => {
+    setCreateMenuOpen(false);
+    setCategoryDialogOpen(true);
+  };
+  const pageActions = <><Button kind="secondary" icon={Eye} onClick={() => setPreviewOpen(true)}>Предпросмотр</Button><div className="menu-create-menu"><Button icon={Plus} onClick={() => setCreateMenuOpen((open) => !open)}>Добавить <ChevronDown size={15} /></Button>{createMenuOpen && <div className="menu-create-popover"><button onClick={addMenuItem}><Utensils size={17} /><span><strong>Позицию</strong><small>Новое блюдо или напиток</small></span></button><button onClick={openCategoryDialog}><Rows3 size={17} /><span><strong>Категорию</strong><small>Новый раздел меню</small></span></button></div>}</div></>;
 
   return <>
     <PageHeader title="Меню" subtitle="Управляйте категориями, ценами и доступностью блюд." actions={pageActions} />
-    <div className="mobile-menu-sections" aria-label="Раздел меню">
-      <button className={mobileSection === "items" ? "active" : ""} onClick={() => setMobileSection("items")}>Позиции</button>
-      <button className={mobileSection === "categories" ? "active" : ""} onClick={() => setMobileSection("categories")}>Категории</button>
-    </div>
-    <div className={`menu-layout mobile-section-${mobileSection}`}>
+    <div className="menu-layout">
       <aside className="category-list">
         <div className="category-heading"><strong>Категории</strong><IconButton icon={Plus} label="Добавить категорию" onClick={() => setCategoryDialogOpen(true)} /></div>
-        {categories.map((item) => <button className={category === item ? "active" : ""} key={item} onClick={() => { setCategory(item); setMobileSection("items"); }}><span>{item}</span><b>{counts[item] ?? 0}</b></button>)}
+        {categories.map((item) => <button className={category === item ? "active" : ""} key={item} onClick={() => setCategory(item)}><span>{item}</span><b>{counts[item] ?? 0}</b></button>)}
       </aside>
       <section className="menu-items-section">
-        <div className="list-toolbar"><p><strong>{visible.length}</strong> позиций</p><div><label className="search-field"><Search size={17} /><input placeholder="Найти блюдо" /></label></div></div>
+        <div className="list-toolbar menu-list-toolbar"><label className="mobile-category-select"><span>Категория</span><select value={category} onChange={(event) => setCategory(event.target.value)}>{categories.map((item) => <option key={item}>{item}</option>)}</select><ChevronDown size={16} /></label><p><strong>{visible.length}</strong> {positionWord}</p><div><label className="search-field"><Search size={17} /><input placeholder="Найти блюдо" /></label></div></div>
         <div className="menu-view-row"><span>Вид меню</span><div className="view-toggle" aria-label="Вид меню"><IconButton icon={LayoutGrid} label="Показать сеткой" active={view === "grid"} onClick={() => setView("grid")} /><IconButton icon={Rows3} label="Показать списком" active={view === "list"} onClick={() => setView("list")} /></div></div>
         <div className={`manager-grid view-${view}`}>{visible.map((item) => <article className="manager-item" key={item.id}><FoodImage item={item} />{item.popular && <span className="menu-status"><Sparkles size={12} />Хит</span>}<div className="manager-copy"><div><small>{item.category}</small></div><h3>{item.name}</h3><p>{item.description}</p><footer><strong>{money(item.price)}</strong><label className="switch"><input type="checkbox" defaultChecked onChange={() => notify("Доступность обновлена")} /><span /></label><IconButton icon={Pencil} label="Редактировать" onClick={onAdd} /><IconButton icon={Ellipsis} label="Действия с позицией" active={actionsItem === item.id} onClick={() => setActionsItem((current) => current === item.id ? null : item.id)} /></footer>{actionsItem === item.id && <div className="item-actions-menu"><button onClick={() => { setActionsItem(null); onAdd(); }}><Pencil size={16} />Редактировать</button><button onClick={() => runAction(`${item.name}: копия создана`)}><Copy size={16} />Дублировать</button><button onClick={() => runAction(`${item.name}: выберите новую категорию`)}><ArrowUpDown size={16} />Переместить в категорию</button><button onClick={() => runAction(`${item.name}: скрыто из меню`)}><EyeOff size={16} />Скрыть из меню</button><button className="danger" onClick={() => runAction(`${item.name}: удалено`)}><Trash2 size={16} />Удалить</button></div>}</div></article>)}</div>
       </section>
