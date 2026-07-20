@@ -1626,3 +1626,53 @@ thead th {
   .sidebar,
   .main-shell { transition: none; }
 }
+
+/* Final surface cleanup for venue navigation, counters, and full-width team rows. */
+.venue-switcher { background: transparent; }
+.venue-menu > .venue-switcher:hover { background: #f2f7fa; }
+.venue-menu-popover > button.active { background: var(--blue-soft); }
+
+.venue-menu-popover > button.add-venue-button {
+  min-height: 40px;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 3px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--blue);
+}
+
+.venue-menu-popover > button.add-venue-button:hover { background: #f2f7fa; }
+.add-venue-button > svg { color: currentColor; }
+.add-venue-button > strong { font-size: 13px; font-weight: 500; }
+
+.team-list { padding: 0 0 18px; }
+
+.side-nav button b,
+.side-nav button.active b {
+  min-width: 0;
+  width: auto;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #74828c;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.side-nav button.active b { color: var(--blue); }
+
+@media (min-width: 901px) {
+  .sidebar-collapsed .side-nav button b {
+    top: 5px;
+    right: 5px;
+    min-width: 0;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    background: transparent;
+    color: var(--blue);
+    font-size: 9px;
+  }
+}
