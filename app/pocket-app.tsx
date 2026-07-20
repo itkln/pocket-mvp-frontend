@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type FormEvent, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -139,7 +139,6 @@ const ownerNavigation = [
   { id: "overview", label: "Обзор", icon: LayoutDashboard },
   { id: "orders", label: "Заказы", icon: ReceiptText, count: 8 },
   { id: "menu", label: "Меню", icon: UtensilsCrossed },
-  { id: "floor", label: "План зала", icon: Table2 },
   { id: "team", label: "Команда", icon: Users },
   { id: "analytics", label: "Аналитика", icon: BarChart3 },
   { id: "reviews", label: "Отзывы", icon: MessageSquareText },
@@ -163,7 +162,7 @@ const staffNavigation = [
 ];
 
 const mobilePrimaryNavigation: Record<Role, string[]> = {
-  owner: ["overview", "orders", "menu", "floor"],
+  owner: ["overview", "orders", "menu"],
   customer: ["discover", "browse-menu", "reservation", "history"],
   staff: ["service", "kitchen", "staff-floor"],
 };
@@ -171,7 +170,7 @@ const mobilePrimaryNavigation: Record<Role, string[]> = {
 const navigationGroups: Record<Role, { label: string; ids: string[] }[]> = {
   owner: [
     { label: "Сегодня", ids: ["overview", "orders"] },
-    { label: "Операции", ids: ["menu", "floor", "team"] },
+    { label: "Операции", ids: ["menu", "team"] },
     { label: "Контроль", ids: ["analytics", "reviews", "payments"] },
     { label: "Настройки", ids: ["venue", "subscription"] },
   ],
@@ -332,7 +331,6 @@ export default function PocketApp() {
           {role === "owner" && screen === "overview" && <OwnerOverview ownerName={currentUser.first_name} onNavigate={navigate} onOrder={() => setModal("order")} />}
           {role === "owner" && screen === "orders" && <OrdersScreen onOrder={() => setModal("order")} />}
           {role === "owner" && screen === "menu" && <MenuManager venueName={venue.name} onAdd={() => setModal("item")} notify={notify} />}
-          {role === "owner" && screen === "floor" && <FloorPlan mode="owner" venueName={venue.name} notify={notify} />}
           {role === "owner" && screen === "team" && <TeamScreen onInvite={() => setModal("invite")} notify={notify} />}
           {role === "owner" && screen === "analytics" && <AnalyticsScreen />}
           {role === "owner" && screen === "reviews" && <ReviewsScreen notify={notify} />}
@@ -537,6 +535,7 @@ type FloorTable = { id: string; seats: number; x: number; y: number; state: "fre
 type FloorFixture = { id: string; type: "bar" | "window"; x: number; y: number };
 type VenueFloor = { id: string; name: string; tables: FloorTable[]; fixtures: FloorFixture[] };
 type FloorSelection = { kind: "table" | "fixture"; id: string } | null;
+type FloorDragState = { target: Exclude<FloorSelection, null>; offsetX: number; offsetY: number };
 
 const tables: FloorTable[] = [
   { id: "01", seats: 2, x: 8, y: 12, state: "free" }, { id: "02", seats: 2, x: 33, y: 12, state: "busy" }, { id: "03", seats: 4, x: 61, y: 10, state: "busy" },
@@ -567,12 +566,15 @@ const loadFloorPlan = (venueName: string) => {
   }
 };
 
-function FloorPlan({ mode, venueName, notify }: { mode: "owner" | "staff"; venueName: string; notify: (message: string) => void }) {
+function FloorPlan({ mode, venueName, notify, embedded = false }: { mode: "owner" | "staff"; venueName: string; notify: (message: string) => void; embedded?: boolean }) {
   const [floors, setFloors] = useState<VenueFloor[]>(initialFloors);
   const [activeFloorId, setActiveFloorId] = useState(initialFloors[0].id);
   const [selected, setSelected] = useState<FloorSelection>({ kind: "table", id: "08" });
+  const [dragging, setDragging] = useState<FloorSelection>(null);
+  const [zoom, setZoom] = useState(100);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [showQrCodes, setShowQrCodes] = useState(false);
+  const draggingRef = useRef<FloorDragState | null>(null);
   const activeFloor = floors.find((floor) => floor.id === activeFloorId) ?? floors[0];
   const selectedTable = selected?.kind === "table" ? activeFloor.tables.find((table) => table.id === selected.id) : undefined;
   const selectedFixture = selected?.kind === "fixture" ? activeFloor.fixtures.find((fixture) => fixture.id === selected.id) : undefined;
@@ -650,18 +652,61 @@ function FloorPlan({ mode, venueName, notify }: { mode: "owner" | "staff"; venue
     notify(`${fixture.type === "bar" ? "Бар" : "Окно"} удалено с плана`);
   };
 
+  const startDragging = (event: ReactPointerEvent<HTMLButtonElement>, target: Exclude<FloorSelection, null>, position: { x: number; y: number }) => {
+    if (mode !== "owner") return;
+    const canvas = event.currentTarget.closest<HTMLElement>(".floor-canvas");
+    if (!canvas) return;
+    const bounds = canvas.getBoundingClientRect();
+    const pointerX = ((event.clientX - bounds.left) / bounds.width) * 100;
+    const pointerY = ((event.clientY - bounds.top) / bounds.height) * 100;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    draggingRef.current = { target, offsetX: pointerX - position.x, offsetY: pointerY - position.y };
+    setDragging(target);
+    setSelected(target);
+  };
+
+  const moveDraggedObject = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const drag = draggingRef.current;
+    if (!drag) return;
+    const { target } = drag;
+    event.preventDefault();
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const rawX = ((event.clientX - bounds.left) / bounds.width) * 100 - drag.offsetX;
+    const rawY = ((event.clientY - bounds.top) / bounds.height) * 100 - drag.offsetY;
+    const selectedFixtureType = target.kind === "fixture" ? activeFloor.fixtures.find((fixture) => fixture.id === target.id)?.type : undefined;
+    const maxX = target.kind === "table" ? 89 : selectedFixtureType === "bar" ? 63 : 98;
+    const maxY = target.kind === "table" ? 87 : selectedFixtureType === "bar" ? 91 : 42;
+    const x = Math.round(Math.max(1, Math.min(maxX, rawX)) * 10) / 10;
+    const y = Math.round(Math.max(2, Math.min(maxY, rawY)) * 10) / 10;
+    updateActiveFloor((floor) => target.kind === "table"
+      ? { ...floor, tables: floor.tables.map((table) => table.id === target.id ? { ...table, x, y } : table) }
+      : { ...floor, fixtures: floor.fixtures.map((fixture) => fixture.id === target.id ? { ...fixture, x, y } : fixture) });
+  };
+
+  const stopDragging = () => {
+    draggingRef.current = null;
+    setDragging(null);
+  };
+
+  const changeZoom = (step: number) => setZoom((current) => Math.max(60, Math.min(160, current + step)));
+
   const allTables = floors.flatMap((floor) => floor.tables);
   const ownerActions = <><Button kind="secondary" icon={QrCode} onClick={() => setShowQrCodes(true)}>QR-коды</Button><div className="floor-add-menu"><Button icon={Plus} onClick={() => setAddMenuOpen((open) => !open)}>Добавить <ChevronDown size={15} /></Button>{addMenuOpen && <div className="floor-add-popover"><button onClick={addTable}><Table2 size={19} /><span><strong>Стол</strong><small>4 места</small></span></button><button onClick={() => addFixture("bar")}><Wine size={19} /><span><strong>Бар</strong><small>Барная стойка</small></span></button><button onClick={() => addFixture("window")}><PanelsTopLeft size={19} /><span><strong>Окно</strong><small>Граница зала</small></span></button><button onClick={addFloor}><Building2 size={19} /><span><strong>Этаж</strong><small>Новый план</small></span></button></div>}</div></>;
 
+  const editorHeading = embedded
+    ? <div className="floor-editor-heading"><div><h2>План зала</h2><p>Перетаскивайте элементы и настройте каждый этаж отдельно.</p></div><div>{ownerActions}</div></div>
+    : <PageHeader title={mode === "owner" ? "План зала" : "Столы"} subtitle={mode === "owner" ? "Настройте расположение столов и отслеживайте загрузку." : "Состояние зала и ваши назначенные столы."} actions={mode === "owner" ? ownerActions : <Button icon={Plus}>Открыть счет</Button>} />;
+  const stageStyle = { "--floor-scale": zoom / 100 } as CSSProperties;
+
   return <>
-    <PageHeader title={mode === "owner" ? "План зала" : "Столы"} subtitle={mode === "owner" ? "Настройте расположение столов и отслеживайте загрузку." : "Состояние зала и ваши назначенные столы."} actions={mode === "owner" ? ownerActions : <Button icon={Plus}>Открыть счет</Button>} />
-    <div className="floor-tabs" role="tablist" aria-label="Этажи заведения">{floors.map((floor) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)}><Building2 size={17} /><span>{floor.name}</span><b>{floor.tables.length}</b></button>)}{mode === "owner" && <button className="add-floor-tab" onClick={addFloor}><Plus size={17} /><span>Этаж</span></button>}</div>
+    {editorHeading}
+    <div className="floor-levels"><div className="floor-levels-label"><Building2 size={18} /><span>Этаж</span></div><div className="floor-level-list" role="tablist" aria-label="Этажи заведения">{floors.map((floor, index) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)}><span>{index + 1}</span><strong>{floor.name}</strong><small>{floor.tables.length} столов</small></button>)}</div>{mode === "owner" && <IconButton icon={Plus} label="Добавить этаж" onClick={addFloor} className="add-floor-button" />}</div>
     <div className="floor-layout">
       <section className="panel floor-panel">
-        <div className="floor-toolbar"><div className="floor-legend"><span><i className="free" />Свободен</span><span><i className="busy" />Занят</span><span><i className="reserved" />Бронь</span></div><div><IconButton icon={Minus} label="Уменьшить" /><span className="zoom-label">100%</span><IconButton icon={Plus} label="Увеличить" /></div></div>
-        <div className="floor-canvas">{activeFloor.fixtures.map((fixture) => <button key={fixture.id} className={`floor-fixture ${fixture.type} ${selected?.kind === "fixture" && selected.id === fixture.id ? "selected" : ""}`} style={{ left: `${fixture.x}%`, top: `${fixture.y}%` }} onClick={() => setSelected({ kind: "fixture", id: fixture.id })}>{fixture.type === "bar" ? <><Wine size={16} />Бар</> : <><PanelsTopLeft size={16} />Окно</>}</button>)}{activeFloor.tables.map((table) => <button key={table.id} className={`floor-table ${table.state} ${selected?.kind === "table" && selected.id === table.id ? "selected" : ""} ${table.seats >= 6 ? "wide" : ""}`} style={{ left: `${table.x}%`, top: `${table.y}%` }} onClick={() => setSelected({ kind: "table", id: table.id })}><strong>{table.id}</strong><span>{table.seats} места</span></button>)}{activeFloor.tables.length === 0 && activeFloor.fixtures.length === 0 && <div className="floor-empty"><Building2 size={28} /><strong>{activeFloor.name}</strong><span>План пока пуст</span></div>}</div>
+        <div className="floor-toolbar"><div className="floor-legend"><span><i className="free" />Свободен</span><span><i className="busy" />Занят</span><span><i className="reserved" />Бронь</span></div><div className="zoom-control"><IconButton icon={Minus} label="Уменьшить масштаб" onClick={() => changeZoom(-20)} /><button className="zoom-label" onClick={() => setZoom(100)} aria-label="Сбросить масштаб">{zoom}%</button><IconButton icon={Plus} label="Увеличить масштаб" onClick={() => changeZoom(20)} /></div></div>
+        <div className="floor-canvas-viewport" style={stageStyle}><div className="floor-stage-shell"><div className={`floor-canvas ${dragging ? "is-dragging" : ""}`} onPointerMove={moveDraggedObject} onPointerUp={stopDragging} onPointerCancel={stopDragging}>{activeFloor.fixtures.map((fixture) => { const target = { kind: "fixture" as const, id: fixture.id }; return <button key={fixture.id} className={`floor-fixture ${fixture.type} ${selected?.kind === "fixture" && selected.id === fixture.id ? "selected" : ""} ${dragging?.kind === "fixture" && dragging.id === fixture.id ? "dragging" : ""}`} style={{ left: `${fixture.x}%`, top: `${fixture.y}%` }} onPointerDown={(event) => startDragging(event, target, fixture)} onClick={() => setSelected(target)}>{fixture.type === "bar" ? <><Wine size={16} />Бар</> : <><PanelsTopLeft size={16} />Окно</>}</button>; })}{activeFloor.tables.map((table) => { const target = { kind: "table" as const, id: table.id }; return <button key={table.id} className={`floor-table ${table.state} ${selected?.kind === "table" && selected.id === table.id ? "selected" : ""} ${dragging?.kind === "table" && dragging.id === table.id ? "dragging" : ""} ${table.seats >= 6 ? "wide" : ""}`} style={{ left: `${table.x}%`, top: `${table.y}%` }} onPointerDown={(event) => startDragging(event, target, table)} onClick={() => setSelected(target)}><strong>{table.id}</strong><span>{table.seats} места</span></button>; })}{activeFloor.tables.length === 0 && activeFloor.fixtures.length === 0 && <div className="floor-empty"><Building2 size={28} /><strong>{activeFloor.name}</strong><span>План пока пуст</span></div>}</div></div></div>
       </section>
-      {selectedTable ? <aside className="panel table-detail"><div className="detail-heading"><div><small>{activeFloor.name.toUpperCase()} · СТОЛ</small><h2>{selectedTable.id}</h2></div><IconButton icon={Ellipsis} label="Действия" /></div><StatusPill status={selectedTable.state === "busy" ? "Занят" : selectedTable.state === "reserved" ? "Бронь" : "Свободен"} /><dl><div><dt>Мест</dt><dd>{selectedTable.seats}</dd></div><div><dt>Официант</dt><dd>София М.</dd></div><div><dt>Текущий счет</dt><dd>{selectedTable.state === "busy" ? "€76.50" : "—"}</dd></div><div><dt>Открыт</dt><dd>{selectedTable.state === "busy" ? "38 мин" : "—"}</dd></div></dl>{selectedTable.state === "busy" ? <><div className="mini-order"><p><span>Тальятелле</span><b>2</b></p><p><span>Буррата</span><b>1</b></p><p><span>Красный апельсин</span><b>3</b></p></div><Button className="full" onClick={() => notify("Счет стола открыт")}>Открыть счет</Button></> : <Button className="full" icon={Plus} onClick={() => notify("Счет создан")}>Открыть новый счет</Button>}<Button className="full" kind="quiet" icon={UserRound}>Назначить официанта</Button></aside> : selectedFixture ? <aside className="panel table-detail fixture-detail"><div className="detail-heading"><div><small>{activeFloor.name.toUpperCase()} · ЭЛЕМЕНТ</small><h2>{selectedFixture.type === "bar" ? "Бар" : "Окно"}</h2></div>{selectedFixture.type === "bar" ? <Wine size={22} /> : <PanelsTopLeft size={22} />}</div><dl><div><dt>Тип</dt><dd>{selectedFixture.type === "bar" ? "Барная стойка" : "Окно"}</dd></div><div><dt>Этаж</dt><dd>{activeFloor.name}</dd></div></dl>{mode === "owner" && <Button className="full" kind="danger" icon={Trash2} onClick={() => removeFixture(selectedFixture)}>Удалить с плана</Button>}</aside> : <aside className="panel table-detail floor-summary"><Building2 size={24} /><h2>{activeFloor.name}</h2><p>{activeFloor.tables.length} столов · {activeFloor.fixtures.length} элементов</p>{mode === "owner" && <Button className="full" icon={Plus} onClick={addTable}>Добавить первый стол</Button>}</aside>}
+      {selectedTable ? <aside className="panel table-detail"><div className="detail-heading"><div><small>{activeFloor.name.toUpperCase()} · СТОЛ</small><h2>{selectedTable.id}</h2></div><IconButton icon={Ellipsis} label="Действия" /></div><StatusPill status={selectedTable.state === "busy" ? "Занят" : selectedTable.state === "reserved" ? "Бронь" : "Свободен"} /><dl><div><dt>Мест</dt><dd>{selectedTable.seats}</dd></div><div><dt>Официант</dt><dd>София М.</dd></div><div><dt>Текущий счет</dt><dd>{selectedTable.state === "busy" ? "€76.50" : "—"}</dd></div><div><dt>Открыт</dt><dd>{selectedTable.state === "busy" ? "38 мин" : "—"}</dd></div></dl>{selectedTable.state === "busy" && <div className="mini-order"><p><span>Тальятелле</span><b>2</b></p><p><span>Буррата</span><b>1</b></p><p><span>Красный апельсин</span><b>3</b></p></div>}<Button className="full" kind="quiet" icon={UserRound}>Назначить официанта</Button></aside> : selectedFixture ? <aside className="panel table-detail fixture-detail"><div className="detail-heading"><div><small>{activeFloor.name.toUpperCase()} · ЭЛЕМЕНТ</small><h2>{selectedFixture.type === "bar" ? "Бар" : "Окно"}</h2></div>{selectedFixture.type === "bar" ? <Wine size={22} /> : <PanelsTopLeft size={22} />}</div><dl><div><dt>Тип</dt><dd>{selectedFixture.type === "bar" ? "Барная стойка" : "Окно"}</dd></div><div><dt>Этаж</dt><dd>{activeFloor.name}</dd></div></dl>{mode === "owner" && <Button className="full" kind="danger" icon={Trash2} onClick={() => removeFixture(selectedFixture)}>Удалить с плана</Button>}</aside> : <aside className="panel table-detail floor-summary"><Building2 size={24} /><h2>{activeFloor.name}</h2><p>{activeFloor.tables.length} столов · {activeFloor.fixtures.length} элементов</p>{mode === "owner" && <Button className="full" icon={Plus} onClick={addTable}>Добавить первый стол</Button>}</aside>}
     </div>
     {showQrCodes && <QrCodesDialog venueName={venueName} tables={allTables} onClose={() => setShowQrCodes(false)} notify={notify} />}
   </>;
@@ -741,7 +786,8 @@ function ReviewsScreen({ notify }: { notify: (message: string) => void }) {
 
 function VenueScreen({ venue, notify }: { venue: Venue; notify: (message: string) => void }) {
   const [tab, setTab] = useState("Основное");
-  return <><PageHeader title={venue.name} subtitle="Публичная информация, расписание и настройки сервиса." actions={<Button icon={Check} onClick={() => notify("Изменения сохранены")}>Сохранить</Button>} /><div className="settings-layout"><aside className="settings-nav">{["Основное", "Расписание", "Заказы", "Уведомления"].map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item}</button>)}</aside><section className="panel settings-form">{tab === "Основное" ? <><PanelTitle title="Профиль заведения" subtitle="Эти данные видят ваши гости." /><div className="cover-upload"><div className="cover-photo" /><Button kind="secondary" icon={ImagePlus}>Изменить обложку</Button></div><div className="form-grid"><Field label="Название"><input defaultValue={venue.name} /></Field><Field label="Тип кухни"><select defaultValue="modern"><option value="modern">Современная европейская</option></select></Field><Field label="Телефон"><input defaultValue="+421 2 555 01 148" /></Field><Field label="E-mail"><input defaultValue={`hello@${venue.id}.sk`} /></Field><Field label="Адрес" wide><input defaultValue={venue.location.replace(" · ", ", ")} /></Field><Field label="Описание" wide><textarea defaultValue="Сезонная европейская кухня, натуральные вина и спокойный городской ритм." /></Field></div></> : tab === "Расписание" ? <ScheduleSettings /> : tab === "Заказы" ? <OrderSettings /> : <NotificationSettings />}</section></div></>;
+  const floorTab = tab === "План зала";
+  return <><PageHeader title={venue.name} subtitle="Публичная информация, расписание и настройки сервиса." actions={!floorTab ? <Button icon={Check} onClick={() => notify("Изменения сохранены")}>Сохранить</Button> : undefined} /><div className={`settings-layout ${floorTab ? "floor-settings-layout" : ""}`}><aside className="settings-nav">{["Основное", "Расписание", "Заказы", "План зала", "Уведомления"].map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item}</button>)}</aside>{floorTab ? <section className="floor-settings-editor"><FloorPlan mode="owner" venueName={venue.name} notify={notify} embedded /></section> : <section className="panel settings-form">{tab === "Основное" ? <><PanelTitle title="Профиль заведения" subtitle="Эти данные видят ваши гости." /><div className="cover-upload"><div className="cover-photo" /><Button kind="secondary" icon={ImagePlus}>Изменить обложку</Button></div><div className="form-grid"><Field label="Название"><input defaultValue={venue.name} /></Field><Field label="Тип кухни"><select defaultValue="modern"><option value="modern">Современная европейская</option></select></Field><Field label="Телефон"><input defaultValue="+421 2 555 01 148" /></Field><Field label="E-mail"><input defaultValue={`hello@${venue.id}.sk`} /></Field><Field label="Адрес" wide><input defaultValue={venue.location.replace(" · ", ", ")} /></Field><Field label="Описание" wide><textarea defaultValue="Сезонная европейская кухня, натуральные вина и спокойный городской ритм." /></Field></div></> : tab === "Расписание" ? <ScheduleSettings /> : tab === "Заказы" ? <OrderSettings /> : <NotificationSettings />}</section>}</div></>;
 }
 
 function Field({ label, wide = false, children }: { label: string; wide?: boolean; children: ReactNode }) { return <label className={`field ${wide ? "wide" : ""}`}><span>{label}</span>{children}</label>; }
