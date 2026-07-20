@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
@@ -28,7 +29,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 
   return <main className="auth-screen">
     <section className="auth-screen-content">
-      <Link className="auth-brand" href="/" aria-label="Pocket, на главную"><span>P</span><strong>pocket</strong></Link>
+      <Link className="auth-brand" href="/" aria-label="Pocket, на главную"><span className="auth-brand-mark"><Image src="/logo.svg" alt="" width={30} height={30} priority /></span><strong>Pocket</strong></Link>
       <header className="auth-heading">
         <h1>{isLogin ? "Войти в Pocket" : "Создать аккаунт"}</h1>
         <p>{isLogin ? "Управляйте заведениями или продолжите как гость." : "Один аккаунт для бронирований, заказов и управления заведениями."}</p>

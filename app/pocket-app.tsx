@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Activity,
   ArrowUpDown,
@@ -255,7 +256,7 @@ function Sidebar({ role, screen, navigation, venue, venues: availableVenues, mob
   };
   return (
     <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
-      <div className="brand-row"><div className="brand-mark"><span>P</span></div><strong>pocket</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} /></div>
+      <div className="brand-row"><div className="brand-mark"><Image src="/logo.svg" alt="" width={28} height={28} priority /></div><strong>Pocket</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} /></div>
       {role === "customer" ? <div className="venue-switcher personal-context"><span className="venue-avatar">P</span><div><strong>Все заведения</strong><small>Аккаунт Pocket</small></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button className="venue-switcher" onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={venueMenuOpen}><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>{venue.location}</small></div><ChevronDown size={16} /></button>{venueMenuOpen && <div className="venue-menu-popover">{availableVenues.map((item) => <button key={item.id} className={item.id === venue.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{item.initials}</span><span><strong>{item.name}</strong><small>{item.location}</small></span>{item.id === venue.id && <Check size={16} />}</button>)}</div>}</div> : <div className="venue-switcher personal-context"><span className="venue-avatar">{venue.initials}</span><div><strong>{venue.name}</strong><small>Рабочая смена</small></div><BadgeCheck size={16} /></div>}
       <nav className="side-nav">
         <p className="nav-label">Рабочее пространство</p>
