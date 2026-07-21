@@ -1690,6 +1690,8 @@ thead th {
 .floor-editor-heading h2 { margin: 0; font-size: 20px; }
 .floor-editor-heading p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
 .floor-editor-heading > div:last-child { display: flex; align-items: center; gap: 8px; }
+.floor-save-state { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.floor-save-state.error { color: #b44d44; }
 
 .floor-levels {
   min-width: 0;
@@ -1834,6 +1836,9 @@ thead th {
 
 .floor-empty strong { margin-top: 10px; color: var(--ink); font-size: 16px; }
 .floor-empty span { margin-top: 3px; font-size: 12px; }
+.floor-empty.loading svg,
+.floor-summary.loading svg { animation: floor-spin 1s linear infinite; }
+@keyframes floor-spin { to { transform: rotate(360deg); } }
 .fixture-detail .detail-heading > svg { color: var(--blue); }
 .technical-detail form { display: grid; gap: 12px; margin-top: 18px; }
 .technical-detail .field { gap: 5px; }
@@ -1974,12 +1979,30 @@ thead th {
   position: relative;
   height: auto !important;
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 30px;
+  grid-template-columns: minmax(0, 1fr) 26px;
   padding: 0 !important;
 }
 .category-row > button:first-child { min-width: 0; }
 .category-row > button:first-child span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.category-row > .row-actions > .icon-button { width: 30px; min-height: 30px; padding: 0; justify-content: center; }
+.category-row > .row-actions { display: grid; place-items: center; }
+.category-row > .row-actions > .category-action-trigger {
+  width: 26px;
+  min-height: 28px;
+  padding: 0;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity .15s ease, color .15s ease;
+}
+.category-row:hover .category-action-trigger,
+.category-row:focus-within .category-action-trigger,
+.category-action-trigger.active { opacity: 1; }
+.category-action-trigger:hover,
+.category-action-trigger.active { background: var(--surface-soft) !important; color: var(--blue) !important; }
+.category-action-trigger svg { transition: transform .15s ease; }
+.category-action-trigger.active svg { transform: rotate(180deg); }
 .category-row .row-actions-menu { top: 34px; }
 .menu-items.list { grid-template-columns: 1fr; }
 .menu-items.list .menu-card { min-height: 132px; grid-template-columns: 120px minmax(0, 1fr); }
