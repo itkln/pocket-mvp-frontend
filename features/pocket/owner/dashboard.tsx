@@ -24,7 +24,7 @@ export function OwnerOverview({ ownerName, onNavigate }: { ownerName: string; on
     </section>
     <section className="dashboard-grid">
       <div className="panel dashboard-orders"><PanelTitle title="Последние заказы" subtitle="Обновляются из рабочего API" action={<Button kind="quiet" onClick={() => onNavigate("orders")}>Все заказы <ChevronRight size={16} /></Button>} /><OrderTable orders={orders.slice(0, 5)} /></div>
-      <div className="panel reviews-panel"><PanelTitle title="Оценка гостей" subtitle="По опубликованным отзывам" /><div className="rating-main"><strong>{dashboard?.average_rating ? dashboard.average_rating.toFixed(1) : "—"}</strong><div><div className="stars"><Star size={18} fill="currentColor" /></div><small>Средняя оценка</small></div></div></div>
+      <div className="panel reviews-panel"><PanelTitle title="Оценка гостей" subtitle="По опубликованным отзывам" />{dashboard?.average_rating ? <div className="rating-main"><strong>{dashboard.average_rating.toFixed(1)}</strong><div><div className="stars"><Star size={18} fill="currentColor" /></div><small>Средняя оценка</small></div></div> : <EmptyIllustration icon={Star} title="Оценок пока нет" text="Средняя оценка появится после первого отзыва." />}</div>
     </section>
   </>;
 }

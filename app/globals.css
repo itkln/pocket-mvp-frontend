@@ -2262,3 +2262,43 @@ td { vertical-align: middle; }
   -webkit-text-fill-color: var(--ink);
   transition: background-color 9999s ease-out;
 }
+
+/* Empty dashboard and analytics panels must not inherit data-row layouts. */
+.dashboard-orders > .panel-title,
+.reviews-panel > .panel-title { padding: 18px 20px 0; }
+.dashboard-orders > .empty-state,
+.reviews-panel > .empty-state {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+}
+.reviews-panel .rating-main { padding: 12px 20px 20px; }
+.popular-list > div.empty-state:not(.panel-title) {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 28px 20px;
+  border-bottom: 0;
+  text-align: center;
+}
+.popular-list > div.empty-state:not(.panel-title) > span {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .dashboard-orders > .panel-title,
+  .reviews-panel > .panel-title { padding: 15px 14px 0; }
+  .dashboard-orders > .empty-state,
+  .reviews-panel > .empty-state { min-height: 210px; }
+}
