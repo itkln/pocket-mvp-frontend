@@ -1440,7 +1440,7 @@ thead th {
 .topbar { box-shadow: 0 1px 0 rgba(23, 33, 43, .04); }
 .topbar-language { position: relative; }
 .topbar-language-trigger {
-  min-width: 58px;
+  min-width: 50px;
   height: 36px;
   display: flex;
   align-items: center;
@@ -1455,7 +1455,6 @@ thead th {
 }
 .topbar-language-trigger:hover,
 .topbar-language-trigger[aria-expanded="true"] { background: #eef5f8; color: #168acd; }
-.topbar-language-trigger > span { color: #a7b1b8; font-size: 17px; font-weight: 400; }
 .topbar-language-trigger > b { font-size: 12px; font-weight: 700; }
 .topbar-language-trigger > svg { transition: transform .16s ease; }
 .topbar-language-trigger[aria-expanded="true"] > svg { transform: rotate(180deg); }

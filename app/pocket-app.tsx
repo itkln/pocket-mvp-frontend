@@ -41,13 +41,25 @@ import {
 } from "../features/pocket/customer";
 import { KitchenScreen, ServiceBoard } from "../features/pocket/staff";
 import { Modal, NewVenueModal } from "../features/pocket/dialogs";
+import { useI18n } from "../features/pocket/i18n";
+import { localeFromPathname, type Locale } from "../features/pocket/locales";
 
-export default function PocketApp() {
+const defaultScreen: Record<Role, string> = { owner: "overview", customer: "discover", staff: "service" };
+const roleScreens: Record<Role, string[]> = {
+  owner: [...ownerNavigation.map((item) => item.id), "account"],
+  customer: [...customerNavigation.map((item) => item.id), "checkout"],
+  staff: [...staffNavigation.map((item) => item.id), "account"],
+};
+const screenForRole = (role: Role, screen?: string) => screen && roleScreens[role].includes(screen) ? screen : defaultScreen[role];
+const appPath = (locale: Locale, role: Role, screen: string) => `/${locale}/${role}/${screen}`;
+
+export default function PocketApp({ initialRole, initialScreen }: { initialRole?: Role; initialScreen?: string }) {
   const router = useRouter();
+	const { locale } = useI18n();
 	const [authReady, setAuthReady] = useState(false);
 	const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [role, setRole] = useState<Role>("customer");
-  const [screen, setScreen] = useState("discover");
+  const [role, setRole] = useState<Role>(initialRole ?? "customer");
+  const [screen, setScreen] = useState(screenForRole(initialRole ?? "customer", initialScreen));
 	const [availableVenues, setAvailableVenues] = useState<Venue[]>([]);
 	const [venue, setVenue] = useState<Venue | null>(null);
   const [cart, setCart] = useState<Record<number, number>>({});
@@ -70,24 +82,31 @@ export default function PocketApp() {
 				if (!active) return;
 				const selectedID = window.localStorage.getItem(selectedVenueKey(user.id));
 				const startsAsOwner = venues.length > 0;
-				setRole(startsAsOwner ? "owner" : "customer");
-				setScreen(startsAsOwner ? "overview" : "discover");
+				const nextRole = initialRole === "staff" && !user.capabilities.includes("staff") ? (startsAsOwner ? "owner" : "customer") : initialRole ?? (startsAsOwner ? "owner" : "customer");
+				const nextScreen = screenForRole(nextRole, initialScreen);
+				setRole(nextRole);
+				setScreen(nextScreen);
 				setCurrentUser(user);
 				setAvailableVenues(venues);
 				setVenue(venues.find((item) => item.id === selectedID) ?? venues[0] ?? null);
 				setAuthReady(true);
+				if (initialRole !== nextRole || initialScreen !== nextScreen) {
+					const routeLocale = localeFromPathname(window.location.pathname) ?? "ru";
+					router.replace(appPath(routeLocale, nextRole, nextScreen));
+				}
 			})
 			.catch((error) => {
 				if (!active) return;
-				if (error instanceof AuthAPIError && error.status === 401) router.replace("/login");
-				else router.replace("/login?error=unavailable");
+				const routeLocale = localeFromPathname(window.location.pathname) ?? "ru";
+				if (error instanceof AuthAPIError && error.status === 401) router.replace(`/${routeLocale}/login`);
+				else router.replace(`/${routeLocale}/login?error=unavailable`);
 			});
 		return () => { active = false; };
-	}, [router]);
+	}, [initialRole, initialScreen, router]);
 
 	const signOut = async () => {
 		try { await logout(); } finally {
-			router.replace("/login");
+			router.replace(`/${locale}/login`);
 			router.refresh();
 		}
 	};
@@ -97,14 +116,17 @@ export default function PocketApp() {
   const cartTotal = menuItems.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0);
 
   const changeRole = (next: Role) => {
+    const nextScreen = defaultScreen[next];
     setRole(next);
-    setScreen(next === "owner" ? "overview" : next === "customer" ? "discover" : "service");
+    setScreen(nextScreen);
+    router.push(appPath(locale, next, nextScreen));
     setMobileNav(false);
     window.scrollTo(0, 0);
   };
 
   const navigate = (next: string) => {
     setScreen(next);
+    router.push(appPath(locale, role, next));
     setMobileNav(false);
     window.scrollTo(0, 0);
   };
@@ -146,6 +168,7 @@ export default function PocketApp() {
 			setVenue(newVenue);
 			setRole("owner");
 			setScreen("venue");
+			router.push(appPath(locale, "owner", "venue"));
 			setModal(null);
 			setMobileNav(false);
 			notify(`${newVenue.name} добавлено`);

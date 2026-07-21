@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { AuthAPIError, login, register } from "../lib/auth-api";
+import { useI18n } from "../features/pocket/i18n";
 
 type AuthMode = "login" | "register";
 
 export default function AuthPage({ mode }: { mode: AuthMode }) {
   const router = useRouter();
+  const { locale } = useI18n();
   const isLogin = mode === "login";
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -37,7 +39,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 				password: String(data.get("password")),
 			});
 		}
-		router.replace("/");
+		router.replace(`/${locale}`);
 		router.refresh();
 	} catch (caught) {
 		setError(caught instanceof AuthAPIError ? caught.message : "Сервер временно недоступен. Попробуйте еще раз");
@@ -48,7 +50,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 
   return <main className="auth-screen">
     <section className="auth-screen-content">
-      <Link className="auth-brand" href="/" aria-label="Pocket, на главную"><span className="auth-brand-mark"><Image src="/logo.svg" alt="" width={30} height={30} priority /></span><strong>Pocket</strong></Link>
+      <Link className="auth-brand" href={`/${locale}`} aria-label="Pocket, на главную"><span className="auth-brand-mark"><Image src="/logo.svg" alt="" width={30} height={30} priority /></span><strong>Pocket</strong></Link>
       <header className="auth-heading">
         <h1>{isLogin ? "Войти в Pocket" : "Создать аккаунт"}</h1>
         <p>{isLogin ? "Управляйте заведениями или продолжите как гость." : "Один аккаунт для бронирований, заказов и управления заведениями."}</p>
@@ -68,7 +70,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 		<button className="auth-submit" type="submit" disabled={submitting}>{submitting ? (isLogin ? "Входим..." : "Создаем аккаунт...") : (isLogin ? "Войти" : "Зарегистрироваться")}</button>
       </form>
 
-      <p className="auth-switch">{isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"} <Link href={isLogin ? "/register" : "/login"}>{isLogin ? "Зарегистрироваться" : "Войти"}</Link></p>
+      <p className="auth-switch">{isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"} <Link href={`/${locale}/${isLogin ? "register" : "login"}`}>{isLogin ? "Зарегистрироваться" : "Войти"}</Link></p>
     </section>
   </main>;
 }

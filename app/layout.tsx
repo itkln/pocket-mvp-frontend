@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { ConfirmProvider } from "../features/pocket/confirm-dialog";
-import { I18nProvider } from "../features/pocket/i18n";
+import { Providers } from "./providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body><I18nProvider><ConfirmProvider>{children}</ConfirmProvider></I18nProvider></body>
+      <body><Providers>{children}</Providers></body>
     </html>
   );
 }

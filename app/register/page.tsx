@@ -1,5 +1,5 @@
-import AuthPage from "../auth-page";
+import { redirect } from "next/navigation";
 
 export default function RegisterPage() {
-  return <AuthPage mode="register" />;
+  redirect("/ru/register");
 }

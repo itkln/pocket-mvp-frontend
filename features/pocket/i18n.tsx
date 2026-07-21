@@ -1,8 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-
-export type Locale = "ru" | "en" | "uk" | "sk";
+import { type Locale } from "./locales";
 type Params = Record<string, string | number>;
 type TranslationRow = readonly [string, string, string, string];
 
@@ -579,15 +578,20 @@ const translateTree = (root: Node, locale: Locale) => {
   root.childNodes.forEach((child) => translateTree(child, locale));
 };
 
-export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("ru");
+export function I18nProvider({ children, initialLocale }: { children: ReactNode; initialLocale?: Locale }) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale ?? "ru");
   useEffect(() => {
+    if (initialLocale) {
+      window.localStorage.setItem(localeStorageKey, initialLocale);
+      const syncLocale = window.setTimeout(() => setLocaleState(initialLocale), 0);
+      return () => window.clearTimeout(syncLocale);
+    }
     const stored = window.localStorage.getItem(localeStorageKey);
     if (stored !== "ru" && stored !== "en" && stored !== "uk" && stored !== "sk") return;
 
     const restoreLocale = window.setTimeout(() => setLocaleState(stored), 0);
     return () => window.clearTimeout(restoreLocale);
-  }, []);
+  }, [initialLocale]);
   useEffect(() => {
     document.documentElement.lang = locale;
     translateTree(document.body, locale);

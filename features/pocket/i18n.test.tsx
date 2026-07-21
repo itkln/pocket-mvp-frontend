@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { I18nProvider, translate, useI18n } from "./i18n";
+import { localeFromPathname, replacePathLocale } from "./locales";
 
 function LanguageHarness() {
   const { setLocale } = useI18n();
@@ -33,5 +34,17 @@ describe("global localization", () => {
     expect(screen.getByPlaceholderText("Search the team")).toHaveAttribute("aria-label", "Search the team");
     expect(document.documentElement).toHaveAttribute("lang", "en");
     expect(window.localStorage.getItem("pocket:locale")).toBe("en");
+  });
+});
+
+describe("localized paths", () => {
+  it("reads the locale from the first URL segment", () => {
+    expect(localeFromPathname("/en/owner/menu")).toBe("en");
+    expect(localeFromPathname("/owner/menu")).toBeUndefined();
+  });
+
+  it("changes only the locale segment and preserves the current screen", () => {
+    expect(replacePathLocale("/ru/owner/menu", "sk")).toBe("/sk/owner/menu");
+    expect(replacePathLocale("/login", "uk")).toBe("/uk/login");
   });
 });

@@ -52,7 +52,7 @@ describe("AuthPage", () => {
       email: "user@example.com",
       password: "a secure password",
     }));
-    expect(replace).toHaveBeenCalledWith("/");
+    expect(replace).toHaveBeenCalledWith("/ru");
   });
 
   it("logs in and redirects after success", async () => {
@@ -62,7 +62,7 @@ describe("AuthPage", () => {
     fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
     fireEvent.click(screen.getByRole("button", { name: "Войти" }));
     await waitFor(() => expect(login).toHaveBeenCalledWith("user@example.com", "a secure password"));
-    expect(replace).toHaveBeenCalledWith("/");
+    expect(replace).toHaveBeenCalledWith("/ru");
     expect(refresh).toHaveBeenCalled();
   });
 });

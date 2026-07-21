@@ -1,5 +1,5 @@
-import PocketApp from "./pocket-app";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <PocketApp />;
+  redirect("/ru");
 }

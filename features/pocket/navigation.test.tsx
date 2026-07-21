@@ -3,8 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "./i18n";
 import { Topbar } from "./navigation";
 
+const replace = vi.fn();
+vi.mock("next/navigation", () => ({ usePathname: () => "/ru/owner/overview", useRouter: () => ({ replace }) }));
+
 describe("Topbar language menu", () => {
-  beforeEach(() => window.localStorage.clear());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    window.localStorage.clear();
+  });
 
   it("switches the whole interface and keeps the selected short code visible", async () => {
     render(<I18nProvider><Topbar
@@ -24,5 +30,6 @@ describe("Topbar language menu", () => {
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     expect(screen.getByText("Overview")).toBeInTheDocument();
     expect(window.localStorage.getItem("pocket:locale")).toBe("en");
+    expect(replace).toHaveBeenCalledWith("/en/owner/overview");
   });
 });
