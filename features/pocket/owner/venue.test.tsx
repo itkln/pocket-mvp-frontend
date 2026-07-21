@@ -18,25 +18,24 @@ const venue: OwnerVenue = {
   timezone: "Europe/Bratislava",
   currency: "EUR",
   status: "active",
-  settings: { floor_plan: [{ id: "floor-1" }], menu_language: "ru" },
+  settings: { floor_plan: [{ id: "floor-1" }], interface_language: "en", menu_language: "ru" },
   created_at: "2026-01-01T00:00:00Z",
 };
 
 describe("VenueScreen", () => {
-  it("saves currency and interface language without resending the floor plan", async () => {
+  it("saves currency without resending layout or account language settings", async () => {
     vi.mocked(updateOwnerVenue).mockImplementation(async (_id, input) => ({ ...venue, ...input, settings: input.settings ?? {} } as OwnerVenue));
 
     const { container } = render(<VenueScreen venue={venue} notify={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText("Валюта меню и заказов"), { target: { value: "UAH" } });
-    fireEvent.click(screen.getByRole("radio", { name: /English/ }));
     fireEvent.click(screen.getByRole("button", { name: "Сохранить", exact: true }));
 
     await waitFor(() => expect(updateOwnerVenue).toHaveBeenCalledWith("venue-1", expect.objectContaining({
       currency: "UAH",
-      settings: expect.objectContaining({ interface_language: "en" }),
     })));
     expect(vi.mocked(updateOwnerVenue).mock.calls[0][1].settings).not.toHaveProperty("floor_plan");
+    expect(vi.mocked(updateOwnerVenue).mock.calls[0][1].settings).not.toHaveProperty("interface_language");
     const coverInput = container.querySelector<HTMLInputElement>('input[type="file"]');
     expect(coverInput).not.toBeNull();
     const inputClick = vi.spyOn(coverInput!, "click");
