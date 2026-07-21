@@ -2,8 +2,8 @@ import { type ReactNode } from "react";
 import { type LucideIcon } from "lucide-react";
 import { type MenuItem } from "./model";
 
-export function money(value: number) {
-  return `€${value.toFixed(2)}`;
+export function money(value: number, currency = "EUR") {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency, currencyDisplay: "narrowSymbol" }).format(value);
 }
 
 export function Button({ children, icon: Icon, kind = "primary", onClick, type = "button", disabled = false, className = "" }: { children?: ReactNode; icon?: LucideIcon; kind?: "primary" | "secondary" | "quiet" | "danger"; onClick?: () => void; type?: "button" | "submit"; disabled?: boolean; className?: string }) {
@@ -39,5 +39,4 @@ export function PanelTitle({ title, subtitle, action }: { title: string; subtitl
 
 export function Field({ label, wide = false, children }: { label: string; wide?: boolean; children: ReactNode }) { return <label className={`field ${wide ? "wide" : ""}`}><span>{label}</span>{children}</label>; }
 export function ToggleRow({ title, text, checked = false }: { title: string; text: string; checked?: boolean }) { return <div><div><strong>{title}</strong><p>{text}</p></div><label className="switch"><input type="checkbox" defaultChecked={checked} /><span /></label></div>; }
-
 

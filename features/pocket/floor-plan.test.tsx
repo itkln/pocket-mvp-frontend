@@ -38,4 +38,21 @@ describe("FloorPlan", () => {
     fireEvent.click(screen.getByRole("button", { name: "Сохранить план", exact: true }));
     await waitFor(() => expect(saveFloorPlan).toHaveBeenCalledWith("venue-1", [expect.objectContaining({ tables: [expect.objectContaining({ id: "01", seats: 6 })] })]));
   });
+
+  it("deletes the active floor and keeps the remaining floor selected", async () => {
+    vi.mocked(getFloorPlan).mockResolvedValue([
+      { id: "floor-1", name: "1 этаж", tables: [], fixtures: [] },
+      { id: "floor-2", name: "2 этаж", tables: [], fixtures: [] },
+    ]);
+    vi.mocked(saveFloorPlan).mockImplementation(async (_venueID, floorPlan) => floorPlan);
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+
+    render(<FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />);
+
+    await waitFor(() => expect(screen.getByRole("button", { name: "Удалить 1 этаж" })).toBeEnabled());
+    fireEvent.click(screen.getByRole("button", { name: "Удалить 1 этаж" }));
+
+    expect(screen.queryByRole("tab", { name: /1 этаж/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: /2 этаж/ })).toHaveAttribute("aria-selected", "true");
+  });
 });

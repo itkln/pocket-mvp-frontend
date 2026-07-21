@@ -1698,7 +1698,7 @@ thead th {
 .floor-levels {
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 36px;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   margin-bottom: 14px;
@@ -1733,7 +1733,11 @@ thead th {
 .floor-level-list button.active { background: var(--blue-soft); color: var(--blue); }
 .floor-level-list button.active > span { background: var(--blue); color: #fff; }
 .floor-level-list button.active small { color: #568da8; }
-.floor-levels .add-floor-button { border: 0; background: transparent; color: var(--blue); }
+.floor-level-actions { display: flex; align-items: center; gap: 2px; }
+.floor-levels .add-floor-button,
+.floor-levels .delete-floor-button { border: 0; background: transparent; color: var(--blue); }
+.floor-levels .delete-floor-button { color: #9a6d68; }
+.floor-levels .delete-floor-button:hover { background: #faecea; color: #b44d44; }
 
 .floor-add-menu { position: relative; }
 .floor-add-popover {
@@ -1872,7 +1876,7 @@ thead th {
   .floor-editor-heading { align-items: stretch; flex-direction: column; }
   .floor-editor-heading > div:last-child { width: 100%; }
   .floor-editor-heading > div:last-child > .button { flex: 1; }
-  .floor-levels { grid-template-columns: minmax(0, 1fr) 36px; gap: 6px; padding-left: 7px; }
+  .floor-levels { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; padding-left: 7px; }
   .floor-levels-label { display: none; }
   .floor-level-list button { padding-right: 9px; }
   .floor-add-menu { width: 100%; }
@@ -2016,6 +2020,8 @@ thead th {
   font-weight: 600;
 }
 .category-manager-row > div:first-child small { display: block; color: var(--muted); font-size: 11px; }
+.category-manager-row.new { box-shadow: inset 3px 0 var(--blue); }
+.category-manager-row.new input::placeholder { color: #7b858c; font-weight: 500; }
 .category-visibility { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
 .category-delete { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; color: #b44d44; cursor: pointer; }
 .category-delete:hover:not(:disabled) { background: #faecea; }
@@ -2023,6 +2029,32 @@ thead th {
 .category-manager-empty { padding: 36px 12px; color: var(--muted); text-align: center; }
 .category-manager-dialog > form > footer { justify-content: space-between; }
 .category-manager-dialog > form > footer > div { display: flex; gap: 8px; }
+.cover-input { display: none; }
+.cover-photo.custom { background-position: center; background-size: cover; }
+.cover-upload .cover-actions { position: absolute; right: 12px; bottom: 12px; display: flex; gap: 7px; }
+.cover-upload .cover-actions .button { position: static; }
+.localization-grid { margin-top: 18px; }
+.language-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.language-options button {
+  min-width: 0;
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  cursor: pointer;
+}
+.language-options button b { color: var(--ink); font-size: 12px; }
+.language-options button span { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.language-options button.active { background: var(--blue-soft); color: var(--blue); box-shadow: inset 0 0 0 1px rgba(34, 158, 217, .18); }
+.language-options button.active b { color: var(--blue); }
+.localization-grid .field > small { color: var(--muted); font-size: 11px; font-weight: 400; }
 .menu-items.list { grid-template-columns: 1fr; }
 .menu-items.list .menu-card { min-height: 132px; grid-template-columns: 120px minmax(0, 1fr); }
 .menu-items.list .menu-card > .food-image { min-height: 132px; }
@@ -2062,6 +2094,9 @@ thead th {
   .category-manager-dialog > form > footer > .button,
   .category-manager-dialog > form > footer > div,
   .category-manager-dialog > form > footer > div > .button { width: 100%; }
+  .cover-upload .cover-actions { right: 8px; bottom: 8px; left: 8px; }
+  .cover-upload .cover-actions .button { flex: 1; }
+  .language-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Final interface consistency pass. */

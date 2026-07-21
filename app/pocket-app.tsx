@@ -203,7 +203,7 @@ export default function PocketApp() {
       <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />
       {toast && <div className="toast"><CheckCircle2 size={18} />{toast}</div>}
 	  {modal === "venue" && <NewVenueModal onClose={() => setModal(null)} onCreate={createVenue} />}
-	  {modal && modal !== "venue" && <Modal type={modal} onClose={() => setModal(null)} notify={(message) => { setModal(null); notify(message); }} />}
+		  {modal && modal !== "venue" && <Modal type={modal} currency={venue?.currency} onClose={() => setModal(null)} notify={(message) => { setModal(null); notify(message); }} />}
     </div>
     </OwnerWorkspaceProvider>
   );

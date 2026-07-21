@@ -159,6 +159,21 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     notify(`${nextFloor.name} добавлен`);
   };
 
+  const removeFloor = () => {
+    if (floors.length <= 1) {
+      notify("В заведении должен остаться хотя бы один этаж");
+      return;
+    }
+    if (!window.confirm(`Удалить «${activeFloor.name}» вместе со всеми элементами плана?`)) return;
+    const activeIndex = floors.findIndex((floor) => floor.id === activeFloor.id);
+    const remainingFloors = floors.filter((floor) => floor.id !== activeFloor.id);
+    const nextFloor = remainingFloors[Math.min(Math.max(activeIndex, 0), remainingFloors.length - 1)];
+    updateFloors(() => remainingFloors);
+    setActiveFloorId(nextFloor.id);
+    setSelected(nextFloor.tables[0] ? { kind: "table", id: nextFloor.tables[0].id } : nextFloor.fixtures[0] ? { kind: "fixture", id: nextFloor.fixtures[0].id } : null);
+    notify(`${activeFloor.name} удален`);
+  };
+
   const addTable = () => {
     const nextNumber = floors.flatMap((floor) => floor.tables).reduce((highest, table) => Math.max(highest, Number(table.id) || 0), 0) + 1;
     const position = activeFloor.tables.length;
@@ -278,7 +293,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
 
   return <>
     {editorHeading}
-    <div className="floor-levels"><div className="floor-level-list" role="tablist" aria-label="Этажи заведения">{floors.map((floor, index) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)} disabled={loading}><span>{index + 1}</span><strong>{floor.name}</strong><small>{tableCountLabel(floor.tables.length)}</small></button>)}</div>{mode === "owner" && !loading && <IconButton icon={Plus} label="Добавить этаж" onClick={addFloor} className="add-floor-button" />}</div>
+    <div className="floor-levels"><div className="floor-level-list" role="tablist" aria-label="Этажи заведения">{floors.map((floor, index) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)} disabled={loading}><span>{index + 1}</span><strong>{floor.name}</strong><small>{tableCountLabel(floor.tables.length)}</small></button>)}</div>{mode === "owner" && !loading && <div className="floor-level-actions"><IconButton icon={Trash2} label={`Удалить ${activeFloor.name}`} onClick={removeFloor} className="delete-floor-button" /><IconButton icon={Plus} label="Добавить этаж" onClick={addFloor} className="add-floor-button" /></div>}</div>
     <div className="floor-layout">
       <section className="panel floor-panel">
         <div className={`floor-toolbar ${mode === "owner" ? "technical" : ""}`}>{mode === "staff" && <div className="floor-legend"><span><i className="free" />Свободен</span><span><i className="busy" />Занят</span><span><i className="reserved" />Бронь</span></div>}<div className="zoom-control"><IconButton icon={Minus} label="Уменьшить масштаб" onClick={() => changeZoom(-20)} /><button className="zoom-label" onClick={() => setZoom(100)} aria-label="Сбросить масштаб">{zoom}%</button><IconButton icon={Plus} label="Увеличить масштаб" onClick={() => changeZoom(20)} /></div></div>

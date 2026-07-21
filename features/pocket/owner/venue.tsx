@@ -1,20 +1,93 @@
 "use client";
 
-import { useState } from "react";
-import { Check, ImagePlus } from "lucide-react";
+import { useRef, useState, type ChangeEvent } from "react";
+import { Check, ImagePlus, Trash2 } from "lucide-react";
 import { updateOwnerVenue, type OwnerVenue, type VenueInput } from "../../../lib/owner-api";
 import { Button, Field, PageHeader, PanelTitle } from "../ui";
 import { FloorPlan } from "../floor-plan";
 
 export function VenueScreen({ venue, notify, onUpdate }: { venue: OwnerVenue; notify: (message: string) => void; onUpdate?: (venue: OwnerVenue) => void }) {
   const [tab, setTab] = useState("Основное");
-  const [draft, setDraft] = useState<VenueInput>({ name: venue.name, description: venue.description, cuisine_type: venue.cuisine_type, phone: venue.phone, email: venue.email, address: venue.address, city: venue.city, postal_code: venue.postal_code, country_code: venue.country_code, timezone: venue.timezone, currency: venue.currency, status: venue.status, settings: venue.settings });
+  const [draft, setDraft] = useState<VenueInput>({ name: venue.name, description: venue.description, cuisine_type: venue.cuisine_type, phone: venue.phone, email: venue.email, address: venue.address, city: venue.city, postal_code: venue.postal_code, country_code: venue.country_code, timezone: venue.timezone, currency: venue.currency, status: venue.status, settings: editableVenueSettings(venue.settings) });
   const [saving, setSaving] = useState(false);
+  const [processingCover, setProcessingCover] = useState(false);
+  const coverInput = useRef<HTMLInputElement>(null);
   const floorTab = tab === "План зала";
   const set = (field: keyof VenueInput, value: string | Record<string, unknown>) => setDraft((current) => ({ ...current, [field]: value }));
+  const coverImage = settingText(draft, "cover_image_url");
+  const menuLanguage = settingText(draft, "menu_language", "ru");
+  const updateSettingValue = (key: string, value: unknown) => setDraft((current) => ({ ...current, settings: { ...current.settings, [key]: value } }));
+  const selectCover = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { notify("Выберите изображение в формате JPG, PNG или WebP"); return; }
+    if (file.size > 10 * 1024 * 1024) { notify("Изображение должно быть меньше 10 МБ"); return; }
+    setProcessingCover(true);
+    try {
+      updateSettingValue("cover_image_url", await prepareCoverImage(file));
+      notify("Обложка готова. Нажмите «Сохранить»");
+    } catch {
+      notify("Не удалось обработать изображение");
+    } finally {
+      setProcessingCover(false);
+    }
+  };
   const save = async () => { setSaving(true); try { const updated = await updateOwnerVenue(venue.id, draft); onUpdate?.(updated); notify("Изменения сохранены"); } finally { setSaving(false); } };
-  return <><PageHeader title={venue.name} subtitle="Публичная информация и настройки сервиса." actions={!floorTab ? <Button icon={Check} disabled={saving} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button> : undefined} /><div className={"settings-layout " + (floorTab ? "floor-settings-layout" : "")}><aside className="settings-nav">{["Основное", "Расписание", "Заказы", "План зала", "Уведомления"].map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item}</button>)}</aside>{floorTab ? <section className="floor-settings-editor"><FloorPlan mode="owner" venueID={venue.id} venueName={venue.name} notify={notify} embedded /></section> : <section className="panel settings-form">{tab === "Основное" ? <><PanelTitle title="Профиль заведения" subtitle="Эти данные видят гости." /><div className="cover-upload"><div className="cover-photo" /><Button kind="secondary" icon={ImagePlus}>Изменить обложку</Button></div><div className="form-grid"><Field label="Название"><input value={draft.name} onChange={(event) => set("name", event.target.value)} /></Field><Field label="Тип кухни"><input value={draft.cuisine_type ?? ""} onChange={(event) => set("cuisine_type", event.target.value)} placeholder="Современная европейская" /></Field><Field label="Телефон"><input value={draft.phone ?? ""} onChange={(event) => set("phone", event.target.value)} /></Field><Field label="E-mail"><input type="email" value={draft.email ?? ""} onChange={(event) => set("email", event.target.value)} /></Field><Field label="Город"><input value={draft.city} onChange={(event) => set("city", event.target.value)} /></Field><Field label="Адрес"><input value={draft.address} onChange={(event) => set("address", event.target.value)} /></Field><Field label="Описание" wide><textarea value={draft.description ?? ""} onChange={(event) => set("description", event.target.value)} /></Field><Field label="Статус"><select value={draft.status} onChange={(event) => set("status", event.target.value)}><option value="draft">Черновик</option><option value="active">Открыто</option><option value="paused">Приостановлено</option><option value="closed">Закрыто</option></select></Field></div></> : tab === "Расписание" ? <ScheduleSettings draft={draft} setDraft={setDraft} /> : tab === "Заказы" ? <OrderSettings draft={draft} setDraft={setDraft} /> : <NotificationSettings draft={draft} setDraft={setDraft} />}</section>}</div></>;
+  return <><PageHeader title={venue.name} subtitle="Публичная информация и настройки сервиса." actions={!floorTab ? <Button icon={Check} disabled={saving || processingCover} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button> : undefined} /><div className={"settings-layout " + (floorTab ? "floor-settings-layout" : "")}><aside className="settings-nav">{["Основное", "Расписание", "Заказы", "План зала", "Уведомления"].map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item}</button>)}</aside>{floorTab ? <section className="floor-settings-editor"><FloorPlan mode="owner" venueID={venue.id} venueName={venue.name} notify={notify} embedded /></section> : <section className="panel settings-form">{tab === "Основное" ? <><PanelTitle title="Профиль заведения" subtitle="Эти данные видят гости." /><div className="cover-upload"><div className={`cover-photo ${coverImage ? "custom" : ""}`} style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined} role="img" aria-label="Обложка заведения" /><input ref={coverInput} className="cover-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void selectCover(event)} /><div className="cover-actions">{coverImage && <Button kind="secondary" icon={Trash2} onClick={() => updateSettingValue("cover_image_url", "")}>Удалить</Button>}<Button kind="secondary" icon={ImagePlus} disabled={processingCover} onClick={() => coverInput.current?.click()}>{processingCover ? "Обрабатываем..." : "Изменить обложку"}</Button></div></div><div className="form-grid"><Field label="Название"><input value={draft.name} onChange={(event) => set("name", event.target.value)} /></Field><Field label="Тип кухни"><input value={draft.cuisine_type ?? ""} onChange={(event) => set("cuisine_type", event.target.value)} placeholder="Современная европейская" /></Field><Field label="Телефон"><input value={draft.phone ?? ""} onChange={(event) => set("phone", event.target.value)} /></Field><Field label="E-mail"><input type="email" value={draft.email ?? ""} onChange={(event) => set("email", event.target.value)} /></Field><Field label="Город"><input value={draft.city} onChange={(event) => set("city", event.target.value)} /></Field><Field label="Адрес"><input value={draft.address} onChange={(event) => set("address", event.target.value)} /></Field><Field label="Описание" wide><textarea value={draft.description ?? ""} onChange={(event) => set("description", event.target.value)} /></Field><Field label="Статус"><select value={draft.status} onChange={(event) => set("status", event.target.value)}><option value="draft">Черновик</option><option value="active">Открыто</option><option value="paused">Приостановлено</option><option value="closed">Закрыто</option></select></Field></div><hr /><PanelTitle title="Язык и валюта" subtitle="Настройки меню и заказов для гостей." /><div className="form-grid localization-grid"><Field label="Валюта меню и заказов"><select value={draft.currency ?? "EUR"} onChange={(event) => set("currency", event.target.value)}>{currencyOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></Field><div className="field wide"><span>Основной язык меню</span><div className="language-options" role="radiogroup" aria-label="Основной язык меню">{languageOptions.map((option) => <button type="button" role="radio" aria-checked={menuLanguage === option.value} className={menuLanguage === option.value ? "active" : ""} key={option.value} onClick={() => updateSettingValue("menu_language", option.value)}><b>{option.short}</b><span>{option.label}</span></button>)}</div><small>Этот язык будет первым при открытии меню по QR-коду.</small></div></div></> : tab === "Расписание" ? <ScheduleSettings draft={draft} setDraft={setDraft} /> : tab === "Заказы" ? <OrderSettings draft={draft} setDraft={setDraft} /> : <NotificationSettings draft={draft} setDraft={setDraft} />}</section>}</div></>;
 }
+
+const currencyOptions = [
+  { value: "EUR", label: "EUR · Евро (€)" },
+  { value: "USD", label: "USD · Доллар США ($)" },
+  { value: "GBP", label: "GBP · Фунт стерлингов (£)" },
+  { value: "UAH", label: "UAH · Украинская гривна (₴)" },
+  { value: "RUB", label: "RUB · Российский рубль (₽)" },
+  { value: "CZK", label: "CZK · Чешская крона (Kč)" },
+];
+
+const languageOptions = [
+  { value: "ru", short: "RU", label: "Русский" },
+  { value: "en", short: "EN", label: "English" },
+  { value: "uk", short: "UA", label: "Українська" },
+  { value: "sk", short: "SK", label: "Slovenčina" },
+];
+
+const editableVenueSettings = (settings: Record<string, unknown>) => Object.fromEntries(Object.entries(settings).filter(([key]) => key !== "floor_plan"));
+const settingText = (draft: VenueInput, key: string, fallback = "") => typeof draft.settings?.[key] === "string" ? String(draft.settings[key]) : fallback;
+
+export const prepareCoverImage = (file: File) => new Promise<string>((resolve, reject) => {
+  const objectURL = URL.createObjectURL(file);
+  const image = new Image();
+  image.onload = () => {
+    const targetRatio = 2;
+    let sourceWidth = image.naturalWidth;
+    let sourceHeight = image.naturalHeight;
+    let sourceX = 0;
+    let sourceY = 0;
+    if (sourceWidth / sourceHeight > targetRatio) {
+      sourceWidth = sourceHeight * targetRatio;
+      sourceX = (image.naturalWidth - sourceWidth) / 2;
+    } else {
+      sourceHeight = sourceWidth / targetRatio;
+      sourceY = (image.naturalHeight - sourceHeight) / 2;
+    }
+    const width = Math.min(1200, Math.round(sourceWidth));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = Math.max(1, Math.round(width / targetRatio));
+    const context = canvas.getContext("2d");
+    if (!context) { URL.revokeObjectURL(objectURL); reject(new Error("Canvas is unavailable")); return; }
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+    const firstPass = canvas.toDataURL("image/jpeg", 0.8);
+    resolve(firstPass.length <= 800_000 ? firstPass : canvas.toDataURL("image/jpeg", 0.62));
+    URL.revokeObjectURL(objectURL);
+  };
+  image.onerror = () => { URL.revokeObjectURL(objectURL); reject(new Error("Invalid image")); };
+  image.src = objectURL;
+});
 
 type SettingsProps = { draft: VenueInput; setDraft: React.Dispatch<React.SetStateAction<VenueInput>> };
 const settingsValue = (draft: VenueInput, key: string, fallback = false) => typeof draft.settings?.[key] === "boolean" ? Boolean(draft.settings[key]) : fallback;
@@ -32,4 +105,3 @@ function NotificationSettings({ draft, setDraft }: SettingsProps) {
 function SettingToggle({ title, text, checked, onChange }: { title: string; text: string; checked: boolean; onChange: (value: boolean) => void }) {
   return <div><div><strong>{title}</strong><p>{text}</p></div><label className="switch"><input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} /><span /></label></div>;
 }
-
