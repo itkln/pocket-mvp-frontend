@@ -31,8 +31,11 @@ describe("FloorPlan", () => {
     fireEvent.click(screen.getByRole("button", { name: "Добавить", exact: true }));
     fireEvent.click(screen.getByRole("button", { name: /Стол\s*4 места/ }));
     expect(screen.getByRole("button", { name: /01\s*4 места/ })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Применить изменения" })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Количество мест"), { target: { value: "6" } });
+    expect(screen.getByRole("button", { name: /01\s*6 мест/ })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Сохранить план", exact: true }));
-    await waitFor(() => expect(saveFloorPlan).toHaveBeenCalledWith("venue-1", [expect.objectContaining({ tables: [expect.objectContaining({ id: "01", seats: 4 })] })]));
+    await waitFor(() => expect(saveFloorPlan).toHaveBeenCalledWith("venue-1", [expect.objectContaining({ tables: [expect.objectContaining({ id: "01", seats: 6 })] })]));
   });
 });

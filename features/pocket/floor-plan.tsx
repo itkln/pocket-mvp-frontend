@@ -74,7 +74,6 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
   const [dirty, setDirty] = useState(false);
   const [loading, setLoading] = useState(mode === "owner" && Boolean(venueID));
   const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState(false);
   const draggingRef = useRef<FloorDragState | null>(null);
   const dirtyRef = useRef(false);
   const revisionRef = useRef(0);
@@ -91,7 +90,6 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     const timeout = window.setTimeout(() => {
       setLoading(true);
       setDirty(false);
-      setSaveError(false);
       void getFloorPlan<unknown>(venueID).then((stored) => {
         if (!active || dirtyRef.current) return;
         const restoredFloors = normalizeFloorPlan(stored);
@@ -112,7 +110,6 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     dirtyRef.current = true;
     revisionRef.current += 1;
     setDirty(true);
-    setSaveError(false);
     setFloors(update);
   };
 
@@ -120,7 +117,6 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     if (!venueID || loading) return;
     const request = ++saveRequestRef.current;
     setSaving(true);
-    setSaveError(false);
     try {
       await saveFloorPlan(venueID, plan);
       if (revisionRef.current === revision) {
@@ -130,7 +126,6 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
       if (announce) notify("План зала сохранен");
     } catch (error) {
       if (request === saveRequestRef.current) {
-        setSaveError(true);
         notify(error instanceof Error ? error.message : "Не удалось сохранить план зала");
       }
     } finally {
@@ -274,8 +269,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
   };
 
   const allTables = floors.flatMap((floor) => floor.tables);
-  const saveState = loading ? "Загружаем план..." : saving ? "Сохраняем..." : saveError ? "Не удалось сохранить" : dirty ? "Есть несохраненные изменения" : "Все изменения сохранены";
-  const ownerActions = <><span className={`floor-save-state ${saveError ? "error" : ""}`}>{saveState}</span><Button kind="secondary" icon={Check} disabled={!dirty || saving || loading} onClick={() => void persistFloorPlan(floors, revisionRef.current, true)}>Сохранить план</Button><Button kind="secondary" icon={QrCode} disabled={loading} onClick={() => setShowQrCodes(true)}>QR-коды</Button><div className="floor-add-menu"><Button icon={Plus} disabled={loading} onClick={() => setAddMenuOpen((open) => !open)}>Добавить <ChevronDown size={15} /></Button>{addMenuOpen && <div className="floor-add-popover"><button onClick={addTable}><Table2 size={19} /><span><strong>Стол</strong><small>4 места</small></span></button><button onClick={() => addFixture("bar")}><Wine size={19} /><span><strong>Бар</strong><small>Барная стойка</small></span></button><button onClick={() => addFixture("window")}><PanelsTopLeft size={19} /><span><strong>Окно</strong><small>Граница зала</small></span></button><button onClick={() => addFixture("entrance")}><DoorOpen size={19} /><span><strong>Вход</strong><small>Дверь или проход</small></span></button><button onClick={addFloor}><Building2 size={19} /><span><strong>Этаж</strong><small>Новый план</small></span></button></div>}</div></>;
+  const ownerActions = <><Button kind="secondary" icon={Check} disabled={!dirty || saving || loading} onClick={() => void persistFloorPlan(floors, revisionRef.current, true)}>{saving ? "Сохраняем..." : "Сохранить план"}</Button><Button kind="secondary" icon={QrCode} disabled={loading} onClick={() => setShowQrCodes(true)}>QR-коды</Button><div className="floor-add-menu"><Button icon={Plus} disabled={loading} onClick={() => setAddMenuOpen((open) => !open)}>Добавить <ChevronDown size={15} /></Button>{addMenuOpen && <div className="floor-add-popover"><button onClick={addTable}><Table2 size={19} /><span><strong>Стол</strong><small>4 места</small></span></button><button onClick={() => addFixture("bar")}><Wine size={19} /><span><strong>Бар</strong><small>Барная стойка</small></span></button><button onClick={() => addFixture("window")}><PanelsTopLeft size={19} /><span><strong>Окно</strong><small>Граница зала</small></span></button><button onClick={() => addFixture("entrance")}><DoorOpen size={19} /><span><strong>Вход</strong><small>Дверь или проход</small></span></button><button onClick={addFloor}><Building2 size={19} /><span><strong>Этаж</strong><small>Новый план</small></span></button></div>}</div></>;
 
   const editorHeading = embedded
     ? <div className="floor-editor-heading"><div><h2>План зала</h2><p>Перетаскивайте элементы и настройте каждый этаж отдельно.</p></div><div>{ownerActions}</div></div>
@@ -309,7 +303,10 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
 export function OwnerTableEditor({ table, floorName, onSave, onDownload, onDelete }: { table: FloorTable; floorName: string; onSave: (id: string, seats: number) => void; onDownload: () => void; onDelete: () => void }) {
   const [tableId, setTableId] = useState(table.id);
   const [seats, setSeats] = useState(table.seats);
-  return <aside className="panel table-detail technical-detail"><div className="detail-heading"><div><small>{floorName.toUpperCase()} · СТОЛ</small><h2>{table.id}</h2></div><Table2 size={22} /></div><form onSubmit={(event) => { event.preventDefault(); onSave(tableId, seats); }}><Field label="Номер стола"><input value={tableId} maxLength={12} onChange={(event) => setTableId(event.target.value)} /></Field><Field label="Количество мест"><select value={seats} onChange={(event) => setSeats(Number(event.target.value))}>{Array.from({ length: 12 }, (_, index) => index + 1).map((value) => <option value={value} key={value}>{value}</option>)}</select></Field><p className="technical-position">Позиция: {Math.round(table.x)}% × {Math.round(table.y)}%</p><Button className="full" type="submit" icon={Check}>Применить изменения</Button></form><Button className="full" kind="secondary" icon={Download} onClick={onDownload}>Скачать QR-код</Button><Button className="full" kind="danger" icon={Trash2} onClick={onDelete}>Удалить стол</Button></aside>;
+  const applyTableId = () => {
+    if (tableId.trim() !== table.id) onSave(tableId, seats);
+  };
+  return <aside className="panel table-detail technical-detail"><div className="detail-heading"><div><small>{floorName.toUpperCase()} · СТОЛ</small><h2>{table.id}</h2></div><Table2 size={22} /></div><div className="table-editor-fields"><Field label="Номер стола"><input value={tableId} maxLength={12} onChange={(event) => setTableId(event.target.value)} onBlur={applyTableId} onKeyDown={(event) => { if (event.key === "Enter") event.currentTarget.blur(); }} /></Field><Field label="Количество мест"><select value={seats} onChange={(event) => { const nextSeats = Number(event.target.value); setSeats(nextSeats); onSave(tableId, nextSeats); }}>{Array.from({ length: 12 }, (_, index) => index + 1).map((value) => <option value={value} key={value}>{value}</option>)}</select></Field><p className="technical-position">Позиция: {Math.round(table.x)}% × {Math.round(table.y)}%</p></div><Button className="full" kind="secondary" icon={Download} onClick={onDownload}>Скачать QR-код</Button><Button className="full" kind="danger" icon={Trash2} onClick={onDelete}>Удалить стол</Button></aside>;
 }
 
 export function StaffTableDetail({ table, floorName, notify }: { table: FloorTable; floorName: string; notify: (message: string) => void }) {
