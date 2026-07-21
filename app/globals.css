@@ -2055,6 +2055,16 @@ thead th {
 .language-options button.active { background: var(--blue-soft); color: var(--blue); box-shadow: inset 0 0 0 1px rgba(34, 158, 217, .18); }
 .language-options button.active b { color: var(--blue); }
 .localization-grid .field > small { color: var(--muted); font-size: 11px; font-weight: 400; }
+.confirm-backdrop { z-index: 200; }
+.confirm-dialog { width: min(430px, 100%); }
+.confirm-dialog > header { align-items: center; }
+.confirm-heading { display: flex; align-items: center; gap: 11px; }
+.confirm-heading > span { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: #faecea; color: #b44d44; }
+.confirm-heading h2 { margin: 0; font-size: 17px; }
+.confirm-dialog > .modal-body { padding-top: 18px; padding-bottom: 20px; }
+.confirm-dialog > .modal-body p { margin: 0; color: var(--ink); font-size: 14px; line-height: 1.5; }
+.confirm-dialog > .modal-body small { display: block; margin-top: 7px; color: var(--muted); font-size: 12px; }
+.confirm-dialog > footer { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px; background: var(--surface-soft); }
 .menu-items.list { grid-template-columns: 1fr; }
 .menu-items.list .menu-card { min-height: 132px; grid-template-columns: 120px minmax(0, 1fr); }
 .menu-items.list .menu-card > .food-image { min-height: 132px; }

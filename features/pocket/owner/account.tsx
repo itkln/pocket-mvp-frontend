@@ -4,6 +4,7 @@ import { type AuthUser } from "../../../lib/auth-api";
 import { CreditCard, Download, LogOut, ShieldCheck } from "lucide-react";
 import { userInitials } from "../model";
 import { Button, EmptyIllustration, PageHeader, PanelTitle, Field, StatusPill, money } from "../ui";
+import { localeTags, useI18n } from "../i18n";
 import { useOwnerWorkspace } from "./context";
 
 export function AccountScreen({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
@@ -11,6 +12,7 @@ export function AccountScreen({ user, onLogout }: { user: AuthUser; onLogout: ()
 }
 
 export function PaymentsScreen() {
+  const { locale } = useI18n();
   const { payments } = useOwnerWorkspace();
   const paid = payments.filter((payment) => payment.status === "paid");
   const total = paid.reduce((sum, payment) => sum + payment.amount_minor - payment.refunded_minor, 0);
@@ -19,5 +21,5 @@ export function PaymentsScreen() {
     const url = URL.createObjectURL(new Blob([rows.map((row) => row.join(",")).join("\n")], { type: "text/csv" }));
     const link = document.createElement("a"); link.href = url; link.download = "pocket-payments.csv"; link.click(); URL.revokeObjectURL(url);
   };
-  return <><PageHeader title="Платежи" subtitle="Транзакции выбранного заведения." actions={<Button kind="secondary" icon={Download} disabled={!payments.length} onClick={exportCSV}>Скачать CSV</Button>} /><section className="metric-grid payment-metrics"><article className="metric"><span className="metric-icon green"><CreditCard size={20} /></span><div className="metric-copy"><p>Получено</p><strong>{money(total / 100)}</strong><small>Успешных платежей: {paid.length}</small></div></article></section><section className="panel payment-table-panel"><PanelTitle title="Последние транзакции" subtitle="Данные платежного провайдера" />{payments.length ? <div className="payment-table"><div className="payment-table-head"><span>Платеж</span><span>Провайдер</span><span>Сумма</span><span>Статус</span><span>Дата</span></div>{payments.map((payment) => <div className="payment-row" key={payment.id}><div className="payment-order"><span className="transaction-icon"><CreditCard size={18} /></span><p><strong>{payment.id.slice(0, 8)}</strong><small>{payment.currency}</small></p></div><span className="payment-method">{payment.provider}</span><b>{money(payment.amount_minor / 100)}</b><StatusPill status={payment.status === "paid" ? "Успешно" : payment.status === "refunded" ? "Возврат" : "В обработке"} /><span>{new Date(payment.created_at).toLocaleDateString("ru-RU")}</span></div>)}</div> : <EmptyIllustration icon={CreditCard} title="Транзакций пока нет" text="Платежи появятся после подключения провайдера и первого онлайн-заказа." />}</section></>;
+  return <><PageHeader title="Платежи" subtitle="Транзакции выбранного заведения." actions={<Button kind="secondary" icon={Download} disabled={!payments.length} onClick={exportCSV}>Скачать CSV</Button>} /><section className="metric-grid payment-metrics"><article className="metric"><span className="metric-icon green"><CreditCard size={20} /></span><div className="metric-copy"><p>Получено</p><strong>{money(total / 100)}</strong><small>Успешных платежей: {paid.length}</small></div></article></section><section className="panel payment-table-panel"><PanelTitle title="Последние транзакции" subtitle="Данные платежного провайдера" />{payments.length ? <div className="payment-table"><div className="payment-table-head"><span>Платеж</span><span>Провайдер</span><span>Сумма</span><span>Статус</span><span>Дата</span></div>{payments.map((payment) => <div className="payment-row" key={payment.id}><div className="payment-order"><span className="transaction-icon"><CreditCard size={18} /></span><p><strong>{payment.id.slice(0, 8)}</strong><small>{payment.currency}</small></p></div><span className="payment-method">{payment.provider}</span><b>{money(payment.amount_minor / 100)}</b><StatusPill status={payment.status === "paid" ? "Успешно" : payment.status === "refunded" ? "Возврат" : "В обработке"} /><span>{new Date(payment.created_at).toLocaleDateString(localeTags[locale])}</span></div>)}</div> : <EmptyIllustration icon={CreditCard} title="Транзакций пока нет" text="Платежи появятся после подключения провайдера и первого онлайн-заказа." />}</section></>;
 }

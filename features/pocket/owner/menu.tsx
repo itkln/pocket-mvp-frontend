@@ -3,11 +3,15 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { ChevronDown, Copy, Ellipsis, Eye, LayoutGrid, List, Pencil, Plus, Search, Settings2, Star, Trash2, X } from "lucide-react";
 import { type MenuItemInput, type OwnerCategory, type OwnerMenuItem } from "../../../lib/owner-api";
+import { useConfirm } from "../confirm-dialog";
+import { useI18n } from "../i18n";
 import { Button, EmptyIllustration, IconButton, PageHeader, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 
 export function MenuManager({ venueName, onAdd, notify }: { venueName: string; onAdd: () => void; notify: (message: string) => void }) {
   const workspace = useOwnerWorkspace();
+  const { confirm } = useConfirm();
+  const { t } = useI18n();
   const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
@@ -23,12 +27,12 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
     setActionItem(null); notify("Копия позиции создана");
   };
   const remove = async (item: OwnerMenuItem) => {
-    if (!window.confirm("Удалить «" + item.name + "»?")) return;
+    if (!await confirm({ description: t("Удалить позицию «{name}»?", { name: item.name }) })) return;
     await workspace.removeItem(item.id); setActionItem(null); notify("Позиция удалена");
   };
   const removeCategory = async (item: OwnerCategory) => {
     if (item.item_count > 0) { notify("Сначала перенесите или удалите позиции категории"); return false; }
-    if (!window.confirm("Удалить категорию «" + item.name + "»?")) return false;
+    if (!await confirm({ description: t("Удалить категорию «{name}»?", { name: item.name }) })) return false;
     await workspace.removeCategory(item.id);
     if (category === item.id) setCategory("all");
     notify("Категория удалена");

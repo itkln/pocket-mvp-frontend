@@ -23,7 +23,7 @@ const venue: OwnerVenue = {
 };
 
 describe("VenueScreen", () => {
-  it("saves currency and guest menu language without resending the floor plan", async () => {
+  it("saves currency and interface language without resending the floor plan", async () => {
     vi.mocked(updateOwnerVenue).mockImplementation(async (_id, input) => ({ ...venue, ...input, settings: input.settings ?? {} } as OwnerVenue));
 
     const { container } = render(<VenueScreen venue={venue} notify={vi.fn()} />);
@@ -34,7 +34,7 @@ describe("VenueScreen", () => {
 
     await waitFor(() => expect(updateOwnerVenue).toHaveBeenCalledWith("venue-1", expect.objectContaining({
       currency: "UAH",
-      settings: expect.objectContaining({ menu_language: "en" }),
+      settings: expect.objectContaining({ interface_language: "en" }),
     })));
     expect(vi.mocked(updateOwnerVenue).mock.calls[0][1].settings).not.toHaveProperty("floor_plan");
     const coverInput = container.querySelector<HTMLInputElement>('input[type="file"]');

@@ -5,6 +5,8 @@ import QRCode from "qrcode";
 import { Building2, Check, ChevronDown, Download, DoorOpen, Ellipsis, Minus, PanelsTopLeft, Plus, QrCode, RefreshCw, RotateCcw, RotateCw, Table2, Trash2, UserRound, Wine, X } from "lucide-react";
 import { makeVenueSlug } from "./model";
 import { getFloorPlan, saveFloorPlan } from "../../lib/owner-api";
+import { useConfirm } from "./confirm-dialog";
+import { useI18n } from "./i18n";
 import { Button, IconButton, StatusPill, PageHeader, Field } from "./ui";
 
 export type FloorTable = { id: string; seats: number; x: number; y: number; state: "free" | "busy" | "reserved" };
@@ -64,6 +66,8 @@ export const downloadTableQr = async (venueName: string, tableId: string) => {
 };
 
 export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }: { mode: "owner" | "staff"; venueID?: string; venueName: string; notify: (message: string) => void; embedded?: boolean }) {
+  const { confirm } = useConfirm();
+  const { t } = useI18n();
   const [floors, setFloors] = useState<VenueFloor[]>(initialFloors);
   const [activeFloorId, setActiveFloorId] = useState(initialFloors[0].id);
   const [selected, setSelected] = useState<FloorSelection>({ kind: "table", id: "08" });
@@ -159,12 +163,12 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     notify(`${nextFloor.name} добавлен`);
   };
 
-  const removeFloor = () => {
+  const removeFloor = async () => {
     if (floors.length <= 1) {
       notify("В заведении должен остаться хотя бы один этаж");
       return;
     }
-    if (!window.confirm(`Удалить «${activeFloor.name}» вместе со всеми элементами плана?`)) return;
+    if (!await confirm({ title: t("Удалить этаж"), description: t("Удалить этаж «{name}» вместе со всеми элементами плана?", { name: activeFloor.name }) })) return;
     const activeIndex = floors.findIndex((floor) => floor.id === activeFloor.id);
     const remainingFloors = floors.filter((floor) => floor.id !== activeFloor.id);
     const nextFloor = remainingFloors[Math.min(Math.max(activeIndex, 0), remainingFloors.length - 1)];
@@ -206,7 +210,8 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     notify(`${fixtureLabel(type)} ${type === "window" ? "добавлено" : "добавлен"} на ${activeFloor.name.toLowerCase()}`);
   };
 
-  const removeFixture = (fixture: FloorFixture) => {
+  const removeFixture = async (fixture: FloorFixture) => {
+    if (!await confirm({ description: t("Удалить {type} с плана?", { type: t(fixtureLabel(fixture.type)).toLocaleLowerCase() }) })) return;
     const remainingFixtures = activeFloor.fixtures.filter((item) => item.id !== fixture.id);
     updateActiveFloor((floor) => ({ ...floor, fixtures: remainingFixtures }));
     setSelected(activeFloor.tables[0] ? { kind: "table", id: activeFloor.tables[0].id } : remainingFixtures[0] ? { kind: "fixture", id: remainingFixtures[0].id } : null);
@@ -233,7 +238,8 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     notify(`Стол ${normalizedId} сохранен`);
   };
 
-  const removeTable = (table: FloorTable) => {
+  const removeTable = async (table: FloorTable) => {
+    if (!await confirm({ description: t("Удалить стол {id} с плана?", { id: table.id }) })) return;
     const remainingTables = activeFloor.tables.filter((item) => item.id !== table.id);
     updateActiveFloor((floor) => ({ ...floor, tables: remainingTables }));
     setSelected(remainingTables[0] ? { kind: "table", id: remainingTables[0].id } : activeFloor.fixtures[0] ? { kind: "fixture", id: activeFloor.fixtures[0].id } : null);
@@ -293,7 +299,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
 
   return <>
     {editorHeading}
-    <div className="floor-levels"><div className="floor-level-list" role="tablist" aria-label="Этажи заведения">{floors.map((floor, index) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)} disabled={loading}><span>{index + 1}</span><strong>{floor.name}</strong><small>{tableCountLabel(floor.tables.length)}</small></button>)}</div>{mode === "owner" && !loading && <div className="floor-level-actions"><IconButton icon={Trash2} label={`Удалить ${activeFloor.name}`} onClick={removeFloor} className="delete-floor-button" /><IconButton icon={Plus} label="Добавить этаж" onClick={addFloor} className="add-floor-button" /></div>}</div>
+    <div className="floor-levels"><div className="floor-level-list" role="tablist" aria-label="Этажи заведения">{floors.map((floor, index) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)} disabled={loading}><span>{index + 1}</span><strong>{floor.name}</strong><small>{tableCountLabel(floor.tables.length)}</small></button>)}</div>{mode === "owner" && !loading && <div className="floor-level-actions"><IconButton icon={Trash2} label={`Удалить ${activeFloor.name}`} onClick={() => void removeFloor()} className="delete-floor-button" /><IconButton icon={Plus} label="Добавить этаж" onClick={addFloor} className="add-floor-button" /></div>}</div>
     <div className="floor-layout">
       <section className="panel floor-panel">
         <div className={`floor-toolbar ${mode === "owner" ? "technical" : ""}`}>{mode === "staff" && <div className="floor-legend"><span><i className="free" />Свободен</span><span><i className="busy" />Занят</span><span><i className="reserved" />Бронь</span></div>}<div className="zoom-control"><IconButton icon={Minus} label="Уменьшить масштаб" onClick={() => changeZoom(-20)} /><button className="zoom-label" onClick={() => setZoom(100)} aria-label="Сбросить масштаб">{zoom}%</button><IconButton icon={Plus} label="Увеличить масштаб" onClick={() => changeZoom(20)} /></div></div>
@@ -309,7 +315,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
           return <button key={fixture.id} className={`floor-fixture ${fixture.type} ${selected?.kind === "fixture" && selected.id === fixture.id ? "selected" : ""} ${dragging?.kind === "fixture" && dragging.id === fixture.id ? "dragging" : ""}`} style={fixtureStyle} onPointerDown={(event) => startDragging(event, target, fixture)} onClick={() => setSelected(target)}>{fixture.type === "bar" ? <><Wine size={16} />Бар</> : fixture.type === "window" ? <><PanelsTopLeft size={16} />Окно</> : <><DoorOpen size={16} />Вход</>}</button>;
         })}{!loading && activeFloor.tables.map((table) => { const target = { kind: "table" as const, id: table.id }; return <button key={table.id} className={`floor-table ${mode === "staff" ? table.state : "technical"} ${selected?.kind === "table" && selected.id === table.id ? "selected" : ""} ${dragging?.kind === "table" && dragging.id === table.id ? "dragging" : ""} ${table.seats >= 6 ? "wide" : ""}`} style={{ left: `${table.x}%`, top: `${table.y}%` }} onPointerDown={(event) => startDragging(event, target, table)} onClick={() => setSelected(target)}><strong>{table.id}</strong><span>{table.seats} места</span></button>; })}{loading ? <div className="floor-empty loading"><RefreshCw size={26} /><strong>Загружаем план</strong><span>Получаем сохраненную расстановку</span></div> : activeFloor.tables.length === 0 && activeFloor.fixtures.length === 0 && <div className="floor-empty"><Building2 size={28} /><strong>{activeFloor.name}</strong><span>План пока пуст</span></div>}</div></div></div>
       </section>
-      {loading ? <aside className="panel table-detail floor-summary loading"><RefreshCw size={24} /><h2>Загружаем</h2><p>Получаем сохраненную расстановку.</p></aside> : selectedTable ? mode === "owner" ? <OwnerTableEditor key={`${activeFloor.id}-${selectedTable.id}`} table={selectedTable} floorName={activeFloor.name} onSave={(id, seats) => saveTableInfo(selectedTable, id, seats)} onDownload={() => downloadQr(selectedTable.id)} onDelete={() => removeTable(selectedTable)} /> : <StaffTableDetail table={selectedTable} floorName={activeFloor.name} notify={notify} /> : selectedFixture ? <aside className="panel table-detail fixture-detail technical-detail"><div className="detail-heading"><div><small>{activeFloor.name.toUpperCase()} · ЭЛЕМЕНТ</small><h2>{fixtureLabel(selectedFixture.type)}</h2></div>{selectedFixture.type === "bar" ? <Wine size={22} /> : selectedFixture.type === "window" ? <PanelsTopLeft size={22} /> : <DoorOpen size={22} />}</div><div className="fixture-controls"><label><span>Поворот</span><div className="rotation-control"><IconButton icon={RotateCcw} label="Повернуть влево на 45 градусов" onClick={() => updateFixture(selectedFixture.id, { rotation: (selectedFixture.rotation - 45 + 360) % 360 })} /><strong>{selectedFixture.rotation}°</strong><IconButton icon={RotateCw} label="Повернуть вправо на 45 градусов" onClick={() => updateFixture(selectedFixture.id, { rotation: (selectedFixture.rotation + 45) % 360 })} /></div></label><label><span>Размер <b>{selectedFixture.size}%</b></span><div className="fixture-size-control"><IconButton icon={Minus} label="Уменьшить размер на 10 процентов" onClick={() => updateFixture(selectedFixture.id, { size: Math.max(50, selectedFixture.size - 10) })} /><input type="range" min="50" max="160" step="10" value={selectedFixture.size} onChange={(event) => updateFixture(selectedFixture.id, { size: Number(event.target.value) })} /><IconButton icon={Plus} label="Увеличить размер на 10 процентов" onClick={() => updateFixture(selectedFixture.id, { size: Math.min(160, selectedFixture.size + 10) })} /></div></label></div>{mode === "owner" && <Button className="full" kind="danger" icon={Trash2} onClick={() => removeFixture(selectedFixture)}>Удалить с плана</Button>}</aside> : <aside className="panel table-detail floor-summary"><Building2 size={24} /><h2>{activeFloor.name}</h2><p>{tableCountLabel(activeFloor.tables.length)} · {activeFloor.fixtures.length} элементов</p>{mode === "owner" && <Button className="full" icon={Plus} onClick={addTable}>{activeFloor.tables.length ? "Добавить стол" : "Добавить первый стол"}</Button>}</aside>}
+      {loading ? <aside className="panel table-detail floor-summary loading"><RefreshCw size={24} /><h2>Загружаем</h2><p>Получаем сохраненную расстановку.</p></aside> : selectedTable ? mode === "owner" ? <OwnerTableEditor key={`${activeFloor.id}-${selectedTable.id}`} table={selectedTable} floorName={activeFloor.name} onSave={(id, seats) => saveTableInfo(selectedTable, id, seats)} onDownload={() => downloadQr(selectedTable.id)} onDelete={() => void removeTable(selectedTable)} /> : <StaffTableDetail table={selectedTable} floorName={activeFloor.name} notify={notify} /> : selectedFixture ? <aside className="panel table-detail fixture-detail technical-detail"><div className="detail-heading"><div><small>{activeFloor.name.toUpperCase()} · ЭЛЕМЕНТ</small><h2>{fixtureLabel(selectedFixture.type)}</h2></div>{selectedFixture.type === "bar" ? <Wine size={22} /> : selectedFixture.type === "window" ? <PanelsTopLeft size={22} /> : <DoorOpen size={22} />}</div><div className="fixture-controls"><label><span>Поворот</span><div className="rotation-control"><IconButton icon={RotateCcw} label="Повернуть влево на 45 градусов" onClick={() => updateFixture(selectedFixture.id, { rotation: (selectedFixture.rotation - 45 + 360) % 360 })} /><strong>{selectedFixture.rotation}°</strong><IconButton icon={RotateCw} label="Повернуть вправо на 45 градусов" onClick={() => updateFixture(selectedFixture.id, { rotation: (selectedFixture.rotation + 45) % 360 })} /></div></label><label><span>Размер <b>{selectedFixture.size}%</b></span><div className="fixture-size-control"><IconButton icon={Minus} label="Уменьшить размер на 10 процентов" onClick={() => updateFixture(selectedFixture.id, { size: Math.max(50, selectedFixture.size - 10) })} /><input type="range" min="50" max="160" step="10" value={selectedFixture.size} onChange={(event) => updateFixture(selectedFixture.id, { size: Number(event.target.value) })} /><IconButton icon={Plus} label="Увеличить размер на 10 процентов" onClick={() => updateFixture(selectedFixture.id, { size: Math.min(160, selectedFixture.size + 10) })} /></div></label></div>{mode === "owner" && <Button className="full" kind="danger" icon={Trash2} onClick={() => void removeFixture(selectedFixture)}>Удалить с плана</Button>}</aside> : <aside className="panel table-detail floor-summary"><Building2 size={24} /><h2>{activeFloor.name}</h2><p>{tableCountLabel(activeFloor.tables.length)} · {activeFloor.fixtures.length} элементов</p>{mode === "owner" && <Button className="full" icon={Plus} onClick={addTable}>{activeFloor.tables.length ? "Добавить стол" : "Добавить первый стол"}</Button>}</aside>}
     </div>
     {showQrCodes && <QrCodesDialog venueName={venueName} tables={allTables} onClose={() => setShowQrCodes(false)} notify={notify} />}
   </>;
