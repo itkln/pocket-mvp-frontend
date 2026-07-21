@@ -1,18 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Plus, Store } from "lucide-react";
 import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
+import { createOwnerVenue, listOwnerVenues, type VenueInput } from "../lib/owner-api";
 import {
   type Role,
   type Venue,
   customerNavigation,
-  initialVenues,
-  loadSavedVenues,
   menuItems,
   ownerNavigation,
-  savedVenuesKey,
   selectedVenueKey,
   sidebarCollapsedKey,
   staffNavigation,
@@ -30,6 +28,8 @@ import {
   TeamScreen,
   VenueScreen,
 } from "../features/pocket/owner";
+import { OwnerWorkspaceProvider } from "../features/pocket/owner/context";
+import { Button } from "../features/pocket/ui";
 import { FloorPlan } from "../features/pocket/floor-plan";
 import {
   Checkout,
@@ -46,11 +46,11 @@ export default function PocketApp() {
   const router = useRouter();
 	const [authReady, setAuthReady] = useState(false);
 	const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [role, setRole] = useState<Role>("owner");
-  const [screen, setScreen] = useState("overview");
-	const [availableVenues, setAvailableVenues] = useState<Venue[]>(initialVenues);
-	const [venue, setVenue] = useState(initialVenues[0]);
-  const [cart, setCart] = useState<Record<number, number>>({ 1: 1, 3: 1 });
+  const [role, setRole] = useState<Role>("customer");
+  const [screen, setScreen] = useState("discover");
+	const [availableVenues, setAvailableVenues] = useState<Venue[]>([]);
+	const [venue, setVenue] = useState<Venue | null>(null);
+  const [cart, setCart] = useState<Record<number, number>>({});
 	const [modal, setModal] = useState<"item" | "invite" | "order" | "venue" | null>(null);
   const [toast, setToast] = useState("");
   const [mobileNav, setMobileNav] = useState(false);
@@ -65,16 +65,16 @@ export default function PocketApp() {
 
 	useEffect(() => {
 		let active = true;
-		getCurrentUser()
-			.then((user) => {
+		Promise.all([getCurrentUser(), listOwnerVenues()])
+			.then(([user, venues]) => {
 				if (!active) return;
-				const restoredVenues = loadSavedVenues(user.id);
 				const selectedID = window.localStorage.getItem(selectedVenueKey(user.id));
-				setRole(user.role === "venue_owner" ? "owner" : "customer");
-				setScreen(user.role === "venue_owner" ? "overview" : "discover");
+				const startsAsOwner = venues.length > 0;
+				setRole(startsAsOwner ? "owner" : "customer");
+				setScreen(startsAsOwner ? "overview" : "discover");
 				setCurrentUser(user);
-				setAvailableVenues(restoredVenues);
-				setVenue(restoredVenues.find((item) => item.id === selectedID) ?? restoredVenues[0]);
+				setAvailableVenues(venues);
+				setVenue(venues.find((item) => item.id === selectedID) ?? venues[0] ?? null);
 				setAuthReady(true);
 			})
 			.catch((error) => {
@@ -115,10 +115,10 @@ export default function PocketApp() {
     });
   };
 
-  const notify = (message: string) => {
+  const notify = useCallback((message: string) => {
     setToast(message);
     window.setTimeout(() => setToast(""), 2400);
-  };
+  }, []);
 
   const addItem = (id: number) => {
     setCart((current) => ({ ...current, [id]: (current[id] || 0) + 1 }));
@@ -134,20 +134,23 @@ export default function PocketApp() {
     });
   };
 
-	const createVenue = (newVenue: Venue) => {
+	const createVenue = async (input: VenueInput) => {
 		if (!currentUser) return;
-		const userID = currentUser.id;
-		setAvailableVenues((current) => {
-			const next = [...current, newVenue];
-			window.localStorage.setItem(savedVenuesKey(userID), JSON.stringify(next.slice(initialVenues.length)));
-			return next;
-		});
-		window.localStorage.setItem(selectedVenueKey(userID), newVenue.id);
-		setVenue(newVenue);
-		setScreen("venue");
-		setModal(null);
-		setMobileNav(false);
-		notify(`${newVenue.name} добавлено`);
+		try {
+			const newVenue = await createOwnerVenue(input);
+			setAvailableVenues((current) => [...current, newVenue]);
+			setCurrentUser((current) => current ? { ...current, capabilities: [...new Set([...current.capabilities, "owner" as const])] } : current);
+			window.localStorage.setItem(selectedVenueKey(currentUser.id), newVenue.id);
+			setVenue(newVenue);
+			setRole("owner");
+			setScreen("venue");
+			setModal(null);
+			setMobileNav(false);
+			notify(`${newVenue.name} добавлено`);
+		} catch (caught) {
+			notify(caught instanceof Error ? caught.message : "Не удалось добавить заведение");
+			throw caught;
+		}
 	};
 
 	const selectVenue = (nextVenue: Venue) => {
@@ -157,23 +160,30 @@ export default function PocketApp() {
 		notify(`Выбрано заведение ${nextVenue.name}`);
 	};
 
+	const updateVenueState = (updatedVenue: Venue) => {
+		setVenue(updatedVenue);
+		setAvailableVenues((current) => current.map((item) => item.id === updatedVenue.id ? updatedVenue : item));
+	};
+
 	if (!authReady || !currentUser) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
 
   return (
+    <OwnerWorkspaceProvider venueID={venue?.id} onError={notify}>
     <div className={`app-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
 	  <Sidebar user={currentUser} role={role} screen={screen} navigation={navigation} venue={venue} venues={availableVenues} mobileNav={mobileNav} collapsed={sidebarCollapsed} onNavigate={navigate} onRole={changeRole} onVenue={selectVenue} onAddVenue={() => setModal("venue")} onClose={() => setMobileNav(false)} onToggleCollapsed={toggleSidebar} />
       <main className="main-shell">
-        <Topbar role={role} screen={screen} navigation={navigation} venueName={venue.name} cartCount={cartCount} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} />
+        <Topbar role={role} screen={screen} navigation={navigation} venueName={venue?.name ?? "Мои заведения"} cartCount={cartCount} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} />
         <div className={`page-area ${role === "customer" ? "customer-area" : ""}`}>
-          {role === "owner" && screen === "overview" && <OwnerOverview ownerName={currentUser.first_name} onNavigate={navigate} onOrder={() => setModal("order")} />}
-          {role === "owner" && screen === "orders" && <OrdersScreen onOrder={() => setModal("order")} />}
-          {role === "owner" && screen === "menu" && <MenuManager venueName={venue.name} onAdd={() => setModal("item")} notify={notify} />}
-          {role === "owner" && screen === "team" && <TeamScreen onInvite={() => setModal("invite")} notify={notify} />}
-          {role === "owner" && screen === "analytics" && <AnalyticsScreen />}
-          {role === "owner" && screen === "reviews" && <ReviewsScreen notify={notify} />}
-          {role === "owner" && screen === "venue" && <VenueScreen key={venue.id} venue={venue} notify={notify} />}
-          {role === "owner" && screen === "payments" && <PaymentsScreen notify={notify} />}
-		  {role === "owner" && screen === "subscription" && <SubscriptionScreen venueCount={availableVenues.length} notify={notify} />}
+          {role === "owner" && !venue && screen !== "account" && <section className="owner-onboarding"><span><Store size={28} /></span><h1>Добавьте первое заведение</h1><p>После создания откроются меню, команда, заказы и аналитика.</p><Button icon={Plus} onClick={() => setModal("venue")}>Добавить заведение</Button></section>}
+          {role === "owner" && venue && screen === "overview" && <OwnerOverview ownerName={currentUser.first_name} onNavigate={navigate} />}
+          {role === "owner" && venue && screen === "orders" && <OrdersScreen />}
+          {role === "owner" && venue && screen === "menu" && <MenuManager venueName={venue.name} onAdd={() => setModal("item")} notify={notify} />}
+          {role === "owner" && venue && screen === "team" && <TeamScreen onInvite={() => setModal("invite")} notify={notify} />}
+          {role === "owner" && venue && screen === "analytics" && <AnalyticsScreen />}
+          {role === "owner" && venue && screen === "reviews" && <ReviewsScreen notify={notify} />}
+          {role === "owner" && venue && screen === "venue" && <VenueScreen key={venue.id} venue={venue} notify={notify} onUpdate={updateVenueState} />}
+          {role === "owner" && venue && screen === "payments" && <PaymentsScreen />}
+		  {role === "owner" && venue && screen === "subscription" && <SubscriptionScreen venueCount={availableVenues.length} notify={notify} />}
 
           {role === "customer" && screen === "discover" && <DiscoverScreen onVenue={() => navigate("browse-menu")} />}
           {role === "customer" && screen === "browse-menu" && <CustomerMenu cart={cart} onAdd={addItem} onCart={() => navigate("checkout")} />}
@@ -184,8 +194,8 @@ export default function PocketApp() {
 
           {role === "staff" && screen === "service" && <ServiceBoard notify={notify} />}
           {role === "staff" && screen === "kitchen" && <KitchenScreen notify={notify} />}
-          {role === "staff" && screen === "staff-floor" && <FloorPlan mode="staff" venueName={venue.name} notify={notify} />}
-		  {role !== "customer" && screen === "account" && <AccountScreen user={currentUser} notify={notify} onLogout={signOut} />}
+          {role === "staff" && venue && screen === "staff-floor" && <FloorPlan mode="staff" venueName={venue.name} notify={notify} />}
+		  {role !== "customer" && screen === "account" && <AccountScreen user={currentUser} onLogout={signOut} />}
         </div>
       </main>
       <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />
@@ -193,5 +203,6 @@ export default function PocketApp() {
 	  {modal === "venue" && <NewVenueModal onClose={() => setModal(null)} onCreate={createVenue} />}
 	  {modal && modal !== "venue" && <Modal type={modal} onClose={() => setModal(null)} notify={(message) => { setModal(null); notify(message); }} />}
     </div>
+    </OwnerWorkspaceProvider>
   );
 }

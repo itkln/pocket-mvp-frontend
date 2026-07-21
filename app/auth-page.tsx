@@ -14,7 +14,6 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
   const isLogin = mode === "login";
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [role, setRole] = useState<"customer" | "owner">("customer");
   const [error, setError] = useState("");
 	const [submitting, setSubmitting] = useState(false);
 
@@ -36,7 +35,6 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 				last_name: String(data.get("lastName")),
 				email: String(data.get("email")),
 				password: String(data.get("password")),
-				role,
 			});
 		}
 		router.replace("/");
@@ -63,7 +61,6 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 
         {!isLogin && <>
           <label className="auth-field"><span>Повторите пароль</span><span className="auth-password"><input name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} autoComplete="new-password" placeholder="Повторите пароль" minLength={12} maxLength={128} required /><button type="button" onClick={() => setConfirmPasswordVisible((current) => !current)} aria-label={confirmPasswordVisible ? "Скрыть пароль" : "Показать пароль"}>{confirmPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}</button></span></label>
-          <fieldset className="auth-role"><legend>Как планируете использовать Pocket?</legend><div><button type="button" className={role === "customer" ? "active" : ""} onClick={() => setRole("customer")}>Как гость</button><button type="button" className={role === "owner" ? "active" : ""} onClick={() => setRole("owner")}>Как владелец</button></div></fieldset>
         </>}
 
         {isLogin ? <div className="auth-options"><label><input type="checkbox" name="remember" />Запомнить меня</label><button type="button">Забыли пароль?</button></div> : <label className="auth-consent"><input type="checkbox" required /><span>Я принимаю условия использования и политику конфиденциальности</span></label>}

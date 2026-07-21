@@ -35,8 +35,28 @@ describe("AuthPage", () => {
     expect(register).not.toHaveBeenCalled();
   });
 
+  it("registers one neutral account without an account role", async () => {
+    vi.mocked(register).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer", capabilities: ["customer"] });
+    render(<AuthPage mode="register" />);
+    expect(screen.queryByText("Выберите роль")).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Denis" } });
+    fireEvent.change(screen.getByLabelText("Фамилия"), { target: { value: "Itkin" } });
+    fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
+    fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
+    fireEvent.change(screen.getByLabelText("Повторите пароль"), { target: { value: "a secure password" } });
+    fireEvent.click(screen.getByLabelText(/Я принимаю/));
+    fireEvent.click(screen.getByRole("button", { name: "Зарегистрироваться" }));
+    await waitFor(() => expect(register).toHaveBeenCalledWith({
+      first_name: "Denis",
+      last_name: "Itkin",
+      email: "user@example.com",
+      password: "a secure password",
+    }));
+    expect(replace).toHaveBeenCalledWith("/");
+  });
+
   it("logs in and redirects after success", async () => {
-    vi.mocked(login).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer" });
+    vi.mocked(login).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer", capabilities: ["customer"] });
     render(<AuthPage mode="login" />);
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
     fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });

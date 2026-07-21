@@ -1,4 +1,5 @@
 import { type AuthUser } from "../../lib/auth-api";
+import { type OwnerVenue } from "../../lib/owner-api";
 import { Activity, BarChart3, CalendarDays, Coffee, LayoutDashboard, MessageSquareText, ReceiptText, Search, Sparkles, Store, Table2, UserRound, Users, Utensils, UtensilsCrossed, WalletCards } from "lucide-react";
 
 export type Role = "owner" | "customer" | "staff";
@@ -7,37 +8,12 @@ export type Status = "Новый" | "Готовится" | "Готов" | "По�
 export const userInitials = (user: AuthUser) => `${user.first_name.at(0) ?? ""}${user.last_name.at(0) ?? ""}`.toUpperCase();
 export const makeVenueSlug = (name: string) => name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "venue";
 
-export type Venue = {
-  id: string;
-  name: string;
-  initials: string;
-  location: string;
-};
+export type Venue = OwnerVenue;
 
-export const savedVenuesKey = (userID: string) => `pocket:venues:${userID}`;
+export const venueInitials = (venue: Venue) => venue.name.split(/\s+/).slice(0, 2).map((part) => part.at(0) ?? "").join("").toUpperCase();
+export const venueLocation = (venue: Venue) => [venue.city, venue.address].filter(Boolean).join(" · ");
 export const selectedVenueKey = (userID: string) => `pocket:selected-venue:${userID}`;
 export const sidebarCollapsedKey = "pocket:sidebar-collapsed";
-
-export const loadSavedVenues = (userID: string) => {
-	try {
-		const stored = JSON.parse(window.localStorage.getItem(savedVenuesKey(userID)) ?? "[]") as unknown;
-		const customVenues = Array.isArray(stored) ? stored.filter((item): item is Venue => {
-			if (!item || typeof item !== "object") return false;
-			const candidate = item as Record<string, unknown>;
-			return ["id", "name", "initials", "location"].every((field) => typeof candidate[field] === "string");
-		}) : [];
-		return [...initialVenues, ...customVenues];
-	} catch {
-		window.localStorage.removeItem(savedVenuesKey(userID));
-		return initialVenues;
-	}
-};
-
-export const initialVenues: Venue[] = [
-  { id: "north-vine", name: "North & Vine", initials: "NV", location: "Братислава · Центр" },
-  { id: "casa-forma", name: "Casa Forma", initials: "CF", location: "Братислава · Старый город" },
-  { id: "mizu-table", name: "Mizu Table", initials: "MT", location: "Братислава · Ружинов" },
-];
 
 export type MenuItem = {
   id: number;
@@ -68,7 +44,7 @@ export const liveOrders = [
 
 export const ownerNavigation = [
   { id: "overview", label: "Обзор", icon: LayoutDashboard },
-  { id: "orders", label: "Заказы", icon: ReceiptText, count: 8 },
+  { id: "orders", label: "Заказы", icon: ReceiptText },
   { id: "menu", label: "Меню", icon: UtensilsCrossed },
   { id: "team", label: "Команда", icon: Users },
   { id: "analytics", label: "Аналитика", icon: BarChart3 },
@@ -111,4 +87,3 @@ export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> 
   ],
   staff: [{ label: "Смена", ids: ["service", "kitchen", "staff-floor"] }],
 };
-

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as R
 import QRCode from "qrcode";
 import { Building2, Check, ChevronDown, Download, DoorOpen, Ellipsis, Minus, PanelsTopLeft, Plus, QrCode, RefreshCw, RotateCcw, RotateCw, Table2, Trash2, UserRound, Wine, X } from "lucide-react";
 import { makeVenueSlug } from "./model";
+import { getFloorPlan, saveFloorPlan } from "../../lib/owner-api";
 import { Button, IconButton, StatusPill, PageHeader, Field } from "./ui";
 
 export type FloorTable = { id: string; seats: number; x: number; y: number; state: "free" | "busy" | "reserved" };
@@ -21,28 +22,24 @@ export const tables: FloorTable[] = [
 export const initialFloors: VenueFloor[] = [{
   id: "floor-1",
   name: "1 этаж",
-  tables,
-  fixtures: [
-    { id: "bar-1", type: "bar", x: 18, y: 88, rotation: 0, size: 100 },
-    { id: "window-1", type: "window", x: 94, y: 17, rotation: 0, size: 100 },
-  ],
+  tables: [],
+  fixtures: [],
 }];
 
-export const floorPlanKey = (venueName: string) => `pocket:floor-plan:${makeVenueSlug(venueName)}`;
-
-export const loadFloorPlan = (venueName: string) => {
-  try {
-    const stored = JSON.parse(window.localStorage.getItem(floorPlanKey(venueName)) ?? "null") as unknown;
-    if (!Array.isArray(stored) || stored.length === 0) return initialFloors;
-    const floors = stored as VenueFloor[];
-    if (!floors.every((floor) => typeof floor.id === "string" && typeof floor.name === "string" && Array.isArray(floor.tables) && Array.isArray(floor.fixtures))) return initialFloors;
-    return floors.map((floor) => ({
-      ...floor,
-      fixtures: floor.fixtures.map((fixture) => ({ ...fixture, rotation: Number.isFinite(fixture.rotation) ? fixture.rotation : 0, size: Number.isFinite(fixture.size) ? fixture.size : 100 })),
-    }));
-  } catch {
-    return initialFloors;
-  }
+const normalizeFloorPlan = (value: unknown): VenueFloor[] => {
+  if (!Array.isArray(value) || value.length === 0) return initialFloors;
+  const floors = value.flatMap((entry, floorIndex) => {
+    if (!entry || typeof entry !== "object") return [];
+    const floor = entry as Partial<VenueFloor>;
+    const normalized: VenueFloor = {
+      id: typeof floor.id === "string" && floor.id ? floor.id : `floor-${floorIndex + 1}`,
+      name: typeof floor.name === "string" && floor.name ? floor.name : `${floorIndex + 1} этаж`,
+      tables: Array.isArray(floor.tables) ? floor.tables.filter((table): table is FloorTable => Boolean(table && typeof table.id === "string" && typeof table.seats === "number" && typeof table.x === "number" && typeof table.y === "number")) : [],
+      fixtures: Array.isArray(floor.fixtures) ? floor.fixtures.filter((fixture): fixture is FloorFixture => Boolean(fixture && typeof fixture.id === "string" && ["bar", "window", "entrance"].includes(fixture.type) && typeof fixture.x === "number" && typeof fixture.y === "number")).map((fixture) => ({ ...fixture, rotation: Number.isFinite(fixture.rotation) ? fixture.rotation : 0, size: Number.isFinite(fixture.size) ? fixture.size : 100 })) : [],
+    };
+    return [normalized];
+  });
+  return floors.length ? floors : initialFloors;
 };
 
 export const fixtureLabel = (type: FloorFixture["type"]) => type === "bar" ? "Бар" : type === "window" ? "Окно" : "Вход";
@@ -60,7 +57,7 @@ export const downloadTableQr = async (venueName: string, tableId: string) => {
   window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 };
 
-export function FloorPlan({ mode, venueName, notify, embedded = false }: { mode: "owner" | "staff"; venueName: string; notify: (message: string) => void; embedded?: boolean }) {
+export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }: { mode: "owner" | "staff"; venueID?: string; venueName: string; notify: (message: string) => void; embedded?: boolean }) {
   const [floors, setFloors] = useState<VenueFloor[]>(initialFloors);
   const [activeFloorId, setActiveFloorId] = useState(initialFloors[0].id);
   const [selected, setSelected] = useState<FloorSelection>({ kind: "table", id: "08" });
@@ -68,28 +65,48 @@ export function FloorPlan({ mode, venueName, notify, embedded = false }: { mode:
   const [zoom, setZoom] = useState(100);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
   const [showQrCodes, setShowQrCodes] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
   const draggingRef = useRef<FloorDragState | null>(null);
   const activeFloor = floors.find((floor) => floor.id === activeFloorId) ?? floors[0];
   const selectedTable = selected?.kind === "table" ? activeFloor.tables.find((table) => table.id === selected.id) : undefined;
   const selectedFixture = selected?.kind === "fixture" ? activeFloor.fixtures.find((fixture) => fixture.id === selected.id) : undefined;
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      const restoredFloors = loadFloorPlan(venueName);
-      const restoredFloor = restoredFloors[0];
-      setFloors(restoredFloors);
-      setActiveFloorId(restoredFloor.id);
-      setSelected(restoredFloor.tables[0] ? { kind: "table", id: restoredFloor.tables[0].id } : restoredFloor.fixtures[0] ? { kind: "fixture", id: restoredFloor.fixtures[0].id } : null);
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [venueName]);
+    if (mode !== "owner" || !venueID) return;
+    let active = true;
+    const timeout = window.setTimeout(() => {
+      void getFloorPlan<unknown>(venueID).then((stored) => {
+        if (!active) return;
+        const restoredFloors = normalizeFloorPlan(stored);
+        const restoredFloor = restoredFloors[0];
+        setFloors(restoredFloors);
+        setActiveFloorId(restoredFloor.id);
+        setDirty(false);
+        setSelected(restoredFloor.tables[0] ? { kind: "table", id: restoredFloor.tables[0].id } : restoredFloor.fixtures[0] ? { kind: "fixture", id: restoredFloor.fixtures[0].id } : null);
+      }).catch((error) => notify(error instanceof Error ? error.message : "Не удалось загрузить план зала"));
+    }, 0);
+    return () => { active = false; window.clearTimeout(timeout); };
+  }, [mode, venueID, notify]);
 
   const updateFloors = (update: (floors: VenueFloor[]) => VenueFloor[]) => {
     setFloors((current) => {
       const next = update(current);
-      window.localStorage.setItem(floorPlanKey(venueName), JSON.stringify(next));
+      setDirty(true);
       return next;
     });
+  };
+
+  const persistFloorPlan = async () => {
+    if (!venueID) return;
+    setSaving(true);
+    try {
+      await saveFloorPlan(venueID, floors);
+      setDirty(false);
+      notify("План зала сохранен");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const updateActiveFloor = (update: (floor: VenueFloor) => VenueFloor) => {
@@ -218,7 +235,7 @@ export function FloorPlan({ mode, venueName, notify, embedded = false }: { mode:
   };
 
   const allTables = floors.flatMap((floor) => floor.tables);
-  const ownerActions = <><Button kind="secondary" icon={QrCode} onClick={() => setShowQrCodes(true)}>QR-коды</Button><div className="floor-add-menu"><Button icon={Plus} onClick={() => setAddMenuOpen((open) => !open)}>Добавить <ChevronDown size={15} /></Button>{addMenuOpen && <div className="floor-add-popover"><button onClick={addTable}><Table2 size={19} /><span><strong>Стол</strong><small>4 места</small></span></button><button onClick={() => addFixture("bar")}><Wine size={19} /><span><strong>Бар</strong><small>Барная стойка</small></span></button><button onClick={() => addFixture("window")}><PanelsTopLeft size={19} /><span><strong>Окно</strong><small>Граница зала</small></span></button><button onClick={() => addFixture("entrance")}><DoorOpen size={19} /><span><strong>Вход</strong><small>Дверь или проход</small></span></button><button onClick={addFloor}><Building2 size={19} /><span><strong>Этаж</strong><small>Новый план</small></span></button></div>}</div></>;
+  const ownerActions = <><Button kind="secondary" icon={Check} disabled={!dirty || saving} onClick={() => void persistFloorPlan()}>{saving ? "Сохраняем..." : "Сохранить"}</Button><Button kind="secondary" icon={QrCode} onClick={() => setShowQrCodes(true)}>QR-коды</Button><div className="floor-add-menu"><Button icon={Plus} onClick={() => setAddMenuOpen((open) => !open)}>Добавить <ChevronDown size={15} /></Button>{addMenuOpen && <div className="floor-add-popover"><button onClick={addTable}><Table2 size={19} /><span><strong>Стол</strong><small>4 места</small></span></button><button onClick={() => addFixture("bar")}><Wine size={19} /><span><strong>Бар</strong><small>Барная стойка</small></span></button><button onClick={() => addFixture("window")}><PanelsTopLeft size={19} /><span><strong>Окно</strong><small>Граница зала</small></span></button><button onClick={() => addFixture("entrance")}><DoorOpen size={19} /><span><strong>Вход</strong><small>Дверь или проход</small></span></button><button onClick={addFloor}><Building2 size={19} /><span><strong>Этаж</strong><small>Новый план</small></span></button></div>}</div></>;
 
   const editorHeading = embedded
     ? <div className="floor-editor-heading"><div><h2>План зала</h2><p>Перетаскивайте элементы и настройте каждый этаж отдельно.</p></div><div>{ownerActions}</div></div>
