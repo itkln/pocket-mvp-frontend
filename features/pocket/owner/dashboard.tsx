@@ -30,7 +30,7 @@ export function OwnerOverview({ ownerName, onNavigate }: { ownerName: string; on
 }
 
 export function Metric({ label, value, change, icon: Icon, tone }: { label: string; value: string; change: string; icon: LucideIcon; tone: string }) {
-  return <article className="metric"><span className={tone}><Icon size={20} /></span><div><p>{label}</p><strong>{value}</strong><small>{change}</small></div></article>;
+  return <article className="metric"><span className={`metric-icon ${tone}`}><Icon size={20} /></span><div className="metric-copy"><p>{label}</p><strong>{value}</strong><small>{change}</small></div></article>;
 }
 
 export function OrderTable({ orders }: { orders: OwnerOrder[] }) {

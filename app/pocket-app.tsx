@@ -100,11 +100,13 @@ export default function PocketApp() {
     setRole(next);
     setScreen(next === "owner" ? "overview" : next === "customer" ? "discover" : "service");
     setMobileNav(false);
+    window.scrollTo(0, 0);
   };
 
   const navigate = (next: string) => {
     setScreen(next);
     setMobileNav(false);
+    window.scrollTo(0, 0);
   };
 
   const toggleSidebar = () => {

@@ -2012,3 +2012,253 @@ thead th {
   .menu-filter-row .search-field { width: 100%; min-width: 0; }
   .row-actions-menu { position: fixed; inset: auto 12px 82px 12px; width: auto; }
 }
+
+/* Final interface consistency pass. */
+html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+body { font-size: 15px; line-height: 1.5; }
+button, input, select, textarea { line-height: 1.35; }
+.page-header > div { min-width: 0; }
+.page-header h1 { overflow-wrap: anywhere; }
+.page-header > div > p:not(.eyebrow) { max-width: 720px; }
+.panel-title > div { min-width: 0; }
+.panel-title h2 { line-height: 1.3; }
+
+/* KPI cards share one resilient internal layout on every owner screen. */
+.metric {
+  position: relative;
+  min-width: 0;
+  min-height: 124px;
+  display: block;
+  padding: 17px;
+}
+.metric > .metric-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  border-radius: 10px;
+}
+.metric-copy { min-width: 0; padding-right: 40px; }
+.metric .metric-copy p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+.metric .metric-copy strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 650;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.metric .metric-copy small {
+  display: block;
+  margin-top: 9px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.payment-metrics { grid-template-columns: minmax(260px, 360px); }
+
+/* Order filters remain compact without falling back to browser button styles. */
+.order-filters {
+  width: fit-content;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #fff;
+}
+.order-filters button {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: #5d6871;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.order-filters button:hover { background: #f2f7fa; color: var(--ink); }
+.order-filters button.active { background: var(--blue); color: #fff; }
+.order-filters button b {
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 10px;
+  font-weight: 650;
+}
+.order-filters button.active b { background: rgba(255, 255, 255, .22); color: #fff; }
+
+/* Analytics rows match their actual three-column markup. */
+.popular-list > div.popular-row:not(.panel-title) {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+.popular-list > .popular-row > span {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f1f5f7;
+  color: #687781;
+  font-size: 11px;
+}
+.popular-list > .popular-row > p { min-width: 0; }
+.popular-list > .popular-row > p strong,
+.popular-list > .popular-row > p small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.popular-list > .popular-row > p strong { font-size: 14px; }
+.popular-list > .popular-row > p small { font-size: 12px; }
+.popular-list > .popular-row > b { font-size: 14px; font-variant-numeric: tabular-nums; }
+
+.reviews-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.review-score,
+.review-stat { min-height: 112px; }
+.review-score { display: grid; grid-template-columns: auto 1fr; align-content: center; column-gap: 10px; }
+.review-score > span,
+.review-score > small { grid-column: 1 / -1; }
+.review-score > strong { margin: 7px 0 0; }
+.review-score .review-stars { align-self: end; margin-bottom: 4px; }
+.reviews-list { max-width: none; }
+
+.account-summary { min-width: 0; }
+.account-summary small { overflow-wrap: anywhere; }
+.person-copy { min-width: 0; }
+.person-copy strong,
+.person-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-row select { width: 100%; }
+.table-scroll { width: 100%; overflow-x: auto; }
+.table-scroll table { min-width: 820px; }
+th { height: 44px; vertical-align: middle; }
+td { vertical-align: middle; }
+
+/* Staff workspaces use the same neutral surfaces and spacing. */
+.kanban { align-items: start; }
+.kanban > section { background: #eef2f5; }
+.kanban > section > header span {
+  min-width: 18px;
+  width: auto;
+  height: 18px;
+  padding: 0 5px;
+  background: #dce5ea;
+  color: #566570;
+  font-size: 10px;
+}
+.ticket,
+.kitchen-ticket { border-radius: 10px; }
+.ticket footer { gap: 10px; }
+.ticket footer .button { flex: 0 0 auto; }
+
+@media (max-width: 900px) {
+  .page-header { align-items: flex-start; }
+  .reviews-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 14px; }
+  .page-header h1 { font-size: 24px; line-height: 1.2; }
+  .page-header > div > p:not(.eyebrow) { font-size: 13px; }
+  .panel-title h2 { font-size: 16px; }
+  .panel-title p { font-size: 12px; }
+  .button { min-height: 42px; }
+  .field input,
+  .field select { min-height: 44px; }
+  .field textarea { min-height: 96px; }
+
+  .metric-grid { gap: 4px; }
+  .metric { min-height: 122px; padding: 14px; }
+  .metric > .metric-icon { top: 12px; right: 12px; width: 32px; height: 32px; }
+  .metric-copy { padding-right: 34px; }
+  .metric .metric-copy p { min-height: 35px; margin-bottom: 8px; font-size: 12px; }
+  .metric .metric-copy strong { font-size: 21px; }
+  .metric .metric-copy small { margin-top: 7px; font-size: 11px; white-space: normal; }
+  .payment-metrics { grid-template-columns: 1fr; }
+
+  .order-filters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .order-filters button { grid-column: span 2; min-width: 0; padding: 0 6px; font-size: 12px; }
+  .order-filters button:nth-child(4),
+  .order-filters button:nth-child(5) { grid-column: span 3; }
+
+  .popular-list > div.popular-row:not(.panel-title) { grid-template-columns: 22px minmax(0, 1fr) auto; gap: 9px; }
+  .analytics-grid > .panel { min-height: 0; }
+  .reviews-overview { grid-template-columns: 1fr; gap: 8px; }
+  .reviews-toolbar { margin-right: 0; margin-left: 0; padding: 8px; border-radius: 12px; }
+
+  .progress-labels { margin-right: -2px; margin-left: -2px; font-size: 10px; line-height: 1.2; }
+  .progress-labels span { width: 25%; text-align: center; }
+
+  .menu-sticky {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    gap: 4px;
+    padding-right: 8px;
+    padding-left: 12px;
+  }
+  .category-tabs { min-width: 0; scrollbar-width: none; }
+  .category-tabs::-webkit-scrollbar { display: none; }
+  .category-tabs button { padding: 0 11px; font-size: 13px; }
+  .menu-sticky > .icon-button { width: 38px; height: 38px; background: #f3f7f9; }
+
+  .profile-card > div small { font-size: 12px; }
+  .account-summary small,
+  .profile-card h2 { overflow-wrap: anywhere; }
+  .team-panel .list-toolbar > p { font-size: 14px; }
+  .team-panel .list-toolbar > p strong { font-size: 18px; }
+  .person-copy small { font-size: 12px; }
+  .team-row select { width: min(180px, 100%); min-height: 38px; }
+
+  .shift-strip { gap: 8px; }
+  .shift-strip p { font-size: 12px; }
+  .ticket footer { align-items: stretch; flex-direction: column; }
+  .ticket footer .button { width: 100%; }
+  .kitchen-clock { font-size: 13px; }
+
+  .auth-screen { min-height: 100svh; }
+  .auth-field > input,
+  .auth-password,
+  .auth-submit { min-height: 48px; }
+}
+
+.auth-field input:-webkit-autofill,
+.auth-password input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset;
+  -webkit-text-fill-color: var(--ink);
+  transition: background-color 9999s ease-out;
+}
