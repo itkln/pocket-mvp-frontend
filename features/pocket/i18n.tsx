@@ -179,6 +179,8 @@ const rows: TranslationRow[] = [
   ["Сохраняем...", "Saving...", "Зберігаємо...", "Ukladá sa..."],
   ["Закрыть", "Close", "Закрити", "Zavrieť"],
   ["Редактировать позицию", "Edit item", "Редагувати позицію", "Upraviť položku"],
+  ["Добавить категорию", "Add category", "Додати категорію", "Pridať kategóriu"],
+  ["Добавить позицию", "Add item", "Додати позицію", "Pridať položku"],
   ["Новая позиция", "New item", "Нова позиція", "Nová položka"],
   ["Название", "Name", "Назва", "Názov"],
   ["Название блюда", "Item name", "Назва страви", "Názov položky"],
