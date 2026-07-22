@@ -2573,3 +2573,254 @@ td { vertical-align: middle; }
   .category-manager-row .category-visibility { grid-column: 2; }
   .category-manager-row .category-delete { grid-column: 3; grid-row: 1 / 3; }
 }
+
+/* Compact menu workspace and practical account settings. */
+.menu-layout {
+  grid-template-columns: 248px minmax(0, 1fr);
+  gap: 20px;
+}
+.category-list {
+  padding: 12px;
+  border-radius: 14px;
+}
+.category-list-heading {
+  height: 46px !important;
+  padding: 0 8px !important;
+}
+.category-list-heading strong { font-size: 16px; font-weight: 650; }
+.category-list-heading .icon-button { width: 32px; height: 32px; }
+.category-sortable-row {
+  height: 48px !important;
+  min-height: 48px;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  overflow: hidden;
+  padding: 0 !important;
+  border-radius: 10px;
+}
+.category-list .category-sortable-row + .category-sortable-row { margin-top: 2px; }
+.category-list .category-sortable-row .category-select,
+.category-list .category-sortable-row .category-select.active {
+  height: 100%;
+  min-height: 0;
+  padding: 0 8px 0 12px;
+  border-radius: 0;
+  background: transparent;
+  font-size: 15px;
+}
+.category-list .category-sortable-row:has(.category-select.active) {
+  background: var(--blue-soft);
+}
+.category-list .category-sortable-row .category-select.active { color: var(--blue); }
+.category-list .category-drag-handle {
+  width: 36px;
+  height: 100%;
+  min-height: 0;
+  align-self: stretch;
+  border-radius: 0;
+}
+.category-list .category-drag-handle:hover,
+.category-list .category-drag-handle:focus-visible { background: rgba(34, 158, 217, .11); }
+
+.menu-items { gap: 10px; }
+.menu-card {
+  min-height: 142px;
+  grid-template-columns: 118px minmax(0, 1fr);
+  overflow: hidden;
+}
+.menu-card.reorder-enabled { grid-template-columns: 118px minmax(0, 1fr) 38px; }
+.menu-card > .food-image { min-height: 142px; border-radius: 12px 0 0 12px; }
+.menu-card-body { padding: 12px; }
+.menu-card-body h3 { margin: 5px 0 3px; font-size: 15px; }
+.menu-card-body > p {
+  min-height: 20px;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 12px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.menu-card-body > footer { padding-top: 6px; }
+.menu-card .menu-status { margin-bottom: 4px; padding: 3px 6px; }
+.menu-items.list .menu-card { min-height: 112px; grid-template-columns: 100px minmax(0, 1fr); }
+.menu-items.list .menu-card.reorder-enabled { grid-template-columns: 100px minmax(0, 1fr) 38px; }
+.menu-items.list .menu-card > .food-image { min-height: 112px; }
+.menu-drag-handle {
+  width: 38px;
+  height: 100%;
+  align-self: stretch;
+  border-radius: 0 12px 12px 0;
+}
+.menu-drag-handle:hover,
+.menu-drag-handle:focus-visible { background: rgba(34, 158, 217, .1); }
+
+.account-layout {
+  width: min(900px, 100%);
+  display: block;
+}
+.account-settings { overflow: hidden; padding: 0; }
+.account-summary {
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  background: #fbfcfd;
+  text-align: left;
+}
+.account-summary > span {
+  width: 54px;
+  height: 54px;
+  margin: 0;
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.account-summary h2 { margin: 0 0 2px; font-size: 18px; }
+.account-summary p { margin: 0; font-size: 13px; }
+.account-summary small { margin-top: 3px; font-size: 12px; }
+.account-settings-content { padding: 20px 22px 22px; }
+.account-settings-content > .panel-title { margin-bottom: 14px; }
+.account-settings .field input[readonly] {
+  border-color: transparent;
+  background: #f5f7f8;
+}
+.account-settings-content hr { margin: 20px 0; }
+.account-security-heading { margin-bottom: 10px; }
+.account-security {
+  margin: 0;
+  padding: 12px;
+  border: 0;
+  background: #f5f7f8;
+}
+.account-security > span { background: #fff; }
+.account-footer-actions { display: flex; justify-content: flex-start; margin-top: 14px; }
+.account-logout { margin-top: 0; }
+
+/* Header tools: quick navigation and session activity. */
+.topbar-action-slot { position: relative; display: flex; }
+.topbar-action-trigger { position: relative; border-color: transparent; }
+.topbar-action-trigger:hover { border-color: var(--line); }
+.topbar-action-trigger.selected { border-color: transparent; background: var(--surface-soft); color: var(--ink); }
+.notification-trigger.has-unread::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 6px;
+  height: 6px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--blue);
+}
+.topbar-popover {
+  position: absolute;
+  z-index: 70;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 320px;
+  overflow: hidden;
+  padding: 8px;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 40px rgba(23, 33, 43, .16);
+}
+.topbar-search-popover { right: -42px; }
+.topbar-popover > header {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 6px 7px;
+}
+.topbar-popover > header strong { font-size: 14px; }
+.topbar-popover > header button {
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--blue);
+  font-size: 12px;
+  cursor: pointer;
+}
+.topbar-search-input {
+  height: 40px;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: #f3f6f8;
+  color: var(--muted);
+}
+.topbar-search-input input { min-width: 0; border: 0; outline: 0; background: transparent; font-size: 13px; }
+.topbar-search-results { display: grid; gap: 2px; margin-top: 6px; }
+.topbar-search-results button {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.topbar-search-results button:hover { background: #f3f7f9; }
+.topbar-search-results button > svg:last-child { color: #a0a8ad; }
+.topbar-search-results > p { margin: 0; padding: 24px 8px; color: var(--muted); font-size: 13px; text-align: center; }
+.notifications-popover { width: 340px; }
+.notification-list { max-height: 320px; overflow-y: auto; }
+.notification-list article {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+}
+.notification-list article:hover { background: #f5f8fa; }
+.notification-list article > span { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+.notification-list article.unread > span { background: var(--blue); }
+.notification-list strong,
+.notification-list small { display: block; }
+.notification-list strong { font-size: 13px; font-weight: 550; }
+.notification-list small { margin-top: 3px; color: var(--muted); font-size: 11px; }
+.notification-empty { display: grid; justify-items: center; padding: 28px 16px 30px; text-align: center; }
+.notification-empty > svg { margin-bottom: 10px; color: #9da9b1; }
+.notification-empty strong { font-size: 14px; }
+.notification-empty p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+
+.toast {
+  background: #edf7fc;
+  color: #263744;
+  box-shadow: 0 10px 30px rgba(38, 69, 88, .16);
+}
+.toast svg { color: var(--blue); }
+
+@media (max-width: 900px) {
+  .menu-layout { grid-template-columns: 220px minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .topbar-action-slot { display: none; }
+  .menu-layout { grid-template-columns: 1fr; }
+  .menu-card,
+  .menu-items.list .menu-card { min-height: 112px; grid-template-columns: 88px minmax(0, 1fr); }
+  .menu-card.reorder-enabled,
+  .menu-items.list .menu-card.reorder-enabled { grid-template-columns: 88px minmax(0, 1fr) 34px; }
+  .menu-card > .food-image,
+  .menu-items.list .menu-card > .food-image { min-height: 112px; }
+  .menu-drag-handle { width: 34px; }
+  .menu-card-body { padding: 10px; }
+  .menu-card-body > p { -webkit-line-clamp: 1; }
+  .account-summary { padding: 16px; }
+  .account-settings-content { padding: 18px 16px; }
+  .account-security { grid-template-columns: 38px minmax(0, 1fr); }
+  .account-security .button { grid-column: 1 / -1; width: 100%; }
+  .account-footer-actions,
+  .account-footer-actions .button { width: 100%; }
+}

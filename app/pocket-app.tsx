@@ -15,7 +15,7 @@ import {
   sidebarCollapsedKey,
   staffNavigation,
 } from "../features/pocket/model";
-import { MobileBottomNavigation, Sidebar, Topbar } from "../features/pocket/navigation";
+import { MobileBottomNavigation, Sidebar, Topbar, type AppNotification } from "../features/pocket/navigation";
 import {
   AccountScreen,
   AnalyticsScreen,
@@ -67,6 +67,7 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
   const [cart, setCart] = useState<Record<number, number>>({});
 	const [modal, setModal] = useState<"item" | "invite" | "order" | "venue" | null>(null);
   const [toast, setToast] = useState("");
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [mobileNav, setMobileNav] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -143,6 +144,7 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
 
   const notify = useCallback((message: string) => {
     setToast(message);
+    setNotifications((current) => [{ id: Date.now(), message, createdAt: Date.now(), read: false }, ...current].slice(0, 20));
     window.setTimeout(() => setToast(""), 2400);
   }, []);
 
@@ -199,7 +201,7 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
     <div className={`app-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
 	  <Sidebar user={currentUser} role={role} screen={screen} navigation={navigation} venue={venue} venues={availableVenues} mobileNav={mobileNav} collapsed={sidebarCollapsed} onNavigate={navigate} onRole={changeRole} onVenue={selectVenue} onAddVenue={() => setModal("venue")} onClose={() => setMobileNav(false)} onToggleCollapsed={toggleSidebar} />
       <main className="main-shell">
-        <Topbar role={role} screen={screen} navigation={navigation} venueName={venue?.name ?? "Мои заведения"} cartCount={cartCount} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} />
+        <Topbar role={role} screen={screen} navigation={navigation} venueName={venue?.name ?? "Мои заведения"} cartCount={cartCount} notifications={notifications} onMenu={() => setMobileNav(true)} onCart={() => navigate("checkout")} onNavigate={navigate} onNotificationsRead={() => setNotifications((current) => current.map((item) => ({ ...item, read: true })))} onNotificationsClear={() => setNotifications([])} />
         <div className={`page-area ${role === "customer" ? "customer-area" : ""}`}>
           {role === "owner" && !venue && screen !== "account" && <section className="owner-onboarding"><span><Store size={28} /></span><h1>Добавьте первое заведение</h1><p>После создания откроются меню, команда, заказы и аналитика.</p><Button icon={Plus} onClick={() => setModal("venue")}>Добавить заведение</Button></section>}
           {role === "owner" && venue && screen === "overview" && <OwnerOverview ownerName={currentUser.first_name} onNavigate={navigate} />}

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { type AuthUser } from "../../lib/auth-api";
-import { BadgeCheck, Bell, Check, ChevronDown, Menu as MenuIcon, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings, ShoppingBag, Store, UserRound, X, type LucideIcon } from "lucide-react";
+import { ArrowRight, BadgeCheck, Bell, BellOff, Check, ChevronDown, Menu as MenuIcon, PanelLeftClose, PanelLeftOpen, Plus, Search, Settings, ShoppingBag, Store, UserRound, X, type LucideIcon } from "lucide-react";
 import { type Role, type Venue, userInitials, venueInitials, venueLocation, mobilePrimaryNavigation, navigationGroups } from "./model";
 import { IconButton } from "./ui";
-import { localeOptions, useI18n } from "./i18n";
+import { localeOptions, localeTags, useI18n } from "./i18n";
 import { replacePathLocale } from "./locales";
 
 export function Sidebar({ user, role, screen, navigation, venue, venues: availableVenues, mobileNav, collapsed, onNavigate, onRole, onVenue, onAddVenue, onClose, onToggleCollapsed }: { user: AuthUser; role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue | null; venues: Venue[]; mobileNav: boolean; collapsed: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onAddVenue: () => void; onClose: () => void; onToggleCollapsed: () => void }) {
@@ -68,13 +68,25 @@ export function MobileBottomNavigation({ role, screen, navigation, onNavigate }:
   </nav>;
 }
 
-export function Topbar({ role, screen, navigation, venueName, cartCount, onMenu, onCart }: { role: Role; screen: string; navigation: { id: string; label: string }[]; venueName: string; cartCount: number; onMenu: () => void; onCart: () => void }) {
+export type AppNotification = { id: number; message: string; createdAt: number; read: boolean };
+
+export function Topbar({ role, screen, navigation, venueName, cartCount, notifications, onMenu, onCart, onNavigate, onNotificationsRead, onNotificationsClear }: { role: Role; screen: string; navigation: { id: string; label: string; icon?: LucideIcon }[]; venueName: string; cartCount: number; notifications: AppNotification[]; onMenu: () => void; onCart: () => void; onNavigate: (id: string) => void; onNotificationsRead: () => void; onNotificationsClear: () => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const { locale, setLocale, t } = useI18n();
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState<"search" | "notifications" | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const languageMenu = useRef<HTMLDivElement>(null);
+  const actionMenus = useRef<HTMLDivElement>(null);
   const activeLanguage = localeOptions.find((option) => option.value === locale) ?? localeOptions[0];
+  const unreadCount = notifications.filter((item) => !item.read).length;
+  const searchResults = useMemo(() => {
+    const normalized = searchQuery.trim().toLocaleLowerCase(localeTags[locale]);
+    if (!normalized) return navigation;
+    return navigation.filter((item) => t(item.label).toLocaleLowerCase(localeTags[locale]).includes(normalized));
+  }, [locale, navigation, searchQuery, t]);
+
   useEffect(() => {
     if (!languageMenuOpen) return;
     const closeOutside = (event: PointerEvent) => { if (!languageMenu.current?.contains(event.target as Node)) setLanguageMenuOpen(false); };
@@ -83,6 +95,21 @@ export function Topbar({ role, screen, navigation, venueName, cartCount, onMenu,
     document.addEventListener("keydown", closeOnEscape);
     return () => { document.removeEventListener("pointerdown", closeOutside); document.removeEventListener("keydown", closeOnEscape); };
   }, [languageMenuOpen]);
+
+  useEffect(() => {
+    if (!activePanel) return;
+    const closeOutside = (event: PointerEvent) => { if (!actionMenus.current?.contains(event.target as Node)) setActivePanel(null); };
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setActivePanel(null); };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => { document.removeEventListener("pointerdown", closeOutside); document.removeEventListener("keydown", closeOnEscape); };
+  }, [activePanel]);
+
+  const togglePanel = (panel: "search" | "notifications") => {
+    setLanguageMenuOpen(false);
+    setActivePanel((current) => current === panel ? null : panel);
+    if (panel === "notifications") onNotificationsRead();
+  };
   const title = screen === "checkout" ? "Оформление заказа" : screen === "account" ? role === "owner" ? "Настройки владельца" : "Настройки сотрудника" : navigation.find((item) => item.id === screen)?.label || "Pocket";
-  return <header className="topbar"><div className="topbar-title"><IconButton icon={MenuIcon} label="Открыть меню" onClick={onMenu} /><div><small>{role === "owner" ? `${venueName} / Управление` : role === "staff" ? `${venueName} / Смена` : "Сегодня в Братиславе"}</small><strong>{title}</strong></div></div><div className="topbar-actions">{role === "customer" && <button className="cart-button" onClick={onCart}><ShoppingBag size={18} /><span>Корзина</span>{cartCount > 0 && <b>{cartCount}</b>}</button>}<IconButton icon={Search} label="Поиск" /><IconButton icon={Bell} label="Уведомления" active /><div className="topbar-language" ref={languageMenu}><button type="button" className="topbar-language-trigger" aria-expanded={languageMenuOpen} aria-label={t("Язык интерфейса: {code}", { code: activeLanguage.short })} onClick={() => setLanguageMenuOpen((open) => !open)}><b>{activeLanguage.short}</b><ChevronDown size={14} /></button>{languageMenuOpen && <div className="topbar-language-menu" role="menu" aria-label={t("Язык интерфейса")}>{localeOptions.map((option) => <button type="button" role="menuitemradio" aria-label={`${option.short} ${option.label}`} aria-checked={locale === option.value} className={locale === option.value ? "active" : ""} key={option.value} onClick={() => { setLocale(option.value); setLanguageMenuOpen(false); router.replace(replacePathLocale(pathname, option.value)); }}><b>{option.short}</b><span>{option.label}</span>{locale === option.value && <Check size={15} />}</button>)}</div>}</div></div></header>;
+  return <header className="topbar"><div className="topbar-title"><IconButton icon={MenuIcon} label="Открыть меню" onClick={onMenu} /><div><small>{role === "owner" ? `${venueName} / Управление` : role === "staff" ? `${venueName} / Смена` : "Сегодня в Братиславе"}</small><strong>{title}</strong></div></div><div className="topbar-actions" ref={actionMenus}>{role === "customer" && <button className="cart-button" onClick={onCart}><ShoppingBag size={18} /><span>Корзина</span>{cartCount > 0 && <b>{cartCount}</b>}</button>}<div className="topbar-action-slot"><button type="button" className={`icon-button topbar-action-trigger ${activePanel === "search" ? "selected" : ""}`} aria-label={t("Поиск")} title={t("Поиск")} aria-expanded={activePanel === "search"} onClick={() => togglePanel("search")}><Search size={19} /></button>{activePanel === "search" && <section className="topbar-popover topbar-search-popover"><header><strong>Быстрый переход</strong></header><label className="topbar-search-input"><Search size={17} /><input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Найти раздел" autoFocus /></label><div className="topbar-search-results">{searchResults.length ? searchResults.map((item) => { const ItemIcon = item.icon ?? Search; return <button type="button" key={item.id} onClick={() => { onNavigate(item.id); setActivePanel(null); setSearchQuery(""); }}><ItemIcon size={18} /><span>{item.label}</span><ArrowRight size={15} /></button>; }) : <p>Ничего не найдено</p>}</div></section>}</div><div className="topbar-action-slot"><button type="button" className={`icon-button topbar-action-trigger notification-trigger ${activePanel === "notifications" ? "selected" : ""} ${unreadCount ? "has-unread" : ""}`} aria-label={t("Уведомления")} title={t("Уведомления")} aria-expanded={activePanel === "notifications"} onClick={() => togglePanel("notifications")}><Bell size={19} /></button>{activePanel === "notifications" && <section className="topbar-popover notifications-popover"><header><strong>Уведомления</strong>{notifications.length > 0 && <button type="button" onClick={onNotificationsClear}>Очистить</button>}</header>{notifications.length ? <div className="notification-list">{notifications.map((item) => <article className={item.read ? "" : "unread"} key={item.id}><span /><div><strong>{t(item.message)}</strong><small>{new Date(item.createdAt).toLocaleTimeString(localeTags[locale], { hour: "2-digit", minute: "2-digit" })}</small></div></article>)}</div> : <div className="notification-empty"><BellOff size={22} /><strong>Новых уведомлений нет</strong><p>Действия в приложении появятся здесь.</p></div>}</section>}</div><div className="topbar-language" ref={languageMenu}><button type="button" className="topbar-language-trigger" aria-expanded={languageMenuOpen} aria-label={t("Язык интерфейса: {code}", { code: activeLanguage.short })} onClick={() => { setActivePanel(null); setLanguageMenuOpen((open) => !open); }}><b>{activeLanguage.short}</b><ChevronDown size={14} /></button>{languageMenuOpen && <div className="topbar-language-menu" role="menu" aria-label={t("Язык интерфейса")}>{localeOptions.map((option) => <button type="button" role="menuitemradio" aria-label={`${option.short} ${option.label}`} aria-checked={locale === option.value} className={locale === option.value ? "active" : ""} key={option.value} onClick={() => { setLocale(option.value); setLanguageMenuOpen(false); router.replace(replacePathLocale(pathname, option.value)); }}><b>{option.short}</b><span>{option.label}</span>{locale === option.value && <Check size={15} />}</button>)}</div>}</div></div></header>;
 }
