@@ -8,6 +8,7 @@ import {
   type CategoryInput, type MenuItemInput, type OwnerCategory, type OwnerDashboard, type OwnerMenuItem,
   type OwnerOrder, type OwnerPayment, type OwnerReview, type OwnerStaffMember, type StaffInput,
 } from "../../../lib/owner-api";
+import { useLocalizedError } from "../error-message";
 
 type OwnerWorkspace = {
   loading: boolean;
@@ -36,6 +37,7 @@ type OwnerWorkspace = {
 const OwnerWorkspaceContext = createContext<OwnerWorkspace | null>(null);
 
 export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID?: string; children: ReactNode; onError: (message: string) => void }) {
+  const errorMessage = useLocalizedError();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [dashboard, setDashboard] = useState<OwnerDashboard | null>(null);
@@ -48,8 +50,8 @@ export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID
 
   const run = useCallback(async (operation: () => Promise<void>) => {
     try { setError(""); await operation(); }
-    catch (caught) { const message = caught instanceof Error ? caught.message : "Не удалось выполнить действие"; setError(message); onError(message); throw caught; }
-  }, [onError]);
+    catch (caught) { const message = errorMessage(caught); setError(message); onError(message); throw caught; }
+  }, [errorMessage, onError]);
 
   const refresh = useCallback(async () => {
     if (!venueID) {
@@ -65,10 +67,10 @@ export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID
       setDashboard(nextDashboard); setCategories(nextCategories); setItems(nextItems); setStaff(nextStaff);
       setOrders(nextOrders); setReviews(nextReviews); setPayments(nextPayments); setError("");
     } catch (caught) {
-      const message = caught instanceof Error ? caught.message : "Не удалось загрузить данные заведения";
+      const message = errorMessage(caught, "Не удалось загрузить данные заведения");
       setError(message); onError(message);
     } finally { setLoading(false); }
-  }, [venueID, onError]);
+  }, [errorMessage, venueID, onError]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void refresh(), 0);

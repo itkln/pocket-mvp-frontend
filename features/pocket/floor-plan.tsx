@@ -7,6 +7,7 @@ import { makeVenueSlug } from "./model";
 import { getFloorPlan, saveFloorPlan } from "../../lib/owner-api";
 import { useConfirm } from "./confirm-dialog";
 import { useI18n } from "./i18n";
+import { useLocalizedError } from "./error-message";
 import { Button, IconButton, StatusPill, PageHeader, Field } from "./ui";
 
 export type FloorTable = { id: string; seats: number; x: number; y: number; state: "free" | "busy" | "reserved" };
@@ -68,6 +69,7 @@ export const downloadTableQr = async (venueName: string, tableId: string) => {
 export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }: { mode: "owner" | "staff"; venueID?: string; venueName: string; notify: (message: string) => void; embedded?: boolean }) {
   const { confirm } = useConfirm();
   const { t } = useI18n();
+  const errorMessage = useLocalizedError();
   const [floors, setFloors] = useState<VenueFloor[]>(initialFloors);
   const [activeFloorId, setActiveFloorId] = useState(initialFloors[0].id);
   const [selected, setSelected] = useState<FloorSelection>({ kind: "table", id: "08" });
@@ -102,13 +104,13 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
         setActiveFloorId(restoredFloor.id);
         setSelected(restoredFloor.tables[0] ? { kind: "table", id: restoredFloor.tables[0].id } : restoredFloor.fixtures[0] ? { kind: "fixture", id: restoredFloor.fixtures[0].id } : null);
       }).catch((error) => {
-        if (active) notify(error instanceof Error ? error.message : "Не удалось загрузить план зала");
+        if (active) notify(errorMessage(error, "Не удалось загрузить план зала"));
       }).finally(() => {
         if (active) setLoading(false);
       });
     }, 0);
     return () => { active = false; window.clearTimeout(timeout); };
-  }, [mode, venueID, notify]);
+  }, [errorMessage, mode, venueID, notify]);
 
   const updateFloors = (update: (floors: VenueFloor[]) => VenueFloor[]) => {
     dirtyRef.current = true;
@@ -130,12 +132,12 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
       if (announce) notify("План зала сохранен");
     } catch (error) {
       if (request === saveRequestRef.current) {
-        notify(error instanceof Error ? error.message : "Не удалось сохранить план зала");
+        notify(errorMessage(error, "Не удалось сохранить план зала"));
       }
     } finally {
       if (request === saveRequestRef.current) setSaving(false);
     }
-  }, [loading, notify, venueID]);
+  }, [errorMessage, loading, notify, venueID]);
 
   useEffect(() => {
     if (mode !== "owner" || !venueID || loading || !dirty || dragging) return;

@@ -42,6 +42,7 @@ import {
 import { KitchenScreen, ServiceBoard } from "../features/pocket/staff";
 import { Modal, NewVenueModal } from "../features/pocket/dialogs";
 import { useI18n } from "../features/pocket/i18n";
+import { useLocalizedError } from "../features/pocket/error-message";
 import { localeFromPathname, type Locale } from "../features/pocket/locales";
 
 const defaultScreen: Record<Role, string> = { owner: "overview", customer: "discover", staff: "service" };
@@ -56,6 +57,7 @@ const appPath = (locale: Locale, role: Role, screen: string) => `/${locale}/${ro
 export default function PocketApp({ initialRole, initialScreen }: { initialRole?: Role; initialScreen?: string }) {
   const router = useRouter();
 	const { locale } = useI18n();
+	const errorMessage = useLocalizedError();
 	const [authReady, setAuthReady] = useState(false);
 	const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [role, setRole] = useState<Role>(initialRole ?? "customer");
@@ -173,7 +175,7 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
 			setMobileNav(false);
 			notify(`${newVenue.name} добавлено`);
 		} catch (caught) {
-			notify(caught instanceof Error ? caught.message : "Не удалось добавить заведение");
+			notify(errorMessage(caught, "Не удалось добавить заведение"));
 			throw caught;
 		}
 	};

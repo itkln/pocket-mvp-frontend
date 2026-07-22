@@ -1,6 +1,6 @@
 export class APIError extends Error {
-  constructor(public code: string, message: string, public status: number) {
-    super(message);
+  constructor(public code: string, public serverMessage: string, public status: number) {
+    super(`API request failed: ${code}`);
     this.name = "APIError";
   }
 }
@@ -21,7 +21,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     const payload = await response.json().catch(() => null) as { error?: { code?: string; message?: string } } | null;
     throw new APIError(
       payload?.error?.code ?? "request_failed",
-      payload?.error?.message ?? "Не удалось связаться с сервером",
+      payload?.error?.message ?? "API request failed",
       response.status,
     );
   }

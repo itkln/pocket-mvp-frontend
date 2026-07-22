@@ -2,6 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AuthPage from "./auth-page";
 import { login, register } from "../lib/auth-api";
+import { APIError } from "../lib/api-client";
+import { I18nProvider } from "../features/pocket/i18n";
 
 const replace = vi.fn();
 const refresh = vi.fn();
@@ -19,6 +21,7 @@ vi.mock("../lib/auth-api", async (importOriginal) => {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  window.localStorage.clear();
 });
 
 describe("AuthPage", () => {
@@ -64,5 +67,17 @@ describe("AuthPage", () => {
     await waitFor(() => expect(login).toHaveBeenCalledWith("user@example.com", "a secure password"));
     expect(replace).toHaveBeenCalledWith("/ru");
     expect(refresh).toHaveBeenCalled();
+  });
+
+  it("shows backend errors in the language selected in the URL", async () => {
+    vi.mocked(login).mockRejectedValue(new APIError("invalid_credentials", "Неверный e-mail или пароль", 401));
+    render(<I18nProvider initialLocale="en"><AuthPage mode="login" /></I18nProvider>);
+
+    fireEvent.change(await screen.findByLabelText("E-mail"), { target: { value: "user@example.com" } });
+    fireEvent.change(await screen.findByLabelText("Password"), { target: { value: "wrong password" } });
+    fireEvent.click(await screen.findByRole("button", { name: "Sign in" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Incorrect e-mail or password");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("Неверный");
   });
 });

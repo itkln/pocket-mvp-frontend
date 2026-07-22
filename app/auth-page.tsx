@@ -5,7 +5,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { AuthAPIError, login, register } from "../lib/auth-api";
+import { login, register } from "../lib/auth-api";
+import { useLocalizedError } from "../features/pocket/error-message";
 import { useI18n } from "../features/pocket/i18n";
 
 type AuthMode = "login" | "register";
@@ -13,6 +14,7 @@ type AuthMode = "login" | "register";
 export default function AuthPage({ mode }: { mode: AuthMode }) {
   const router = useRouter();
   const { locale } = useI18n();
+  const errorMessage = useLocalizedError();
   const isLogin = mode === "login";
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -42,7 +44,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
 		router.replace(`/${locale}`);
 		router.refresh();
 	} catch (caught) {
-		setError(caught instanceof AuthAPIError ? caught.message : "Сервер временно недоступен. Попробуйте еще раз");
+		setError(errorMessage(caught, "Сервер временно недоступен. Попробуйте еще раз"));
 	} finally {
 		setSubmitting(false);
 	}
