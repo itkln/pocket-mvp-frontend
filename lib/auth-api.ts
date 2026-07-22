@@ -44,3 +44,17 @@ export async function getCurrentUser(): Promise<AuthUser> {
 export async function logout(): Promise<void> {
   await apiRequest<void>("/auth/logout", { method: "POST" });
 }
+
+export async function requestPasswordReset(email: string, locale: string): Promise<void> {
+  await apiRequest<{ status: string }>("/auth/password-reset/request", {
+    method: "POST",
+    body: JSON.stringify({ email, locale }),
+  });
+}
+
+export async function resetPassword(token: string, password: string): Promise<void> {
+  await apiRequest<void>("/auth/password-reset/confirm", {
+    method: "POST",
+    body: JSON.stringify({ token, password }),
+  });
+}

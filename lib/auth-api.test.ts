@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getCurrentUser, login, logout, register } from "./auth-api";
+import { getCurrentUser, login, logout, register, requestPasswordReset, resetPassword } from "./auth-api";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -33,5 +33,20 @@ describe("auth API", () => {
     await logout();
     expect(fetchMock.mock.calls[0][1]).toEqual(expect.objectContaining({ method: "GET", credentials: "include" }));
     expect(fetchMock.mock.calls[1][1]).toEqual(expect.objectContaining({ method: "POST", credentials: "include" }));
+  });
+
+  it("requests and confirms a password reset", async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ status: "accepted" }), { status: 202 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await requestPasswordReset("user@example.com", "sk");
+    await resetPassword("single-use-token", "a new secure password");
+
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/auth\/password-reset\/request$/);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ email: "user@example.com", locale: "sk" });
+    expect(fetchMock.mock.calls[1][0]).toMatch(/\/auth\/password-reset\/confirm$/);
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ token: "single-use-token", password: "a new secure password" });
   });
 });

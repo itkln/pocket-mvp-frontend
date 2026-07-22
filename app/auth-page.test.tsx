@@ -80,4 +80,9 @@ describe("AuthPage", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Incorrect e-mail or password");
     expect(screen.getByRole("alert")).not.toHaveTextContent("Неверный");
   });
+
+  it("links the login form to password recovery in the active locale", () => {
+    render(<I18nProvider initialLocale="sk"><AuthPage mode="login" /></I18nProvider>);
+    expect(screen.getByRole("link", { name: "Zabudli ste heslo?" })).toHaveAttribute("href", "/sk/forgot-password");
+  });
 });

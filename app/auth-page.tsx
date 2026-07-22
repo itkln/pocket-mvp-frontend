@@ -67,7 +67,7 @@ export default function AuthPage({ mode }: { mode: AuthMode }) {
           <label className="auth-field"><span>Повторите пароль</span><span className="auth-password"><input name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} autoComplete="new-password" placeholder="Повторите пароль" minLength={12} maxLength={128} required /><button type="button" onClick={() => setConfirmPasswordVisible((current) => !current)} aria-label={confirmPasswordVisible ? "Скрыть пароль" : "Показать пароль"}>{confirmPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}</button></span></label>
         </>}
 
-        {isLogin ? <div className="auth-options"><label><input type="checkbox" name="remember" />Запомнить меня</label><button type="button">Забыли пароль?</button></div> : <label className="auth-consent"><input type="checkbox" required /><span>Я принимаю условия использования и политику конфиденциальности</span></label>}
+        {isLogin ? <div className="auth-options"><label><input type="checkbox" name="remember" />Запомнить меня</label><Link href={`/${locale}/forgot-password`}>Забыли пароль?</Link></div> : <label className="auth-consent"><input type="checkbox" required /><span>Я принимаю условия использования и политику конфиденциальности</span></label>}
         {error && <p className="auth-error" role="alert">{error}</p>}
 		<button className="auth-submit" type="submit" disabled={submitting}>{submitting ? (isLogin ? "Входим..." : "Создаем аккаунт...") : (isLogin ? "Войти" : "Зарегистрироваться")}</button>
       </form>

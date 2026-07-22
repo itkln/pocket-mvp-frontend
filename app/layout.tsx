@@ -5,6 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Pocket | Venue operations",
   description: "Orders, reservations, payments, and venue operations in one place.",
+  referrer: "no-referrer",
   icons: { icon: "/logo.svg" },
 };
 
