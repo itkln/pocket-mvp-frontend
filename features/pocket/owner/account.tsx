@@ -1,14 +1,49 @@
 "use client";
 
-import { type AuthUser } from "../../../lib/auth-api";
-import { CreditCard, Download, LogOut, ShieldCheck } from "lucide-react";
-import { userInitials } from "../model";
+import { useState, type FormEvent } from "react";
+import { changePassword, type AuthUser } from "../../../lib/auth-api";
+import { CreditCard, Download, Eye, EyeOff, KeyRound, LogOut, ShieldCheck } from "lucide-react";
+import { type Role, userInitials } from "../model";
 import { Button, EmptyIllustration, PageHeader, PanelTitle, Field, StatusPill, money } from "../ui";
 import { localeTags, useI18n } from "../i18n";
+import { useLocalizedError } from "../error-message";
 import { useOwnerWorkspace } from "./context";
 
-export function AccountScreen({ user, onLogout }: { user: AuthUser; onLogout: () => void }) {
-  return <><PageHeader title="Аккаунт" subtitle="Личные данные и безопасность входа." /><div className="account-layout"><aside className="panel account-summary"><span>{userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>Аккаунт Pocket</p><small>{user.email}</small></aside><section className="panel settings-form"><PanelTitle title="Личные данные" /><div className="form-grid"><Field label="Имя"><input value={user.first_name} readOnly /></Field><Field label="Фамилия"><input value={user.last_name} readOnly /></Field><Field label="E-mail"><input type="email" value={user.email} readOnly /></Field><Field label="Телефон"><input type="tel" value={user.phone ?? ""} readOnly placeholder="Телефон не добавлен" /></Field></div><hr /><PanelTitle title="Безопасность" /><div className="account-security"><span><ShieldCheck size={20} /></span><div><strong>Защищенная сессия</strong><p>Пароль хранится в виде Argon2id-хеша</p></div></div><Button className="account-logout" kind="danger" icon={LogOut} onClick={onLogout}>Выйти из аккаунта</Button></section></div></>;
+export function AccountScreen({ user, role, notify, onLogout }: { user: AuthUser; role: Role; notify: (message: string) => void; onLogout: () => void }) {
+  const { t } = useI18n();
+  const errorMessage = useLocalizedError();
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
+  const accountLabel = role === "owner" ? "Настройки владельца" : "Настройки сотрудника";
+
+  const submitPassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const currentPassword = String(data.get("current_password") ?? "");
+    const newPassword = String(data.get("new_password") ?? "");
+    const confirmation = String(data.get("password_confirmation") ?? "");
+    if (!currentPassword) { setFormError(t("Введите текущий пароль")); return; }
+    if (newPassword.length < 12 || newPassword.length > 128) { setFormError(t("Пароль должен содержать от 12 до 128 символов")); return; }
+    if (newPassword !== confirmation) { setFormError(t("Пароли не совпадают")); return; }
+    setSubmitting(true);
+    setFormError("");
+    try {
+      await changePassword(currentPassword, newPassword);
+      form.reset();
+      setEditingPassword(false);
+      setShowPasswords(false);
+      notify("Пароль изменен");
+    } catch (error) {
+      setFormError(errorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return <><PageHeader title={accountLabel} subtitle="Личные данные и безопасность входа." /><div className="account-layout"><aside className="panel account-summary"><span>{userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>{accountLabel}</p><small>{user.email}</small></aside><section className="panel settings-form"><PanelTitle title="Личные данные" /><div className="form-grid"><Field label="Имя"><input value={user.first_name} readOnly /></Field><Field label="Фамилия"><input value={user.last_name} readOnly /></Field><Field label="E-mail"><input type="email" value={user.email} readOnly /></Field><Field label="Телефон"><input type="tel" value={user.phone ?? ""} readOnly placeholder="Телефон не добавлен" /></Field></div><hr /><div className="account-security-heading"><PanelTitle title="Безопасность" />{!editingPassword && <Button kind="secondary" icon={KeyRound} onClick={() => setEditingPassword(true)}>Изменить пароль</Button>}</div>{editingPassword ? <form className="account-password-form" noValidate onSubmit={submitPassword}><div className="form-grid"><Field label="Текущий пароль" wide><div className="account-password-input"><input name="current_password" type={showPasswords ? "text" : "password"} autoComplete="current-password" autoFocus /><button type="button" aria-label={t(showPasswords ? "Скрыть пароль" : "Показать пароль")} onClick={() => setShowPasswords((value) => !value)}>{showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></Field><Field label="Новый пароль"><input name="new_password" type={showPasswords ? "text" : "password"} autoComplete="new-password" /></Field><Field label="Повторите новый пароль"><input name="password_confirmation" type={showPasswords ? "text" : "password"} autoComplete="new-password" /></Field></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className="account-password-actions"><Button kind="secondary" onClick={() => { setEditingPassword(false); setFormError(""); }}>Отмена</Button><Button type="submit" disabled={submitting}>{submitting ? "Сохраняем..." : "Сохранить пароль"}</Button></div></form> : <div className="account-security"><span><ShieldCheck size={20} /></span><div><strong>Защищенная сессия</strong><p>Пароль защищен Argon2id</p></div></div>}<Button className="account-logout" kind="danger" icon={LogOut} onClick={onLogout}>Выйти из аккаунта</Button></section></div></>;
 }
 
 export function PaymentsScreen() {

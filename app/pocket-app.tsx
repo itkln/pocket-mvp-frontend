@@ -222,7 +222,7 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
           {role === "staff" && screen === "service" && <ServiceBoard notify={notify} />}
           {role === "staff" && screen === "kitchen" && <KitchenScreen notify={notify} />}
           {role === "staff" && venue && screen === "staff-floor" && <FloorPlan mode="staff" venueName={venue.name} notify={notify} />}
-		  {role !== "customer" && screen === "account" && <AccountScreen user={currentUser} onLogout={signOut} />}
+		  {role !== "customer" && screen === "account" && <AccountScreen user={currentUser} role={role} notify={notify} onLogout={signOut} />}
         </div>
       </main>
       <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />

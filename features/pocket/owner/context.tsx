@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import {
   createCategory, createMenuItem, createStaff, deleteCategory, deleteMenuItem, deleteStaff,
   getOwnerDashboard, listCategories, listMenuItems, listOrders, listPayments, listReviews, listStaff,
+  reorderCategories as saveCategoryOrder, reorderMenuItems as saveMenuItemOrder,
   replyReview, updateCategory, updateMenuItem, updateOrderStatus, updateStaff,
   type CategoryInput, type MenuItemInput, type OwnerCategory, type OwnerDashboard, type OwnerMenuItem,
   type OwnerOrder, type OwnerPayment, type OwnerReview, type OwnerStaffMember, type StaffInput,
@@ -27,6 +28,8 @@ type OwnerWorkspace = {
   addItem: (input: MenuItemInput) => Promise<void>;
   editItem: (id: string, input: MenuItemInput) => Promise<void>;
   removeItem: (id: string) => Promise<void>;
+  reorderCategories: (ids: string[]) => Promise<void>;
+  reorderItems: (categoryID: string, ids: string[]) => Promise<void>;
   inviteStaff: (input: StaffInput) => Promise<void>;
   editStaff: (id: string, input: StaffInput) => Promise<void>;
   removeStaff: (id: string) => Promise<void>;
@@ -35,6 +38,18 @@ type OwnerWorkspace = {
 };
 
 const OwnerWorkspaceContext = createContext<OwnerWorkspace | null>(null);
+
+function applyOrder<T extends { id: string; sort_order: number }>(items: T[], ids: string[]) {
+  const order = new Map(ids.map((id, index) => [id, index]));
+  return items.map((item) => order.has(item.id) ? { ...item, sort_order: order.get(item.id)! } : item)
+    .sort((left, right) => left.sort_order - right.sort_order);
+}
+
+function applyCategoryItemOrder(items: OwnerMenuItem[], categoryID: string, ids: string[]) {
+  const ordered = applyOrder(items.filter((item) => item.category_id === categoryID), ids);
+  let index = 0;
+  return items.map((item) => item.category_id === categoryID ? ordered[index++] : item);
+}
 
 export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID?: string; children: ReactNode; onError: (message: string) => void }) {
   const errorMessage = useLocalizedError();
@@ -85,6 +100,18 @@ export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID
     addItem: (input) => run(async()=>{const created=await createMenuItem(venueID!,input);setItems(current=>[...current,created]);setCategories(current=>current.map(category=>category.id===created.category_id?{...category,item_count:category.item_count+1}:category));}),
     editItem: (id,input) => run(async()=>{const previous=items.find(item=>item.id===id);const updated=await updateMenuItem(venueID!,id,input);setItems(current=>current.map(item=>item.id===id?updated:item));if(previous&&previous.category_id!==updated.category_id)setCategories(current=>current.map(category=>category.id===previous.category_id?{...category,item_count:Math.max(0,category.item_count-1)}:category.id===updated.category_id?{...category,item_count:category.item_count+1}:category));}),
     removeItem: (id) => run(async()=>{const previous=items.find(item=>item.id===id);await deleteMenuItem(venueID!,id);setItems(current=>current.filter(item=>item.id!==id));if(previous)setCategories(current=>current.map(category=>category.id===previous.category_id?{...category,item_count:Math.max(0,category.item_count-1)}:category));}),
+    reorderCategories: async (ids) => {
+      const previous = categories;
+      setCategories((current) => applyOrder(current, ids));
+      try { await run(() => saveCategoryOrder(venueID!, ids)); }
+      catch (error) { setCategories(previous); throw error; }
+    },
+    reorderItems: async (categoryID, ids) => {
+      const previous = items;
+      setItems((current) => applyCategoryItemOrder(current, categoryID, ids));
+      try { await run(() => saveMenuItemOrder(venueID!, categoryID, ids)); }
+      catch (error) { setItems(previous); throw error; }
+    },
     inviteStaff: (input) => run(async()=>{const created=await createStaff(venueID!,input);setStaff(current=>[...current,created]);}),
     editStaff: (id,input) => run(async()=>{const updated=await updateStaff(venueID!,id,input);setStaff(current=>current.map(item=>item.id===id?updated:item));}),
     removeStaff: (id) => run(async()=>{await deleteStaff(venueID!,id);setStaff(current=>current.filter(item=>item.id!==id));}),

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getCurrentUser, login, logout, register, requestPasswordReset, resetPassword } from "./auth-api";
+import { changePassword, getCurrentUser, login, logout, register, requestPasswordReset, resetPassword } from "./auth-api";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -48,5 +48,16 @@ describe("auth API", () => {
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ email: "user@example.com", locale: "sk" });
     expect(fetchMock.mock.calls[1][0]).toMatch(/\/auth\/password-reset\/confirm$/);
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ token: "single-use-token", password: "a new secure password" });
+  });
+
+  it("changes the password through the authenticated endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await changePassword("old secure password", "new secure password");
+
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/auth\/password\/change$/);
+    expect(fetchMock.mock.calls[0][1]).toEqual(expect.objectContaining({ method: "POST", credentials: "include" }));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ current_password: "old secure password", new_password: "new secure password" });
   });
 });

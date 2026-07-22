@@ -58,3 +58,10 @@ export async function resetPassword(token: string, password: string): Promise<vo
     body: JSON.stringify({ token, password }),
   });
 }
+
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  await apiRequest<void>("/auth/password/change", {
+    method: "POST",
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+}

@@ -31,6 +31,15 @@ describe("global localization", () => {
     expect(translate("Выбрано заведение North & Vine", "sk")).toBe("Vybraná prevádzka North & Vine");
   });
 
+  it("keeps owner forms fully localized in Ukrainian and English", () => {
+    expect(translate("Новая позиция", "ua")).toBe("Нова позиція");
+    expect(translate("Название блюда", "ua")).toBe("Назва страви");
+    expect(translate("Выберите категорию", "ua")).toBe("Виберіть категорію");
+    expect(translate("Отправить приглашение", "en")).toBe("Send invitation");
+    expect(translate("Имя сотрудника", "en")).toBe("Staff member name");
+    expect(translate("Создать рабочее пространство", "ua")).toBe("Створити робочий простір");
+  });
+
   it("updates text and accessible field labels across the document", async () => {
     render(<I18nProvider><LanguageHarness /></I18nProvider>);
 

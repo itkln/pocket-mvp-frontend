@@ -67,10 +67,12 @@ export const listCategories = async (id: string) => (await apiRequest<{ categori
 export const createCategory = async (id: string, input: CategoryInput) => (await apiRequest<{ category: OwnerCategory }>(venuePath(id, "/categories"), { method: "POST", body: JSON.stringify(input) })).category;
 export const updateCategory = async (venueID: string, id: string, input: CategoryInput) => (await apiRequest<{ category: OwnerCategory }>(venuePath(venueID, `/categories/${id}`), { method: "PATCH", body: JSON.stringify(input) })).category;
 export const deleteCategory = async (venueID: string, id: string) => apiRequest<void>(venuePath(venueID, `/categories/${id}`), { method: "DELETE" });
+export const reorderCategories = async (venueID: string, ids: string[]) => apiRequest<void>(venuePath(venueID, "/categories/order"), { method: "PUT", body: JSON.stringify({ ids }) });
 export const listMenuItems = async (id: string) => (await apiRequest<{ items: OwnerMenuItem[] }>(venuePath(id, "/menu-items"))).items;
 export const createMenuItem = async (id: string, input: MenuItemInput) => (await apiRequest<{ item: OwnerMenuItem }>(venuePath(id, "/menu-items"), { method: "POST", body: JSON.stringify(input) })).item;
 export const updateMenuItem = async (venueID: string, id: string, input: MenuItemInput) => (await apiRequest<{ item: OwnerMenuItem }>(venuePath(venueID, `/menu-items/${id}`), { method: "PATCH", body: JSON.stringify(input) })).item;
 export const deleteMenuItem = async (venueID: string, id: string) => apiRequest<void>(venuePath(venueID, `/menu-items/${id}`), { method: "DELETE" });
+export const reorderMenuItems = async (venueID: string, categoryID: string, ids: string[]) => apiRequest<void>(venuePath(venueID, "/menu-items/order"), { method: "PUT", body: JSON.stringify({ category_id: categoryID, ids }) });
 export const listStaff = async (id: string) => (await apiRequest<{ staff: OwnerStaffMember[] }>(venuePath(id, "/staff"))).staff;
 export const createStaff = async (id: string, input: StaffInput) => (await apiRequest<{ staff_member: OwnerStaffMember }>(venuePath(id, "/staff"), { method: "POST", body: JSON.stringify(input) })).staff_member;
 export const updateStaff = async (venueID: string, id: string, input: StaffInput) => (await apiRequest<{ staff_member: OwnerStaffMember }>(venuePath(venueID, `/staff/${id}`), { method: "PATCH", body: JSON.stringify(input) })).staff_member;

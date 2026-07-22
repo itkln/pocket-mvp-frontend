@@ -10,6 +10,7 @@ const errorSourceByCode: Record<string, string> = {
   invalid_input: "Проверьте введенные данные",
   account_exists: "Аккаунт с таким e-mail уже существует",
   invalid_credentials: "Неверный e-mail или пароль",
+  invalid_current_password: "Текущий пароль указан неверно",
   invalid_reset_token: "Ссылка недействительна или устарела",
   too_many_attempts: "Слишком много попыток. Попробуйте через 15 минут",
   unauthorized: "Требуется вход в аккаунт",
