@@ -6,11 +6,11 @@ type Params = Record<string, string | number>;
 type TranslationRow = readonly [string, string, string, string];
 
 export const localeStorageKey = "pocket:locale";
-export const localeTags: Record<Locale, string> = { ru: "ru-RU", en: "en-GB", uk: "uk-UA", sk: "sk-SK" };
+export const localeTags: Record<Locale, string> = { ru: "ru-RU", en: "en-GB", ua: "uk-UA", sk: "sk-SK" };
 export const localeOptions: { value: Locale; short: string; label: string }[] = [
   { value: "ru", short: "RU", label: "Русский" },
   { value: "en", short: "EN", label: "English" },
-  { value: "uk", short: "UA", label: "Українська" },
+  { value: "ua", short: "UA", label: "Українська" },
   { value: "sk", short: "SK", label: "Slovenčina" },
 ];
 
@@ -61,6 +61,32 @@ const rows: TranslationRow[] = [
   ["Уведомления", "Notifications", "Сповіщення", "Upozornenia"],
   ["Корзина", "Cart", "Кошик", "Košík"],
   ["Добавлено в заказ", "Added to order", "Додано до замовлення", "Pridané do objednávky"],
+  ["Архив QR-кодов подготовлен", "QR code archive is ready", "Архів QR-кодів готовий", "Archív QR kódov je pripravený"],
+  ["Заказ принят", "Order accepted", "Замовлення прийнято", "Objednávka bola prijatá"],
+  ["Изменения сохранены", "Changes saved", "Зміни збережено", "Zmeny boli uložené"],
+  ["Категория удалена", "Category deleted", "Категорію видалено", "Kategória bola odstránená"],
+  ["Категории добавлены", "Categories added", "Категорії додано", "Kategórie boli pridané"],
+  ["Категории сохранены", "Categories saved", "Категорії збережено", "Kategórie boli uložené"],
+  ["Копия позиции создана", "Item copy created", "Копію позиції створено", "Kópia položky bola vytvorená"],
+  ["Обложка готова. Нажмите «Сохранить»", "Cover ready. Select Save", "Обкладинка готова. Натисніть «Зберегти»", "Titulná fotografia je pripravená. Vyberte Uložiť"],
+  ["Ответ опубликован", "Reply published", "Відповідь опубліковано", "Odpoveď bola zverejnená"],
+  ["Официант назначен", "Waiter assigned", "Офіціанта призначено", "Čašník bol priradený"],
+  ["План зала сохранен", "Floor plan saved", "План залу збережено", "Plán sály bol uložený"],
+  ["Позиция добавлена в меню", "Item added to menu", "Позицію додано до меню", "Položka bola pridaná do menu"],
+  ["Позиция обновлена", "Item updated", "Позицію оновлено", "Položka bola aktualizovaná"],
+  ["Позиция удалена", "Item deleted", "Позицію видалено", "Položka bola odstránená"],
+  ["Приглашение отправлено", "Invitation sent", "Запрошення надіслано", "Pozvánka bola odoslaná"],
+  ["Профиль сохранен", "Profile saved", "Профіль збережено", "Profil bol uložený"],
+  ["Роль сотрудника обновлена", "Staff role updated", "Роль працівника оновлено", "Rola zamestnanca bola aktualizovaná"],
+  ["Сотрудник удален", "Staff member removed", "Працівника видалено", "Zamestnanec bol odstránený"],
+  ["E-mail скопирован", "E-mail copied", "E-mail скопійовано", "E-mail bol skopírovaný"],
+  ["Доступ восстановлен", "Access restored", "Доступ відновлено", "Prístup bol obnovený"],
+  ["Доступ приостановлен", "Access suspended", "Доступ призупинено", "Prístup bol pozastavený"],
+  ["Ссылка на заказ скопирована", "Order link copied", "Посилання на замовлення скопійовано", "Odkaz na objednávku bol skopírovaný"],
+  ["Тариф сохранен", "Plan saved", "Тариф збережено", "Program bol uložený"],
+  ["Форма отзыва открыта", "Review form opened", "Форму відгуку відкрито", "Formulár recenzie bol otvorený"],
+  ["Заказ отмечен как поданный", "Order marked as served", "Замовлення позначено як подане", "Objednávka bola označená ako podaná"],
+  ["Заказ передан на следующий этап", "Order moved to the next stage", "Замовлення передано на наступний етап", "Objednávka bola presunutá do ďalšej fázy"],
   ["Добрый день, {name}", "Good afternoon, {name}", "Добрий день, {name}", "Dobrý deň, {name}"],
   ["Актуальные данные выбранного заведения.", "Current data for the selected venue.", "Актуальні дані вибраного закладу.", "Aktuálne údaje vybranej prevádzky."],
   ["Отчет", "Report", "Звіт", "Prehľad"],
@@ -515,12 +541,43 @@ const rows: TranslationRow[] = [
   ["Удалить сотрудника {name} из команды?", "Remove {name} from the team?", "Видалити {name} з команди?", "Odstrániť člena {name} z tímu?"],
 ];
 
-const localeIndex: Record<Locale, number> = { ru: 0, en: 1, uk: 2, sk: 3 };
+const localeIndex: Record<Locale, number> = { ru: 0, en: 1, ua: 2, sk: 3 };
 const dictionaries = Object.fromEntries((Object.keys(localeIndex) as Locale[]).map((locale) => [locale, new Map(rows.map((row) => [row[0], row[localeIndex[locale]]]))])) as Record<Locale, Map<string, string>>;
 
 const interpolate = (value: string, params?: Params) => params ? value.replace(/\{(\w+)\}/g, (_, key: string) => String(params[key] ?? `{${key}}`)) : value;
 
 const dynamicTranslation = (source: string, locale: Locale) => {
+  const localized = (en: string, ua: string, sk: string) => locale === "en" ? en : locale === "ua" ? ua : locale === "sk" ? sk : source;
+  const floorName = (value: string) => {
+    const match = value.match(/^(\d+) этаж$/);
+    return match ? localized(`Floor ${match[1]}`, `${match[1]} поверх`, `${match[1]}. poschodie`) : value;
+  };
+  const fixtureName = (value: string) => {
+    const names: Record<string, [string, string, string]> = {
+      "Окно": ["Window", "Вікно", "Okno"],
+      "Бар": ["Bar", "Бар", "Bar"],
+      "Вход": ["Entrance", "Вхід", "Vchod"],
+    };
+    const translations = names[value];
+    return translations ? localized(...translations) : value;
+  };
+  let match: RegExpMatchArray | null;
+  if ((match = source.match(/^Выбрано заведение (.+)$/))) return localized(`Selected venue ${match[1]}`, `Вибрано заклад ${match[1]}`, `Vybraná prevádzka ${match[1]}`);
+  if ((match = source.match(/^(.+) добавлено$/))) return localized(`${match[1]} added`, `${match[1]} додано`, `${match[1]} pridané`);
+  if ((match = source.match(/^Заказ #(.+) принят$/))) return localized(`Order #${match[1]} accepted`, `Замовлення #${match[1]} прийнято`, `Objednávka #${match[1]} bola prijatá`);
+  if ((match = source.match(/^(#\d+) готов к выдаче$/))) return localized(`${match[1]} is ready for pickup`, `${match[1]} готове до видачі`, `${match[1]} je pripravená na výdaj`);
+  if ((match = source.match(/^(\d+) этаж (добавлен|удален)$/))) return match[2] === "добавлен"
+    ? localized(`Floor ${match[1]} added`, `${match[1]} поверх додано`, `${match[1]}. poschodie pridané`)
+    : localized(`Floor ${match[1]} deleted`, `${match[1]} поверх видалено`, `${match[1]}. poschodie odstránené`);
+  if ((match = source.match(/^Стол (.+) добавлен на (.+)$/))) return localized(`Table ${match[1]} added to ${floorName(match[2])}`, `Стіл ${match[1]} додано на ${floorName(match[2])}`, `Stôl ${match[1]} pridaný na ${floorName(match[2])}`);
+  if ((match = source.match(/^(Окно|Бар|Вход) (?:добавлено|добавлен) на (.+)$/))) return localized(`${fixtureName(match[1])} added to ${floorName(match[2])}`, `${fixtureName(match[1])} додано на ${floorName(match[2])}`, `${fixtureName(match[1])} pridaný na ${floorName(match[2])}`);
+  if ((match = source.match(/^(Окно|Бар|Вход) (?:удалено|удален) с плана$/))) return localized(`${fixtureName(match[1])} removed from the plan`, `${fixtureName(match[1])} видалено з плану`, `${fixtureName(match[1])} odstránený z plánu`);
+  if ((match = source.match(/^Стол (.+) сохранен$/))) return localized(`Table ${match[1]} saved`, `Стіл ${match[1]} збережено`, `Stôl ${match[1]} bol uložený`);
+  if ((match = source.match(/^Стол (.+) удален с плана$/))) return localized(`Table ${match[1]} removed from the plan`, `Стіл ${match[1]} видалено з плану`, `Stôl ${match[1]} bol odstránený z plánu`);
+  if ((match = source.match(/^QR-код стола (.+) (скачан|перегенерирован)$/))) return match[2] === "скачан"
+    ? localized(`Table ${match[1]} QR code downloaded`, `QR-код столу ${match[1]} завантажено`, `QR kód stola ${match[1]} bol stiahnutý`)
+    : localized(`Table ${match[1]} QR code regenerated`, `QR-код столу ${match[1]} перегенеровано`, `QR kód stola ${match[1]} bol vygenerovaný znova`);
+  if ((match = source.match(/^Стол (.+) забронирован на (.+)$/))) return localized(`Table ${match[1]} reserved for ${match[2]}`, `Стіл ${match[1]} заброньовано на ${match[2]}`, `Stôl ${match[1]} rezervovaný na ${match[2]}`);
   const templates: [RegExp, string, string, string][] = [
     [/^Стол (.+) уже существует$/, "Table $1 already exists", "Стіл $1 уже існує", "Stôl $1 už existuje"],
     [/^(\d+) этаж$/, "$1 floor", "$1 поверх", "$1. poschodie"],
@@ -553,7 +610,7 @@ const dynamicTranslation = (source: string, locale: Locale) => {
   ];
   for (const template of templates) {
     if (!template[0].test(source)) continue;
-    const replacement = locale === "en" ? template[1] : locale === "uk" ? template[2] : locale === "sk" ? template[3] : source;
+    const replacement = locale === "en" ? template[1] : locale === "ua" ? template[2] : locale === "sk" ? template[3] : source;
     return source.replace(template[0], replacement);
   }
   return source;
@@ -629,9 +686,10 @@ export function I18nProvider({ children, initialLocale }: { children: ReactNode;
       return () => window.clearTimeout(syncLocale);
     }
     const stored = window.localStorage.getItem(localeStorageKey);
-    if (stored !== "ru" && stored !== "en" && stored !== "uk" && stored !== "sk") return;
+    const restored = stored === "uk" ? "ua" : stored;
+    if (restored !== "ru" && restored !== "en" && restored !== "ua" && restored !== "sk") return;
 
-    const restoreLocale = window.setTimeout(() => setLocaleState(stored), 0);
+    const restoreLocale = window.setTimeout(() => setLocaleState(restored), 0);
     return () => window.clearTimeout(restoreLocale);
   }, [initialLocale]);
   useEffect(() => {

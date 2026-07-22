@@ -31,7 +31,7 @@ describe("PasswordRecoveryPage", () => {
 
   it("submits a new password with the URL token", async () => {
     vi.mocked(resetPassword).mockResolvedValue();
-    render(<I18nProvider initialLocale="uk"><PasswordRecoveryPage mode="reset" token="single-use-token" /></I18nProvider>);
+    render(<I18nProvider initialLocale="ua"><PasswordRecoveryPage mode="reset" token="single-use-token" /></I18nProvider>);
 
     fireEvent.change(await screen.findByLabelText("Новий пароль"), { target: { value: "a new secure password" } });
     fireEvent.change(await screen.findByLabelText("Повторіть новий пароль"), { target: { value: "a new secure password" } });

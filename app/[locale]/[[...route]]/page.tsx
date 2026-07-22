@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import AuthPage from "../../auth-page";
 import PasswordRecoveryPage from "../../password-recovery-page";
 import PocketApp from "../../pocket-app";
@@ -9,6 +9,13 @@ const isRole = (value: string | undefined): value is Role => value === "owner" |
 
 export default async function LocalizedPage({ params, searchParams }: { params: Promise<{ locale: string; route?: string[] }>; searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const { locale, route = [] } = await params;
+  if (locale === "uk") {
+    const query = await searchParams;
+    const nextQuery = new URLSearchParams();
+    Object.entries(query).forEach(([key, value]) => (Array.isArray(value) ? value : [value]).forEach((item) => { if (item !== undefined) nextQuery.append(key, item); }));
+    const suffix = nextQuery.size ? `?${nextQuery.toString()}` : "";
+    redirect(`/ua${route.length ? `/${route.map(encodeURIComponent).join("/")}` : ""}${suffix}`);
+  }
   if (!isLocale(locale)) notFound();
   if (route[0] === "login") return route.length === 1 ? <AuthPage mode="login" /> : notFound();
   if (route[0] === "register") return route.length === 1 ? <AuthPage mode="register" /> : notFound();

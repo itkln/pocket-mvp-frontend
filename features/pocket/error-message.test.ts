@@ -6,7 +6,7 @@ describe("localized API errors", () => {
   it.each([
     ["ru", "Неверный e-mail или пароль"],
     ["en", "Incorrect e-mail or password"],
-    ["uk", "Неправильний e-mail або пароль"],
+    ["ua", "Неправильний e-mail або пароль"],
     ["sk", "Nesprávny e-mail alebo heslo"],
   ] as const)("renders an API error in %s", (locale, expected) => {
     const error = new APIError("invalid_credentials", "Сообщение сервера на русском", 401);

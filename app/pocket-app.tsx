@@ -56,7 +56,7 @@ const appPath = (locale: Locale, role: Role, screen: string) => `/${locale}/${ro
 
 export default function PocketApp({ initialRole, initialScreen }: { initialRole?: Role; initialScreen?: string }) {
   const router = useRouter();
-	const { locale } = useI18n();
+	const { locale, t } = useI18n();
 	const errorMessage = useLocalizedError();
 	const [authReady, setAuthReady] = useState(false);
 	const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
@@ -226,7 +226,7 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
         </div>
       </main>
       <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />
-      {toast && <div className="toast"><CheckCircle2 size={18} />{toast}</div>}
+      {toast && <div className="toast"><CheckCircle2 size={18} />{t(toast)}</div>}
 	  {modal === "venue" && <NewVenueModal onClose={() => setModal(null)} onCreate={createVenue} />}
 		  {modal && modal !== "venue" && <Modal type={modal} currency={venue?.currency} onClose={() => setModal(null)} notify={(message) => { setModal(null); notify(message); }} />}
     </div>
