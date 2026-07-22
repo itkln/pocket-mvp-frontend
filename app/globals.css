@@ -2824,3 +2824,194 @@ td { vertical-align: middle; }
   .account-footer-actions,
   .account-footer-actions .button { width: 100%; }
 }
+
+/* Three-pane menu workspace: categories, products, and selected item details. */
+.menu-workspace {
+  min-height: 560px;
+  display: grid;
+  grid-template-columns: 220px 310px minmax(300px, 1fr);
+  align-items: stretch;
+  gap: 10px;
+}
+.menu-category-pane,
+.menu-product-pane,
+.menu-detail-pane {
+  min-width: 0;
+  border-radius: 14px;
+  background: #fff;
+}
+.menu-category-pane { height: 100%; align-self: stretch; }
+.menu-product-pane { position: relative; }
+.menu-product-header {
+  display: grid;
+  gap: 10px;
+  padding: 16px 14px 12px;
+}
+.menu-pane-title { min-height: 32px; display: flex; align-items: center; gap: 8px; }
+.menu-pane-title strong { font-size: 16px; }
+.menu-pane-title span {
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  border-radius: 11px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 650;
+}
+.menu-product-tools { display: flex; align-items: center; gap: 7px; }
+.menu-product-tools .search-field { width: 100%; min-width: 0; background: #f5f7f8; }
+.menu-product-list { display: grid; }
+.menu-product-row {
+  position: relative;
+  z-index: 0;
+  min-width: 0;
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 34px 34px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0 10px 12px;
+  background: #fff;
+  cursor: pointer;
+}
+.menu-product-row + .menu-product-row { border-top: 1px solid #f0f2f3; }
+.menu-product-row:hover { background: #f7fafb; }
+.menu-product-row.selected { z-index: 2; background: var(--blue-soft); }
+.menu-product-row.dragging { z-index: 30; opacity: .94; box-shadow: 0 12px 30px rgba(23, 33, 43, .16); }
+.menu-product-row > .food-image {
+  width: 52px;
+  height: 52px;
+  min-height: 0;
+  border-radius: 9px;
+  background-position: center;
+  background-size: cover;
+}
+.menu-product-row .menu-image-placeholder span { font-size: 20px; }
+.menu-product-copy { min-width: 0; }
+.menu-product-copy > div { min-width: 0; display: flex; align-items: center; gap: 7px; }
+.menu-product-copy h3 {
+  min-width: 0;
+  overflow: hidden;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu-product-copy > div > svg { flex: 0 0 auto; color: #b18425; }
+.menu-product-copy p { margin: 5px 0 0 37px; color: var(--muted); font-size: 12px; font-weight: 550; }
+.menu-product-row .row-actions { z-index: 5; }
+.menu-product-row .icon-button { width: 32px; height: 32px; }
+.menu-product-drag {
+  width: 34px;
+  height: calc(100% + 20px);
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  margin: -10px 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #9aa5ad;
+  cursor: grab;
+  touch-action: none;
+}
+.menu-product-drag:hover,
+.menu-product-drag:focus-visible { background: rgba(34, 158, 217, .1); color: var(--blue); }
+.menu-product-drag:active { cursor: grabbing; }
+.menu-product-pane > .empty-state { min-height: 430px; }
+
+.menu-detail-pane { padding: 14px; }
+.menu-item-details { position: sticky; top: 84px; }
+.menu-detail-media { position: relative; overflow: hidden; border-radius: 12px; }
+.menu-detail-media > .food-image {
+  width: 100%;
+  min-height: 220px;
+  aspect-ratio: 16 / 9;
+  background-position: center;
+  background-size: cover;
+}
+.menu-detail-media .menu-image-placeholder span { font-size: 42px; }
+.menu-detail-media .menu-status { position: absolute; top: 12px; left: 12px; margin: 0; }
+.menu-item-details > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 2px 14px;
+}
+.menu-item-details > header small { display: block; margin-bottom: 4px; color: var(--blue); font-size: 12px; font-weight: 600; }
+.menu-item-details > header h2 { margin: 0; font-size: 22px; line-height: 1.25; }
+.menu-detail-description,
+.menu-detail-values > div,
+.menu-detail-setting { padding: 14px; border-radius: 10px; background: #f6f8f9; }
+.menu-detail-description > span,
+.menu-detail-values dt { color: var(--muted); font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.menu-detail-description p { margin: 7px 0 0; font-size: 13px; line-height: 1.5; }
+.menu-detail-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 8px 0; }
+.menu-detail-values > div { min-width: 0; }
+.menu-detail-values dd { overflow: hidden; margin: 6px 0 0; font-size: 14px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.menu-detail-setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.menu-detail-setting strong { font-size: 13px; }
+.menu-detail-setting p { margin: 2px 0 0; color: var(--muted); font-size: 11px; }
+.menu-popular-toggle {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 8px 0;
+  padding: 0 12px;
+  border: 0;
+  background: #f6f8f9;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.menu-popular-toggle:hover { background: #f2f5f6; }
+.menu-popular-toggle.active { background: #fff4d8; color: #8a6512; }
+.menu-item-details > .button { width: 100%; }
+.menu-detail-empty {
+  min-height: 520px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  padding: 28px;
+  color: var(--muted);
+  text-align: center;
+}
+.menu-detail-empty > svg { margin-bottom: 10px; color: #9aa7af; }
+.menu-detail-empty strong { color: var(--ink); font-size: 15px; }
+.menu-detail-empty p { max-width: 260px; margin: 5px 0 0; font-size: 12px; line-height: 1.5; }
+
+@media (max-width: 1180px) {
+  .menu-workspace { grid-template-columns: 230px minmax(360px, 1fr); }
+  .menu-detail-pane { display: none; }
+}
+
+@media (max-width: 760px) {
+  .menu-workspace { grid-template-columns: 1fr; min-height: 0; }
+  .menu-category-pane { display: none; }
+  .menu-product-pane { min-height: 520px; }
+  .menu-product-header { padding: 12px; }
+  .menu-pane-title { justify-content: space-between; }
+}
+
+@media (max-width: 640px) {
+  .menu-product-tools { display: grid; grid-template-columns: minmax(0, 1fr) 36px; }
+  .menu-product-tools .mobile-category-select {
+    width: 100%;
+    grid-template-columns: 16px minmax(0, 1fr) 16px;
+  }
+  .menu-product-tools .mobile-category-manage { display: inline-grid; }
+  .menu-product-tools .search-field { grid-column: 1 / -1; }
+  .menu-product-row { grid-template-columns: 48px minmax(0, 1fr) 32px 32px; gap: 8px; padding-left: 10px; }
+  .menu-product-row > .food-image { width: 48px; height: 48px; }
+  .menu-product-copy p { margin-left: 37px; }
+  .menu-product-drag { width: 32px; }
+}
