@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "./i18n";
-import { Topbar } from "./navigation";
+import { Sidebar, Topbar } from "./navigation";
+import { type Venue } from "./model";
 
 const replace = vi.fn();
 vi.mock("next/navigation", () => ({ usePathname: () => "/ru/owner/overview", useRouter: () => ({ replace }) }));
@@ -62,5 +63,71 @@ describe("Topbar language menu", () => {
     fireEvent.click(screen.getByRole("button", { name: "Уведомления" }));
     expect(onNotificationsRead).toHaveBeenCalled();
     expect(screen.getByText("Изменения сохранены")).toBeInTheDocument();
+  });
+});
+
+const owner = {
+  id: "user-1",
+  email: "owner@example.com",
+  first_name: "Denys",
+  last_name: "Itkin",
+  role: "venue_owner" as const,
+  capabilities: ["customer", "owner"] as ("customer" | "owner")[],
+};
+
+const venue = (id: string, name: string, city: string): Venue => ({
+  id,
+  name,
+  slug: name.toLowerCase().replaceAll(" ", "-"),
+  address: "Hidden address",
+  city,
+  country_code: "SK",
+  timezone: "Europe/Bratislava",
+  currency: "EUR",
+  status: "active",
+  settings: {},
+  created_at: "2026-01-01T00:00:00Z",
+});
+
+const sidebarProps = {
+  user: owner,
+  role: "owner" as const,
+  screen: "overview",
+  navigation: [],
+  mobileNav: false,
+  collapsed: false,
+  onNavigate: vi.fn(),
+  onRole: vi.fn(),
+  onVenue: vi.fn(),
+  onAddVenue: vi.fn(),
+  onClose: vi.fn(),
+  onToggleCollapsed: vi.fn(),
+};
+
+describe("Sidebar venue navigation", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("shows venue creation below a single non-expandable venue", () => {
+    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
+    render(<I18nProvider><Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden]} /></I18nProvider>);
+
+    expect(screen.getByRole("button", { name: /Zen Garden/ })).toBeDisabled();
+    expect(screen.queryByText("Bratislava")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Добавить заведение" }));
+    expect(sidebarProps.onAddVenue).toHaveBeenCalledOnce();
+  });
+
+  it("opens venue switching only when multiple venues are available", () => {
+    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
+    const northVine = venue("venue-2", "North & Vine", "Kosice");
+    render(<I18nProvider><Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden, northVine]} /></I18nProvider>);
+
+    fireEvent.click(screen.getByRole("button", { name: /Zen Garden/ }));
+
+    expect(screen.getByText("North & Vine")).toBeInTheDocument();
+    expect(screen.queryByText("Kosice")).not.toBeInTheDocument();
   });
 });

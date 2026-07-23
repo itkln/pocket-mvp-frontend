@@ -21,6 +21,8 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
   const [searchOpen, setSearchOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [categoriesMode, setCategoriesMode] = useState<"manage" | "create" | null>(null);
+  const [categoriesOpen, setCategoriesOpen] = useState(true);
+  const [productsOpen, setProductsOpen] = useState(true);
   const [actionItem, setActionItem] = useState<string | null>(null);
   const [selectedItemID, setSelectedItemID] = useState<string | null>(null);
   const [detailEditItemID, setDetailEditItemID] = useState<string | null>(null);
@@ -74,16 +76,48 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
     else setEditing(item);
   };
 
+  const saveCategories = async (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean }[]) => {
+    await Promise.all([
+      ...categories.map((item) => workspace.editCategory(item.id, { name: item.name, sort_order: item.sort_order, is_active: item.is_active })),
+      ...newCategories.map((item) => workspace.addCategory(item)),
+    ]);
+    setCategoriesMode(null);
+    notify(newCategories.length ? "Категории добавлены" : "Категории сохранены");
+  };
+
   return <><PageHeader title="Меню" subtitle="Категории, цены и доступность блюд." actions={<Button kind="secondary" icon={Eye} onClick={() => setPreview(true)}>Предпросмотр</Button>} />
-    <div className={`mobile-create-fab ${createOpen ? "open" : ""}`}>{createOpen && <div className="mobile-create-popover"><CreateMenuContent onItem={() => { setCreateOpen(false); onAdd(); }} onCategory={() => { setCreateOpen(false); setCategoriesMode("create"); }} /></div>}<button className="mobile-create-trigger" aria-label={createOpen ? "Закрыть меню создания" : "Добавить в меню"} onClick={() => setCreateOpen((value) => !value)}>{createOpen ? <X size={25} /> : <Plus size={25} />}</button></div>
+    <div className={`mobile-create-fab ${createOpen ? "open" : ""}`}>{createOpen && <div className="mobile-create-popover"><CreateMenuContent onItem={() => { setCreateOpen(false); setProductsOpen(true); onAdd(); }} onCategory={() => { setCreateOpen(false); setCategoriesOpen(true); setCategoriesMode("create"); }} /></div>}<button className="mobile-create-trigger" aria-label={createOpen ? "Закрыть меню создания" : "Добавить в меню"} onClick={() => setCreateOpen((value) => !value)}>{createOpen ? <X size={25} /> : <Plus size={25} />}</button></div>
     <div className="menu-workspace">
-      <aside className="category-list menu-category-pane"><div className="category-list-heading"><div className="menu-pane-title"><strong>Категории</strong><span>{workspace.categories.length}</span></div><IconButton icon={Settings2} label="Управление категориями" onClick={() => setCategoriesMode("manage")} /></div><button type="button" className="menu-column-add" onClick={() => setCategoriesMode("create")}><Plus size={17} />Добавить категорию</button><DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderCategories}><SortableContext items={workspace.categories.map((item) => item.id)} strategy={verticalListSortingStrategy}>{workspace.categories.map((item) => <SortableCategory key={item.id} item={item} active={selectedCategory === item.id} onSelect={() => { setCategory(item.id); setSelectedItemID(null); setDetailEditItemID(null); }} />)}</SortableContext></DndContext></aside>
-      <section className="menu-product-pane"><header className="menu-product-header"><div className="menu-product-title-row"><div className="menu-pane-title"><strong>Позиции</strong><span>{filtered.length}</span></div><IconButton icon={searchOpen ? X : Search} className="menu-search-toggle" label={searchOpen ? "Закрыть поиск" : "Найти позицию"} onClick={() => { if (searchOpen) setQuery(""); setSearchOpen((value) => !value); }} /></div><button type="button" className="menu-column-add" onClick={onAdd}><Plus size={17} />Добавить позицию</button><div className="menu-product-tools"><label className="mobile-category-select"><LayoutGrid size={16} /><select aria-label="Категория меню" value={selectedCategory} onChange={(event) => { setCategory(event.target.value); setSelectedItemID(null); setDetailEditItemID(null); }}>{workspace.categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select><ChevronDown size={15} /></label><IconButton icon={Settings2} className="mobile-category-manage" label="Управление категориями" onClick={() => setCategoriesMode("manage")} />{searchOpen && <label className="search-field menu-search-expanded"><Search size={17} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Найти блюдо" /></label>}</div></header>
-        {filtered.length ? <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderItems}><SortableContext items={filtered.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-product-list">{filtered.map((item) => <SortableMenuCard key={item.id} item={item} selected={selectedItem?.id === item.id} reorderEnabled={canReorderItems} actionOpen={actionItem === item.id} onSelect={() => { setSelectedItemID(item.id); setDetailEditItemID(null); setActionItem(null); }} onToggleActions={() => { setSelectedItemID(item.id); setActionItem(actionItem === item.id ? null : item.id); }} onEdit={() => editItem(item)} onToggleAvailable={() => void workspace.editItem(item.id, itemInput(item, { is_available: !item.is_available }))} onTogglePopular={() => void workspace.editItem(item.id, itemInput(item, { is_popular: !item.is_popular })).then(() => setActionItem(null))} onDuplicate={() => void duplicate(item)} onRemove={() => void remove(item)} />)}</div></SortableContext></DndContext> : <EmptyIllustration icon={LayoutGrid} title={workspace.categories.length ? "Позиции не найдены" : "Меню пока пустое"} text={workspace.categories.length ? "Измените поисковый запрос." : "Сначала создайте категорию, затем добавьте первую позицию."} />}
+      <aside className={`category-list menu-category-pane ${categoriesOpen ? "" : "collapsed"}`}>
+        <div className="category-list-heading">
+          <div className="menu-pane-title"><strong>Категории</strong><span>{workspace.categories.length}</span></div>
+          <div className="menu-pane-header-actions">
+            <IconButton icon={categoriesMode ? X : Settings2} label={categoriesMode ? "Закрыть редактирование категорий" : "Редактировать категории"} onClick={() => { setCategoriesOpen(true); setCategoriesMode((mode) => mode ? null : "manage"); }} />
+            <IconButton icon={ChevronDown} className={`menu-pane-collapse ${categoriesOpen ? "open" : ""}`} label={categoriesOpen ? "Свернуть категории" : "Развернуть категории"} onClick={() => setCategoriesOpen((open) => !open)} />
+          </div>
+        </div>
+        <div className="menu-pane-collapsible">
+          <button type="button" className="menu-column-add" onClick={() => setCategoriesMode("create")}><Plus size={17} />Добавить категорию</button>
+          {categoriesMode ? <CategoryEditor key={categoriesMode} categories={workspace.categories} initialCreate={categoriesMode === "create"} inline onClose={() => setCategoriesMode(null)} onRemove={removeCategory} onSave={saveCategories} /> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderCategories}><SortableContext items={workspace.categories.map((item) => item.id)} strategy={verticalListSortingStrategy}>{workspace.categories.map((item) => <SortableCategory key={item.id} item={item} active={selectedCategory === item.id} onSelect={() => { setCategory(item.id); setSelectedItemID(null); setDetailEditItemID(null); }} />)}</SortableContext></DndContext>}
+        </div>
+      </aside>
+      <section className={`menu-product-pane ${productsOpen ? "" : "collapsed"}`}>
+        <header className="menu-product-header">
+          <div className={`menu-product-title-row ${searchOpen ? "searching" : ""}`}>
+            {searchOpen ? <label className="search-field menu-title-search"><Search size={17} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Найти блюдо" /></label> : <div className="menu-pane-title"><strong>Позиции</strong><span>{filtered.length}</span></div>}
+            <div className="menu-pane-header-actions">
+              <IconButton icon={searchOpen ? X : Search} className="menu-search-toggle" label={searchOpen ? "Закрыть поиск" : "Найти позицию"} onClick={() => { setProductsOpen(true); if (searchOpen) setQuery(""); setSearchOpen((value) => !value); }} />
+              <IconButton icon={ChevronDown} className={`menu-pane-collapse ${productsOpen ? "open" : ""}`} label={productsOpen ? "Свернуть позиции" : "Развернуть позиции"} onClick={() => setProductsOpen((open) => !open)} />
+            </div>
+          </div>
+        </header>
+        <div className="menu-pane-collapsible">
+          <button type="button" className="menu-column-add" onClick={onAdd}><Plus size={17} />Добавить позицию</button>
+          {filtered.length ? <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderItems}><SortableContext items={filtered.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-product-list">{filtered.map((item) => <SortableMenuCard key={item.id} item={item} selected={selectedItem?.id === item.id} reorderEnabled={canReorderItems} actionOpen={actionItem === item.id} onSelect={() => { setSelectedItemID(item.id); setDetailEditItemID(null); setActionItem(null); }} onToggleActions={() => { setSelectedItemID(item.id); setActionItem(actionItem === item.id ? null : item.id); }} onEdit={() => editItem(item)} onToggleAvailable={() => void workspace.editItem(item.id, itemInput(item, { is_available: !item.is_available }))} onTogglePopular={() => void workspace.editItem(item.id, itemInput(item, { is_popular: !item.is_popular })).then(() => setActionItem(null))} onDuplicate={() => void duplicate(item)} onRemove={() => void remove(item)} />)}</div></SortableContext></DndContext> : <EmptyIllustration icon={LayoutGrid} title={workspace.categories.length ? "Позиции не найдены" : "Меню пока пустое"} text={workspace.categories.length ? "Измените поисковый запрос." : "Сначала создайте категорию, затем добавьте первую позицию."} />}
+        </div>
       </section>
       <aside className="menu-detail-pane">{selectedItem ? <MenuItemDetails key={`${selectedItem.id}-${detailEditItemID === selectedItem.id ? "edit" : "view"}`} item={selectedItem} categories={workspace.categories} startEditing={detailEditItemID === selectedItem.id} onCancelEdit={() => setDetailEditItemID(null)} onSave={async (input) => { await workspace.editItem(selectedItem.id, input); setDetailEditItemID(null); notify("Позиция обновлена"); }} onToggleAvailable={() => void workspace.editItem(selectedItem.id, itemInput(selectedItem, { is_available: !selectedItem.is_available }))} onTogglePopular={() => void workspace.editItem(selectedItem.id, itemInput(selectedItem, { is_popular: !selectedItem.is_popular }))} /> : <div className="menu-detail-empty"><LayoutGrid size={24} /><strong>Выберите позицию</strong><p>Здесь появятся описание, цена и настройки доступности.</p></div>}</aside>
     </div>
-    {categoriesMode && <CategoryManagerDialog categories={workspace.categories} initialCreate={categoriesMode === "create"} onClose={() => setCategoriesMode(null)} onRemove={removeCategory} onSave={async (categories, newCategories) => { await Promise.all([...categories.map((item) => workspace.editCategory(item.id, { name: item.name, sort_order: item.sort_order, is_active: item.is_active })), ...newCategories.map((item) => workspace.addCategory(item))]); setCategoriesMode(null); notify(newCategories.length ? "Категории добавлены" : "Категории сохранены"); }} />}
     {editing && <ItemEditDialog item={editing} onClose={() => setEditing(null)} onSave={async (input) => { await workspace.editItem(editing.id, input); setEditing(null); notify("Позиция обновлена"); }} />}
     {preview && <MenuPreview venueName={venueName} items={workspace.items.filter((item) => item.is_available)} onClose={() => setPreview(false)} />}
   </>;
@@ -131,7 +165,20 @@ type CategoryDraft = OwnerCategory & { isNew?: boolean };
 
 const newCategoryDraft = (sortOrder: number): CategoryDraft => ({ id: `new-category-${Date.now()}-${sortOrder}`, name: "", sort_order: sortOrder, is_active: true, item_count: 0, isNew: true });
 
-export function CategoryManagerDialog({ categories, initialCreate, onClose, onRemove, onSave }: { categories: OwnerCategory[]; initialCreate: boolean; onClose: () => void; onRemove: (category: OwnerCategory) => Promise<boolean>; onSave: (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean }[]) => Promise<void> }) {
+type CategoryEditorProps = {
+  categories: OwnerCategory[];
+  initialCreate: boolean;
+  inline?: boolean;
+  onClose: () => void;
+  onRemove: (category: OwnerCategory) => Promise<boolean>;
+  onSave: (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean }[]) => Promise<void>;
+};
+
+export function CategoryManagerDialog(props: CategoryEditorProps) {
+  return <div className="modal-backdrop" onMouseDown={props.onClose}><section className="modal category-manager-dialog" onMouseDown={(event) => event.stopPropagation()}><header><h2>Управление категориями</h2><IconButton icon={X} label="Закрыть" onClick={props.onClose} /></header><CategoryEditor {...props} /></section></div>;
+}
+
+function CategoryEditor({ categories, initialCreate, inline = false, onClose, onRemove, onSave }: CategoryEditorProps) {
   const [drafts, setDrafts] = useState<CategoryDraft[]>(() => [...categories.map((category) => ({ ...category })), ...(initialCreate ? [newCategoryDraft(categories.length)] : [])]);
   const [saving, setSaving] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
@@ -166,7 +213,7 @@ export function CategoryManagerDialog({ categories, initialCreate, onClose, onRe
     }
   };
 
-  return <div className="modal-backdrop" onMouseDown={onClose}><section className="modal category-manager-dialog" onMouseDown={(event) => event.stopPropagation()}><header><h2>Управление категориями</h2><IconButton icon={X} label="Закрыть" onClick={onClose} /></header><form onSubmit={submit}><div className="modal-body">{drafts.length ? <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderDrafts}><SortableContext items={drafts.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="category-manager-list">{drafts.map((category, index) => <SortableCategoryDraft key={category.id} category={category} autoFocus={Boolean(category.isNew && index === drafts.length - 1)} positionLabel={category.isNew ? "Новая категория" : positionCount(category.item_count)} onChange={(patch) => setDrafts((current) => current.map((item) => item.id === category.id ? { ...item, ...patch } : item))} onDelete={() => { if (category.isNew) { setDrafts((current) => current.filter((item) => item.id !== category.id)); return; } void onRemove(category).then((removed) => { if (removed) setDrafts((current) => current.filter((item) => item.id !== category.id)); }); }} />)}</div></SortableContext></DndContext> : <div className="category-manager-empty">Категорий пока нет</div>}</div><footer><Button kind="secondary" icon={Plus} onClick={addDraft}>Новая категория</Button><div><Button kind="secondary" onClick={onClose}>Закрыть</Button><Button type="submit" disabled={!hasChanges || invalid || saving}>{saving ? "Сохраняем..." : "Сохранить"}</Button></div></footer></form></section></div>;
+  return <form className={inline ? "category-editor category-inline-editor" : "category-editor"} onSubmit={submit}><div className={inline ? "category-inline-body" : "modal-body"}>{drafts.length ? <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderDrafts}><SortableContext items={drafts.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="category-manager-list">{drafts.map((category, index) => <SortableCategoryDraft key={category.id} category={category} autoFocus={Boolean(category.isNew && index === drafts.length - 1)} positionLabel={category.isNew ? "Новая категория" : positionCount(category.item_count)} onChange={(patch) => setDrafts((current) => current.map((item) => item.id === category.id ? { ...item, ...patch } : item))} onDelete={() => { if (category.isNew) { setDrafts((current) => current.filter((item) => item.id !== category.id)); return; } void onRemove(category).then((removed) => { if (removed) setDrafts((current) => current.filter((item) => item.id !== category.id)); }); }} />)}</div></SortableContext></DndContext> : <div className="category-manager-empty">Категорий пока нет</div>}</div><footer><Button kind="secondary" icon={Plus} onClick={addDraft}>Новая категория</Button><div><Button kind="secondary" onClick={onClose}>Закрыть</Button><Button type="submit" disabled={!hasChanges || invalid || saving}>{saving ? "Сохраняем..." : "Сохранить"}</Button></div></footer></form>;
 }
 
 function SortableCategoryDraft({ category, autoFocus, positionLabel, onChange, onDelete }: { category: CategoryDraft; autoFocus: boolean; positionLabel: string; onChange: (patch: Partial<CategoryDraft>) => void; onDelete: () => void }) {

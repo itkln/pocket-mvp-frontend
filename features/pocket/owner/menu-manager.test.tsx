@@ -37,4 +37,19 @@ describe("MenuManager", () => {
     fireEvent.click(screen.getByRole("button", { name: "Закрыть поиск" }));
     expect(screen.queryByPlaceholderText("Найти блюдо")).not.toBeInTheDocument();
   });
+
+  it("edits categories inside the category column and collapses each mobile block", () => {
+    render(<MenuManager venueName="Pocket Cafe" onAdd={vi.fn()} notify={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Редактировать категории" }));
+
+    expect(screen.getByRole("textbox", { name: "Название категории Напитки" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Управление категориями" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Свернуть категории" }));
+    expect(screen.getByRole("button", { name: "Развернуть категории" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Свернуть позиции" }));
+    expect(screen.getByRole("button", { name: "Развернуть позиции" })).toBeInTheDocument();
+  });
 });
