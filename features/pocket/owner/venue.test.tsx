@@ -29,7 +29,7 @@ describe("VenueScreen", () => {
     const { container } = render(<VenueScreen venue={venue} notify={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText("Валюта меню и заказов"), { target: { value: "UAH" } });
-    fireEvent.click(screen.getByRole("button", { name: "Сохранить", exact: true }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить", exact: true })[0]);
 
     await waitFor(() => expect(updateOwnerVenue).toHaveBeenCalledWith("venue-1", expect.objectContaining({
       currency: "UAH",
@@ -41,5 +41,15 @@ describe("VenueScreen", () => {
     const inputClick = vi.spyOn(coverInput!, "click");
     fireEvent.click(screen.getByRole("button", { name: "Изменить обложку" }));
     expect(inputClick).toHaveBeenCalledOnce();
+  });
+
+  it("deletes the venue through the confirmed owner action", async () => {
+    const onDelete = vi.fn().mockResolvedValue(undefined);
+
+    render(<VenueScreen venue={venue} notify={vi.fn()} onDelete={onDelete} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Удалить заведение", exact: true }));
+
+    await waitFor(() => expect(onDelete).toHaveBeenCalledOnce());
   });
 });

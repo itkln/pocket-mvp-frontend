@@ -77,6 +77,17 @@ describe("AccountScreen", () => {
     });
   });
 
+  it("keeps sign out in the account header instead of security", () => {
+    const onLogout = vi.fn();
+    render(<I18nProvider><AccountScreen user={user} notify={vi.fn()} onLogout={onLogout} onUpdate={vi.fn()} /></I18nProvider>);
+
+    const signOut = screen.getByRole("button", { name: "Выйти из аккаунта" });
+    expect(document.querySelector(".account-profile-actions")).toContainElement(signOut);
+
+    fireEvent.click(signOut);
+    expect(onLogout).toHaveBeenCalledOnce();
+  });
+
   it("updates the shared profile", async () => {
     const updated = { ...user, first_name: "Denys", phone: "+421 900 123 456" };
     vi.mocked(updateProfile).mockResolvedValue(updated);

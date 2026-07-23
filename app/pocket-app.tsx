@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Plus, Store } from "lucide-react";
 import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
-import { createOwnerVenue, listOwnerVenues, type VenueInput } from "../lib/owner-api";
+import { createOwnerVenue, deleteOwnerVenue, listOwnerVenues, type VenueInput } from "../lib/owner-api";
 import {
   type Role,
   type Venue,
@@ -193,6 +193,21 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
 		setAvailableVenues((current) => current.map((item) => item.id === updatedVenue.id ? updatedVenue : item));
 	};
 
+	const removeCurrentVenue = async () => {
+		if (!currentUser || !venue) return;
+		const removedVenue = venue;
+		await deleteOwnerVenue(removedVenue.id);
+		const remainingVenues = availableVenues.filter((item) => item.id !== removedVenue.id);
+		const nextVenue = remainingVenues[0] ?? null;
+		setAvailableVenues(remainingVenues);
+		setVenue(nextVenue);
+		if (nextVenue) window.localStorage.setItem(selectedVenueKey(currentUser.id), nextVenue.id);
+		else window.localStorage.removeItem(selectedVenueKey(currentUser.id));
+		setScreen("overview");
+		router.push(appPath(locale, "owner", "overview"));
+		notify("Заведение удалено");
+	};
+
 	if (!authReady || !currentUser) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
 
   return (
@@ -209,7 +224,7 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
           {role === "owner" && venue && screen === "team" && <TeamScreen onInvite={() => setModal("invite")} notify={notify} />}
           {role === "owner" && venue && screen === "analytics" && <AnalyticsScreen />}
           {role === "owner" && venue && screen === "reviews" && <ReviewsScreen notify={notify} />}
-          {role === "owner" && venue && screen === "venue" && <VenueScreen key={venue.id} venue={venue} notify={notify} onUpdate={updateVenueState} />}
+          {role === "owner" && venue && screen === "venue" && <VenueScreen key={venue.id} venue={venue} notify={notify} onUpdate={updateVenueState} onDelete={removeCurrentVenue} />}
           {role === "owner" && venue && screen === "payments" && <PaymentsScreen />}
 		  {role === "owner" && venue && screen === "subscription" && <SubscriptionScreen venueCount={availableVenues.length} notify={notify} />}
 

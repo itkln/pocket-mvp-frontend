@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent } from "react";
-import { Check, ImagePlus, Trash2 } from "lucide-react";
+import { Bell, Check, ChevronDown, Clock3, ImagePlus, LayoutDashboard, ShoppingBag, Store, Trash2 } from "lucide-react";
 import { updateOwnerVenue, type OwnerVenue, type VenueInput } from "../../../lib/owner-api";
 import { useConfirm } from "../confirm-dialog";
 import { useI18n } from "../i18n";
@@ -9,13 +9,29 @@ import { useLocalizedError } from "../error-message";
 import { Button, Field, PageHeader, PanelTitle } from "../ui";
 import { FloorPlan } from "../floor-plan";
 
-export function VenueScreen({ venue, notify, onUpdate }: { venue: OwnerVenue; notify: (message: string) => void; onUpdate?: (venue: OwnerVenue) => void }) {
+const venueTabs = [
+  { id: "Основное", icon: Store },
+  { id: "Расписание", icon: Clock3 },
+  { id: "Заказы", icon: ShoppingBag },
+  { id: "План зала", icon: LayoutDashboard },
+  { id: "Уведомления", icon: Bell },
+] as const;
+
+type VenueScreenProps = {
+  venue: OwnerVenue;
+  notify: (message: string) => void;
+  onUpdate?: (venue: OwnerVenue) => void;
+  onDelete?: () => Promise<void> | void;
+};
+
+export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenProps) {
   const { t } = useI18n();
   const { confirm } = useConfirm();
   const errorMessage = useLocalizedError();
   const [tab, setTab] = useState("Основное");
   const [draft, setDraft] = useState<VenueInput>({ name: venue.name, description: venue.description, cuisine_type: venue.cuisine_type, phone: venue.phone, email: venue.email, address: venue.address, city: venue.city, postal_code: venue.postal_code, country_code: venue.country_code, timezone: venue.timezone, currency: venue.currency, status: venue.status, settings: editableVenueSettings(venue.settings) });
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [processingCover, setProcessingCover] = useState(false);
   const coverInput = useRef<HTMLInputElement>(null);
   const floorTab = tab === "План зала";
@@ -43,7 +59,50 @@ export function VenueScreen({ venue, notify, onUpdate }: { venue: OwnerVenue; no
     updateSettingValue("cover_image_url", "");
   };
   const save = async () => { setSaving(true); try { const updated = await updateOwnerVenue(venue.id, draft); onUpdate?.(updated); notify("Изменения сохранены"); } catch (error) { notify(errorMessage(error, "Не удалось сохранить изменения")); } finally { setSaving(false); } };
-  return <><PageHeader title={venue.name} subtitle="Публичная информация и настройки сервиса." actions={!floorTab ? <Button icon={Check} disabled={saving || processingCover} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button> : undefined} /><div className={"settings-layout " + (floorTab ? "floor-settings-layout" : "")}><aside className="settings-nav">{["Основное", "Расписание", "Заказы", "План зала", "Уведомления"].map((item) => <button className={tab === item ? "active" : ""} key={item} onClick={() => setTab(item)}>{item}</button>)}</aside>{floorTab ? <section className="floor-settings-editor"><FloorPlan mode="owner" venueID={venue.id} venueName={venue.name} notify={notify} embedded /></section> : <section className="panel settings-form">{tab === "Основное" ? <><PanelTitle title="Профиль заведения" subtitle="Эти данные видят гости." /><div className="cover-upload"><div className={`cover-photo ${coverImage ? "custom" : ""}`} style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined} role="img" aria-label="Обложка заведения" /><input ref={coverInput} className="cover-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void selectCover(event)} /><div className="cover-actions">{coverImage && <Button kind="secondary" icon={Trash2} onClick={() => void removeCover()}>Удалить</Button>}<Button kind="secondary" icon={ImagePlus} disabled={processingCover} onClick={() => coverInput.current?.click()}>{processingCover ? "Обрабатываем..." : "Изменить обложку"}</Button></div></div><div className="form-grid"><Field label="Название"><input value={draft.name} onChange={(event) => set("name", event.target.value)} /></Field><Field label="Тип кухни"><input value={draft.cuisine_type ?? ""} onChange={(event) => set("cuisine_type", event.target.value)} placeholder="Современная европейская" /></Field><Field label="Телефон"><input value={draft.phone ?? ""} onChange={(event) => set("phone", event.target.value)} /></Field><Field label="E-mail"><input type="email" value={draft.email ?? ""} onChange={(event) => set("email", event.target.value)} /></Field><Field label="Город"><input value={draft.city} onChange={(event) => set("city", event.target.value)} /></Field><Field label="Адрес"><input value={draft.address} onChange={(event) => set("address", event.target.value)} /></Field><Field label="Описание" wide><textarea value={draft.description ?? ""} onChange={(event) => set("description", event.target.value)} /></Field><Field label="Статус"><select value={draft.status} onChange={(event) => set("status", event.target.value)}><option value="draft">Черновик</option><option value="active">Открыто</option><option value="paused">Приостановлено</option><option value="closed">Закрыто</option></select></Field></div><hr /><PanelTitle title="Валюта" subtitle="Используется в меню, заказах и отчетах." /><div className="form-grid localization-grid"><Field label="Валюта меню и заказов"><select value={draft.currency ?? "EUR"} onChange={(event) => set("currency", event.target.value)}>{currencyOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></Field></div></> : tab === "Расписание" ? <ScheduleSettings draft={draft} setDraft={setDraft} /> : tab === "Заказы" ? <OrderSettings draft={draft} setDraft={setDraft} /> : <NotificationSettings draft={draft} setDraft={setDraft} />}</section>}</div></>;
+  const removeVenue = async () => {
+    if (!onDelete || !await confirm({
+      title: t("Удалить заведение"),
+      description: t("Удалить заведение «{name}» и связанные с ним данные?", { name: venue.name }),
+      confirmLabel: t("Удалить"),
+    })) return;
+    setDeleting(true);
+    try {
+      await onDelete();
+    } catch (error) {
+      notify(errorMessage(error, "Не удалось удалить заведение"));
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const saveButton = <Button icon={Check} disabled={saving || processingCover} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button>;
+
+  return <>
+    <PageHeader title={venue.name} subtitle="Публичная информация и настройки сервиса." actions={!floorTab ? <div className="venue-desktop-save">{saveButton}</div> : undefined} />
+    <label className="venue-section-select">
+      <span>Раздел</span>
+      <select value={tab} onChange={(event) => setTab(event.target.value)}>
+        {venueTabs.map((item) => <option value={item.id} key={item.id}>{item.id}</option>)}
+      </select>
+      <ChevronDown size={17} />
+    </label>
+    <div className={"settings-layout " + (floorTab ? "floor-settings-layout" : "")}>
+      <aside className="settings-nav">
+        {venueTabs.map(({ id, icon: Icon }) => <button className={tab === id ? "active" : ""} key={id} onClick={() => setTab(id)}><Icon size={18} strokeWidth={1.8} /><span>{id}</span></button>)}
+      </aside>
+      {floorTab ? <section className="floor-settings-editor"><FloorPlan mode="owner" venueID={venue.id} venueName={venue.name} notify={notify} embedded /></section> : <section className="panel settings-form">
+        {tab === "Основное" ? <>
+          <PanelTitle title="Профиль заведения" subtitle="Эти данные видят гости." />
+          <div className="cover-upload"><div className={`cover-photo ${coverImage ? "custom" : ""}`} style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined} role="img" aria-label="Обложка заведения" /><input ref={coverInput} className="cover-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void selectCover(event)} /><div className="cover-actions">{coverImage && <Button kind="secondary" icon={Trash2} onClick={() => void removeCover()}>Удалить</Button>}<Button kind="secondary" icon={ImagePlus} disabled={processingCover} onClick={() => coverInput.current?.click()}>{processingCover ? "Обрабатываем..." : "Изменить обложку"}</Button></div></div>
+          <div className="form-grid"><Field label="Название"><input value={draft.name} onChange={(event) => set("name", event.target.value)} /></Field><Field label="Тип кухни"><input value={draft.cuisine_type ?? ""} onChange={(event) => set("cuisine_type", event.target.value)} placeholder="Современная европейская" /></Field><Field label="Телефон"><input value={draft.phone ?? ""} onChange={(event) => set("phone", event.target.value)} /></Field><Field label="E-mail"><input type="email" value={draft.email ?? ""} onChange={(event) => set("email", event.target.value)} /></Field><Field label="Город"><input value={draft.city} onChange={(event) => set("city", event.target.value)} /></Field><Field label="Адрес"><input value={draft.address} onChange={(event) => set("address", event.target.value)} /></Field><Field label="Описание" wide><textarea value={draft.description ?? ""} onChange={(event) => set("description", event.target.value)} /></Field><Field label="Статус"><select value={draft.status} onChange={(event) => set("status", event.target.value)}><option value="draft">Черновик</option><option value="active">Открыто</option><option value="paused">Приостановлено</option><option value="closed">Закрыто</option></select></Field></div>
+          <PanelTitle title="Валюта" subtitle="Используется в меню, заказах и отчетах." />
+          <div className="form-grid localization-grid"><Field label="Валюта меню и заказов"><select value={draft.currency ?? "EUR"} onChange={(event) => set("currency", event.target.value)}>{currencyOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></Field></div>
+          {onDelete && <section className="venue-delete-section"><div><strong>Удалить заведение</strong><p>Меню, план зала и история заведения станут недоступны.</p></div><Button kind="danger" icon={Trash2} disabled={deleting} onClick={() => void removeVenue()}>{deleting ? "Удаление..." : "Удалить заведение"}</Button></section>}
+        </> : tab === "Расписание" ? <ScheduleSettings draft={draft} setDraft={setDraft} /> : tab === "Заказы" ? <OrderSettings draft={draft} setDraft={setDraft} /> : <NotificationSettings draft={draft} setDraft={setDraft} />}
+        <footer className="venue-mobile-save">{saveButton}</footer>
+      </section>}
+    </div>
+  </>;
 }
 
 const currencyOptions = [
