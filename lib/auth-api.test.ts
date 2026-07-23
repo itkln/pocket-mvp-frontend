@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { changePassword, getCurrentUser, login, logout, register, requestPasswordReset, resetPassword } from "./auth-api";
+import { changePassword, getCurrentUser, login, logout, register, requestPasswordReset, resetPassword, updateProfile } from "./auth-api";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -33,6 +33,17 @@ describe("auth API", () => {
     await logout();
     expect(fetchMock.mock.calls[0][1]).toEqual(expect.objectContaining({ method: "GET", credentials: "include" }));
     expect(fetchMock.mock.calls[1][1]).toEqual(expect.objectContaining({ method: "POST", credentials: "include" }));
+  });
+
+  it("updates the authenticated profile", async () => {
+    const user = { id: "1", email: "user@example.com", first_name: "Denys", last_name: "Itkin", phone: "+421 900 123 456", role: "customer" as const, capabilities: ["customer" as const] };
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ user }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(updateProfile({ first_name: "Denys", last_name: "Itkin", phone: "+421 900 123 456" })).resolves.toEqual(user);
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/auth\/me$/);
+    expect(fetchMock.mock.calls[0][1]).toEqual(expect.objectContaining({ method: "PATCH", credentials: "include" }));
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ first_name: "Denys", last_name: "Itkin", phone: "+421 900 123 456" });
   });
 
   it("requests and confirms a password reset", async () => {

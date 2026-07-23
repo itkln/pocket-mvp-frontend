@@ -1,6 +1,6 @@
 import { type AuthUser } from "../../lib/auth-api";
 import { type OwnerVenue } from "../../lib/owner-api";
-import { Activity, BarChart3, CalendarDays, Coffee, LayoutDashboard, MessageSquareText, ReceiptText, Search, Sparkles, Store, Table2, UserRound, Users, Utensils, UtensilsCrossed, WalletCards } from "lucide-react";
+import { Activity, BarChart3, CalendarDays, Coffee, LayoutDashboard, MessageSquareText, ReceiptText, Search, Settings, Sparkles, Store, Table2, Users, Utensils, UtensilsCrossed, WalletCards } from "lucide-react";
 
 export type Role = "owner" | "customer" | "staff";
 export type Status = "Новый" | "Готовится" | "Готов" | "Подан";
@@ -59,7 +59,7 @@ export const customerNavigation = [
   { id: "browse-menu", label: "Меню", icon: Utensils },
   { id: "reservation", label: "Бронь", icon: CalendarDays },
   { id: "history", label: "Мои заказы", icon: ReceiptText },
-  { id: "profile", label: "Профиль", icon: UserRound },
+  { id: "profile", label: "Настройки", icon: Settings },
 ];
 
 export const staffNavigation = [

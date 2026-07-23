@@ -41,6 +41,14 @@ export async function getCurrentUser(): Promise<AuthUser> {
   return response.user;
 }
 
+export async function updateProfile(payload: Pick<AuthUser, "first_name" | "last_name"> & { phone?: string }): Promise<AuthUser> {
+  const response = await apiRequest<{ user: AuthUser }>("/auth/me", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+  return response.user;
+}
+
 export async function logout(): Promise<void> {
   await apiRequest<void>("/auth/logout", { method: "POST" });
 }

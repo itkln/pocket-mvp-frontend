@@ -36,7 +36,6 @@ import {
   CustomerMenu,
   DiscoverScreen,
   HistoryScreen,
-  ProfileScreen,
   ReservationScreen,
 } from "../features/pocket/customer";
 import { KitchenScreen, ServiceBoard } from "../features/pocket/staff";
@@ -219,12 +218,12 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
           {role === "customer" && screen === "checkout" && <Checkout cart={cart} total={cartTotal} updateQty={updateQty} onBack={() => navigate("browse-menu")} onDone={() => { setCart({}); navigate("history"); notify("Заказ #1049 принят"); }} />}
           {role === "customer" && screen === "reservation" && <ReservationScreen onMenu={() => navigate("browse-menu")} notify={notify} />}
           {role === "customer" && screen === "history" && <HistoryScreen notify={notify} />}
-		  {role === "customer" && screen === "profile" && <ProfileScreen user={currentUser} notify={notify} onLogout={signOut} />}
+		  {role === "customer" && screen === "profile" && <AccountScreen user={currentUser} notify={notify} onLogout={signOut} onUpdate={setCurrentUser} />}
 
           {role === "staff" && screen === "service" && <ServiceBoard notify={notify} />}
           {role === "staff" && screen === "kitchen" && <KitchenScreen notify={notify} />}
           {role === "staff" && venue && screen === "staff-floor" && <FloorPlan mode="staff" venueName={venue.name} notify={notify} />}
-		  {role !== "customer" && screen === "account" && <AccountScreen user={currentUser} role={role} notify={notify} onLogout={signOut} />}
+		  {role !== "customer" && screen === "account" && <AccountScreen user={currentUser} notify={notify} onLogout={signOut} onUpdate={setCurrentUser} />}
         </div>
       </main>
       <MobileBottomNavigation role={role} screen={screen} navigation={navigation} onNavigate={navigate} />

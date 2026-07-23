@@ -1,5 +1,4 @@
 export { DiscoverScreen } from "./discover";
 export { CustomerMenu, Checkout } from "./ordering";
 export { ReservationScreen } from "./reservation";
-export { HistoryScreen, ProfileScreen } from "./account";
-
+export { HistoryScreen } from "./account";
