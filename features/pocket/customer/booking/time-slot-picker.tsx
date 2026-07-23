@@ -25,25 +25,28 @@ export function TimeSlotPicker({
   const { t } = useI18n();
   return (
     <>
-      <div className="venue-time-periods" role="group" aria-label={t("Свободное время")}>
-        <button
-          type="button"
-          aria-pressed={activePeriod === "day"}
-          disabled={!daySlots.length}
-          className={activePeriod === "day" ? "active" : ""}
-          onClick={() => onPeriodChange("day")}
-        >
-          {t("День")}
-        </button>
-        <button
-          type="button"
-          aria-pressed={activePeriod === "evening"}
-          disabled={!eveningSlots.length}
-          className={activePeriod === "evening" ? "active" : ""}
-          onClick={() => onPeriodChange("evening")}
-        >
-          {t("Вечер")}
-        </button>
+      <div className="venue-time-heading">
+        <h3>{t("Свободное время")}</h3>
+        <div className="venue-time-periods" role="group" aria-label={t("Свободное время")}>
+          <button
+            type="button"
+            aria-pressed={activePeriod === "day"}
+            disabled={!daySlots.length}
+            className={activePeriod === "day" ? "active" : ""}
+            onClick={() => onPeriodChange("day")}
+          >
+            {t("День")}
+          </button>
+          <button
+            type="button"
+            aria-pressed={activePeriod === "evening"}
+            disabled={!eveningSlots.length}
+            className={activePeriod === "evening" ? "active" : ""}
+            onClick={() => onPeriodChange("evening")}
+          >
+            {t("Вечер")}
+          </button>
+        </div>
       </div>
       <div className="venue-time-grid">
         {(activePeriod === "day" ? daySlots : eveningSlots).map((slot) => (

@@ -101,7 +101,7 @@ const renderFlow = (
   );
 const chooseTime = async () => {
   fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
-  fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+  fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
 };
 
 describe("DesktopBookingFlow", () => {
@@ -110,7 +110,7 @@ describe("DesktopBookingFlow", () => {
     const onMenuModeChange = vi.fn();
     renderFlow(account, {}, onMenuModeChange, ref);
     await chooseTime();
-    expect(screen.getByRole("dialog", { name: "Бронирование" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Забронировать стол" })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: "Имя" })).toHaveValue("Anna Guest");
     expect(screen.getByRole("textbox", { name: "Эл. почта (необязательно)" })).toHaveValue(
       "guest@example.test",
@@ -121,11 +121,16 @@ describe("DesktopBookingFlow", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), {
       target: { value: "+421900123456" },
     });
-    expect(screen.queryByRole("button", { name: "Свидание" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Свидание" })).toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), {
       target: { value: "Тихий столик" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    fireEvent.click(screen.getByRole("button", { name: "День рождения" }));
+    expect(screen.getByRole("button", { name: "День рождения" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить к предзаказу" }));
     expect(onMenuModeChange).toHaveBeenCalledWith(true);
     ref.current?.bookWithoutPreorder();
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
@@ -134,7 +139,7 @@ describe("DesktopBookingFlow", () => {
       guest_name: "Other Guest",
       guest_email: "guest@example.test",
       guest_phone: "+421900123456",
-      notes: "Тихий столик",
+      notes: "День рождения · Тихий столик",
     });
     expect(await screen.findByText(/Номер брони: BOOK123/)).toBeInTheDocument();
   });
@@ -144,7 +149,7 @@ describe("DesktopBookingFlow", () => {
     const ref = createRef<DesktopBookingFlowHandle>();
     renderFlow(null, {}, vi.fn(), ref);
     await chooseTime();
-    expect(screen.getByRole("button", { name: "Продолжить" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Продолжить к предзаказу" })).toBeDisabled();
     expect(createPublicReservation).not.toHaveBeenCalled();
     fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), {
       target: { value: "Guest Name" },
@@ -152,7 +157,7 @@ describe("DesktopBookingFlow", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), {
       target: { value: "+421900123456" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить к предзаказу" }));
     ref.current?.bookWithoutPreorder();
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
     expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({
@@ -186,7 +191,7 @@ describe("DesktopBookingFlow", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), {
       target: { value: "+421900123456" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить к предзаказу" }));
     expect(onMenuModeChange).toHaveBeenCalledWith(true);
     expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
     rerender(
@@ -221,7 +226,7 @@ describe("DesktopBookingFlow", () => {
     expect(onMenuModeChange).toHaveBeenLastCalledWith(true);
     expect(createPublicReservation).not.toHaveBeenCalled();
     act(() => ref.current?.checkout());
-    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    fireEvent.click(screen.getByRole("button", { name: "Подтвердить бронь" }));
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
     expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({
       expected_total_minor: 1200,

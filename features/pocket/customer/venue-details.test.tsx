@@ -153,10 +153,10 @@ describe("VenueDetailsScreen preorder categories", () => {
       within(screen.getByRole("dialog", { name: "Чай" })).getByRole("button", { name: "Закрыть" }),
     );
     fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
-    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Anna Guest" } });
     fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить к предзаказу" }));
     const preorder = screen.getByRole("dialog", { name: "Меню для предзаказа" });
     expect(within(preorder).getByRole("button", { name: "Еда" })).toHaveAttribute(
       "aria-current",
@@ -166,21 +166,29 @@ describe("VenueDetailsScreen preorder categories", () => {
     expect(
       within(preorder).queryByRole("button", { name: "Подробнее о блюде: Чай" }),
     ).not.toBeInTheDocument();
-    fireEvent.click(within(preorder).getByRole("button", { name: "Добавить Паста" }));
+    expect(within(preorder).getByText("Ваш предзаказ")).toBeInTheDocument();
+    expect(within(preorder).getByText("Дата")).toBeInTheDocument();
+    fireEvent.click(within(preorder).getByRole("button", { name: "Изменить" }));
+    expect(screen.getByLabelText("Имя")).toHaveValue("Anna Guest");
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить к предзаказу" }));
+    const updatedPreorder = screen.getByRole("dialog", { name: "Меню для предзаказа" });
+    fireEvent.click(within(updatedPreorder).getByRole("button", { name: "Добавить Паста" }));
     vi.mocked(getPublicVenueMenu).mockResolvedValue([
       { ...menu[0], preorder_enabled: false },
       menu[1],
     ]);
     fireEvent(window, new Event("focus"));
     await waitFor(() =>
-      expect(within(preorder).getByText("Блюдо недоступно · 1")).toBeInTheDocument(),
+      expect(within(updatedPreorder).getByText("Блюдо недоступно · 1")).toBeInTheDocument(),
     );
-    expect(within(preorder).getByRole("button", { name: /^Продолжить к оплате/ })).toBeDisabled();
-    fireEvent.click(within(preorder).getByRole("button", { name: "Убрать" }));
     expect(
-      within(preorder).getByRole("button", { name: "Забронировать без предзаказа" }),
+      within(updatedPreorder).getByRole("button", { name: /^Продолжить к подтверждению/ }),
+    ).toBeDisabled();
+    fireEvent.click(within(updatedPreorder).getByRole("button", { name: "Убрать" }));
+    expect(
+      within(updatedPreorder).getByRole("button", { name: "Забронировать без предзаказа" }),
     ).toBeEnabled();
-    fireEvent.click(within(preorder).getByRole("button", { name: "Назад к бронированию" }));
+    fireEvent.click(within(updatedPreorder).getByRole("button", { name: "Назад к бронированию" }));
     expect(screen.getByLabelText("Имя")).toHaveValue("Anna Guest");
     expect(screen.getByRole("button", { name: "Напитки" })).toBeInTheDocument();
   });
@@ -269,7 +277,7 @@ it("shows desktop booking immediately and changes menu view without losing the s
       .getByRole("button", { name: "Подробнее о блюде: Паста" })
       .closest(".venue-public-menu-grid"),
   ).not.toHaveClass("venue-public-menu-list");
-  fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
-  expect(screen.getByRole("dialog", { name: "Бронирование" })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+  expect(screen.getByRole("dialog", { name: "Забронировать стол" })).toBeInTheDocument();
   expect(onReserve).not.toHaveBeenCalled();
 });

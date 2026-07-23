@@ -2,6 +2,36 @@ import type { TranslationRow } from "./types";
 
 // Pocket Dish: venue page, menu, booking, table ordering, guest account.
 export const dishTranslations: TranslationRow[] = [
+  ["Подтвердить бронь", "Confirm booking", "Підтвердити бронювання", "Potvrdiť rezerváciu"],
+  ["Забронировать стол", "Book a table", "Забронювати столик", "Rezervovať stôl"],
+  [
+    "Продолжить к предзаказу",
+    "Continue to pre-order",
+    "Перейти до передзамовлення",
+    "Pokračovať k predobjednávke",
+  ],
+  [
+    "Продолжить к подтверждению",
+    "Continue to confirmation",
+    "Перейти до підтвердження",
+    "Pokračovať k potvrdeniu",
+  ],
+  ["Изменить контакты", "Change contacts", "Змінити контакти", "Zmeniť kontakty"],
+  [
+    "Выберите время, чтобы продолжить",
+    "Choose a time to continue",
+    "Виберіть час, щоб продовжити",
+    "Vyberte čas a pokračujte",
+  ],
+  [
+    "Введите имя и телефон",
+    "Enter your name and phone",
+    "Введіть ім’я та телефон",
+    "Zadajte meno a telefón",
+  ],
+  ["Подтверждение", "Confirmation", "Підтвердження", "Potvrdenie"],
+  ["Время и контакты", "Time and contacts", "Час і контакти", "Čas a kontakty"],
+  ["Шаг {step} из 3", "Step {step} of 3", "Крок {step} із 3", "Krok {step} z 3"],
   [
     "Подтверждение заказа ещё не получено. Повторите отправку — заказ не продублируется.",
     "Order confirmation has not arrived yet. Send it again — your order will not be duplicated.",
@@ -351,12 +381,15 @@ export const dishTranslations: TranslationRow[] = [
     "Збільшити кількість гостей",
     "Zvýšiť počet hostí",
   ],
+  ["{count} гость", "{count} guest", "{count} гість", "{count} hosť"],
+  ["{count} гостя", "{count} guests", "{count} гості", "{count} hostia"],
+  ["{count} гостей", "{count} guests", "{count} гостей", "{count} hostí"],
   ["Гостей: {count}", "Guests: {count}", "Гостей: {count}", "Hostia: {count}"],
-  ["Свободное время", "Available times", "Вільний час", "Voľné časy"],
+  ["Свободное время", "Available time", "Вільний час", "Voľné časy"],
   ["День", "Day", "День", "Deň"],
   ["Вечер", "Evening", "Вечір", "Večer"],
-  ["Пожелания к брони", "Booking requests", "Побажання до бронювання", "Požiadavky k rezervácii"],
-  ["Свидание", "Date", "Побачення", "Rande"],
+  ["Пожелания к брони", "Booking wishes", "Побажання до бронювання", "Požiadavky k rezervácii"],
+  ["Свидание", "Date night", "Побачення", "Rande"],
   ["День рождения", "Birthday", "День народження", "Narodeniny"],
   ["С детьми", "With children", "З дітьми", "S deťmi"],
   [
@@ -371,7 +404,7 @@ export const dishTranslations: TranslationRow[] = [
   ["Подтверждение брони", "Confirm booking", "Підтвердження бронювання", "Potvrdenie rezervácie"],
   [
     "В предзаказе пока пусто",
-    "Your pre-order is empty",
+    "The pre-order is empty",
     "Передзамовлення поки порожнє",
     "Predobjednávka je zatiaľ prázdna",
   ],
@@ -512,7 +545,7 @@ export const dishTranslations: TranslationRow[] = [
   ["Ничего не нашли", "No results", "Нічого не знайшли", "Žiadne výsledky"],
   ["Рестораны", "Restaurants", "Ресторани", "Reštaurácie"],
   ["Сохранённые места", "Saved places", "Збережені місця", "Uložené miesta"],
-  ["Мои брони", "My bookings", "Мої бронювання", "Moje rezervácie"],
+  ["Мои брони", "My reservations", "Мої бронювання", "Moje rezervácie"],
   ["Фильтры броней", "Reservation filters", "Фільтри бронювань", "Filtre rezervácií"],
   ["Все брони", "All reservations", "Усі бронювання", "Všetky rezervácie"],
   [

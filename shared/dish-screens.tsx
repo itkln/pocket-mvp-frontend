@@ -15,7 +15,7 @@ import { useI18n } from "../features/pocket/i18n";
 import { useDishShell } from "./dish-shell-context";
 
 function VenuePage({ reservation }: { reservation: boolean }) {
-  const { venueID, user, navigate, menuQuery } = useDishShell();
+  const { venueID, user, navigate, menuQuery, openSettings } = useDishShell();
   const params = useSearchParams();
   if (!venueID) return null;
   return (
@@ -26,6 +26,8 @@ function VenuePage({ reservation }: { reservation: boolean }) {
       initialSearchOpen={params.get("search") === "1"}
       reservationPage={reservation}
       onReserve={() => navigate("reservation")}
+      onViewReservations={() => navigate("reservations")}
+      onOpenSettings={openSettings}
       saved={false}
       venueID={venueID}
       onBack={() => navigate("")}
@@ -66,7 +68,7 @@ export function TableBillPage() {
 }
 
 export function TableMenuPage() {
-  const { qrToken, user, navigate, notify, menuQuery } = useDishShell();
+  const { qrToken, user, navigate, notify, menuQuery, openSettings } = useDishShell();
   if (!qrToken) return null;
   return (
     <TableVenueScreen
@@ -75,6 +77,7 @@ export function TableMenuPage() {
       token={qrToken}
       onBack={() => navigate("")}
       notify={notify}
+      onOpenSettings={openSettings}
       desktopMenuQuery={menuQuery}
     />
   );

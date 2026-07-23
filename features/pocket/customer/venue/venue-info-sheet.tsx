@@ -19,12 +19,14 @@ export function VenueInfoSheet({
   venue,
   photoStyle,
   illustration,
+  mobile = false,
   anchorRef,
   onClose,
 }: {
   venue: PublicVenue;
   photoStyle?: CSSProperties;
   illustration: string;
+  mobile?: boolean;
   // The desktop trigger: clicks on it toggle the sheet instead of closing it as "outside".
   anchorRef: RefObject<HTMLDivElement | null>;
   onClose: () => void;
@@ -38,9 +40,23 @@ export function VenueInfoSheet({
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
-    if (window.innerWidth <= 760) closeRef.current?.focus();
+    const trigger = anchorRef.current?.querySelector<HTMLButtonElement>("button");
+    closeRef.current?.focus({ preventScroll: true });
+    const updateHeight = () => {
+      const bottom = anchorRef.current?.getBoundingClientRect().bottom ?? 0;
+      overlayRef.current?.style.setProperty(
+        "--venue-info-space",
+        `${Math.max(160, window.innerHeight - bottom - 12)}px`,
+      );
+    };
+    updateHeight();
+    window.addEventListener("scroll", updateHeight, { passive: true });
+    window.addEventListener("resize", updateHeight);
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        trigger?.focus();
+      }
     };
     const onPointerDown = (event: PointerEvent) => {
       if (
@@ -53,6 +69,8 @@ export function VenueInfoSheet({
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("pointerdown", onPointerDown);
     return () => {
+      window.removeEventListener("scroll", updateHeight);
+      window.removeEventListener("resize", updateHeight);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown);
     };
@@ -92,7 +110,7 @@ export function VenueInfoSheet({
       <section
         className={`venue-info-sheet ${dragging ? "dragging" : ""}`}
         role="dialog"
-        aria-modal="true"
+        aria-modal={mobile || undefined}
         aria-labelledby="venue-info-title"
         style={drag ? { transform: `translateY(${drag}px)` } : undefined}
         onTouchStart={onTouchStart}
@@ -107,7 +125,10 @@ export function VenueInfoSheet({
             type="button"
             className="venue-info-close"
             aria-label={t("Закрыть")}
-            onClick={onClose}
+            onClick={() => {
+              onClose();
+              anchorRef.current?.querySelector<HTMLButtonElement>("button")?.focus();
+            }}
           >
             <X size={22} />
           </button>
@@ -118,7 +139,7 @@ export function VenueInfoSheet({
           <strong>{t("Контакты")}</strong>
           <p>
             <MapPin size={18} />
-            {venue.address}, {venue.city}, {venue.country_code}
+            {[venue.address, venue.city, venue.country_code].filter(Boolean).join(", ")}
           </p>
           {venue.phone && (
             <p>

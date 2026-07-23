@@ -131,7 +131,11 @@ it("changes language while retaining QR context and a stored cart", async () => 
   sessionStorage.setItem("pocket:table-cart:test-token", draft);
   show();
   await screen.findByRole("heading", { name: "Pocket Bistro" });
-  fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса" }));
+  fireEvent.click(
+    within(screen.getByRole("navigation", { name: "Навигация" })).getByRole("button", {
+      name: "Язык интерфейса",
+    }),
+  );
   fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "English" }));
   expect(replace).toHaveBeenCalledWith("/en/qr/test-token", { scroll: false });
   expect(screen.getByRole("link", { name: /Pay the bill/ })).toHaveAttribute(

@@ -10,18 +10,18 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import Image from "next/image";
 import {
   ArrowLeft,
   CalendarDays,
   Check,
+  Globe,
   LayoutGrid,
   List,
+  Menu,
   Heart,
   Info,
   RefreshCw,
   Search,
-  ShoppingBag,
   Star,
   Utensils,
   X,
@@ -32,7 +32,7 @@ import {
   type PublicMenuItem,
   type PublicVenue,
 } from "../../../lib/public-catalog-api";
-import { useI18n } from "../i18n";
+import { localeOptions, useI18n } from "../i18n";
 import { useMenuView } from "./menu-view";
 import { usePublicVenue, useVenueReviews } from "./venue/use-public-venue";
 import { VenueInfoSheet } from "./venue/venue-info-sheet";
@@ -82,6 +82,8 @@ export function VenueDetailsScreen({
   menuPage = false,
   initialCategoryID,
   initialSearchOpen = false,
+  onOpenSettings,
+  onViewReservations,
 }: {
   standalone?: boolean;
   reservationPage?: boolean;
@@ -89,6 +91,8 @@ export function VenueDetailsScreen({
   initialCategoryID?: string;
   initialSearchOpen?: boolean;
   onReserve?: () => void;
+  onViewReservations?: () => void;
+  onOpenSettings?: (page: "menu" | "language") => void;
   venueID: string;
   onBack: () => void;
   saved: boolean;
@@ -105,7 +109,6 @@ export function VenueDetailsScreen({
     onOpenCart: () => void;
     count: number;
     totalLabel: string;
-    historyButton: ReactNode;
     panel: ReactNode;
   };
 }) {
@@ -258,14 +261,14 @@ export function VenueDetailsScreen({
     const menuContainer = preorderMenuScrollRef.current;
     const updateScrollState = () => {
       setCompactHeader(window.scrollY > 115);
-      const categoryNav = categoryNavRef.current;
-      const stickyTop = categoryNav ? Number.parseFloat(getComputedStyle(categoryNav).top) : NaN;
+      const categoryBar = categoryNavRef.current?.parentElement;
+      const stickyTop = categoryBar ? Number.parseFloat(getComputedStyle(categoryBar).top) : NaN;
       setMenuPinned(
         !preorderMenuOpen &&
           window.scrollY > 0 &&
-          !!categoryNav &&
+          !!categoryBar &&
           Number.isFinite(stickyTop) &&
-          categoryNav.getBoundingClientRect().top <= stickyTop + 1,
+          categoryBar.getBoundingClientRect().top <= stickyTop + 1,
       );
       if (preorderMenuOpen && pendingCategoryRef.current) {
         const pending = pendingCategoryRef.current;
@@ -356,7 +359,8 @@ export function VenueDetailsScreen({
     : "";
   // Online booking: restaurants only, unless the venue switched it off in Vendor.
   const bookable = venue?.category_slug === "restaurants" && venue.booking_enabled !== false;
-  const desktopSearchActive = !mobileBooking && Boolean(desktopMenuQuery.trim());
+  const desktopSearchActive =
+    !mobileBooking && !preorderMenuOpen && Boolean(desktopMenuQuery.trim());
   const normalizedQuery = (mobileBooking ? menuQuery : desktopMenuQuery)
     .trim()
     .toLocaleLowerCase(locale);
@@ -423,13 +427,23 @@ export function VenueDetailsScreen({
 
   return (
     <section
-      className={`dish-venue-detail dish-real-venue-detail ${standalone ? "venue-standalone" : ""} ${reservationPage ? "venue-reservation-page" : ""} ${searchOpen ? "venue-search-active" : ""} ${tableOrder ? "venue-table-mode" : ""} ${venue?.image_url ? "venue-cover-mode" : ""}`}
+      className={`dish-venue-detail dish-real-venue-detail ${standalone ? "venue-standalone" : ""} ${reservationPage ? "venue-reservation-page" : ""} ${searchOpen ? "venue-search-active" : ""} ${tableOrder ? "venue-table-mode" : ""}`}
     >
       <header className={`venue-mobile-toolbar ${compactHeader ? "compact" : ""}`}>
         <div className="venue-mobile-toolbar-leading">
           {tableOrder && (
             <button type="button" aria-label={t("Назад к столу")} onClick={onBack}>
               <ArrowLeft size={24} />
+            </button>
+          )}
+          {!tableOrder && standalone && onOpenSettings && (
+            <button
+              type="button"
+              aria-label={t("Настройки меню")}
+              aria-haspopup="dialog"
+              onClick={() => onOpenSettings("menu")}
+            >
+              <Menu size={22} aria-hidden="true" />
             </button>
           )}
           {!tableOrder && !standalone && (
@@ -446,25 +460,21 @@ export function VenueDetailsScreen({
           {venue?.name}
         </span>
         <div className="venue-mobile-toolbar-actions">
-          {!tableOrder && venue && venue.category_slug !== "restaurants" && (
+          {onOpenSettings && (
             <button
               type="button"
-              aria-label={t("Открыть информацию о заведении")}
-              aria-expanded={infoOpen}
-              onClick={() => setInfoOpen(true)}
+              className="venue-toolbar-language"
+              aria-label={t("Язык интерфейса")}
+              aria-haspopup="dialog"
+              onClick={() => onOpenSettings("language")}
             >
-              <Info size={23} aria-hidden="true" />
+              <Globe size={19} aria-hidden="true" />
+              <span>{localeOptions.find((option) => option.value === locale)?.short}</span>
             </button>
           )}
-          {
-            <button
-              type="button"
-              aria-label={t("Поиск по меню")}
-              onClick={() => setSearchOpen(true)}
-            >
-              <Search size={23} />
-            </button>
-          }
+          <button type="button" aria-label={t("Поиск по меню")} onClick={() => setSearchOpen(true)}>
+            <Search size={22} aria-hidden="true" />
+          </button>
           {venue && onToggleSaved && (
             <button
               type="button"
@@ -491,7 +501,6 @@ export function VenueDetailsScreen({
           bookingUnavailable={!tableOrder && !bookable}
         />
       )}
-      {tableOrder?.historyButton}
       {tableOrder && (
         <button
           type="button"
@@ -510,30 +519,14 @@ export function VenueDetailsScreen({
       {venue ? (
         <article className="dish-restaurant venue-detail-page" aria-labelledby="venue-title">
           <div className="venue-primary-column">
-            <div
-              className="venue-overview-block"
-              style={
-                venue.image_url
-                  ? ({
-                      "--venue-cover-image": `url(${JSON.stringify(venue.image_url)})`,
-                    } as CSSProperties)
-                  : undefined
-              }
-            >
+            <div className="venue-overview-block">
               <div
                 className={`venue-public-photo ${venue.image_url ? "has-image" : ""}`}
                 style={photoStyle}
                 role="img"
                 aria-label={t("Фото заведения: {name}", { name: venue.name })}
               >
-                {!venue.image_url && (
-                  <Image
-                    src={`/assets/categories/${illustration}.png`}
-                    alt=""
-                    width={220}
-                    height={220}
-                  />
-                )}
+                {!venue.image_url && <Utensils size={44} aria-hidden="true" />}
               </div>
               <div className="venue-detail-summary">
                 <div className="venue-detail-heading">
@@ -550,6 +543,29 @@ export function VenueDetailsScreen({
                         <Heart size={22} fill={saved ? "currentColor" : "none"} />
                       </button>
                     )}
+                    <div ref={infoRef} className="venue-desktop-info-wrap">
+                      <button
+                        type="button"
+                        className="venue-desktop-info-button"
+                        aria-label={t("Информация о заведении")}
+                        aria-haspopup="dialog"
+                        aria-expanded={infoOpen}
+                        onClick={() => setInfoOpen((value) => !value)}
+                      >
+                        <Info size={18} aria-hidden="true" />
+                        <span>{t("О месте")}</span>
+                      </button>
+                      {infoOpen && (
+                        <VenueInfoSheet
+                          venue={venue}
+                          photoStyle={photoStyle}
+                          illustration={illustration}
+                          mobile={mobileBooking}
+                          anchorRef={infoRef}
+                          onClose={closeInfo}
+                        />
+                      )}
+                    </div>
                   </div>
                   <p>{details}</p>
                   <div className="venue-facts" aria-label={t("Краткая информация")}>
@@ -571,29 +587,14 @@ export function VenueDetailsScreen({
                     {venue.tags.map((tag) => (
                       <span key={tag}>{t(tag)}</span>
                     ))}
-                    <div ref={infoRef} className="venue-desktop-info-wrap">
-                      <button
-                        type="button"
-                        className="venue-desktop-info-button"
-                        aria-label={t("Информация о заведении")}
-                        aria-haspopup="dialog"
-                        aria-expanded={infoOpen}
-                        onClick={() => setInfoOpen((value) => !value)}
-                      >
-                        <Info size={20} aria-hidden="true" />
-                      </button>
-                    </div>
+                    {tableOrder && (
+                      <span>
+                        <Utensils size={15} aria-hidden="true" />
+                        {t("Стол {number}", { number: tableOrder.table.table_identifier })}
+                      </span>
+                    )}
                   </div>
                 </div>
-                {infoOpen && (
-                  <VenueInfoSheet
-                    venue={venue}
-                    photoStyle={photoStyle}
-                    illustration={illustration}
-                    anchorRef={infoRef}
-                    onClose={closeInfo}
-                  />
-                )}
               </div>
             </div>
 
@@ -612,17 +613,17 @@ export function VenueDetailsScreen({
                   aria-label={t("Назад к бронированию")}
                   onClick={backToBookingDetails}
                 >
-                  <ArrowLeft size={23} />
+                  <X size={23} aria-hidden="true" />
                 </button>
               )}
               {
                 <>
                   {!desktopSearchActive && visibleCategories.length > 0 && (
                     <div className="venue-public-category-sticky-shell">
-                      <div className="venue-category-controls">
+                      <div className={`venue-category-controls${menuPinned ? " is-pinned" : ""}`}>
                         <nav
                           ref={categoryNavRef}
-                          className={`venue-section-nav venue-public-category-nav${menuPinned ? " is-pinned" : ""}`}
+                          className="venue-section-nav venue-public-category-nav"
                           aria-label={t("Категории меню")}
                         >
                           {visibleCategories.map((category) => (
@@ -645,7 +646,7 @@ export function VenueDetailsScreen({
                             </button>
                           ))}
                         </nav>
-                        {!mobileBooking && (
+                        {(!mobileBooking || tableOrder || !bookable) && (
                           <button
                             type="button"
                             className="venue-desktop-menu-view-toggle"
@@ -718,6 +719,9 @@ export function VenueDetailsScreen({
               {preorderMenuOpen && (
                 <PreorderCart
                   bookingSummary={bookingSummary}
+                  venueName={venue.name}
+                  venueAddress={[venue.address, venue.city].filter(Boolean).join(" · ")}
+                  onBack={backToBookingDetails}
                   quantities={preorderQuantities}
                   selectedItems={preorderSelectedItems}
                   unavailableItems={unavailablePreorderItems}
@@ -767,6 +771,7 @@ export function VenueDetailsScreen({
                     menu={menuState.categories}
                     preorderEnabled={venue.preorder_enabled}
                     onClose={closeBooking}
+                    onViewReservations={user ? onViewReservations : undefined}
                   />
                 ) : (
                   <DesktopBookingFlow
@@ -782,9 +787,11 @@ export function VenueDetailsScreen({
                     onQuantityChange={changePreorderQuantity}
                     menuModeOpen={preorderMenuOpen}
                     onMenuModeChange={setPreorderMenuOpen}
+                    venueAddress={[venue.address, venue.city].filter(Boolean).join(" · ")}
                     onPreorderStart={setBookingSummary}
                     onMenuUpdated={replaceMenu}
                     onConfirmationClose={finishBooking}
+                    onViewReservations={onViewReservations}
                   />
                 )}
               </div>
@@ -864,8 +871,10 @@ export function VenueDetailsScreen({
               tableOrder.onOpenCart();
             }}
           >
+            <span>
+              {t("Ваш заказ")} · {tableOrder.count}
+            </span>
             <strong>{tableOrder.totalLabel}</strong>
-            <ShoppingBag size={23} aria-hidden="true" />
           </button>
         </div>
       )}

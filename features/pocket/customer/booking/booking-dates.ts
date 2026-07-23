@@ -1,3 +1,5 @@
+import type { Locale } from "../../locales";
+
 // Calendar arithmetic on ISO days ("2026-11-09"). Noon UTC avoids DST edge cases.
 export const asDay = (value: string) => new Date(`${value}T12:00:00Z`);
 export const isoDay = (value: Date) => value.toISOString().slice(0, 10);
@@ -32,3 +34,14 @@ export const bookingWindowDays = 30;
 
 export type TimePeriod = "day" | "evening";
 export const periodForTime = (time: string): TimePeriod => (time < "18:00" ? "day" : "evening");
+
+export function guestsLabel(
+  t: (source: string, params: { count: number }) => string,
+  count: number,
+  locale: Locale,
+) {
+  const category = new Intl.PluralRules(locale === "ua" ? "uk" : locale).select(count);
+  const source =
+    category === "one" ? "{count} гость" : category === "few" ? "{count} гостя" : "{count} гостей";
+  return t(source, { count });
+}

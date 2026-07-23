@@ -64,19 +64,21 @@ export function PublicMenuCards({
               )}
             </div>
             <div className="venue-public-menu-copy">
-              <strong>
-                {new Intl.NumberFormat(locale, {
-                  style: "currency",
-                  currency: item.currency,
-                }).format(item.price_minor / 100)}
-              </strong>
+              <div className="venue-public-menu-price">
+                <strong>
+                  {new Intl.NumberFormat(locale, {
+                    style: "currency",
+                    currency: item.currency,
+                  }).format(item.price_minor / 100)}
+                </strong>
+                {item.portion_weight_g != null && (
+                  <small>
+                    {item.portion_weight_g} {t("г")}
+                  </small>
+                )}
+              </div>
               <h3>{item.name}</h3>
               {item.description && <p>{item.description}</p>}
-              {view === "list" && item.portion_weight_g != null && (
-                <small>
-                  {item.portion_weight_g} {t("г")}
-                </small>
-              )}
             </div>
             {onOpenDetails && (
               <button

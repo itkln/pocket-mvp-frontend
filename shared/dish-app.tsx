@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams, useSelectedLayoutSegment } fro
 import { Menu, Search } from "lucide-react";
 import { getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
 import { dishAuthPath } from "../lib/dish-auth-navigation";
+import { VenueOrderHistoryDialog } from "../features/pocket/customer/table/venue-order-history-dialog";
 import { DishCatalogHeader } from "../features/pocket/customer/catalog-header";
 import { GuestProfileDialog } from "../features/pocket/customer/profile";
 import { useI18n } from "../features/pocket/i18n";
@@ -48,6 +49,7 @@ export default function DishApp({
     [ready, setReady] = useState(false);
   const [toast, setToast] = useState("");
   const [signingOut, setSigningOut] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [section, setSection] = useState<"profile" | "security" | "notifications" | null>(null);
   const [menuQuery, setMenuQuery] = useState(params.get("q") ?? "");
   const basePath = `/${locale}/${qrToken ? `qr/${encodeURIComponent(qrToken)}` : `r/${encodeURIComponent(venueID ?? "")}`}`;
@@ -59,6 +61,7 @@ export default function DishApp({
     setMenuQuery(params.get("q") ?? "");
     setSettingsPage(null);
     setSection(null);
+    setHistoryOpen(false);
     setSigningOut(false);
   }
   const notify = useCallback((message: string) => setToast(message), [setToast]);
@@ -129,29 +132,29 @@ export default function DishApp({
         }}
       >
         <div
-          className={`pocket-dish ${user ? "signed-in" : "guest"} ${tableEntry ? "dish-table-entry-active" : ""} ${venueScreen ? "venue-detail-active" : "dish-account-active"}`}
+          className={`pocket-dish ${user ? "signed-in" : "guest"} ${tableEntry ? "dish-table-entry-active" : ""} ${venueScreen ? "venue-detail-active" : tableEntry ? "" : "dish-account-active"}`}
         >
-          {!tableEntry && (
-            <DishCatalogHeader
-              user={user}
-              screen={screen}
-              searchQuery={menuQuery}
-              onSearch={setMenuQuery}
-              searchAutoFocus={params.get("search") === "1"}
-              onNavigate={navigate}
-              onLogin={() =>
-                router.push(
-                  dishAuthPath(
-                    locale,
-                    "login",
-                    `${pathname}${window.location.search}${window.location.hash}`,
-                  ),
-                )
-              }
-              onLogout={signOut}
-              onAccountSection={setSection}
-            />
-          )}
+          <DishCatalogHeader
+            user={user}
+            screen={screen}
+            showSearch={!tableEntry}
+            searchQuery={menuQuery}
+            onSearch={setMenuQuery}
+            searchAutoFocus={params.get("search") === "1"}
+            onNavigate={navigate}
+            onLogin={() =>
+              router.push(
+                dishAuthPath(
+                  locale,
+                  "login",
+                  `${pathname}${window.location.search}${window.location.hash}`,
+                ),
+              )
+            }
+            onLogout={signOut}
+            onAccountSection={setSection}
+            onOrderHistory={venueID || qrToken ? () => setHistoryOpen(true) : undefined}
+          />
           {!tableEntry && (
             <header
               aria-label={t("Мобильная навигация")}
@@ -201,6 +204,13 @@ export default function DishApp({
             <main className="dish-main">
               <div className="dish-page">{children}</div>
             </main>
+            {user && historyOpen && (
+              <VenueOrderHistoryDialog
+                venueID={venueID}
+                qrToken={qrToken}
+                onClose={() => setHistoryOpen(false)}
+              />
+            )}
             {user && (
               <GuestProfileDialog
                 open={!!section}

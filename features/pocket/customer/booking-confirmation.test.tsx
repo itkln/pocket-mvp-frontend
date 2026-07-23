@@ -17,6 +17,7 @@ const reservation = {
 describe("BookingConfirmation", () => {
   it("shows venue branding, guest, local visit time and preorder details without losing the return action", () => {
     const onClose = vi.fn();
+    const onViewReservations = vi.fn();
     render(
       <I18nProvider initialLocale="en">
         <BookingConfirmation
@@ -30,6 +31,7 @@ describe("BookingConfirmation", () => {
           headingID="confirmation"
           items={[{ id: "toast", name: "French toast", quantity: 1 }]}
           onClose={onClose}
+          onViewReservations={onViewReservations}
         />
       </I18nProvider>,
     );
@@ -49,6 +51,8 @@ describe("BookingConfirmation", () => {
     expect(screen.getByText(/9.50/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Back to venue" }));
     expect(onClose).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole("button", { name: "My reservations" }));
+    expect(onViewReservations).toHaveBeenCalledOnce();
   });
 
   it("uses each venue's initials when no logo is uploaded or an image fails", () => {

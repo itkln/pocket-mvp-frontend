@@ -1,21 +1,18 @@
 "use client";
 
-import {
-  CalendarDays,
-  Minus,
-  Plus,
-  ShoppingBag,
-  UserRound,
-  UsersRound,
-  Utensils,
-} from "lucide-react";
+import { ArrowLeft, Minus, Plus, ShoppingBag, Utensils } from "lucide-react";
 import type { PublicMenuItem } from "../../../../lib/public-catalog-api";
 import { useI18n } from "../../i18n";
+import { BookingSummary } from "../booking/booking-summary";
+import { BookingProgress } from "../booking/booking-progress";
 import type { DesktopBookingSummary } from "../desktop-booking-flow";
 
 // Side cart of the desktop preorder menu: the reservation being made and the chosen dishes.
 export function PreorderCart({
   bookingSummary,
+  venueName,
+  venueAddress,
+  onBack,
   quantities,
   selectedItems,
   unavailableItems,
@@ -28,6 +25,9 @@ export function PreorderCart({
   onBookWithoutPreorder,
 }: {
   bookingSummary: DesktopBookingSummary | null;
+  venueName: string;
+  venueAddress: string;
+  onBack: () => void;
   quantities: Record<string, number>;
   selectedItems: PublicMenuItem[];
   // Dishes still in the cart that are no longer offered for preorder: [id, quantity].
@@ -44,40 +44,34 @@ export function PreorderCart({
   return (
     <aside className="venue-preorder-cart" aria-label={t("Предзаказ")}>
       <header>
-        <h2>{t("Предзаказ")}</h2>
-        {count > 0 && (
-          <button type="button" onClick={onClear}>
-            {t("Очистить")}
-          </button>
-        )}
+        <button
+          className="venue-preorder-back"
+          type="button"
+          aria-label={t("Назад")}
+          onClick={onBack}
+        >
+          <ArrowLeft size={22} aria-hidden="true" />
+        </button>
+        <h2>{t("Предзаказ блюд")}</h2>
       </header>
+      <BookingProgress step={2} />
       <div className="venue-preorder-cart-body">
         {bookingSummary && (
-          <section className="venue-preorder-reservation-summary" aria-label={t("Бронирование")}>
-            <h3>{t("Бронирование")}</h3>
-            <div>
-              <CalendarDays size={17} aria-hidden="true" />
-              <span>
-                {bookingSummary.dateLabel} · {bookingSummary.time}
-              </span>
-            </div>
-            <div>
-              <UsersRound size={17} aria-hidden="true" />
-              <span>{t("Гостей: {count}", { count: bookingSummary.guests })}</span>
-            </div>
-            <div>
-              <UserRound size={17} aria-hidden="true" />
-              <span>
-                {bookingSummary.name}
-                <small>
-                  {bookingSummary.phone}
-                  {bookingSummary.email && <> · {bookingSummary.email}</>}
-                </small>
-              </span>
-            </div>
-            {bookingSummary.comment && <p>{bookingSummary.comment}</p>}
-          </section>
+          <BookingSummary
+            venueName={venueName}
+            venueAddress={venueAddress}
+            {...bookingSummary}
+            onEdit={onBack}
+          />
         )}
+        <div className="venue-preorder-cart-heading">
+          <h3>{t("Ваш предзаказ")}</h3>
+          {count > 0 && (
+            <button type="button" onClick={onClear}>
+              {t("Очистить")}
+            </button>
+          )}
+        </div>
         {count > 0 ? (
           <div className="venue-preorder-cart-items">
             {selectedItems.map((item) => (
@@ -142,31 +136,37 @@ export function PreorderCart({
           </div>
         ) : (
           <div className="venue-preorder-cart-empty">
-            <ShoppingBag size={46} aria-hidden="true" />
-            <h3>{t("В предзаказе пока пусто")}</h3>
-            <p>{t("Добавьте блюда из меню")}</p>
+            <ShoppingBag size={28} aria-hidden="true" />
+            <strong>{t("В предзаказе пока пусто")}</strong>
+            <p>{t("Добавьте блюда из меню или забронируйте без предзаказа")}</p>
           </div>
         )}
-      </div>
-      <div className="venue-preorder-cart-footer">
-        {count > 0 ? (
-          <button
-            type="button"
-            disabled={selectedItems.length !== Object.keys(quantities).length}
-            onClick={onCheckout}
-          >
-            <span>{t("Продолжить к оплате")}</span>
+        {count > 0 && (
+          <div className="desktop-booking-total">
+            <span>{t("Итого к оплате")}</span>
             <strong>{totalLabel}</strong>
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="venue-preorder-book-without"
-            onClick={onBookWithoutPreorder}
-          >
-            <span>{t("Забронировать без предзаказа")}</span>
-          </button>
+          </div>
         )}
+        <div className="venue-preorder-cart-footer">
+          {count > 0 ? (
+            <button
+              type="button"
+              disabled={selectedItems.length !== Object.keys(quantities).length}
+              onClick={onCheckout}
+            >
+              <span>{t("Продолжить к подтверждению")}</span>
+              <strong>{totalLabel}</strong>
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="venue-preorder-book-without"
+              onClick={onBookWithoutPreorder}
+            >
+              <span>{t("Забронировать без предзаказа")}</span>
+            </button>
+          )}
+        </div>
       </div>
     </aside>
   );

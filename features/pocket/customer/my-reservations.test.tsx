@@ -9,7 +9,8 @@ import { APIError } from "../../../lib/api-client";
 import { I18nProvider } from "../i18n";
 import { MyReservationsScreen } from "./my-reservations";
 
-vi.mock("../../../lib/reservations-api", () => ({
+vi.mock("../../../lib/reservations-api", async (original) => ({
+  ...(await original<object>()),
   listCustomerReservations: vi.fn(),
   cancelCustomerReservation: vi.fn(),
 }));

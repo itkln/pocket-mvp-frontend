@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight, CalendarDays, UsersRound, X } from "lucide-react";
+import { ArrowUpRight, CalendarDays, ChevronRight, ShoppingBag, X } from "lucide-react";
 import {
   cancelCustomerReservation,
+  isUpcomingReservation,
   listCustomerReservations,
   type CustomerReservation,
 } from "../../../lib/reservations-api";
@@ -11,6 +12,7 @@ import { reservationStatusLabels as statusLabels } from "../reservation-status";
 import { APIError } from "../../../lib/api-client";
 import { localeTags, useI18n } from "../i18n";
 import { Button } from "../ui";
+import { guestsLabel } from "./booking/booking-dates";
 import { CategoryFilterStrip } from "./filter-strip";
 
 const cancellationMessages: Record<string, string> = {
@@ -69,9 +71,7 @@ export function MyReservationsScreen({
     setLoading(true);
     setRetry((value) => value + 1);
   };
-  const isUpcoming = (reservation: CustomerReservation) =>
-    ["confirmed", "seated"].includes(reservation.status) &&
-    new Date(reservation.ends_at).getTime() > now;
+  const isUpcoming = (reservation: CustomerReservation) => isUpcomingReservation(reservation, now);
   const venues = Array.from(
     new Map(
       reservations.map((reservation) => [reservation.venue_id, reservation.venue_name]),
@@ -128,58 +128,65 @@ export function MyReservationsScreen({
     .sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   const selected = reservations.find((reservation) => reservation.id === selectedID);
 
-  const card = (reservation: CustomerReservation) => (
-    <article
-      className="my-reservation-card"
-      key={reservation.id}
-      aria-label={`${reservation.venue_name} · ${t("Бронь №{code}", { code: reservation.code })}`}
-    >
-      <header>
-        <div>
-          <h3>{reservation.venue_name}</h3>
-          <p>{[reservation.venue_address, reservation.venue_city].filter(Boolean).join(" · ")}</p>
+  const card = (reservation: CustomerReservation) => {
+    const startsAt = new Date(reservation.starts_at);
+    const dateFormat = (options: Intl.DateTimeFormatOptions) =>
+      new Intl.DateTimeFormat(localeTags[locale], {
+        ...options,
+        timeZone: reservation.timezone,
+      }).format(startsAt);
+    const preorderTotal = new Intl.NumberFormat(localeTags[locale], {
+      style: "currency",
+      currency: reservation.currency,
+    }).format(reservation.preorder_total_minor / 100);
+    return (
+      <article
+        className="my-reservation-card"
+        key={reservation.id}
+        aria-label={`${reservation.venue_name} · ${t("Бронь №{code}", { code: reservation.code })}`}
+      >
+        <div
+          className={`my-reservation-date-tile${isUpcoming(reservation) ? " upcoming" : ""}`}
+          aria-hidden="true"
+        >
+          <span>{dateFormat({ month: "short" })}</span>
+          <strong>{dateFormat({ day: "numeric" })}</strong>
         </div>
+        <div className="my-reservation-copy">
+          <h3>{reservation.venue_name}</h3>
+          <div className="my-reservation-schedule">
+            <time dateTime={reservation.starts_at} title={dateFormat({ dateStyle: "long" })}>
+              <span className="my-reservation-date-text">
+                {dateFormat({ dateStyle: "long" })},{" "}
+              </span>
+              {dateFormat({ timeStyle: "short" })}
+            </time>
+            <span>{guestsLabel(t, reservation.guest_count, locale)}</span>
+          </div>
+          <div className="my-reservation-meta">
+            <span className={`my-reservation-status ${reservation.status}`}>
+              {t(statusLabels[reservation.status])}
+            </span>
+            {reservation.preorder_items.length > 0 && (
+              <span className="my-reservation-card-preorder">
+                <ShoppingBag size={14} aria-hidden="true" />
+                {preorderTotal}
+              </span>
+            )}
+            <span>{t("Бронь №{code}", { code: reservation.code })}</span>
+          </div>
+        </div>
+        <ChevronRight size={20} aria-hidden="true" />
         <button
           type="button"
           className="my-reservation-details-link"
           aria-label={`${t("Открыть бронь")}: ${reservation.venue_name} · ${reservation.code}`}
           aria-haspopup="dialog"
           onClick={() => setSelectedID(reservation.id)}
-        >
-          <ArrowUpRight size={20} />
-        </button>
-      </header>
-      <div className="my-reservation-meta">
-        <span>{t("Бронь №{code}", { code: reservation.code })}</span>
-        <span className={`my-reservation-status ${reservation.status}`}>
-          {t(statusLabels[reservation.status])}
-        </span>
-      </div>
-      <div className="my-reservation-schedule">
-        <div className="my-reservation-when">
-          <CalendarDays size={22} aria-hidden="true" />
-          <time dateTime={reservation.starts_at}>
-            <span>
-              {new Intl.DateTimeFormat(localeTags[locale], {
-                dateStyle: "long",
-                timeZone: reservation.timezone,
-              }).format(new Date(reservation.starts_at))}
-            </span>
-            <strong>
-              {new Intl.DateTimeFormat(localeTags[locale], {
-                timeStyle: "short",
-                timeZone: reservation.timezone,
-              }).format(new Date(reservation.starts_at))}
-            </strong>
-          </time>
-        </div>
-        <span className="my-reservation-guests">
-          <UsersRound size={20} aria-hidden="true" />
-          {t("Гостей: {count}", { count: reservation.guest_count })}
-        </span>
-      </div>
-    </article>
-  );
+        />
+      </article>
+    );
+  };
 
   return (
     <section className="dish-reservations dish-category-catalog" aria-label={t("Мои брони")}>

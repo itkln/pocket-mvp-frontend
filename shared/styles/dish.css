@@ -3893,73 +3893,6 @@
   }
 }
 
-.pocket-dish .my-reservations-groups {
-  display: grid;
-  gap: 32px;
-}
-.pocket-dish .my-reservations-groups h2 {
-  margin: 0 0 16px;
-  font-size: 22px;
-}
-.pocket-dish .my-reservations-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-}
-.pocket-dish .my-reservation-card {
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  height: 224px;
-  padding: 24px;
-  border-radius: 24px;
-  background: var(--dish-card);
-  min-width: 0;
-}
-.pocket-dish .my-reservation-card header {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 16px;
-}
-.pocket-dish .my-reservation-card header > div {
-  min-width: 0;
-}
-.pocket-dish .my-reservation-card h3 {
-  font-size: 22px;
-  margin: 0 0 6px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.pocket-dish .my-reservation-card header p {
-  color: var(--dish-secondary);
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.pocket-dish .my-reservation-details-link {
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 14px;
-  background: #eeeeee;
-  color: var(--dish-text);
-  cursor: pointer;
-}
-.pocket-dish .my-reservation-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  margin: 20px 0 12px;
-  color: var(--dish-secondary);
-  font-size: 14px;
-}
 .pocket-dish .my-reservation-status {
   padding: 6px 12px;
   border-radius: 18px;
@@ -3970,44 +3903,6 @@
 .pocket-dish .my-reservation-status.seated {
   background: #e0f3fd;
   color: #007fb7;
-}
-.pocket-dish .my-reservation-schedule {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: auto;
-  font-size: 14px;
-}
-.pocket-dish .my-reservation-when {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.pocket-dish .my-reservation-when > svg,
-.pocket-dish .my-reservation-guests > svg {
-  flex: 0 0 auto;
-}
-.pocket-dish .my-reservation-when time {
-  min-width: 0;
-  display: grid;
-  gap: 4px;
-  line-height: 1.35;
-}
-.pocket-dish .my-reservation-when time span {
-  color: var(--dish-secondary);
-}
-.pocket-dish .my-reservation-when time strong {
-  font-size: 16px;
-  font-weight: 600;
-}
-.pocket-dish .my-reservation-guests {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  white-space: nowrap;
 }
 .pocket-dish .my-reservation-panel {
   position: fixed;
@@ -4206,25 +4101,7 @@
 .pocket-dish .my-reservation-preorder > div {
   margin-top: 20px;
 }
-@media (max-width: 1199px) {
-  .pocket-dish .my-reservations-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-@media (max-width: 799px) {
-  .pocket-dish .my-reservations-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
 @media (max-width: 600px) {
-  .pocket-dish .my-reservation-card {
-    height: 236px;
-    padding: 20px;
-    border-radius: 20px;
-  }
-  .pocket-dish .my-reservation-card h3 {
-    font-size: 20px;
-  }
   .pocket-dish .my-reservation-panel {
     inset: 0;
     width: 100%;
@@ -5108,71 +4985,93 @@ body::-webkit-scrollbar,
 
 /* A single confirmation layout for desktop and mobile bookings. */
 .pocket-dish .venue-booking-confirmed.booking-confirmation {
-  gap: 28px;
-  padding: 40px 36px 32px;
+  gap: 20px;
+  padding: 16px 0 0;
   text-align: center;
 }
 .pocket-dish .booking-confirmation-brand {
   display: grid;
   justify-items: center;
-  gap: 14px;
+  gap: 6px;
+}
+.pocket-dish .booking-confirmation-logo {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 10px;
+}
+.pocket-dish .booking-confirmation-logo .venue-logo {
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+}
+.pocket-dish .booking-confirmation-logo > span:last-child {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: #18795b;
+  color: #fff;
 }
 .pocket-dish .booking-confirmation .booking-confirmation-venue {
-  margin: 4px 0 0;
-  font-size: 28px;
-  font-weight: 750;
-  line-height: 1.2;
+  margin: 0;
+  color: var(--dish-secondary);
+  font-size: 14px;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 .pocket-dish .booking-confirmation-brand h2 {
   margin: 0;
-  color: var(--dish-cta);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 24px;
+  letter-spacing: -0.02em;
 }
-.pocket-dish .booking-confirmation-visit {
-  display: grid;
-  gap: 10px;
-}
-.pocket-dish .booking-confirmation-visit .booking-confirmation-guest {
-  margin-bottom: 8px;
-  color: var(--dish-secondary);
-  font-size: 20px;
-  overflow-wrap: anywhere;
-}
-.pocket-dish .booking-confirmation-date,
-.pocket-dish .booking-confirmation-time {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.5;
-}
-.pocket-dish .booking-confirmation-meta {
-  display: grid;
-  gap: 6px;
-  color: var(--dish-secondary);
-  font-size: 13px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
+.pocket-dish .booking-confirmation-visit,
 .pocket-dish .booking-confirmation-preorder {
   display: grid;
-  gap: 8px;
-  padding: 20px;
-  border-radius: 16px;
-  background: #f6f7f8;
+  padding: 4px 16px;
+  border-radius: 20px;
+  background: var(--dish-card);
+  text-align: left;
+  font-size: 15px;
+}
+.pocket-dish .booking-confirmation-visit > p {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 12px;
+}
+.pocket-dish .booking-confirmation-visit > p + p {
+  border-top: 1px solid var(--dish-divider);
+}
+.pocket-dish .booking-confirmation-visit svg {
+  flex: none;
+  color: var(--dish-secondary);
+}
+.pocket-dish .booking-confirmation-guest > span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .booking-confirmation-guest small,
+.pocket-dish .booking-confirmation-meta,
+.pocket-dish .booking-confirmation-payment {
+  color: var(--dish-secondary);
   font-size: 14px;
-  line-height: 1.5;
+}
+.pocket-dish .booking-confirmation-preorder {
+  gap: 8px;
+  padding-block: 16px;
 }
 .pocket-dish .booking-confirmation-preorder h3 {
   margin: 0 0 4px;
-  font-size: 16px;
+  font-size: 14px;
 }
 .pocket-dish .booking-confirmation-preorder strong {
-  margin-top: 4px;
   font-size: 18px;
-}
-.pocket-dish .booking-confirmation-payment {
-  color: var(--dish-secondary);
 }
 .pocket-dish .desktop-booking-flow.checkout-open.confirmation-open {
   overflow-y: auto;
@@ -5182,23 +5081,22 @@ body::-webkit-scrollbar,
   margin: 12px auto;
   max-height: none;
 }
-.pocket-dish .booking-confirmation .venue-booking-submit {
+.pocket-dish .booking-confirmation-actions {
+  display: grid;
+  gap: 8px;
+}
+.pocket-dish .booking-confirmation .booking-confirmation-actions .venue-booking-submit {
   margin-top: 0;
+  border-radius: 16px !important;
 }
-@media (max-width: 760px) {
-  .pocket-dish .venue-booking-confirmed.booking-confirmation {
-    padding: 28px 8px 20px;
-    gap: 26px;
-  }
-  .pocket-dish .booking-confirmation .booking-confirmation-venue {
-    font-size: 26px;
-  }
-  .pocket-dish .booking-confirmation-date,
-  .pocket-dish .booking-confirmation-time {
-    font-size: 18px;
-  }
+.pocket-dish .booking-confirmation-actions .venue-booking-submit.secondary {
+  background: var(--dish-card);
+  color: var(--dish-text);
 }
-
+.pocket-dish .booking-confirmation-actions .venue-booking-submit.secondary:hover {
+  background: var(--dish-active);
+  color: var(--dish-text);
+}
 .pocket-dish .mobile-booking-flow.confirmation-open {
   overflow-y: auto;
 }
@@ -5732,165 +5630,6 @@ body:has(.pocket-dish .dish-tip-dialog[open]) {
   justify-content: center;
 }
 
-/* Centered venue identity and compact review/information actions. */
-.pocket-dish .dish-real-venue-detail .venue-detail-heading {
-  text-align: center;
-}
-.pocket-dish .dish-real-venue-detail .venue-title-row {
-  justify-content: center;
-}
-.pocket-dish .dish-real-venue-detail .venue-facts {
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-.pocket-dish .dish-real-venue-detail .venue-public-rating {
-  display: inline-flex;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px;
-  padding: 0 16px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--dish-card);
-  color: var(--dish-text);
-}
-.pocket-dish .dish-real-venue-detail .venue-public-rating b {
-  font-size: 15px;
-}
-.pocket-dish .dish-real-venue-detail .venue-desktop-info-wrap {
-  display: flex;
-}
-.pocket-dish .dish-real-venue-detail .venue-desktop-info-button {
-  width: 44px;
-  height: 44px;
-  border: 0;
-  border-radius: 14px;
-  background: var(--dish-card);
-}
-.pocket-dish .dish-real-venue-detail .venue-public-rating:hover,
-.pocket-dish .dish-real-venue-detail .venue-desktop-info-button:hover {
-  background: var(--dish-active);
-  color: var(--dish-cta);
-}
-@media (max-width: 760px) {
-  .pocket-dish .dish-real-venue-detail .venue-facts {
-    margin-top: 16px;
-    margin-bottom: 10px;
-  }
-}
-
-/* The venue cover frames its identity; controls remain readable on the image. */
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-overview-block {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-height: 280px;
-  background-color: #26343b;
-  background-image:
-    linear-gradient(
-      180deg,
-      rgba(15, 23, 30, 0.12),
-      rgba(15, 23, 30, 0.3) 35%,
-      rgba(15, 23, 30, 0.76)
-    ),
-    var(--venue-cover-image);
-  background-size: cover;
-  background-position: center;
-}
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-overview-block > .venue-public-photo {
-  display: none;
-}
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-summary {
-  min-height: 0;
-  background: transparent;
-}
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-heading h1 {
-  color: #fff;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
-}
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-heading > p {
-  color: rgba(255, 255, 255, 0.9);
-}
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-facts > span {
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--dish-text);
-}
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-public-rating,
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-desktop-info-button {
-  background: #fff;
-  color: var(--dish-text);
-}
-@media (max-width: 760px) {
-  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-overview-block {
-    box-sizing: border-box;
-    min-height: 220px;
-    margin-top: calc(-1 * var(--venue-toolbar-height));
-    padding: var(--venue-toolbar-height) 0 16px;
-  }
-  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-summary {
-    padding: 8px 20px 0;
-  }
-  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-facts {
-    margin-top: 12px;
-    margin-bottom: 0;
-  }
-  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-mobile-toolbar {
-    background: transparent;
-    transition: background-color 0.18s;
-  }
-  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-mobile-toolbar.compact {
-    background: #fff;
-    box-shadow: none;
-  }
-  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar button {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: none;
-  }
-  .pocket-dish .venue-table-mode .venue-mobile-toolbar-title {
-    max-width: calc(100% - 192px);
-  }
-  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar button svg {
-    width: 21px;
-    height: 21px;
-  }
-  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar-actions {
-    gap: 8px;
-  }
-  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar button:focus-visible {
-    outline: 2px solid var(--dish-cta);
-    outline-offset: 3px;
-  }
-}
-
-@media (max-width: 760px) {
-  .pocket-dish .dish-real-venue-detail {
-    --venue-toolbar-height: calc(72px + env(safe-area-inset-top, 0px));
-  }
-  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar {
-    box-sizing: border-box;
-    height: var(--venue-toolbar-height);
-    min-height: var(--venue-toolbar-height);
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
-    box-shadow: none;
-  }
-  .pocket-dish .dish-real-venue-detail .venue-public-category-nav {
-    top: var(--venue-toolbar-height);
-    box-shadow: none;
-    transition: box-shadow 0.18s ease;
-  }
-  .pocket-dish .dish-real-venue-detail .venue-public-category-nav.is-pinned {
-    box-shadow: var(--dish-menu-shadow);
-  }
-  .pocket-dish .dish-real-venue-detail .venue-public-menu-category {
-    scroll-margin-top: calc(var(--venue-toolbar-height) + 64px);
-  }
-}
-
 /* Keep dismissal above the sheet content, with a neutral focus treatment. */
 .pocket-dish .venue-info-controls {
   position: relative;
@@ -5941,24 +5680,6 @@ body:has(.pocket-dish .dish-tip-dialog[open]) {
 
 /* Keep table actions visible while the menu and order contents scroll. */
 @media (min-width: 761px) {
-  .pocket-dish .dish-real-venue-detail.venue-table-mode {
-    padding-left: 64px;
-  }
-  .pocket-dish .dish-real-venue-detail > .venue-table-history-trigger {
-    position: sticky;
-    z-index: 20;
-    top: 96px;
-    right: auto;
-    bottom: auto;
-    width: 48px;
-    height: 48px;
-    margin: 0 0 -48px -64px;
-    border: 0;
-    box-shadow: none;
-  }
-  .pocket-dish .venue-table-mode .venue-detail-page {
-    grid-template-columns: minmax(0, 1fr) 390px;
-  }
   .pocket-dish .venue-table-mode .venue-primary-column {
     display: grid;
   }
@@ -6516,75 +6237,6 @@ body:has(.pocket-dish .dish-tip-dialog[open]) {
   }
 }
 
-/* Mobile cart follows the account menu's separate white sections. */
-@media (max-width: 760px) {
-  .pocket-dish .venue-table-cart-dialog .venue-table-order-panel {
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-  }
-  .pocket-dish .venue-table-cart-dialog .venue-table-cart-body {
-    flex: 0 0 auto;
-    overflow: visible;
-  }
-
-  .pocket-dish .venue-table-cart-dialog.has-items,
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-panel {
-    background: #f0f1f5;
-  }
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-panel > header {
-    padding: calc(20px + env(safe-area-inset-top, 0px)) 24px 20px;
-    border-radius: 0 0 26px 26px;
-    background: #fff;
-  }
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-cart-body {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 6px 0 0;
-  }
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-options {
-    display: contents;
-  }
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-cart-items,
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-notes,
-  .pocket-dish .venue-table-cart-dialog.has-items .dish-tip-picker,
-  .pocket-dish
-    .venue-table-cart-dialog.has-items
-    .venue-table-cart-body
-    > .venue-table-cart-footer {
-    flex-shrink: 0;
-    box-sizing: border-box;
-    width: 100%;
-    margin: 0;
-    padding: 24px;
-    border: 0;
-    border-radius: 26px;
-    background: #fff;
-    box-shadow: none;
-  }
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-notes {
-    gap: 12px;
-  }
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-notes textarea {
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 96px;
-  }
-  .pocket-dish
-    .venue-table-cart-dialog.has-items
-    .venue-table-cart-body
-    > .venue-table-cart-footer {
-    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-    border-radius: 26px 26px 0 0;
-  }
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-cart-body > .form-error {
-    margin: 0;
-    padding: 16px 24px;
-    border-radius: 26px;
-    background: #fff;
-  }
-}
-
 /* Mobile reservation details follow the separate white card layout. */
 @media (max-width: 760px) {
   .pocket-dish
@@ -6653,21 +6305,6 @@ body:has(.pocket-dish .dish-tip-dialog[open]) {
     border-radius: 0;
     background: #fff;
     box-shadow: none;
-  }
-}
-
-/* Bottom action sections join the final card without a grey seam. */
-@media (max-width: 760px) {
-  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-options > :last-child {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-  .pocket-dish
-    .venue-table-cart-dialog.has-items
-    .venue-table-cart-body
-    > .venue-table-cart-footer {
-    margin-top: -6px;
-    border-radius: 0;
   }
 }
 

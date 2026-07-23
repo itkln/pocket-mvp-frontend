@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarDays, Check, Clock3, UserRound } from "lucide-react";
 import type { CreatedReservation } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 import { TipBreakdown } from "./tip-picker";
@@ -16,6 +17,7 @@ type Props = {
   headingID: string;
   items?: { id: string; name: string; quantity: number }[];
   onClose?: () => void;
+  onViewReservations?: () => void;
 };
 
 export function BookingConfirmation({
@@ -29,6 +31,7 @@ export function BookingConfirmation({
   headingID,
   items = [],
   onClose,
+  onViewReservations,
 }: Props) {
   const { locale, t } = useI18n();
   const start = new Date(reservation.starts_at);
@@ -49,28 +52,39 @@ export function BookingConfirmation({
   return (
     <section className="venue-booking-confirmed booking-confirmation" role="status">
       <div className="booking-confirmation-brand">
-        <VenueLogo venueID={venueID} name={venueName} imageURL={venueLogoURL} />
+        <div className="booking-confirmation-logo">
+          <VenueLogo venueID={venueID} name={venueName} imageURL={venueLogoURL} />
+          <span aria-hidden="true">
+            <Check size={14} />
+          </span>
+        </div>
         <p className="booking-confirmation-venue">{venueName}</p>
         <h2 id={headingID}>{t("Бронь подтверждена")}</h2>
-      </div>
-      <div className="booking-confirmation-visit">
-        {guestName?.trim() && <p className="booking-confirmation-guest">{guestName.trim()}</p>}
-        <p className="booking-confirmation-date">{date}</p>
-        <p className="booking-confirmation-time">
-          {t("Гостей: {count}", { count: reservation.guest_count })} · {time}
-        </p>
-      </div>
-      <div className="booking-confirmation-meta">
-        <p>
+        <p className="booking-confirmation-meta">
           {t("Номер брони")}: {reservation.code}
         </p>
-        {guestPhone?.trim() && <p>{guestPhone.trim()}</p>}
-        {reservation.preorder_order_number ? (
-          <p>
-            {t("Номер предзаказа")}: {reservation.preorder_order_number}
-          </p>
-        ) : null}
       </div>
+      <div className="booking-confirmation-visit">
+        <p className="booking-confirmation-date">
+          <CalendarDays size={18} aria-hidden="true" /> {date}
+        </p>
+        <p className="booking-confirmation-time">
+          <Clock3 size={18} aria-hidden="true" /> {time} ·{" "}
+          {t("Гостей: {count}", { count: reservation.guest_count })}
+        </p>
+        {(guestName?.trim() || guestPhone?.trim()) && (
+          <p className="booking-confirmation-guest">
+            <UserRound size={18} aria-hidden="true" />
+            <span>{guestName?.trim()}</span>
+            {guestPhone?.trim() && <small>{guestPhone.trim()}</small>}
+          </p>
+        )}
+      </div>
+      {reservation.preorder_order_number && (
+        <p className="booking-confirmation-meta">
+          {t("Номер предзаказа")}: {reservation.preorder_order_number}
+        </p>
+      )}
       {reservation.preorder_total_minor > 0 && (
         <div className="booking-confirmation-preorder">
           <h3>{t("Предзаказ")}</h3>
@@ -91,10 +105,23 @@ export function BookingConfirmation({
           <p className="booking-confirmation-payment">{t("Оплата в заведении")}</p>
         </div>
       )}
-      {onClose && (
-        <button type="button" className="venue-booking-submit" onClick={onClose}>
-          {t("Вернуться к заведению")}
-        </button>
+      {(onClose || onViewReservations) && (
+        <div className="booking-confirmation-actions">
+          {onClose && (
+            <button type="button" className="venue-booking-submit" onClick={onClose}>
+              {t("Вернуться к заведению")}
+            </button>
+          )}
+          {onViewReservations && (
+            <button
+              type="button"
+              className="venue-booking-submit secondary"
+              onClick={onViewReservations}
+            >
+              {t("Мои брони")}
+            </button>
+          )}
+        </div>
       )}
     </section>
   );

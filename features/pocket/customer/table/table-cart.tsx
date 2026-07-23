@@ -1,6 +1,6 @@
 "use client";
 
-import type { Ref } from "react";
+import type { ReactNode, Ref } from "react";
 import { Minus, Plus, ShoppingBag, Utensils, X } from "lucide-react";
 import type { PublicMenuItem } from "../../../../lib/public-catalog-api";
 import type { TableContext, TableOrder } from "../../../../lib/table-orders-api";
@@ -14,6 +14,7 @@ import type { Draft } from "./table-draft";
 // Contents of the table cart, shown in the side panel and in the mobile cart dialog.
 export function TableCart({
   table,
+  headerAction,
   order,
   draft,
   selected,
@@ -36,6 +37,7 @@ export function TableCart({
   onSend,
 }: {
   table: TableContext;
+  headerAction?: ReactNode;
   order: TableOrder | null;
   draft: Draft;
   selected: PublicMenuItem[];
@@ -118,6 +120,7 @@ export function TableCart({
             {t("Стол {number}", { number: table.table_identifier })}
           </p>
         </div>
+        {headerAction}
         {cartOpen && (
           <button type="button" aria-label={t("Закрыть")} disabled={pending} onClick={onClose}>
             <X size={24} />

@@ -18,6 +18,7 @@ import { PublicMenuItemDialog } from "./public-menu-item-dialog";
 import { APIError } from "../../../lib/api-client";
 import { createReservationKey } from "../../../lib/reservation-key";
 import {
+  clearSavedPublicReservation,
   createPublicReservation,
   getPreorderCategories,
   getPublicVenueMenu,
@@ -33,25 +34,23 @@ import {
   addDays,
   asDay,
   bookingWindowDays,
+  guestsLabel,
   monthStart,
   periodForTime,
   venueToday,
   type TimePeriod,
 } from "./booking/booking-dates";
+import { bookingNotes, BookingWishes } from "./booking/booking-wishes";
+import { BookingProgress } from "./booking/booking-progress";
 import { CalendarPopover } from "./booking/calendar-popover";
 import { TimeSlotPicker } from "./booking/time-slot-picker";
-
-const wishOptions = [
-  { id: "date", icon: "🌹", label: "Свидание" },
-  { id: "birthday", icon: "🎂", label: "День рождения" },
-  { id: "children", icon: "🧸", label: "С детьми" },
-] as const;
 
 export function BookingPicker({
   venueID,
   menu = [],
   preorderEnabled = false,
   onClose,
+  onViewReservations,
   venueName,
   venueLogoURL,
 }: {
@@ -61,6 +60,7 @@ export function BookingPicker({
   menu?: PublicMenuCategory[];
   preorderEnabled?: boolean;
   onClose?: () => void;
+  onViewReservations?: () => void;
 }) {
   const { locale, t } = useI18n();
   const [menuView, setMenuView] = useMenuView();
@@ -230,10 +230,6 @@ export function BookingPicker({
       setTime("");
     }
   };
-  const toggleWish = (id: string) =>
-    setWishes((selected) =>
-      selected.includes(id) ? selected.filter((value) => value !== id) : [...selected, id],
-    );
   const today = current ? venueToday(current.timezone) : date;
   const latest = today ? addDays(today, bookingWindowDays) : date;
   const catalog = categories.flatMap((category) => category.items);
@@ -277,15 +273,7 @@ export function BookingPicker({
         guest_name: guestName.trim(),
         guest_phone: guestPhone.trim(),
         guest_email: guestEmail.trim(),
-        notes: [
-          wishes
-            .map((id) => wishOptions.find((wish) => wish.id === id)?.label)
-            .filter(Boolean)
-            .join(", "),
-          comment.trim(),
-        ]
-          .filter(Boolean)
-          .join(" · "),
+        notes: bookingNotes(wishes, comment),
         items: selectedItems.flatMap(({ item, quantity }) =>
           item ? [{ menu_item_id: item.id, quantity, expected_price_minor: item.price_minor }] : [],
         ),
@@ -406,7 +394,12 @@ export function BookingPicker({
       className={`venue-booking-card venue-public-booking mobile-booking-flow ${step !== "details" && !confirmed ? "preorder-step" : ""} ${confirmed ? "confirmation-open" : step === "details" ? "details-step" : ""}`}
       aria-labelledby="venue-booking-title"
     >
-      {!confirmed && step !== "details" && heading}
+      {!confirmed && step !== "details" && (
+        <header className="mobile-booking-step-heading">
+          {heading}
+          {preorderEnabled && <BookingProgress step={step === "preorder" ? 2 : 3} />}
+        </header>
+      )}
       {confirmed ? (
         <BookingConfirmation
           venueID={venueID}
@@ -417,6 +410,22 @@ export function BookingPicker({
           guestName={guestName}
           guestPhone={guestPhone}
           headingID="venue-booking-title"
+          onViewReservations={
+            onViewReservations
+              ? () => {
+                  clearSavedPublicReservation(venueID);
+                  onViewReservations();
+                }
+              : undefined
+          }
+          onClose={
+            onClose
+              ? () => {
+                  clearSavedPublicReservation(venueID);
+                  onClose();
+                }
+              : undefined
+          }
           items={selectedItems.map(({ id, quantity, item }) => ({
             id,
             quantity,
@@ -473,7 +482,10 @@ export function BookingPicker({
           >
             {step === "details" ? (
               <>
-                {heading}
+                <header className="mobile-booking-step-heading">
+                  {heading}
+                  {preorderEnabled && <BookingProgress step={1} />}
+                </header>
                 <section className="mobile-booking-selection" aria-label={t("Дата и время")}>
                   <div className="venue-booking-toolbar">
                     <div className="venue-date-picker" ref={calendarRef}>
@@ -511,7 +523,7 @@ export function BookingPicker({
                       >
                         <Minus size={16} />
                       </button>
-                      <strong>{t("Гостей: {count}", { count: guests })}</strong>
+                      <strong>{guestsLabel(t, guests, locale)}</strong>
                       <button
                         type="button"
                         aria-label={t("Увеличить количество гостей")}
@@ -559,31 +571,12 @@ export function BookingPicker({
                 {!loading && !error && Boolean(current?.slots.length) && (
                   <>
                     {selectedSlot && (
-                      <div className="venue-booking-wishes">
-                        <h3>{t("Пожелания к брони")}</h3>
-                        <div className="venue-wish-options">
-                          {wishOptions.map((wish) => (
-                            <button
-                              type="button"
-                              key={wish.id}
-                              className={wishes.includes(wish.id) ? "active" : ""}
-                              aria-pressed={wishes.includes(wish.id)}
-                              onClick={() => toggleWish(wish.id)}
-                            >
-                              <span aria-hidden="true">{wish.icon}</span>
-                              {t(wish.label)}
-                            </button>
-                          ))}
-                        </div>
-                        <textarea
-                          aria-label={t("Комментарий к ресторану")}
-                          placeholder={t("Комментарий к ресторану")}
-                          value={comment}
-                          maxLength={500}
-                          onChange={(event) => setComment(event.target.value.slice(0, 500))}
-                        />
-                        <small className="comment-character-count">{comment.length}/500</small>
-                      </div>
+                      <BookingWishes
+                        wishes={wishes}
+                        comment={comment}
+                        onWishesChange={setWishes}
+                        onCommentChange={setComment}
+                      />
                     )}
 
                     <div className="venue-booking-contact">
@@ -708,16 +701,7 @@ export function BookingPicker({
                 {(comment.trim() || wishes.length > 0) && (
                   <div className="desktop-booking-notes">
                     <h3>{t("Комментарий к ресторану")}</h3>
-                    <p>
-                      {[
-                        wishes
-                          .map((id) => t(wishOptions.find((wish) => wish.id === id)?.label ?? ""))
-                          .join(", "),
-                        comment.trim(),
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
+                    <p>{bookingNotes(wishes, comment, t)}</p>
                   </div>
                 )}
                 <div className="desktop-booking-payment">

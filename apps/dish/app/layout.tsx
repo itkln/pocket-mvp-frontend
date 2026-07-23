@@ -5,6 +5,7 @@ import "../../../shared/styles/base.css";
 import "../../../shared/styles/dish-base.css";
 import "../../../shared/styles/dish.css";
 import "../../../shared/styles/dish-navigation.css";
+import "../../../shared/styles/dish-venue.css";
 
 export const metadata: Metadata = {
   title: "Pocket Dish",

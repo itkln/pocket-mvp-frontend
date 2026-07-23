@@ -33,6 +33,7 @@ export function VenueMobileSearch({
   return (
     <div className="venue-mobile-search" role="search" aria-label={t("Поиск по меню")}>
       <div className="venue-mobile-search-bar">
+        <Search size={20} aria-hidden="true" />
         <input
           ref={inputRef}
           type="search"

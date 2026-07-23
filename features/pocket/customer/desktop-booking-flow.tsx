@@ -1,7 +1,17 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { ArrowLeft, CalendarDays, ChevronDown, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarDays,
+  ChevronDown,
+  Minus,
+  Pencil,
+  Plus,
+  ShoppingBag,
+  UserRound,
+  X,
+} from "lucide-react";
 import type { AuthUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
 import { createReservationKey } from "../../../lib/reservation-key";
@@ -18,8 +28,18 @@ import {
 } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 import { BookingConfirmation } from "./booking-confirmation";
-import { addDays, asDay, bookingWindowDays, monthStart, venueToday } from "./booking/booking-dates";
+import {
+  addDays,
+  asDay,
+  bookingWindowDays,
+  guestsLabel,
+  monthStart,
+  venueToday,
+} from "./booking/booking-dates";
+import { bookingNotes, BookingWishes } from "./booking/booking-wishes";
+import { BookingProgress } from "./booking/booking-progress";
 import { CalendarPopover } from "./booking/calendar-popover";
+import { BookingSummary } from "./booking/booking-summary";
 import { TimeSlotPicker } from "./booking/time-slot-picker";
 
 type Step = "schedule" | "details" | "preorder" | "checkout";
@@ -30,13 +50,9 @@ export type DesktopBookingFlowHandle = {
   backToDetails: () => void;
 };
 export type DesktopBookingSummary = {
-  dateLabel: string;
+  date: string;
   time: string;
   guests: number;
-  name: string;
-  phone: string;
-  email: string;
-  comment: string;
 };
 
 export const DesktopBookingFlow = forwardRef<
@@ -44,6 +60,7 @@ export const DesktopBookingFlow = forwardRef<
   {
     venueID: string;
     venueName: string;
+    venueAddress?: string;
     venueLogoURL?: string;
     menu: PublicMenuCategory[];
     preorderEnabled: boolean;
@@ -55,11 +72,13 @@ export const DesktopBookingFlow = forwardRef<
     onPreorderStart?: (summary: DesktopBookingSummary) => void;
     onMenuUpdated: (categories: PublicMenuCategory[]) => void;
     onConfirmationClose: () => void;
+    onViewReservations?: () => void;
   }
 >(function DesktopBookingFlow(
   {
     venueID,
     venueName,
+    venueAddress,
     venueLogoURL,
     menu,
     preorderEnabled,
@@ -71,6 +90,7 @@ export const DesktopBookingFlow = forwardRef<
     onPreorderStart,
     onMenuUpdated,
     onConfirmationClose,
+    onViewReservations,
   },
   ref,
 ) {
@@ -89,6 +109,7 @@ export const DesktopBookingFlow = forwardRef<
   const [guestName, setGuestName] = useState<string | null>(null);
   const [guestEmail, setGuestEmail] = useState<string | null>(null);
   const [guestPhone, setGuestPhone] = useState<string | null>(null);
+  const [wishes, setWishes] = useState<string[]>([]);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -158,11 +179,11 @@ export const DesktopBookingFlow = forwardRef<
     if (step !== "details" && step !== "checkout" && !confirmed) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    if (step === "details") detailsCloseRef.current?.focus();
-    else
+    if (confirmed)
       detailsDialogRef.current
-        ?.querySelector<HTMLButtonElement>(".desktop-booking-header button")
+        ?.querySelector<HTMLButtonElement>(".booking-confirmation .venue-booking-submit")
         ?.focus();
+    else detailsCloseRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (detailsDialogRef.current?.querySelector("dialog[open]")) return;
       if (event.key === "Escape") {
@@ -238,6 +259,14 @@ export const DesktopBookingFlow = forwardRef<
     contactName.trim().length >= 2 &&
     contactPhone.trim().length >= 5 &&
     (!contactEmail.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim()));
+  const detailsHint =
+    loading || availabilityError || !current?.slots.length
+      ? ""
+      : !selectedSlot
+        ? t("Выберите время, чтобы продолжить")
+        : step === "details" && (!contactName.trim() || !contactPhone.trim())
+          ? t("Введите имя и телефон")
+          : "";
   const currency = selectedItems.find(({ item }) => item)?.item?.currency ?? "EUR";
   const formatMoney = (minor: number, code = currency) =>
     new Intl.NumberFormat(localeTags[locale], { style: "currency", currency: code }).format(
@@ -271,15 +300,7 @@ export const DesktopBookingFlow = forwardRef<
     setLoading(true);
   };
   const startPreorder = () => {
-    onPreorderStart?.({
-      dateLabel,
-      time,
-      guests,
-      name: contactName.trim(),
-      phone: contactPhone.trim(),
-      email: contactEmail.trim(),
-      comment: comment.trim(),
-    });
+    onPreorderStart?.({ date, time, guests });
     setStep("preorder");
     onMenuModeChange(true);
   };
@@ -300,7 +321,7 @@ export const DesktopBookingFlow = forwardRef<
         guest_name: contactName.trim(),
         guest_email: contactEmail.trim(),
         guest_phone: contactPhone.trim(),
-        notes: comment.trim(),
+        notes: bookingNotes(wishes, comment),
         items: withPreorder
           ? selectedItems.flatMap(({ item, quantity }) =>
               item
@@ -418,19 +439,27 @@ export const DesktopBookingFlow = forwardRef<
 
   return (
     <>
-      {step === "details" && (
+      {(step === "details" || step === "checkout" || confirmed) && (
         <div
           className="desktop-booking-backdrop"
           onMouseDown={() => {
-            setStep("schedule");
-            setCalendarOpen(false);
-            scheduleTriggerRef.current?.focus();
+            if (submitting) return;
+            if (confirmed) {
+              clearSavedPublicReservation(venueID);
+              onConfirmationClose();
+            } else if (step === "checkout") goBack();
+            else {
+              setStep("schedule");
+              setCalendarOpen(false);
+              scheduleTriggerRef.current?.focus();
+            }
           }}
         />
       )}
       <aside
         ref={detailsDialogRef}
         className={`venue-booking-card venue-public-booking desktop-booking-flow ${step === "details" ? "details-open" : step === "checkout" || confirmed ? "checkout-open" : ""} ${confirmed ? "confirmation-open" : ""}`}
+        hidden={step === "preorder" && menuModeOpen}
         aria-labelledby="venue-desktop-booking-title"
         role={step === "details" || step === "checkout" || confirmed ? "dialog" : undefined}
         aria-modal={step === "details" || step === "checkout" || Boolean(confirmed) || undefined}
@@ -449,15 +478,20 @@ export const DesktopBookingFlow = forwardRef<
                   ? t("Предзаказ")
                   : step === "checkout"
                     ? t("Подтверждение брони")
-                    : t("Бронирование")}
+                    : t("Забронировать стол")}
             </h2>
-            {step === "details" && (
+            {(step === "details" || step === "checkout") && (
               <button
                 ref={detailsCloseRef}
                 type="button"
                 className="desktop-booking-close"
                 aria-label={t("Закрыть")}
+                disabled={submitting}
                 onClick={() => {
+                  if (step === "checkout") {
+                    goBack();
+                    return;
+                  }
                   setStep("schedule");
                   setCalendarOpen(false);
                   scheduleTriggerRef.current?.focus();
@@ -467,6 +501,9 @@ export const DesktopBookingFlow = forwardRef<
               </button>
             )}
           </header>
+        )}
+        {!confirmed && preorderEnabled && (step !== "preorder" || !menuModeOpen) && (
+          <BookingProgress step={step === "checkout" ? 3 : step === "preorder" ? 2 : 1} />
         )}
         {confirmed ? (
           <BookingConfirmation
@@ -478,6 +515,14 @@ export const DesktopBookingFlow = forwardRef<
             guestName={contactName}
             guestPhone={contactPhone}
             headingID="venue-desktop-booking-title"
+            onViewReservations={
+              user && onViewReservations
+                ? () => {
+                    clearSavedPublicReservation(venueID);
+                    onViewReservations();
+                  }
+                : undefined
+            }
             items={selectedItems.map(({ id, quantity, item }) => ({
               id,
               quantity,
@@ -514,6 +559,7 @@ export const DesktopBookingFlow = forwardRef<
                         <span>
                           {date
                             ? new Intl.DateTimeFormat(localeTags[locale], {
+                                weekday: "short",
                                 day: "numeric",
                                 month: "short",
                                 timeZone: "UTC",
@@ -548,7 +594,7 @@ export const DesktopBookingFlow = forwardRef<
                       >
                         <Minus size={16} />
                       </button>
-                      <strong>{t("Гостей: {count}", { count: guests })}</strong>
+                      <strong>{guestsLabel(t, guests, locale)}</strong>
                       <button
                         type="button"
                         aria-label={t("Увеличить количество гостей")}
@@ -597,17 +643,6 @@ export const DesktopBookingFlow = forwardRef<
                   </div>
                   {step === "details" && (
                     <div className="desktop-booking-details-scroll">
-                      <div className="venue-booking-wishes">
-                        <h3>{t("Комментарий к ресторану")}</h3>
-                        <textarea
-                          value={comment}
-                          maxLength={500}
-                          placeholder={t("Комментарий к ресторану")}
-                          aria-label={t("Комментарий к ресторану")}
-                          onChange={(event) => setComment(event.target.value.slice(0, 500))}
-                        />
-                        <small className="comment-character-count">{comment.length}/500</small>
-                      </div>
                       <div className="venue-booking-contact">
                         <h3>{t("Контакты")}</h3>
                         <label>
@@ -640,6 +675,14 @@ export const DesktopBookingFlow = forwardRef<
                           />
                         </label>
                       </div>
+                      {selectedSlot && (
+                        <BookingWishes
+                          wishes={wishes}
+                          comment={comment}
+                          onWishesChange={setWishes}
+                          onCommentChange={setComment}
+                        />
+                      )}
                     </div>
                   )}
                   {submitError && (
@@ -662,8 +705,13 @@ export const DesktopBookingFlow = forwardRef<
                     setSubmitError("");
                   }}
                 >
-                  {step === "schedule" || !preorderEnabled ? t("Забронировать") : t("Продолжить")}
+                  {step === "schedule"
+                    ? t("Продолжить")
+                    : preorderEnabled
+                      ? t("Продолжить к предзаказу")
+                      : t("Забронировать")}
                 </button>
+                {detailsHint && <p className="desktop-booking-hint">{detailsHint}</p>}
               </>
             )}
             {step === "preorder" && (
@@ -722,12 +770,17 @@ export const DesktopBookingFlow = forwardRef<
             )}
             {step === "checkout" && (
               <div className="desktop-booking-checkout">
-                <div className="desktop-booking-summary">
-                  <strong>{venueName}</strong>
-                  <span>
-                    {dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}
-                  </span>
-                </div>
+                <BookingSummary
+                  venueName={venueName}
+                  venueAddress={venueAddress}
+                  date={date}
+                  time={time}
+                  guests={guests}
+                  onEdit={() => {
+                    setStep("details");
+                    setSubmitError("");
+                  }}
+                />
                 <h3>{t("Ваш предзаказ")}</h3>
                 <div className="desktop-booking-review-items">
                   {selectedItems.map(({ id, quantity, item }) => (
@@ -759,21 +812,45 @@ export const DesktopBookingFlow = forwardRef<
                 </div>
                 <div className="desktop-booking-account">
                   <h3>{t("Контакты")}</h3>
-                  <strong>{contactName.trim()}</strong>
-                  <span>{contactPhone.trim()}</span>
-                  {contactEmail.trim() && <span>{contactEmail.trim()}</span>}
+                  <div className="desktop-booking-contact-card">
+                    <span className="desktop-booking-contact-avatar">
+                      <UserRound size={18} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <strong>{contactName.trim()}</strong>
+                      <span>
+                        {[contactPhone.trim(), contactEmail.trim()].filter(Boolean).join(" · ")}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label={t("Изменить контакты")}
+                      onClick={() => {
+                        setStep("details");
+                        setSubmitError("");
+                      }}
+                    >
+                      <Pencil size={16} aria-hidden="true" />
+                    </button>
+                  </div>
                 </div>
-                {comment.trim() && (
+                {(wishes.length > 0 || comment.trim()) && (
                   <div className="desktop-booking-notes">
                     <h3>{t("Комментарий к ресторану")}</h3>
-                    <p>{comment.trim()}</p>
+                    <p>{bookingNotes(wishes, comment, t)}</p>
                   </div>
                 )}
-                <div className="desktop-booking-payment">
+                <section className="desktop-booking-payment desktop-booking-payment-section">
                   <h3>{t("Оплата предзаказа")}</h3>
-                  <strong>{t("Оплата в заведении")}</strong>
-                  <p>{t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}</p>
-                </div>
+                  <div className="desktop-booking-payment-choice">
+                    <div>
+                      <strong>{t("Оплата в заведении")}</strong>
+                      <p>
+                        {t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}
+                      </p>
+                    </div>
+                  </div>
+                </section>
                 {submitError && (
                   <p className="venue-booking-submit-error" role="alert">
                     {t(submitError)}
@@ -789,7 +866,7 @@ export const DesktopBookingFlow = forwardRef<
                     ? t("Сохраняем бронь...")
                     : submitError.includes(t("Цена изменилась"))
                       ? t("Подтвердить новую сумму")
-                      : t("Забронировать")}
+                      : t("Подтвердить бронь")}
                 </button>
               </div>
             )}

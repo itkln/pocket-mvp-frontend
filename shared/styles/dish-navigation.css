@@ -1197,55 +1197,6 @@
   }
 }
 
-/* Glass controls over the restaurant cover; scrolled toolbar keeps its solid contrast. */
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-mobile-toolbar:not(.compact) button,
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-public-rating,
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-desktop-info-button {
-  border: 0;
-  color: #fff;
-  background:
-    linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.18),
-      rgba(255, 255, 255, 0.035) 55%,
-      rgba(255, 255, 255, 0.09)
-    ),
-    rgba(8, 30, 43, 0.28);
-  -webkit-backdrop-filter: blur(4px) saturate(150%);
-  backdrop-filter: blur(4px) saturate(150%);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-.pocket-dish
-  .dish-real-venue-detail.venue-cover-mode
-  .venue-mobile-toolbar:not(.compact)
-  button:hover,
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-public-rating:hover,
-.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-desktop-info-button:hover {
-  background-color: rgba(8, 30, 43, 0.42);
-}
-
-/* One control shape and height throughout the restaurant menu. */
-.pocket-dish .dish-real-venue-detail .venue-mobile-toolbar button,
-.pocket-dish .dish-real-venue-detail .venue-desktop-info-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
-  min-height: 40px;
-  padding: 0;
-  border-radius: 50% !important;
-}
-.pocket-dish .dish-real-venue-detail .venue-public-rating {
-  height: 40px;
-  min-height: 40px;
-  padding: 0 16px;
-  border-radius: 999px;
-}
-
 /* Compact primary actions on the QR welcome screen. */
 .pocket-dish .dish-table-actions .dish-table-action {
   min-height: 56px;

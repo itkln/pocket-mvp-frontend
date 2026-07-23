@@ -47,6 +47,7 @@ export function TableVenueScreen({
   notify,
   onVenueLoaded,
   desktopMenuQuery,
+  onOpenSettings,
   user = null,
 }: {
   user?: AuthUser | null;
@@ -55,6 +56,7 @@ export function TableVenueScreen({
   notify?: (message: string) => void;
   onVenueLoaded?: (venue: PublicVenue) => void;
   desktopMenuQuery?: string;
+  onOpenSettings?: (page: "menu" | "language") => void;
 }) {
   const { locale, t } = useI18n();
   const mobile = useSyncExternalStore(subscribeMobile, mobileSnapshot, serverSnapshot);
@@ -429,9 +431,27 @@ export function TableVenueScreen({
         {t("Открываем меню вашего стола...")}
       </div>
     );
+  const historyButton = (
+    <button
+      type="button"
+      className={mobile ? "venue-table-history-trigger" : "venue-table-history-inline"}
+      aria-label={t("История заказов в заведении")}
+      aria-haspopup="dialog"
+      onClick={() => {
+        setHistoryOrderID(null);
+        setRepeatPlan(null);
+        setRepeatError("");
+        setHistoryOpen(true);
+      }}
+    >
+      <History size={mobile ? 25 : 18} aria-hidden="true" />
+      {!mobile && <span>{t("История")}</span>}
+    </button>
+  );
   const cart = (
     <TableCart
       table={table}
+      headerAction={!mobile ? historyButton : undefined}
       order={order}
       draft={draft}
       selected={selected}
@@ -458,22 +478,6 @@ export function TableVenueScreen({
       onSend={send}
     />
   );
-  const historyButton = (
-    <button
-      type="button"
-      className="venue-table-history-trigger"
-      aria-label={t("История заказов в заведении")}
-      aria-haspopup="dialog"
-      onClick={() => {
-        setHistoryOrderID(null);
-        setRepeatPlan(null);
-        setRepeatError("");
-        setHistoryOpen(true);
-      }}
-    >
-      <History size={25} aria-hidden="true" />
-    </button>
-  );
   return (
     <>
       <VenueDetailsScreen
@@ -484,6 +488,7 @@ export function TableVenueScreen({
         onBack={onBack}
         onMenuLoaded={setMenu}
         onVenueLoaded={onVenueLoaded}
+        onOpenSettings={onOpenSettings}
         desktopMenuQuery={desktopMenuQuery}
         menuRevision={menuRevision}
         tableOrder={{
@@ -493,7 +498,6 @@ export function TableVenueScreen({
           onOpenCart: () => setCartOpen(true),
           totalLabel: tip === null ? "—" : money(total),
           count,
-          historyButton: mobile ? null : historyButton,
           panel: (
             <aside
               className={`venue-table-order-panel ${order && !count ? "receipt-view" : ""}`}

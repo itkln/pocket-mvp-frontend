@@ -25,6 +25,12 @@ export type CustomerReservation = {
   preorder_items: { name: string; quantity: number; unit_price_minor: number }[];
 };
 
+export function isUpcomingReservation(reservation: CustomerReservation, now: number) {
+  return (
+    ["confirmed", "seated"].includes(reservation.status) && Date.parse(reservation.ends_at) > now
+  );
+}
+
 export async function listCustomerReservations(
   signal?: AbortSignal,
 ): Promise<CustomerReservation[]> {

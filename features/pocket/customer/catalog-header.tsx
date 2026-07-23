@@ -14,6 +14,7 @@ import {
   LogIn,
   LogOut,
   Menu,
+  Receipt,
   Search,
   ShieldCheck,
   UserRound,
@@ -22,10 +23,12 @@ import {
 import { localeOptions, useI18n } from "../i18n";
 import { replacePathLocale } from "../locales";
 import { userInitials } from "../model";
+import { isUpcomingReservation, listCustomerReservations } from "../../../lib/reservations-api";
 import { type AuthUser } from "../../../lib/auth-api";
 
 type DishCatalogHeaderProps = {
   searchAutoFocus?: boolean;
+  showSearch?: boolean;
   user: AuthUser | null;
   screen: string;
   searchQuery: string;
@@ -33,6 +36,7 @@ type DishCatalogHeaderProps = {
   onNavigate: (screen: string) => void;
   onLogin: () => void;
   onLogout: () => void;
+  onOrderHistory?: () => void;
   onAccountSection?: (section: "profile" | "security" | "notifications") => void;
 };
 
@@ -41,6 +45,7 @@ const productName = "Pocket Dish";
 // Top bar of Dish: brand, menu search, language and account controls.
 export function DishCatalogHeader({
   searchAutoFocus = false,
+  showSearch = true,
   user,
   screen,
   searchQuery,
@@ -48,6 +53,7 @@ export function DishCatalogHeader({
   onNavigate,
   onLogin,
   onLogout,
+  onOrderHistory,
   onAccountSection,
 }: DishCatalogHeaderProps) {
   const { locale, setLocale, t } = useI18n();
@@ -56,9 +62,12 @@ export function DishCatalogHeader({
   const languageDialog = useRef<HTMLDialogElement>(null);
   const mobileMenuDialog = useRef<HTMLDialogElement>(null);
   const accountRoot = useRef<HTMLElement>(null);
+  const accountOpenedByKeyboard = useRef(false);
   const accountTrigger = useRef<HTMLButtonElement>(null);
   const languageTrigger = useRef<HTMLButtonElement>(null);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [upcomingCount, setUpcomingCount] = useState<number | null>(null);
+  const userID = user?.id;
   const [languageOpen, setLanguageOpen] = useState(false);
   const [mobileMenuView, setMobileMenuView] = useState<"menu" | "language">("menu");
   const headerHidden = useScrollHeader();
@@ -71,7 +80,8 @@ export function DishCatalogHeader({
   }, []);
   useEffect(() => {
     if (!accountOpen && !languageOpen) return;
-    accountRoot.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
+    if (languageOpen || accountOpenedByKeyboard.current)
+      accountRoot.current?.querySelector<HTMLButtonElement>('[role="menuitem"]')?.focus();
     const onPointerDown = (event: PointerEvent) => {
       if (!accountRoot.current?.contains(event.target as Node)) {
         setAccountOpen(false);
@@ -92,6 +102,20 @@ export function DishCatalogHeader({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [accountOpen, languageOpen]);
+  useEffect(() => {
+    if (!accountOpen || !userID) return;
+    const controller = new AbortController();
+    void listCustomerReservations(controller.signal)
+      .then((reservations) => {
+        if (controller.signal.aborted) return;
+        const now = Date.now();
+        setUpcomingCount(
+          reservations.filter((reservation) => isUpcomingReservation(reservation, now)).length,
+        );
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [accountOpen, userID]);
   const selectLanguage = (value: (typeof localeOptions)[number]["value"]) => {
     setLocale(value);
     setLanguageOpen(false);
@@ -108,6 +132,9 @@ export function DishCatalogHeader({
       accountSection: "profile" as const,
     },
     { label: "Мои брони", screen: "reservations", icon: CalendarDays },
+    ...(onOrderHistory
+      ? [{ label: "История заказов", screen: "order-history", icon: Receipt }]
+      : []),
     {
       label: "Уведомления",
       screen: "notifications",
@@ -137,16 +164,18 @@ export function DishCatalogHeader({
           <Image src="/logo.svg" alt="" width={30} height={30} priority />
           <strong>{productName}</strong>
         </button>
-        <div className="dish-global-search" role="search">
-          <Search size={19} />
-          <input
-            autoFocus={searchAutoFocus}
-            value={searchQuery}
-            onChange={(event) => onSearch(event.target.value)}
-            placeholder={t("Поиск по меню")}
-            aria-label={t("Поиск по меню")}
-          />
-        </div>
+        {showSearch && (
+          <div className="dish-global-search" role="search">
+            <Search size={19} />
+            <input
+              autoFocus={searchAutoFocus}
+              value={searchQuery}
+              onChange={(event) => onSearch(event.target.value)}
+              placeholder={t("Поиск по меню")}
+              aria-label={t("Поиск по меню")}
+            />
+          </div>
+        )}
         <nav
           ref={accountRoot}
           className="dish-header-actions"
@@ -208,8 +237,10 @@ export function DishCatalogHeader({
               ref={accountTrigger}
               type="button"
               className={`dish-account-trigger ${screen === "profile" || accountOpen ? "active" : ""}`}
-              onClick={() => {
+              onClick={(event) => {
+                accountOpenedByKeyboard.current = event.detail === 0;
                 setLanguageOpen(false);
+                setUpcomingCount(null);
                 setAccountOpen(!accountOpen);
               }}
               aria-label={t("Меню аккаунта")}
@@ -218,6 +249,15 @@ export function DishCatalogHeader({
               aria-haspopup="menu"
               aria-expanded={accountOpen}
               aria-controls={accountOpen ? "dish-catalog-account-menu" : undefined}
+              onKeyDown={(event) => {
+                if (event.key !== "ArrowDown") return;
+                event.preventDefault();
+                if (accountOpen) {
+                  accountRoot.current
+                    ?.querySelector<HTMLButtonElement>('[role="menuitem"]')
+                    ?.focus();
+                } else event.currentTarget.click();
+              }}
             >
               {user.avatar_url ? (
                 <i style={{ backgroundImage: `url("${user.avatar_url}")` }} />
@@ -273,7 +313,23 @@ export function DishCatalogHeader({
               }}
             >
               <div className="dish-account-menu-heading">
-                {[user.first_name, user.last_name].filter(Boolean).join(" ") || t("Аккаунт")}
+                <span
+                  className="dish-account-menu-avatar"
+                  aria-hidden="true"
+                  style={
+                    user.avatar_url
+                      ? { backgroundImage: `url(${JSON.stringify(user.avatar_url)})` }
+                      : undefined
+                  }
+                >
+                  {!user.avatar_url && userInitials(user)}
+                </span>
+                <div className="dish-account-menu-identity">
+                  <strong>
+                    {[user.first_name, user.last_name].filter(Boolean).join(" ") || t("Аккаунт")}
+                  </strong>
+                  <span>{user.email}</span>
+                </div>
               </div>
               {accountItems.map(({ label, screen: target, icon: Icon, accountSection }) => (
                 <button
@@ -282,12 +338,18 @@ export function DishCatalogHeader({
                   role="menuitem"
                   onClick={() => {
                     setAccountOpen(false);
-                    if (accountSection && onAccountSection) onAccountSection(accountSection);
+                    if (target === "order-history") onOrderHistory?.();
+                    else if (accountSection && onAccountSection) onAccountSection(accountSection);
                     else onNavigate(target);
                   }}
                 >
                   <Icon size={20} />
                   <span>{t(label)}</span>
+                  {target === "reservations" && upcomingCount !== null && upcomingCount > 0 && (
+                    <span className="dish-account-menu-count" aria-hidden="true">
+                      {upcomingCount}
+                    </span>
+                  )}
                 </button>
               ))}
               <button
