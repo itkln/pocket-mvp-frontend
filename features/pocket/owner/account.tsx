@@ -2,8 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { changePassword, updateProfile, type AuthUser } from "../../../lib/auth-api";
-import { Bell, Check, CreditCard, Download, Eye, EyeOff, KeyRound, Languages, LogOut, MonitorSmartphone, Pencil, ShieldCheck, UserRound } from "lucide-react";
+import { changeEmail, changePassword, updateAvatar, updateProfile, type AuthUser } from "../../../lib/auth-api";
+import { Bell, Camera, Check, CreditCard, Download, Eye, EyeOff, KeyRound, Languages, LogOut, Mail, Pencil, ShieldCheck, UserRound } from "lucide-react";
 import { userInitials } from "../model";
 import { Button, EmptyIllustration, PageHeader, PanelTitle, Field, StatusPill, money } from "../ui";
 import { localeTags, useI18n } from "../i18n";
@@ -27,9 +27,12 @@ export function AccountScreen({ user, notify, onLogout, onUpdate }: { user: Auth
   const [profileError, setProfileError] = useState("");
   const [preferences, setPreferences] = useState<AccountPreferences>(defaultPreferences);
   const [editingPassword, setEditingPassword] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
   const [showPasswords, setShowPasswords] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
+  const [avatarError, setAvatarError] = useState("");
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const profileChanged = profile.firstName.trim() !== user.first_name || profile.lastName.trim() !== user.last_name || profile.phone.trim() !== (user.phone ?? "");
 
   useEffect(() => {
@@ -101,6 +104,52 @@ export function AccountScreen({ user, notify, onLogout, onUpdate }: { user: Auth
     }
   };
 
+  const submitEmail = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const email = String(data.get("new_email") ?? "").trim().toLowerCase();
+    const currentPassword = String(data.get("current_password") ?? "");
+    if (!email || !email.includes("@")) { setFormError(t("Введите корректный e-mail")); return; }
+    if (!currentPassword) { setFormError(t("Введите текущий пароль")); return; }
+    setSubmitting(true);
+    setFormError("");
+    try {
+      const updated = await changeEmail(currentPassword, email);
+      onUpdate(updated);
+      form.reset();
+      setEditingEmail(false);
+      notify("E-mail изменен");
+    } catch (error) {
+      setFormError(errorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const uploadPhoto = async (file?: File) => {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setAvatarError(t("Используйте JPEG, PNG или WebP"));
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError(t("Фотография должна быть меньше 2 МБ"));
+      return;
+    }
+    setUploadingAvatar(true);
+    setAvatarError("");
+    try {
+      const updated = await updateAvatar(file);
+      onUpdate(updated);
+      notify("Фотография обновлена");
+    } catch (error) {
+      setAvatarError(errorMessage(error));
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const sections: { id: AccountSection; label: string; icon: typeof UserRound; value?: string }[] = [
     { id: "profile", label: "Личные данные", icon: UserRound },
     { id: "notifications", label: "Уведомления", icon: Bell },
@@ -108,11 +157,11 @@ export function AccountScreen({ user, notify, onLogout, onUpdate }: { user: Auth
     { id: "security", label: "Безопасность", icon: ShieldCheck },
   ];
 
-  return <><PageHeader title="Настройки" subtitle="Один личный аккаунт для всех ролей Pocket." /><div className="account-page"><section className="panel account-profile-hero"><span className="account-profile-avatar">{userInitials(user)}</span><div><h2>{user.first_name} {user.last_name}</h2><p>{user.email}</p></div><Button kind="quiet" icon={Pencil} onClick={() => setSection("profile")}>Изменить профиль</Button></section><div className="account-settings-layout"><nav className="panel account-section-list" aria-label={t("Разделы настроек")}>{sections.map(({ id, label, icon: Icon, value }) => <button type="button" className={section === id ? "active" : ""} key={id} onClick={() => setSection(id)}><span><Icon size={20} strokeWidth={1.8} /></span><strong>{label}</strong>{value && <small>{value}</small>}</button>)}</nav><section className="panel account-section-panel">
+  return <><PageHeader title="Настройки" subtitle="Один личный аккаунт для всех ролей Pocket." /><div className="account-page"><section className="panel account-profile-hero"><label className={`account-profile-avatar account-avatar-editor ${uploadingAvatar ? "loading" : ""}`} title={t("Изменить фотографию")}>{user.avatar_url ? <i className="account-avatar-image" style={{ backgroundImage: `url("${user.avatar_url}")` }} /> : userInitials(user)}<input type="file" aria-label={t("Изменить фотографию")} accept="image/jpeg,image/png,image/webp" disabled={uploadingAvatar} onChange={(event) => { void uploadPhoto(event.target.files?.[0]); event.currentTarget.value = ""; }} /><span><Camera size={18} /></span></label><div><h2>{user.first_name} {user.last_name}</h2><p>{user.email}</p>{avatarError && <small className="account-avatar-error" role="alert">{avatarError}</small>}</div><Button kind="quiet" icon={Pencil} onClick={() => setSection("profile")}>Изменить профиль</Button></section><div className="account-settings-layout"><nav className="panel account-section-list" aria-label={t("Разделы настроек")}>{sections.map(({ id, label, icon: Icon, value }) => <button type="button" className={section === id ? "active" : ""} key={id} onClick={() => setSection(id)}><span><Icon size={20} strokeWidth={1.8} /></span><strong>{label}</strong>{value && <small>{value}</small>}</button>)}</nav><section className="panel account-section-panel">
     {section === "profile" && <form className="account-profile-form" onSubmit={submitProfile}><PanelTitle title="Личные данные" subtitle="Используются во всех ролях и заведениях." /><div className="form-grid"><Field label="Имя"><input value={profile.firstName} onChange={(event) => setProfile((current) => ({ ...current, firstName: event.target.value }))} maxLength={80} autoComplete="given-name" /></Field><Field label="Фамилия"><input value={profile.lastName} onChange={(event) => setProfile((current) => ({ ...current, lastName: event.target.value }))} maxLength={80} autoComplete="family-name" /></Field><Field label="Телефон"><input type="tel" value={profile.phone} onChange={(event) => setProfile((current) => ({ ...current, phone: event.target.value }))} maxLength={40} autoComplete="tel" placeholder="Добавить телефон" /></Field><Field label="E-mail"><input type="email" value={user.email} readOnly /></Field></div>{profileError && <p className="form-error" role="alert">{profileError}</p>}<footer><Button type="submit" disabled={!profileChanged || savingProfile}>{savingProfile ? "Сохраняем..." : "Сохранить изменения"}</Button></footer></form>}
     {section === "notifications" && <div className="account-preference-panel"><PanelTitle title="Уведомления" subtitle="Выберите события, которые важны лично вам." /><div className="account-setting-rows"><AccountToggle title="Статусы заказов" text="Изменения заказов, оплат и бронирований." checked={preferences.orderUpdates} onChange={(value) => updatePreference("orderUpdates", value)} /><AccountToggle title="Ответы на отзывы" text="Ответы заведений на ваши отзывы." checked={preferences.reviewReplies} onChange={(value) => updatePreference("reviewReplies", value)} /><AccountToggle title="Новости Pocket" text="Редкие обновления о новых возможностях." checked={preferences.productNews} onChange={(value) => updatePreference("productNews", value)} /></div></div>}
     {section === "language" && <div className="account-preference-panel"><PanelTitle title="Язык" subtitle="Язык применяется ко всему приложению." /><div className="account-language-list">{(["ru", "en", "ua", "sk"] as const).map((option) => { const labels = { ru: "Русский", en: "English", ua: "Українська", sk: "Slovenčina" }; return <button type="button" className={locale === option ? "active" : ""} key={option} onClick={() => selectLanguage(option)}><span>{option.toUpperCase()}</span><strong>{labels[option]}</strong>{locale === option && <Check size={18} />}</button>; })}</div></div>}
-    {section === "security" && <div className="account-preference-panel"><PanelTitle title="Безопасность" subtitle="Пароль и текущий вход в аккаунт." />{editingPassword ? <form className="account-password-form" noValidate onSubmit={submitPassword}><div className="form-grid"><Field label="Текущий пароль" wide><div className="account-password-input"><input name="current_password" type={showPasswords ? "text" : "password"} autoComplete="current-password" autoFocus /><button type="button" aria-label={t(showPasswords ? "Скрыть пароль" : "Показать пароль")} onClick={() => setShowPasswords((value) => !value)}>{showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></Field><Field label="Новый пароль"><input name="new_password" type={showPasswords ? "text" : "password"} autoComplete="new-password" /></Field><Field label="Повторите новый пароль"><input name="password_confirmation" type={showPasswords ? "text" : "password"} autoComplete="new-password" /></Field></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className="account-password-actions"><Button kind="secondary" onClick={() => { setEditingPassword(false); setFormError(""); }}>Отмена</Button><Button type="submit" disabled={submitting}>{submitting ? "Сохраняем..." : "Сохранить пароль"}</Button></div></form> : <div className="account-security-actions"><div className="account-current-session"><span><MonitorSmartphone size={20} /></span><div><strong>Текущая сессия</strong><p>Этот браузер · активна сейчас</p></div></div><Button kind="secondary" icon={KeyRound} onClick={() => setEditingPassword(true)}>Изменить пароль</Button></div>}<Button className="account-logout" kind="danger" icon={LogOut} onClick={onLogout}>Выйти из аккаунта</Button></div>}
+    {section === "security" && <div className="account-preference-panel account-security-panel"><PanelTitle title="Безопасность" subtitle="E-mail и пароль для входа в аккаунт." />{editingEmail ? <form className="account-password-form" noValidate onSubmit={submitEmail}><div className="form-grid"><Field label="Новый e-mail" wide><input name="new_email" type="email" defaultValue={user.email} autoComplete="email" autoFocus /></Field><Field label="Текущий пароль" wide><div className="account-password-input"><input name="current_password" type={showPasswords ? "text" : "password"} autoComplete="current-password" /><button type="button" aria-label={t(showPasswords ? "Скрыть пароль" : "Показать пароль")} onClick={() => setShowPasswords((value) => !value)}>{showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></Field></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className="account-password-actions"><Button kind="secondary" onClick={() => { setEditingEmail(false); setFormError(""); }}>Отмена</Button><Button type="submit" disabled={submitting}>{submitting ? "Сохраняем..." : "Сохранить e-mail"}</Button></div></form> : editingPassword ? <form className="account-password-form" noValidate onSubmit={submitPassword}><div className="form-grid"><Field label="Текущий пароль" wide><div className="account-password-input"><input name="current_password" type={showPasswords ? "text" : "password"} autoComplete="current-password" autoFocus /><button type="button" aria-label={t(showPasswords ? "Скрыть пароль" : "Показать пароль")} onClick={() => setShowPasswords((value) => !value)}>{showPasswords ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></Field><Field label="Новый пароль"><input name="new_password" type={showPasswords ? "text" : "password"} autoComplete="new-password" /></Field><Field label="Повторите новый пароль"><input name="password_confirmation" type={showPasswords ? "text" : "password"} autoComplete="new-password" /></Field></div>{formError && <p className="form-error" role="alert">{formError}</p>}<div className="account-password-actions"><Button kind="secondary" onClick={() => { setEditingPassword(false); setFormError(""); }}>Отмена</Button><Button type="submit" disabled={submitting}>{submitting ? "Сохраняем..." : "Сохранить пароль"}</Button></div></form> : <div className="account-security-list"><div><span><Mail size={20} /></span><div><strong>E-mail</strong><p>{user.email}</p></div><Button kind="quiet" ariaLabel={t("Изменить e-mail")} onClick={() => { setEditingEmail(true); setShowPasswords(false); setFormError(""); }}>Изменить</Button></div><div><span><KeyRound size={20} /></span><div><strong>Пароль</strong><p>••••••••••••</p></div><Button kind="quiet" ariaLabel={t("Изменить пароль")} onClick={() => { setEditingPassword(true); setShowPasswords(false); setFormError(""); }}>Изменить</Button></div></div>}<Button className="account-logout" kind="danger" icon={LogOut} onClick={onLogout}>Выйти из аккаунта</Button></div>}
   </section></div></div></>;
 }
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { changePassword, getCurrentUser, login, logout, register, requestPasswordReset, resetPassword, updateProfile } from "./auth-api";
+import { changeEmail, changePassword, getCurrentUser, login, logout, register, requestPasswordReset, resetPassword, updateAvatar, updateProfile } from "./auth-api";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -70,5 +70,31 @@ describe("auth API", () => {
     expect(fetchMock.mock.calls[0][0]).toMatch(/\/auth\/password\/change$/);
     expect(fetchMock.mock.calls[0][1]).toEqual(expect.objectContaining({ method: "POST", credentials: "include" }));
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ current_password: "old secure password", new_password: "new secure password" });
+  });
+
+  it("changes the email and resolves the protected avatar URL", async () => {
+    const user = { id: "1", email: "new@example.com", first_name: "Denis", last_name: "Itkin", avatar_url: "/api/v1/auth/me/avatar?v=1", role: "customer" as const, capabilities: ["customer" as const] };
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ user }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(changeEmail("old secure password", "new@example.com")).resolves.toEqual({
+      ...user,
+      avatar_url: "http://localhost:8080/api/v1/auth/me/avatar?v=1",
+    });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ current_password: "old secure password", new_email: "new@example.com" });
+  });
+
+  it("uploads an avatar as multipart form data", async () => {
+    const user = { id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer" as const, capabilities: ["customer" as const] };
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ user }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const file = new File([new Uint8Array([1, 2, 3])], "avatar.png", { type: "image/png" });
+
+    await updateAvatar(file);
+
+    const options = fetchMock.mock.calls[0][1] as RequestInit;
+    expect(options.body).toBeInstanceOf(FormData);
+    expect((options.body as FormData).get("avatar")).toBe(file);
+    expect((options.headers as Headers).has("Content-Type")).toBe(false);
   });
 });

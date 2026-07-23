@@ -1,4 +1,4 @@
-import { APIError, apiRequest } from "./api-client";
+import { APIError, apiRequest, resolveAPIURL } from "./api-client";
 
 export { APIError as AuthAPIError };
 
@@ -8,6 +8,7 @@ export type AuthUser = {
   first_name: string;
   last_name: string;
   phone?: string;
+  avatar_url?: string;
   role: "customer" | "venue_owner";
   capabilities: Array<"customer" | "owner" | "staff">;
 };
@@ -25,7 +26,7 @@ export async function register(payload: RegisterPayload): Promise<AuthUser> {
     method: "POST",
     body: JSON.stringify(payload),
   });
-  return response.user;
+  return normalizeUser(response.user);
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
@@ -33,12 +34,12 @@ export async function login(email: string, password: string): Promise<AuthUser> 
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
-  return response.user;
+  return normalizeUser(response.user);
 }
 
 export async function getCurrentUser(): Promise<AuthUser> {
   const response = await apiRequest<{ user: AuthUser }>("/auth/me", { method: "GET" });
-  return response.user;
+  return normalizeUser(response.user);
 }
 
 export async function updateProfile(payload: Pick<AuthUser, "first_name" | "last_name"> & { phone?: string }): Promise<AuthUser> {
@@ -46,7 +47,7 @@ export async function updateProfile(payload: Pick<AuthUser, "first_name" | "last
     method: "PATCH",
     body: JSON.stringify(payload),
   });
-  return response.user;
+  return normalizeUser(response.user);
 }
 
 export async function logout(): Promise<void> {
@@ -72,4 +73,26 @@ export async function changePassword(currentPassword: string, newPassword: strin
     method: "POST",
     body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
   });
+}
+
+export async function changeEmail(currentPassword: string, newEmail: string): Promise<AuthUser> {
+  const response = await apiRequest<{ user: AuthUser }>("/auth/email/change", {
+    method: "POST",
+    body: JSON.stringify({ current_password: currentPassword, new_email: newEmail }),
+  });
+  return normalizeUser(response.user);
+}
+
+export async function updateAvatar(file: File): Promise<AuthUser> {
+  const body = new FormData();
+  body.append("avatar", file);
+  const response = await apiRequest<{ user: AuthUser }>("/auth/me/avatar", {
+    method: "POST",
+    body,
+  });
+  return normalizeUser(response.user);
+}
+
+function normalizeUser(user: AuthUser): AuthUser {
+  return user.avatar_url ? { ...user, avatar_url: resolveAPIURL(user.avatar_url) } : user;
 }

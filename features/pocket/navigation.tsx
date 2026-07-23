@@ -56,7 +56,7 @@ export function Sidebar({ user, role, screen, navigation, venue, venues: availab
             <button className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}><UserRound size={20} strokeWidth={1.9} /><span><strong>Гость</strong></span>{role === "customer" && <Check size={16} />}</button>
           </div>}
         </div>
-		<button className={`user-chip collapsed-tooltip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} data-tooltip={collapsed ? t("Управление аккаунтом") : undefined} onClick={() => onNavigate(role === "customer" ? "profile" : "account")} aria-label={collapsed ? t("Управление аккаунтом") : undefined}><span>{userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong></div><Settings size={20} strokeWidth={1.9} /></button>
+		<button className={`user-chip collapsed-tooltip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} data-tooltip={collapsed ? t("Управление аккаунтом") : undefined} onClick={() => onNavigate(role === "customer" ? "profile" : "account")} aria-label={collapsed ? t("Управление аккаунтом") : undefined}><span className={user.avatar_url ? "has-photo" : ""} style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{user.avatar_url ? "" : userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong></div><Settings size={20} strokeWidth={1.9} /></button>
       </div>
     </aside>
   );
