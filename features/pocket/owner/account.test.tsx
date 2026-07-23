@@ -82,10 +82,17 @@ describe("AccountScreen", () => {
     render(<I18nProvider><AccountScreen user={user} notify={vi.fn()} onLogout={onLogout} onUpdate={vi.fn()} /></I18nProvider>);
 
     const signOut = screen.getByRole("button", { name: "Выйти из аккаунта" });
-    expect(document.querySelector(".account-profile-actions")).toContainElement(signOut);
+    expect(document.querySelector(".header-actions")).toContainElement(signOut);
+    expect(signOut).toHaveClass("account-header-logout");
 
     fireEvent.click(signOut);
     expect(onLogout).toHaveBeenCalledOnce();
+  });
+
+  it("keeps language selection in the global header", () => {
+    render(<I18nProvider><AccountScreen user={user} notify={vi.fn()} onLogout={vi.fn()} onUpdate={vi.fn()} /></I18nProvider>);
+
+    expect(screen.queryByRole("button", { name: "Язык" })).not.toBeInTheDocument();
   });
 
   it("updates the shared profile", async () => {

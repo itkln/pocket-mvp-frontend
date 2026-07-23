@@ -178,10 +178,9 @@ export function CategoryManagerDialog(props: CategoryEditorProps) {
   return <div className="modal-backdrop" onMouseDown={props.onClose}><section className="modal category-manager-dialog" onMouseDown={(event) => event.stopPropagation()}><header><h2>Управление категориями</h2><IconButton icon={X} label="Закрыть" onClick={props.onClose} /></header><CategoryEditor {...props} /></section></div>;
 }
 
-function CategoryEditor({ categories, initialCreate, inline = false, onClose, onRemove, onSave }: CategoryEditorProps) {
+function CategoryEditor({ categories, initialCreate, inline = false, onRemove, onSave }: CategoryEditorProps) {
   const [drafts, setDrafts] = useState<CategoryDraft[]>(() => [...categories.map((category) => ({ ...category })), ...(initialCreate ? [newCategoryDraft(categories.length)] : [])]);
   const [saving, setSaving] = useState(false);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   const originals = new Map(categories.map((category) => [category.id, category]));
   const changed = drafts.filter((category) => {
     const original = originals.get(category.id);
@@ -191,16 +190,6 @@ function CategoryEditor({ categories, initialCreate, inline = false, onClose, on
   const invalid = drafts.some((category) => !category.name.trim());
   const hasChanges = changed.length > 0 || created.length > 0;
   const positionCount = (count: number) => count === 1 ? "1 позиция" : count >= 2 && count <= 4 ? `${count} позиции` : `${count} позиций`;
-  const addDraft = () => setDrafts((current) => [...current, newCategoryDraft(Math.max(-1, ...current.map((category) => category.sort_order)) + 1)]);
-  const reorderDrafts = ({ active, over }: DragEndEvent) => {
-    if (!over || active.id === over.id) return;
-    setDrafts((current) => {
-      const oldIndex = current.findIndex((item) => item.id === active.id);
-      const newIndex = current.findIndex((item) => item.id === over.id);
-      if (oldIndex < 0 || newIndex < 0) return current;
-      return arrayMove(current, oldIndex, newIndex).map((item, index) => ({ ...item, sort_order: index }));
-    });
-  };
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -213,14 +202,11 @@ function CategoryEditor({ categories, initialCreate, inline = false, onClose, on
     }
   };
 
-  return <form className={inline ? "category-editor category-inline-editor" : "category-editor"} onSubmit={submit}><div className={inline ? "category-inline-body" : "modal-body"}>{drafts.length ? <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderDrafts}><SortableContext items={drafts.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="category-manager-list">{drafts.map((category, index) => <SortableCategoryDraft key={category.id} category={category} autoFocus={Boolean(category.isNew && index === drafts.length - 1)} positionLabel={category.isNew ? "Новая категория" : positionCount(category.item_count)} onChange={(patch) => setDrafts((current) => current.map((item) => item.id === category.id ? { ...item, ...patch } : item))} onDelete={() => { if (category.isNew) { setDrafts((current) => current.filter((item) => item.id !== category.id)); return; } void onRemove(category).then((removed) => { if (removed) setDrafts((current) => current.filter((item) => item.id !== category.id)); }); }} />)}</div></SortableContext></DndContext> : <div className="category-manager-empty">Категорий пока нет</div>}</div><footer><Button kind="secondary" icon={Plus} onClick={addDraft}>Новая категория</Button><div><Button kind="secondary" onClick={onClose}>Закрыть</Button><Button type="submit" disabled={!hasChanges || invalid || saving}>{saving ? "Сохраняем..." : "Сохранить"}</Button></div></footer></form>;
+  return <form className={inline ? "category-editor category-inline-editor" : "category-editor"} onSubmit={submit}><div className={inline ? "category-inline-body" : "modal-body"}>{drafts.length ? <div className="category-manager-list">{drafts.map((category, index) => <CategoryDraftRow key={category.id} category={category} autoFocus={Boolean(category.isNew && index === drafts.length - 1)} positionLabel={category.isNew ? "Новая категория" : positionCount(category.item_count)} onChange={(patch) => setDrafts((current) => current.map((item) => item.id === category.id ? { ...item, ...patch } : item))} onDelete={() => { if (category.isNew) { setDrafts((current) => current.filter((item) => item.id !== category.id)); return; } void onRemove(category).then((removed) => { if (removed) setDrafts((current) => current.filter((item) => item.id !== category.id)); }); }} />)}</div> : <div className="category-manager-empty">Категорий пока нет</div>}</div><footer><Button type="submit" disabled={!hasChanges || invalid || saving}>{saving ? "Сохраняем..." : "Сохранить"}</Button></footer></form>;
 }
 
-function SortableCategoryDraft({ category, autoFocus, positionLabel, onChange, onDelete }: { category: CategoryDraft; autoFocus: boolean; positionLabel: string; onChange: (patch: Partial<CategoryDraft>) => void; onDelete: () => void }) {
-  const { t } = useI18n();
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: category.id });
-  const style: CSSProperties = { transform: CSS.Transform.toString(transform), transition };
-  return <div ref={setNodeRef} style={style} className={`category-manager-row ${category.isNew ? "new" : ""} ${isDragging ? "dragging" : ""}`}><button type="button" className="category-manager-drag" aria-label={t("Переместить категорию {name}", { name: category.name || t("Новая категория") })} {...attributes} {...listeners}><GripVertical size={17} /></button><div className="category-manager-copy"><input aria-label={category.isNew ? "Название новой категории" : `Название категории ${category.name}`} autoFocus={autoFocus} value={category.name} onChange={(event) => onChange({ name: event.target.value })} placeholder={category.isNew ? "Название новой категории" : undefined} /><small>{positionLabel}</small></div><label className="category-visibility"><span>{category.is_active ? "В меню" : "Скрыта"}</span><span className="switch"><input type="checkbox" aria-label={`${category.is_active ? "Скрыть" : "Опубликовать"} категорию ${category.name || "новую"}`} checked={category.is_active} onChange={(event) => onChange({ is_active: event.target.checked })} /><span /></span></label><button type="button" className="category-delete" disabled={!category.isNew && category.item_count > 0} aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`} title={!category.isNew && category.item_count > 0 ? "Сначала удалите или перенесите позиции" : "Удалить категорию"} onClick={onDelete}><Trash2 size={17} /></button></div>;
+function CategoryDraftRow({ category, autoFocus, positionLabel, onChange, onDelete }: { category: CategoryDraft; autoFocus: boolean; positionLabel: string; onChange: (patch: Partial<CategoryDraft>) => void; onDelete: () => void }) {
+  return <div className={`category-manager-row ${category.isNew ? "new" : ""}`}><div className="category-manager-copy"><input aria-label={category.isNew ? "Название новой категории" : `Название категории ${category.name}`} autoFocus={autoFocus} value={category.name} onChange={(event) => onChange({ name: event.target.value })} placeholder={category.isNew ? "Название новой категории" : undefined} /><small>{positionLabel}</small></div><label className="category-visibility" title={category.is_active ? "Скрыть категорию" : "Показывать категорию"}><span className="switch"><input type="checkbox" aria-label={`${category.is_active ? "Скрыть" : "Опубликовать"} категорию ${category.name || "новую"}`} checked={category.is_active} onChange={(event) => onChange({ is_active: event.target.checked })} /><span /></span></label><button type="button" className="category-delete" disabled={!category.isNew && category.item_count > 0} aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`} title={!category.isNew && category.item_count > 0 ? "Сначала удалите или перенесите позиции" : "Удалить категорию"} onClick={onDelete}><Trash2 size={17} /></button></div>;
 }
 
 function ItemEditDialog({ item, onClose, onSave }: { item: OwnerMenuItem; onClose: () => void; onSave: (input: MenuItemInput) => Promise<void> }) {

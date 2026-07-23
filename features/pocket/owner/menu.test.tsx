@@ -16,12 +16,12 @@ describe("CategoryManagerDialog", () => {
     await waitFor(() => expect(onSave).toHaveBeenCalledWith([], [{ name: "Напитки", sort_order: 0, is_active: true }]));
   });
 
-  it("adds another editable row inside the same manager", () => {
-    render(<CategoryManagerDialog categories={[]} initialCreate={false} onClose={vi.fn()} onRemove={vi.fn()} onSave={vi.fn()} />);
+  it("keeps category editing focused on fields without drag controls or extra footer actions", () => {
+    render(<CategoryManagerDialog categories={[{ id: "category-1", name: "Напитки", sort_order: 0, item_count: 0, is_active: true }]} initialCreate={false} onClose={vi.fn()} onRemove={vi.fn()} onSave={vi.fn()} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Новая категория" }));
-
-    expect(screen.getByRole("textbox", { name: "Название новой категории" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Новая категория" })).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Название категории Напитки" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Переместить категорию/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Новая категория" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Закрыть" })).toHaveLength(1);
   });
 });
