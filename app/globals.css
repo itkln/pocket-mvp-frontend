@@ -3126,11 +3126,6 @@ td { vertical-align: middle; }
 }
 
 /* Unified account settings and a consistent Telegram-like editor language. */
-@media (min-width: 901px) {
-  .sidebar { box-shadow: 4px 0 18px rgba(23, 33, 43, .055); }
-  .sidebar-collapsed .sidebar { box-shadow: 2px 0 12px rgba(23, 33, 43, .035); }
-}
-
 .venue-menu-popover,
 .role-menu-popover {
   border: 0;
@@ -3267,16 +3262,62 @@ td { vertical-align: middle; }
 .menu-category-pane > .menu-column-add,
 .menu-product-header > .menu-column-add {
   width: 100%;
-  min-height: 40px;
+  min-height: 44px;
+  justify-content: flex-start;
+  gap: 10px;
   margin: 0 0 10px;
-  padding: 0 11px;
-  border-radius: 8px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #f3f6f8;
+  color: #2d3b46;
   font-size: 14px;
+  font-weight: 600;
+  transition: background .15s ease, color .15s ease;
+}
+.menu-category-pane > .menu-column-add:hover,
+.menu-product-header > .menu-column-add:hover {
+  background: #e8f4fa;
+  color: var(--blue);
+}
+.menu-category-pane > .menu-column-add > svg,
+.menu-product-header > .menu-column-add > svg {
+  color: var(--blue);
 }
 .menu-category-pane > .menu-column-add {
   width: calc(100% - 28px);
   margin-right: 14px;
   margin-left: 14px;
+}
+.menu-product-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.menu-product-title-row .menu-pane-title {
+  flex: 1;
+  justify-content: flex-start;
+}
+.menu-search-toggle {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 0;
+  background: transparent;
+  color: #73808a;
+}
+.menu-search-toggle:hover,
+.menu-search-toggle:focus-visible {
+  background: #e8f4fa;
+  color: var(--blue);
+}
+.menu-search-expanded {
+  animation: menu-search-open .16s ease-out;
+}
+@keyframes menu-search-open {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .menu-category-pane .category-sortable-row { margin-right: 10px; margin-left: 10px; }
 .menu-product-row { min-height: 72px; }
@@ -3379,4 +3420,13 @@ td { vertical-align: middle; }
   .account-security-actions .button { width: 100%; }
   .menu-image-editor,
   .menu-image-editor > .food-image { min-height: 180px; }
+}
+
+@media (min-width: 901px) {
+  .sidebar,
+  .sidebar-collapsed .sidebar { box-shadow: none; }
+}
+
+@media (max-width: 900px) {
+  .sidebar.open { box-shadow: 12px 0 30px rgba(23, 33, 43, .14); }
 }

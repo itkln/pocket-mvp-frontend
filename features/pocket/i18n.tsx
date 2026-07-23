@@ -189,6 +189,8 @@ const rows: TranslationRow[] = [
   ["Показывать заметную метку в меню", "Show a visible label in the menu", "Показувати помітну позначку в меню", "Zobraziť výrazné označenie v menu"],
   ["Добавить категорию", "Add category", "Додати категорію", "Pridať kategóriu"],
   ["Добавить позицию", "Add item", "Додати позицію", "Pridať položku"],
+  ["Найти позицию", "Search items", "Знайти позицію", "Nájsť položku"],
+  ["Закрыть поиск", "Close search", "Закрити пошук", "Zavrieť vyhľadávanie"],
   ["Новая позиция", "New item", "Нова позиція", "Nová položka"],
   ["Название", "Name", "Назва", "Názov"],
   ["Название блюда", "Item name", "Назва страви", "Názov položky"],
