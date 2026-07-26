@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { DndContext, KeyboardSensor, PointerSensor, closestCenter, useSensor, useSensors, type DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -21,6 +21,7 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
   const [searchOpen, setSearchOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [categoriesMode, setCategoriesMode] = useState<"manage" | "create" | null>(null);
+  const [categoryCreateRequest, setCategoryCreateRequest] = useState(0);
   const [categoriesOpen, setCategoriesOpen] = useState(true);
   const [productsOpen, setProductsOpen] = useState(true);
   const [actionItem, setActionItem] = useState<string | null>(null);
@@ -33,6 +34,12 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
   const filtered = useMemo(() => workspace.items.filter((item) => item.category_id === selectedCategory && (item.name + " " + (item.description ?? "")).toLowerCase().includes(query.toLowerCase())), [workspace.items, selectedCategory, query]);
   const selectedItem = filtered.find((item) => item.id === selectedItemID) ?? filtered[0] ?? null;
   const canReorderItems = Boolean(selectedCategory) && query.trim() === "";
+  const openCategoryCreator = () => {
+    setCreateOpen(false);
+    setCategoriesOpen(true);
+    setCategoriesMode("create");
+    setCategoryCreateRequest((request) => request + 1);
+  };
 
   const reorderCategories = ({ active, over }: DragEndEvent) => {
     if (!over || active.id === over.id) return;
@@ -86,7 +93,7 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
   };
 
   return <><PageHeader title="Меню" subtitle="Категории, цены и доступность блюд." actions={<Button kind="secondary" icon={Eye} onClick={() => setPreview(true)}>Предпросмотр</Button>} />
-    <div className={`mobile-create-fab ${createOpen ? "open" : ""}`}>{createOpen && <div className="mobile-create-popover"><CreateMenuContent onItem={() => { setCreateOpen(false); setProductsOpen(true); onAdd(); }} onCategory={() => { setCreateOpen(false); setCategoriesOpen(true); setCategoriesMode("create"); }} /></div>}<button className="mobile-create-trigger" aria-label={createOpen ? "Закрыть меню создания" : "Добавить в меню"} onClick={() => setCreateOpen((value) => !value)}>{createOpen ? <X size={25} /> : <Plus size={25} />}</button></div>
+    <div className={`mobile-create-fab ${createOpen ? "open" : ""}`}>{createOpen && <div className="mobile-create-popover"><CreateMenuContent onItem={() => { setCreateOpen(false); setProductsOpen(true); onAdd(); }} onCategory={openCategoryCreator} /></div>}<button className="mobile-create-trigger" aria-label={createOpen ? "Закрыть меню создания" : "Добавить в меню"} onClick={() => setCreateOpen((value) => !value)}>{createOpen ? <X size={25} /> : <Plus size={25} />}</button></div>
     <div className="menu-workspace">
       <aside className={`category-list menu-category-pane ${categoriesOpen ? "" : "collapsed"}`}>
         <div className="category-list-heading">
@@ -97,8 +104,8 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
           </div>
         </div>
         <div className="menu-pane-collapsible">
-          <button type="button" className="menu-column-add" onClick={() => setCategoriesMode("create")}><Plus size={17} />Добавить категорию</button>
-          {categoriesMode ? <CategoryEditor key={categoriesMode} categories={workspace.categories} initialCreate={categoriesMode === "create"} inline onClose={() => setCategoriesMode(null)} onRemove={removeCategory} onSave={saveCategories} /> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderCategories}><SortableContext items={workspace.categories.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-category-list">{workspace.categories.map((item) => <SortableCategory key={item.id} item={item} active={selectedCategory === item.id} onSelect={() => { setCategory(item.id); setSelectedItemID(null); setDetailEditItemID(null); }} />)}</div></SortableContext></DndContext>}
+          <button type="button" className="menu-column-add" onClick={openCategoryCreator}><Plus size={17} />Добавить категорию</button>
+          {categoriesMode ? <CategoryEditor key={categoriesMode} categories={workspace.categories} initialCreate={categoriesMode === "create"} createRequest={categoryCreateRequest} inline onClose={() => setCategoriesMode(null)} onRemove={removeCategory} onSave={saveCategories} /> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderCategories}><SortableContext items={workspace.categories.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-category-list">{workspace.categories.map((item) => <SortableCategory key={item.id} item={item} active={selectedCategory === item.id} onSelect={() => { setCategory(item.id); setSelectedItemID(null); setDetailEditItemID(null); }} />)}</div></SortableContext></DndContext>}
         </div>
       </aside>
       <section className={`menu-product-pane ${productsOpen ? "" : "collapsed"}`}>
@@ -168,6 +175,7 @@ const newCategoryDraft = (sortOrder: number): CategoryDraft => ({ id: `new-categ
 type CategoryEditorProps = {
   categories: OwnerCategory[];
   initialCreate: boolean;
+  createRequest?: number;
   inline?: boolean;
   onClose: () => void;
   onRemove: (category: OwnerCategory) => Promise<boolean>;
@@ -178,9 +186,15 @@ export function CategoryManagerDialog(props: CategoryEditorProps) {
   return <div className="modal-backdrop" onMouseDown={props.onClose}><section className="modal category-manager-dialog" onMouseDown={(event) => event.stopPropagation()}><header><h2>Управление категориями</h2><IconButton icon={X} label="Закрыть" onClick={props.onClose} /></header><CategoryEditor {...props} /></section></div>;
 }
 
-function CategoryEditor({ categories, initialCreate, inline = false, onRemove, onSave }: CategoryEditorProps) {
+function CategoryEditor({ categories, initialCreate, createRequest = 0, inline = false, onRemove, onSave }: CategoryEditorProps) {
   const [drafts, setDrafts] = useState<CategoryDraft[]>(() => [...categories.map((category) => ({ ...category })), ...(initialCreate ? [newCategoryDraft(categories.length)] : [])]);
   const [saving, setSaving] = useState(false);
+  const handledCreateRequest = useRef(createRequest);
+  useEffect(() => {
+    if (handledCreateRequest.current === createRequest) return;
+    handledCreateRequest.current = createRequest;
+    setDrafts((current) => [...current, newCategoryDraft(current.length)]);
+  }, [createRequest]);
   const originals = new Map(categories.map((category) => [category.id, category]));
   const changed = drafts.filter((category) => {
     const original = originals.get(category.id);

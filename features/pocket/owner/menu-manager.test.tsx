@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MenuManager } from "./menu";
 
@@ -51,5 +51,18 @@ describe("MenuManager", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Свернуть позиции" }));
     expect(screen.getByRole("button", { name: "Развернуть позиции" })).toBeInTheDocument();
+  });
+
+  it("can create a category again after removing an unsaved draft", async () => {
+    render(<MenuManager venueName="Pocket Cafe" onAdd={vi.fn()} notify={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Добавить категорию" }));
+    expect(screen.getByRole("textbox", { name: "Название новой категории" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Удалить новую категорию" }));
+    expect(screen.queryByRole("textbox", { name: "Название новой категории" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Добавить категорию" }));
+    await waitFor(() => expect(screen.getByRole("textbox", { name: "Название новой категории" })).toBeInTheDocument());
   });
 });

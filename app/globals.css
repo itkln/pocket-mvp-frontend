@@ -3833,7 +3833,7 @@ td { vertical-align: middle; }
 .settings-nav {
   gap: 3px;
   padding: 6px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #fff;
 }
 .settings-nav button {
