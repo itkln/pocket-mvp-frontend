@@ -3141,6 +3141,7 @@ td { vertical-align: middle; }
   width: min(980px, 100%);
   display: grid;
   gap: 12px;
+  margin-inline: auto;
 }
 
 .account-profile-hero {
@@ -3869,6 +3870,18 @@ td { vertical-align: middle; }
 .settings-form {
   padding: clamp(20px, 2vw, 28px);
 }
+
+.venue-settings-page {
+  width: min(958px, 100%);
+  margin-inline: auto;
+}
+.venue-settings-page.wide { width: 100%; }
+.history-screen {
+  width: min(900px, 100%);
+  margin-inline: auto;
+}
+.history-list { max-width: none; }
+.profile-layout { margin-inline: auto; }
 
 @media (min-width: 761px) {
   .menu-pane-collapse { display: none !important; }

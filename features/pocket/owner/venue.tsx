@@ -77,7 +77,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
 
   const saveButton = <Button icon={Check} disabled={saving || processingCover} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button>;
 
-  return <>
+  return <div className={`venue-settings-page ${floorTab ? "wide" : ""}`}>
     <PageHeader title={venue.name} subtitle="Публичная информация и настройки сервиса." actions={!floorTab ? <div className="venue-desktop-save">{saveButton}</div> : undefined} />
     <label className="venue-section-select">
       <span>Раздел</span>
@@ -102,7 +102,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
         <footer className="venue-mobile-save">{saveButton}</footer>
       </section>}
     </div>
-  </>;
+  </div>;
 }
 
 const currencyOptions = [
