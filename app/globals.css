@@ -3870,6 +3870,7 @@ td { vertical-align: middle; }
 .settings-form {
   padding: clamp(20px, 2vw, 28px);
 }
+.settings-form > .form-grid + .panel-title { margin-top: 32px; }
 
 .venue-settings-page {
   width: min(958px, 100%);
