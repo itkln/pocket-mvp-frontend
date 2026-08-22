@@ -53,4 +53,23 @@ describe("FloorPlan", () => {
     await waitFor(() => expect(screen.queryByRole("tab", { name: /1 этаж/ })).not.toBeInTheDocument());
     expect(screen.getByRole("tab", { name: /2 этаж/ })).toHaveAttribute("aria-selected", "true");
   });
+
+  it("keeps a long floor list navigable", async () => {
+    vi.mocked(getFloorPlan).mockResolvedValue(Array.from({ length: 12 }, (_, index) => ({
+      id: `floor-${index + 1}`,
+      name: `${index + 1} этаж`,
+      tables: [],
+      fixtures: [],
+    })));
+    vi.mocked(saveFloorPlan).mockImplementation(async (_venueID, floorPlan) => floorPlan);
+
+    render(<FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />);
+
+    const lastFloor = await screen.findByRole("tab", { name: /12 этаж/ });
+    fireEvent.click(lastFloor);
+
+    expect(lastFloor).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: "Прокрутить этажи влево" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Прокрутить этажи вправо" })).toBeInTheDocument();
+  });
 });

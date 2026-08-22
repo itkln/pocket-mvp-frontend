@@ -1760,9 +1760,44 @@ thead th {
   background: #fff;
 }
 
-.floor-level-list { min-width: 0; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-.floor-level-list::-webkit-scrollbar { display: none; }
+.floor-level-scroll { position: relative; min-width: 0; }
+.floor-level-list {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding: 0 30px 4px;
+  scrollbar-color: #c8d5dc transparent;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.floor-level-list::-webkit-scrollbar { height: 4px; }
+.floor-level-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #c8d5dc; }
+.floor-scroll-button {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  width: 28px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #fff;
+  color: #60727e;
+  box-shadow: 0 1px 5px rgba(31, 47, 58, .12);
+  cursor: pointer;
+}
+.floor-scroll-button.previous { left: 0; }
+.floor-scroll-button.next { right: 0; }
+.floor-scroll-button:hover { background: #f2f8fb; color: var(--blue); }
+.floor-scroll-button:disabled { opacity: 0; pointer-events: none; }
 .floor-level-list button {
+  flex: 0 0 auto;
   min-width: max-content;
   height: 42px;
   display: grid;
@@ -1776,6 +1811,7 @@ thead th {
   background: transparent;
   color: #5c6973;
   text-align: left;
+  scroll-snap-align: start;
   cursor: pointer;
 }
 

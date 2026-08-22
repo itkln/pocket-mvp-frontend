@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import QRCode from "qrcode";
-import { Building2, Check, ChevronDown, Download, DoorOpen, Ellipsis, Minus, PanelsTopLeft, Plus, QrCode, RefreshCw, RotateCcw, RotateCw, Table2, Trash2, UserRound, Wine, X } from "lucide-react";
+import { Building2, Check, ChevronDown, ChevronLeft, ChevronRight, Download, DoorOpen, Ellipsis, Minus, PanelsTopLeft, Plus, QrCode, RefreshCw, RotateCcw, RotateCw, Table2, Trash2, UserRound, Wine, X } from "lucide-react";
 import { makeVenueSlug } from "./model";
 import { getFloorPlan, saveFloorPlan } from "../../lib/owner-api";
 import { useConfirm } from "./confirm-dialog";
@@ -84,6 +84,8 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
   const dirtyRef = useRef(false);
   const revisionRef = useRef(0);
   const saveRequestRef = useRef(0);
+  const floorListRef = useRef<HTMLDivElement | null>(null);
+  const [floorScroll, setFloorScroll] = useState({ left: false, right: false });
   const activeFloor = floors.find((floor) => floor.id === activeFloorId) ?? floors[0];
   const selectedTable = selected?.kind === "table" ? activeFloor.tables.find((table) => table.id === selected.id) : undefined;
   const selectedFixture = selected?.kind === "fixture" ? activeFloor.fixtures.find((fixture) => fixture.id === selected.id) : undefined;
@@ -146,6 +148,45 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
     const timeout = window.setTimeout(() => void persistFloorPlan(plan, revision, false), 900);
     return () => window.clearTimeout(timeout);
   }, [dirty, dragging, floors, loading, mode, persistFloorPlan, venueID]);
+
+  const updateFloorScroll = useCallback(() => {
+    const list = floorListRef.current;
+    if (!list) return;
+    const maxScroll = Math.max(0, list.scrollWidth - list.clientWidth);
+    setFloorScroll({
+      left: list.scrollLeft > 2,
+      right: list.scrollLeft < maxScroll - 2,
+    });
+  }, []);
+
+  useEffect(() => {
+    const list = floorListRef.current;
+    if (!list) return;
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(updateFloorScroll);
+    resizeObserver?.observe(list);
+    list.addEventListener("scroll", updateFloorScroll, { passive: true });
+    window.addEventListener("resize", updateFloorScroll);
+    updateFloorScroll();
+    return () => {
+      resizeObserver?.disconnect();
+      list.removeEventListener("scroll", updateFloorScroll);
+      window.removeEventListener("resize", updateFloorScroll);
+    };
+  }, [updateFloorScroll]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      const list = floorListRef.current;
+      const activeTab = list?.querySelector<HTMLElement>('[aria-selected="true"]');
+      activeTab?.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      updateFloorScroll();
+    }, 0);
+    return () => window.clearTimeout(timeout);
+  }, [activeFloorId, floors.length, updateFloorScroll]);
+
+  const scrollFloors = (direction: -1 | 1) => {
+    floorListRef.current?.scrollBy?.({ left: direction * 260, behavior: "smooth" });
+  };
 
   const updateActiveFloor = (update: (floor: VenueFloor) => VenueFloor) => {
     updateFloors((current) => current.map((floor) => floor.id === activeFloorId ? update(floor) : floor));
@@ -301,7 +342,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
 
   return <>
     {editorHeading}
-    <div className="floor-levels"><div className="floor-level-list" role="tablist" aria-label="Этажи заведения">{floors.map((floor, index) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)} disabled={loading}><span>{index + 1}</span><strong>{floor.name}</strong><small>{tableCountLabel(floor.tables.length)}</small></button>)}</div>{mode === "owner" && !loading && <div className="floor-level-actions"><IconButton icon={Trash2} label={`Удалить ${activeFloor.name}`} onClick={() => void removeFloor()} className="delete-floor-button" /><IconButton icon={Plus} label="Добавить этаж" onClick={addFloor} className="add-floor-button" /></div>}</div>
+    <div className="floor-levels"><div className="floor-level-scroll"><button type="button" className="floor-scroll-button previous" aria-label="Прокрутить этажи влево" title="Предыдущие этажи" disabled={!floorScroll.left} onClick={() => scrollFloors(-1)}><ChevronLeft size={18} /></button><div ref={floorListRef} className="floor-level-list" role="tablist" aria-label="Этажи заведения">{floors.map((floor, index) => <button role="tab" aria-selected={floor.id === activeFloorId} className={floor.id === activeFloorId ? "active" : ""} key={floor.id} onClick={() => switchFloor(floor)} disabled={loading}><span>{index + 1}</span><strong>{floor.name}</strong><small>{tableCountLabel(floor.tables.length)}</small></button>)}</div><button type="button" className="floor-scroll-button next" aria-label="Прокрутить этажи вправо" title="Следующие этажи" disabled={!floorScroll.right} onClick={() => scrollFloors(1)}><ChevronRight size={18} /></button></div>{mode === "owner" && !loading && <div className="floor-level-actions"><IconButton icon={Trash2} label={`Удалить ${activeFloor.name}`} onClick={() => void removeFloor()} className="delete-floor-button" /><IconButton icon={Plus} label="Добавить этаж" onClick={addFloor} className="add-floor-button" /></div>}</div>
     <div className="floor-layout">
       <section className="panel floor-panel">
         <div className={`floor-toolbar ${mode === "owner" ? "technical" : ""}`}>{mode === "staff" && <div className="floor-legend"><span><i className="free" />Свободен</span><span><i className="busy" />Занят</span><span><i className="reserved" />Бронь</span></div>}<div className="zoom-control"><IconButton icon={Minus} label="Уменьшить масштаб" onClick={() => changeZoom(-20)} /><button className="zoom-label" onClick={() => setZoom(100)} aria-label="Сбросить масштаб">{zoom}%</button><IconButton icon={Plus} label="Увеличить масштаб" onClick={() => changeZoom(20)} /></div></div>
