@@ -54,7 +54,7 @@ describe("FloorPlan", () => {
     expect(screen.getByRole("tab", { name: /2 этаж/ })).toHaveAttribute("aria-selected", "true");
   });
 
-  it("keeps a long floor list navigable", async () => {
+  it("keeps a long floor list available through the mobile selector", async () => {
     vi.mocked(getFloorPlan).mockResolvedValue(Array.from({ length: 12 }, (_, index) => ({
       id: `floor-${index + 1}`,
       name: `${index + 1} этаж`,
@@ -66,10 +66,10 @@ describe("FloorPlan", () => {
     render(<FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />);
 
     const lastFloor = await screen.findByRole("tab", { name: /12 этаж/ });
-    fireEvent.click(lastFloor);
+    const floorSelector = screen.getByRole("combobox", { name: "Выбрать этаж" });
+    fireEvent.change(floorSelector, { target: { value: "floor-12" } });
 
     expect(lastFloor).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("button", { name: "Прокрутить этажи влево" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Прокрутить этажи вправо" })).toBeInTheDocument();
+    expect(floorSelector).toHaveValue("floor-12");
   });
 });
