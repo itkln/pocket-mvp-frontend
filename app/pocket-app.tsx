@@ -71,6 +71,11 @@ export default function PocketApp({ initialRole, initialScreen }: { initialRole?
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
+    document.body.classList.toggle("mobile-nav-open", mobileNav);
+    return () => document.body.classList.remove("mobile-nav-open");
+  }, [mobileNav]);
+
+  useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       setSidebarCollapsed(window.localStorage.getItem(sidebarCollapsedKey) === "true");
     });

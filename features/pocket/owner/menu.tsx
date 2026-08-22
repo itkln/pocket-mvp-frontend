@@ -83,6 +83,13 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
     else setEditing(item);
   };
 
+  const selectItem = (item: OwnerMenuItem) => {
+    setSelectedItemID(item.id);
+    setDetailEditItemID(null);
+    setActionItem(null);
+    if (window.matchMedia("(max-width: 760px)").matches) setEditing(item);
+  };
+
   const saveCategories = async (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean }[]) => {
     await Promise.all([
       ...categories.map((item) => workspace.editCategory(item.id, { name: item.name, sort_order: item.sort_order, is_active: item.is_active })),
@@ -92,9 +99,9 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
     notify(newCategories.length ? "Категории добавлены" : "Категории сохранены");
   };
 
-  return <><PageHeader title="Меню" subtitle="Категории, цены и доступность блюд." actions={<Button kind="secondary" icon={Eye} onClick={() => setPreview(true)}>Предпросмотр</Button>} />
+  return <div className="owner-menu-screen"><PageHeader title="Меню" subtitle="Категории, цены и доступность блюд." actions={<Button kind="secondary" icon={Eye} onClick={() => setPreview(true)}>Предпросмотр</Button>} />
     <div className={`mobile-create-fab ${createOpen ? "open" : ""}`}>{createOpen && <div className="mobile-create-popover"><CreateMenuContent onItem={() => { setCreateOpen(false); setProductsOpen(true); onAdd(); }} onCategory={openCategoryCreator} /></div>}<button className="mobile-create-trigger" aria-label={createOpen ? "Закрыть меню создания" : "Добавить в меню"} onClick={() => setCreateOpen((value) => !value)}>{createOpen ? <X size={25} /> : <Plus size={25} />}</button></div>
-    <div className="menu-workspace">
+    <div className={`menu-workspace ${categoriesMode ? "editing-categories" : ""}`}>
       <aside className={`category-list menu-category-pane ${categoriesOpen ? "" : "collapsed"}`}>
         <div className="category-list-heading">
           <div className="menu-pane-title"><strong>Категории</strong><span>{workspace.categories.length}</span></div>
@@ -105,7 +112,7 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
         </div>
         <div className="menu-pane-collapsible">
           <button type="button" className="menu-column-add" onClick={openCategoryCreator}><Plus size={17} />Добавить категорию</button>
-          {categoriesMode ? <CategoryEditor key={categoriesMode} categories={workspace.categories} initialCreate={categoriesMode === "create"} createRequest={categoryCreateRequest} inline onClose={() => setCategoriesMode(null)} onRemove={removeCategory} onSave={saveCategories} /> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderCategories}><SortableContext items={workspace.categories.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-category-list">{workspace.categories.map((item) => <SortableCategory key={item.id} item={item} active={selectedCategory === item.id} onSelect={() => { setCategory(item.id); setSelectedItemID(null); setDetailEditItemID(null); }} />)}</div></SortableContext></DndContext>}
+          {categoriesMode ? <CategoryEditor key={categoriesMode} categories={workspace.categories} initialCreate={categoriesMode === "create"} createRequest={categoryCreateRequest} inline onClose={() => setCategoriesMode(null)} onRemove={removeCategory} onSave={saveCategories} /> : <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderCategories}><SortableContext items={workspace.categories.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-category-list">{workspace.categories.map((item) => <SortableCategory key={item.id} item={item} active={selectedCategory === item.id} onSelect={() => { setCategory(item.id); setSelectedItemID(null); setDetailEditItemID(null); if (window.matchMedia("(max-width: 760px)").matches) { setCategoriesOpen(false); setProductsOpen(true); } }} />)}</div></SortableContext></DndContext>}
         </div>
       </aside>
       <section className={`menu-product-pane ${productsOpen ? "" : "collapsed"}`}>
@@ -113,6 +120,7 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
           <div className={`menu-product-title-row ${searchOpen ? "searching" : ""}`}>
             {searchOpen ? <label className="search-field menu-title-search"><Search size={17} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Найти блюдо" /></label> : <div className="menu-pane-title"><strong>Позиции</strong><span>{filtered.length}</span></div>}
             <div className="menu-pane-header-actions">
+              <IconButton icon={Eye} className="menu-mobile-preview" label="Предпросмотр меню" onClick={() => setPreview(true)} />
               <IconButton icon={searchOpen ? X : Search} className="menu-search-toggle" label={searchOpen ? "Закрыть поиск" : "Найти позицию"} onClick={() => { setProductsOpen(true); if (searchOpen) setQuery(""); setSearchOpen((value) => !value); }} />
               <IconButton icon={ChevronDown} className={`menu-pane-collapse ${productsOpen ? "open" : ""}`} label={productsOpen ? "Свернуть позиции" : "Развернуть позиции"} onClick={() => setProductsOpen((open) => !open)} />
             </div>
@@ -120,14 +128,14 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
         </header>
         <div className="menu-pane-collapsible">
           <button type="button" className="menu-column-add" onClick={onAdd}><Plus size={17} />Добавить позицию</button>
-          {filtered.length ? <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderItems}><SortableContext items={filtered.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-product-list">{filtered.map((item) => <SortableMenuCard key={item.id} item={item} selected={selectedItem?.id === item.id} reorderEnabled={canReorderItems} actionOpen={actionItem === item.id} onSelect={() => { setSelectedItemID(item.id); setDetailEditItemID(null); setActionItem(null); }} onToggleActions={() => { setSelectedItemID(item.id); setActionItem(actionItem === item.id ? null : item.id); }} onEdit={() => editItem(item)} onToggleAvailable={() => void workspace.editItem(item.id, itemInput(item, { is_available: !item.is_available }))} onTogglePopular={() => void workspace.editItem(item.id, itemInput(item, { is_popular: !item.is_popular })).then(() => setActionItem(null))} onDuplicate={() => void duplicate(item)} onRemove={() => void remove(item)} />)}</div></SortableContext></DndContext> : <EmptyIllustration icon={LayoutGrid} title={workspace.categories.length ? "Позиции не найдены" : "Меню пока пустое"} text={workspace.categories.length ? "Измените поисковый запрос." : "Сначала создайте категорию, затем добавьте первую позицию."} />}
+          {filtered.length ? <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={reorderItems}><SortableContext items={filtered.map((item) => item.id)} strategy={verticalListSortingStrategy}><div className="menu-product-list">{filtered.map((item) => <SortableMenuCard key={item.id} item={item} selected={selectedItem?.id === item.id} reorderEnabled={canReorderItems} actionOpen={actionItem === item.id} onSelect={() => selectItem(item)} onToggleActions={() => { setSelectedItemID(item.id); setActionItem(actionItem === item.id ? null : item.id); }} onEdit={() => editItem(item)} onToggleAvailable={() => void workspace.editItem(item.id, itemInput(item, { is_available: !item.is_available }))} onTogglePopular={() => void workspace.editItem(item.id, itemInput(item, { is_popular: !item.is_popular })).then(() => setActionItem(null))} onDuplicate={() => void duplicate(item)} onRemove={() => void remove(item)} />)}</div></SortableContext></DndContext> : <EmptyIllustration icon={LayoutGrid} title={workspace.categories.length ? "Позиции не найдены" : "Меню пока пустое"} text={workspace.categories.length ? "Измените поисковый запрос." : "Сначала создайте категорию, затем добавьте первую позицию."} />}
         </div>
       </section>
       <aside className="menu-detail-pane">{selectedItem ? <MenuItemDetails key={`${selectedItem.id}-${detailEditItemID === selectedItem.id ? "edit" : "view"}`} item={selectedItem} categories={workspace.categories} startEditing={detailEditItemID === selectedItem.id} onCancelEdit={() => setDetailEditItemID(null)} onSave={async (input) => { await workspace.editItem(selectedItem.id, input); setDetailEditItemID(null); notify("Позиция обновлена"); }} onToggleAvailable={() => void workspace.editItem(selectedItem.id, itemInput(selectedItem, { is_available: !selectedItem.is_available }))} onTogglePopular={() => void workspace.editItem(selectedItem.id, itemInput(selectedItem, { is_popular: !selectedItem.is_popular }))} /> : <div className="menu-detail-empty"><LayoutGrid size={24} /><strong>Выберите позицию</strong><p>Здесь появятся описание, цена и настройки доступности.</p></div>}</aside>
     </div>
     {editing && <ItemEditDialog item={editing} onClose={() => setEditing(null)} onSave={async (input) => { await workspace.editItem(editing.id, input); setEditing(null); notify("Позиция обновлена"); }} />}
     {preview && <MenuPreview venueName={venueName} items={workspace.items.filter((item) => item.is_available)} onClose={() => setPreview(false)} />}
-  </>;
+  </div>;
 }
 
 function CreateMenuContent({ onItem, onCategory }: { onItem: () => void; onCategory: () => void }) {
