@@ -79,7 +79,7 @@ describe("auth API", () => {
 
     await expect(changeEmail("old secure password", "new@example.com")).resolves.toEqual({
       ...user,
-      avatar_url: "http://localhost:8080/api/v1/auth/me/avatar?v=1",
+      avatar_url: "/api/v1/auth/me/avatar?v=1",
     });
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ current_password: "old secure password", new_email: "new@example.com" });
   });

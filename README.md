@@ -9,8 +9,9 @@ npm install
 npm run dev
 ```
 
-Set `NEXT_PUBLIC_API_URL` to the API root when it is not available at
-`http://localhost:8080/api/v1`. Authentication uses a server-issued HttpOnly
+The browser uses the same-origin `/api/v1` route. Next.js proxies it to
+`INTERNAL_API_URL` (`http://localhost:8080` for local development and the
+`backend` service in Docker). Authentication uses a server-issued HttpOnly
 cookie and does not store session secrets in browser storage.
 
 Run the UI and API-client tests:

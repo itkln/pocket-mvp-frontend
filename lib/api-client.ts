@@ -5,10 +5,12 @@ export class APIError extends Error {
   }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/api/v1";
 
 export function resolveAPIURL(path: string): string {
-  return new URL(path, API_URL).toString();
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith("/api/")) return path;
+  return `${API_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
