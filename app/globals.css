@@ -2357,12 +2357,23 @@ td { vertical-align: middle; }
 
   .order-filters {
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
   }
-  .order-filters button { grid-column: span 2; min-width: 0; padding: 0 6px; font-size: 12px; }
-  .order-filters button:nth-child(4),
-  .order-filters button:nth-child(5) { grid-column: span 3; }
+  .order-filters::-webkit-scrollbar { display: none; }
+  .order-filters button {
+    flex: 0 0 auto;
+    min-width: 104px;
+    min-height: 44px;
+    padding: 0 16px;
+    font-size: 13px;
+    scroll-snap-align: start;
+  }
 
   .popular-list > div.popular-row:not(.panel-title) { grid-template-columns: 22px minmax(0, 1fr) auto; gap: 9px; }
   .analytics-grid > .panel { min-height: 0; }
