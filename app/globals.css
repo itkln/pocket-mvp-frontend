@@ -4380,3 +4380,60 @@ body { font-size: 16px; }
   .order-status-control { min-width: 124px; }
   .order-status-control select { padding: 0 8px; font-size: 14px; }
 }
+
+/* Keep supporting copy readable across every role and viewport. */
+body { font-size: 16px; }
+body :where(p, span, small, label, button, input, select, textarea, th, td, dt, dd, li, time) {
+  font-size: max(1em, 16px) !important;
+}
+
+.order-row {
+  grid-template-columns: minmax(165px, .9fr) minmax(155px, 1fr) minmax(100px, .5fr) minmax(108px, .45fr) minmax(142px, .65fr);
+}
+.order-total { display: flex; }
+.order-time {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.order-time svg { flex: 0 0 auto; color: #7f8d97; }
+.order-time time { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 1180px) {
+  .order-row {
+    grid-template-columns: minmax(145px, .9fr) minmax(125px, 1fr) minmax(88px, .5fr) minmax(92px, .45fr) minmax(132px, .65fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 700px) {
+  body { font-size: 16px; }
+  .order-row {
+    min-height: 146px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto auto;
+  }
+  .order-identity { grid-column: 1; grid-row: 1; }
+  .order-status-control { grid-column: 2; grid-row: 1; }
+  .order-guest { grid-column: 1; grid-row: 2; }
+  .order-total {
+    width: auto;
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    justify-content: flex-end;
+    overflow: visible;
+    text-align: right;
+  }
+  .order-total strong { overflow: visible; }
+  .order-time {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    padding-top: 10px;
+    border-top: 1px solid #e6ebee;
+  }
+  .order-guest > span { width: 34px; height: 34px; }
+}

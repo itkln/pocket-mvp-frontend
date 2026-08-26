@@ -99,7 +99,7 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
     notify(newCategories.length ? "Категории добавлены" : "Категории сохранены");
   };
 
-  return <div className="owner-menu-screen"><PageHeader title="Меню" subtitle="Категории, цены и доступность блюд." actions={<Button kind="secondary" icon={Eye} onClick={() => setPreview(true)}>Предпросмотр</Button>} />
+  return <div className="owner-menu-screen"><PageHeader title="Меню" actions={<Button kind="secondary" icon={Eye} onClick={() => setPreview(true)}>Предпросмотр</Button>} />
     <div className={`mobile-create-fab ${createOpen ? "open" : ""}`}>{createOpen && <div className="mobile-create-popover"><CreateMenuContent onItem={() => { setCreateOpen(false); setProductsOpen(true); onAdd(); }} onCategory={openCategoryCreator} /></div>}<button className="mobile-create-trigger" aria-label={createOpen ? "Закрыть меню создания" : "Добавить в меню"} onClick={() => setCreateOpen((value) => !value)}>{createOpen ? <X size={25} /> : <Plus size={25} />}</button></div>
     <div className={`menu-workspace ${categoriesMode ? "editing-categories" : ""}`}>
       <aside className={`category-list menu-category-pane ${categoriesOpen ? "" : "collapsed"}`}>

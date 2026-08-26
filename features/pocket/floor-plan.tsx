@@ -296,7 +296,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
 
   const editorHeading = embedded
     ? <div className="floor-editor-heading"><div><h2>План зала</h2><p>Перетаскивайте элементы и настройте каждый этаж отдельно.</p></div><div>{ownerActions}</div></div>
-    : <PageHeader title={mode === "owner" ? "План зала" : "Столы"} subtitle={mode === "owner" ? "Настройте расположение столов и отслеживайте загрузку." : "Состояние зала и ваши назначенные столы."} actions={mode === "owner" ? ownerActions : <Button icon={Plus}>Открыть счет</Button>} />;
+    : <PageHeader title={mode === "owner" ? "План зала" : "Столы"} subtitle={mode === "owner" ? undefined : "Состояние зала и ваши назначенные столы."} actions={mode === "owner" ? ownerActions : <Button icon={Plus}>Открыть счет</Button>} />;
   const stageStyle = { "--floor-scale": zoom / 100 } as CSSProperties;
 
   return <>

@@ -5,6 +5,7 @@ import {
   CalendarClock,
   CheckCircle2,
   ChevronRight,
+  Clock3,
   CircleDollarSign,
   Download,
   Globe2,
@@ -117,6 +118,9 @@ export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
         </div>
         <div className="order-total">
           <strong>{money(order.total_minor / 100, order.currency)}</strong>
+        </div>
+        <div className="order-time">
+          <Clock3 size={18} />
           <time dateTime={order.created_at}>{new Date(order.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</time>
         </div>
         <label className={`order-status-control status-${order.status}`}>

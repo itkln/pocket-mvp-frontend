@@ -78,7 +78,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
   const saveButton = <Button icon={Check} disabled={saving || processingCover} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button>;
 
   return <div className={`venue-settings-page ${floorTab ? "wide" : ""}`}>
-    <PageHeader title={venue.name} subtitle="Публичная информация и настройки сервиса." actions={!floorTab ? <div className="venue-desktop-save">{saveButton}</div> : undefined} />
+    <PageHeader title={venue.name} actions={!floorTab ? <div className="venue-desktop-save">{saveButton}</div> : undefined} />
     <label className="venue-section-select">
       <span>Раздел</span>
       <select value={tab} onChange={(event) => setTab(event.target.value)}>
