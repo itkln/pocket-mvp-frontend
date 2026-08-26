@@ -1,68 +1,21 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import {
-  CalendarClock,
-  CheckCircle2,
-  ChevronRight,
-  Clock3,
-  CircleDollarSign,
-  Download,
-  Globe2,
-  ReceiptText,
-  ShoppingBag,
-  Star,
-  Table2,
-  Utensils,
-  type LucideIcon,
-} from "lucide-react";
+import { CheckCircle2, ChevronRight, CircleDollarSign, Download, ReceiptText, ShoppingBag, Star, Table2, type LucideIcon } from "lucide-react";
 import { type OwnerOrder } from "../../../lib/owner-api";
-import { Button, EmptyIllustration, PageHeader, PanelTitle, money } from "../ui";
+import { Button, EmptyIllustration, PageHeader, PanelTitle, StatusPill, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 
 const orderStatusLabel: Record<OwnerOrder["status"], string> = {
-  new: "Новый",
-  accepted: "Принят",
-  preparing: "Готовится",
-  ready: "Готов",
-  served: "Подан",
-  completed: "Завершен",
-  cancelled: "Отменен",
+  new: "Новый", accepted: "Принят", preparing: "Готовится", ready: "Готов",
+  served: "Подан", completed: "Завершен", cancelled: "Отменен",
 };
-
-const channelIcons: Record<string, LucideIcon> = {
-  dine_in: Utensils,
-  online: Globe2,
-  pickup: ShoppingBag,
-  preorder: CalendarClock,
-};
-
-const statusOptions: OwnerOrder["status"][] = [
-  "new",
-  "accepted",
-  "preparing",
-  "ready",
-  "served",
-  "completed",
-  "cancelled",
-];
-
-function guestInitials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
-}
 
 export function OwnerOverview({ ownerName, onNavigate }: { ownerName: string; onNavigate: (screen: string) => void }) {
-  const { dashboard, orders } = useOwnerWorkspace();
+  const { dashboard, orders, loading } = useOwnerWorkspace();
   const occupancy = dashboard?.total_tables ? Math.round((dashboard.active_tables / dashboard.total_tables) * 100) : 0;
-
   return <>
-    <PageHeader title={`Добрый день, ${ownerName}`} actions={<Button icon={Download} kind="secondary" onClick={() => window.print()}>Отчет</Button>} />
+    <PageHeader title={`Добрый день, ${ownerName}`} subtitle={loading ? "Обновляем показатели..." : "Актуальные данные выбранного заведения."} actions={<Button icon={Download} kind="secondary" onClick={() => window.print()}>Отчет</Button>} />
     <section className="metric-grid">
       <Metric label="Выручка сегодня" value={money((dashboard?.revenue_minor ?? 0) / 100)} change="Оплаченные заказы" icon={CircleDollarSign} tone="coral" />
       <Metric label="Заказы" value={String(dashboard?.orders_today ?? 0)} change={`${dashboard?.new_orders ?? 0} новых`} icon={ShoppingBag} tone="green" />
@@ -70,16 +23,8 @@ export function OwnerOverview({ ownerName, onNavigate }: { ownerName: string; on
       <Metric label="Загрузка зала" value={`${occupancy}%`} change={`${dashboard?.active_tables ?? 0} из ${dashboard?.total_tables ?? 0}`} icon={Table2} tone="gold" />
     </section>
     <section className="dashboard-grid">
-      <div className="panel dashboard-orders">
-        <PanelTitle title="Последние заказы" action={<Button kind="quiet" onClick={() => onNavigate("orders")}>Все заказы <ChevronRight size={18} /></Button>} />
-        <OrderTable orders={orders.slice(0, 5)} />
-      </div>
-      <div className="panel reviews-panel">
-        <PanelTitle title="Оценка гостей" />
-        {dashboard?.average_rating
-          ? <div className="rating-main"><strong>{dashboard.average_rating.toFixed(1)}</strong><div><div className="stars"><Star size={20} fill="currentColor" /></div><span>Средняя оценка</span></div></div>
-          : <EmptyIllustration icon={Star} title="Оценок пока нет" text="Средняя оценка появится после первого отзыва." />}
-      </div>
+      <div className="panel dashboard-orders"><PanelTitle title="Последние заказы" subtitle="Обновляются из рабочего API" action={<Button kind="quiet" onClick={() => onNavigate("orders")}>Все заказы <ChevronRight size={16} /></Button>} /><OrderTable orders={orders.slice(0, 5)} /></div>
+      <div className="panel reviews-panel"><PanelTitle title="Оценка гостей" subtitle="По опубликованным отзывам" />{dashboard?.average_rating ? <div className="rating-main"><strong>{dashboard.average_rating.toFixed(1)}</strong><div><div className="stars"><Star size={18} fill="currentColor" /></div><small>Средняя оценка</small></div></div> : <EmptyIllustration icon={Star} title="Оценок пока нет" text="Средняя оценка появится после первого отзыва." />}</div>
     </section>
   </>;
 }
@@ -91,77 +36,20 @@ export function Metric({ label, value, change, icon: Icon, tone }: { label: stri
 export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
   const { setOrderStatus } = useOwnerWorkspace();
   const [updating, setUpdating] = useState("");
-
   if (!orders.length) return <EmptyIllustration icon={CheckCircle2} title="Заказов пока нет" text="Новые онлайн-заказы появятся здесь автоматически." />;
-
   const change = async (order: OwnerOrder, status: OwnerOrder["status"]) => {
     setUpdating(order.id);
-    try {
-      await setOrderStatus(order.id, status);
-    } finally {
-      setUpdating("");
-    }
+    try { await setOrderStatus(order.id, status); } finally { setUpdating(""); }
   };
-
-  return <div className="order-list" role="list">
-    {orders.map((order) => {
-      const ChannelIcon = channelIcons[order.channel] ?? ShoppingBag;
-      const guest = order.guest_name || "Гость";
-      return <article className="order-row" key={order.id} role="listitem">
-        <div className="order-identity">
-          <span className={`order-channel-icon channel-${order.channel}`}><ChannelIcon size={20} /></span>
-          <div><strong>#{order.number}</strong><span>{order.source}</span></div>
-        </div>
-        <div className="order-guest">
-          <span>{guestInitials(guest)}</span>
-          <strong>{guest}</strong>
-        </div>
-        <div className="order-total">
-          <strong>{money(order.total_minor / 100, order.currency)}</strong>
-        </div>
-        <div className="order-time">
-          <Clock3 size={18} />
-          <time dateTime={order.created_at}>{new Date(order.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })}</time>
-        </div>
-        <label className={`order-status-control status-${order.status}`}>
-          <span className="visually-hidden">Статус</span>
-          <select
-            aria-label={`Изменить статус заказа #${order.number}`}
-            disabled={updating === order.id}
-            value={order.status}
-            onChange={(event) => void change(order, event.target.value as OwnerOrder["status"])}
-          >
-            {statusOptions.map((status) => <option value={status} key={status}>{orderStatusLabel[status]}</option>)}
-          </select>
-        </label>
-      </article>;
-    })}
-  </div>;
+  return <div className="table-scroll"><table><thead><tr><th>Заказ</th><th>Источник</th><th>Гость</th><th>Сумма</th><th>Статус</th><th>Создан</th><th /></tr></thead><tbody>{orders.map((order)=><tr key={order.id}><td><strong>#{order.number}</strong></td><td>{order.source}</td><td>{order.guest_name || "Гость"}</td><td><strong>{money(order.total_minor/100)}</strong></td><td><StatusPill status={orderStatusLabel[order.status]} /></td><td>{new Date(order.created_at).toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}</td><td><select aria-label={`Изменить статус заказа #${order.number}`} disabled={updating===order.id} value={order.status} onChange={(event)=>void change(order,event.target.value as OwnerOrder["status"])}><option value="new">Новый</option><option value="accepted">Принят</option><option value="preparing">Готовится</option><option value="ready">Готов</option><option value="served">Подан</option><option value="completed">Завершен</option><option value="cancelled">Отменен</option></select></td></tr>)}</tbody></table></div>;
 }
 
 export function OrdersScreen() {
   const { orders } = useOwnerWorkspace();
   const [filter, setFilter] = useState<"all" | OwnerOrder["status"]>("all");
-  const filtered = filter === "all" ? orders : orders.filter((order) => order.status === filter);
-  const filters: Array<[typeof filter, string]> = [
-    ["all", "Все"],
-    ["new", "Новые"],
-    ["preparing", "Готовятся"],
-    ["ready", "Готовы"],
-    ["completed", "Завершены"],
-  ];
-
-  const count = (id: typeof filter) => id === "all" ? orders.length : orders.filter((order) => order.status === id).length;
-
-  return <>
-    <PageHeader title="Заказы" />
-    <div className="order-filters">
-      {filters.map(([id, label]) => <button key={id} className={filter === id ? "active" : ""} onClick={() => setFilter(id)}>{label}<span>{count(id)}</span></button>)}
-    </div>
-    <section className="panel orders-list-panel"><OrderTable orders={filtered} /></section>
-  </>;
+  const filtered = filter === "all" ? orders : orders.filter((order)=>order.status===filter);
+  const filters: Array<[typeof filter,string]> = [["all","Все"],["new","Новые"],["preparing","Готовятся"],["ready","Готовы"],["completed","Завершены"]];
+  return <><PageHeader title="Заказы" subtitle="Заказы из зала, сайта и предзаказов." /><div className="order-filters">{filters.map(([id,label])=><button key={id} className={filter===id?"active":""} onClick={()=>setFilter(id)}>{label}{id==="new"&&orders.filter((order)=>order.status==="new").length>0&&<b>{orders.filter((order)=>order.status==="new").length}</b>}</button>)}</div><section className="panel"><OrderTable orders={filtered} /></section></>;
 }
 
-export function OwnerAction({ children }: { children: ReactNode }) {
-  return children;
-}
+export function OwnerAction({ children }: { children: ReactNode }) { return children; }
