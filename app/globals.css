@@ -4381,12 +4381,6 @@ body { font-size: 16px; }
   .order-status-control select { padding: 0 8px; font-size: 14px; }
 }
 
-/* Keep supporting copy readable across every role and viewport. */
-body { font-size: 16px; }
-body :where(p, span, small, label, button, input, select, textarea, th, td, dt, dd, li, time) {
-  font-size: max(1em, 16px) !important;
-}
-
 .order-row {
   grid-template-columns: minmax(165px, .9fr) minmax(155px, 1fr) minmax(100px, .5fr) minmax(108px, .45fr) minmax(142px, .65fr);
 }
@@ -4410,7 +4404,6 @@ body :where(p, span, small, label, button, input, select, textarea, th, td, dt, 
 }
 
 @media (max-width: 700px) {
-  body { font-size: 16px; }
   .order-row {
     min-height: 146px;
     grid-template-columns: minmax(0, 1fr) auto;
