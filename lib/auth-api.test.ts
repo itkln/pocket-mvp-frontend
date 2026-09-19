@@ -52,13 +52,20 @@ describe("auth API", () => {
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    await requestPasswordReset("user@example.com", "sk");
+    await requestPasswordReset("user@example.com", "sk", "spots");
     await resetPassword("single-use-token", "a new secure password");
 
     expect(fetchMock.mock.calls[0][0]).toMatch(/\/auth\/password-reset\/request$/);
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ email: "user@example.com", locale: "sk" });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ email: "user@example.com", locale: "sk", product: "spots" });
     expect(fetchMock.mock.calls[1][0]).toMatch(/\/auth\/password-reset\/confirm$/);
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ token: "single-use-token", password: "a new secure password" });
+  });
+
+  it("defaults legacy reset callers to Vendor", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: "accepted" }), { status: 202 }));
+    vi.stubGlobal("fetch", fetchMock);
+    await requestPasswordReset("user@example.com", "en");
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({ email: "user@example.com", locale: "en", product: "vendor" });
   });
 
   it("changes the password through the authenticated endpoint", async () => {

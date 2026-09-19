@@ -1,0 +1,918 @@
+/* Pocket Spots tokens are scoped so Vendor keeps its existing visual system. */
+.pocket-spots {
+  --spots-brand: #109cdb;
+  --spots-cta: #087fbb;
+  --spots-cta-hover: #066ea4;
+  --spots-cta-pressed: #075880;
+  --spots-active: #e0f3ff;
+  --spots-page: #ffffff;
+  --spots-card: #f7f8fa;
+  --spots-header-initial: #ffffff;
+  --spots-header-selected: #f5f4f2;
+  --spots-text: #202831;
+  --spots-secondary: #596775;
+  --spots-muted: #737d87;
+  --spots-disabled: #a2aab2;
+  --spots-divider: #e9edf0;
+  --spots-success: #18795b;
+  --spots-warning: #95600d;
+  --spots-error: #c23e43;
+  --spots-sky: #dcefff;
+  --spots-yellow: #fff0ba;
+  --spots-mint: #d9f4e8;
+  --spots-coral: #ffdfd5;
+  --spots-lilac: #eee2ff;
+  --spots-aqua: #d8f2f3;
+  --spots-pink: #fce0eb;
+  --spots-peach: #ffe8cc;
+  --spots-gradient-restaurants: linear-gradient(135deg, #e9f6ff, #a7d9f5);
+  --spots-gradient-entertainment: linear-gradient(135deg, #fff7d6, #ffda88);
+  --spots-gradient-activities: linear-gradient(135deg, #e8faef, #9fe1c2);
+  --spots-gradient-sports: linear-gradient(135deg, #fff0e9, #ffb7a1);
+  --spots-gradient-yoga: linear-gradient(135deg, #f4edff, #d0b7ef);
+  --spots-gradient-spa: linear-gradient(135deg, #e8faf7, #9adbd8);
+  --spots-gradient-beauty: linear-gradient(135deg, #ffedf4, #f7b9d1);
+  --spots-gradient-workshops: linear-gradient(135deg, #fff3e1, #f3cca0);
+  --blue: var(--spots-brand);
+  --blue-soft: var(--spots-active);
+  --ink: var(--spots-text);
+  --muted: var(--spots-secondary);
+  --line: var(--spots-divider);
+  background: var(--spots-page);
+  color: var(--spots-text);
+}
+
+.pocket-spots .button.primary { background: var(--spots-cta); color: #fff; }
+.pocket-spots .button.primary:hover:not(:disabled) { background: var(--spots-cta-hover); }
+.pocket-spots .button.primary:active:not(:disabled) { background: var(--spots-cta-pressed); }
+.pocket-spots .button:disabled { background: var(--spots-card); color: var(--spots-disabled); }
+.pocket-spots .form-error { color: var(--spots-error); }
+.pocket-spots .open-dot { background: var(--spots-success); }
+.pocket-spots .venue-card-copy > span > b { color: var(--spots-warning); }
+.pocket-spots button:focus-visible, .pocket-spots input:focus-visible {
+  outline: 2px solid var(--spots-brand);
+  outline-offset: 3px;
+}
+.pocket-spots .spots-main { background: var(--spots-page); }
+@media (min-width: 900px) {
+  .pocket-spots .spots-page {
+    width: min(1500px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 48px;
+    padding-left: 48px;
+  }
+}
+@media (min-width: 761px) {
+  .pocket-spots .spots-page.has-category { padding-top: 12px; }
+  .pocket-spots .spots-category-catalog.category-selected { padding-top: 8px; }
+  .pocket-spots .spots-venue-carousel.expanded .venue-grid { justify-content: flex-start; }
+}
+.pocket-spots .spots-header {
+  background: var(--spots-header-initial);
+  transition: background-color 320ms ease, box-shadow 220ms ease;
+}
+.pocket-spots .spots-header button:focus:not(:focus-visible),
+.pocket-spots .spots-header input:focus:not(:focus-visible) { outline: none; box-shadow: none; }
+.pocket-spots .spots-header button:focus-visible,
+.pocket-spots .spots-header input:focus-visible { outline: 2px solid #65717c; outline-offset: 3px; }
+.pocket-spots .spots-header .spots-global-search,
+.pocket-spots .spots-header .spots-global-search:focus-within {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+.pocket-spots .spots-header .spots-global-search input:focus,
+.pocket-spots .spots-header .spots-global-search input:focus-visible {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+.pocket-spots .spots-header .spots-global-search { transition: background-color 320ms ease; }
+.pocket-spots .spots-header.has-city { background: var(--spots-header-initial); }
+.pocket-spots .spots-header.scrolled.has-category { box-shadow: none; }
+.pocket-spots .spots-header.scrolled.has-category + .spots-main .spots-category-filters {
+  box-shadow: 0 5px 18px rgba(23, 33, 43, .1);
+}
+.pocket-spots .spots-header .spots-global-search,
+.pocket-spots .spots-header.has-city .spots-global-search { background: var(--spots-header-selected); }
+.pocket-spots header.spots-header button.spots-location {
+  width: max-content;
+  min-width: 0;
+  max-width: 320px;
+  padding-right: 18px;
+  padding-left: 18px;
+  background: var(--spots-header-selected);
+  color: var(--spots-text);
+  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+@media (min-width: 761px) {
+  .pocket-spots header.spots-header button.spots-location {
+    justify-content: center;
+    text-align: center;
+  }
+  .pocket-spots header.spots-header button.spots-location > span { width: auto; text-align: center; }
+}
+.pocket-spots .spots-picker-search:focus-within { outline: none; }
+.pocket-spots header.spots-header button.spots-location-cta { background: var(--spots-cta); color: #fff; }
+.pocket-spots .spots-location-cta svg { color: inherit; }
+.pocket-spots header.spots-header button.spots-location-cta:hover { background: var(--spots-cta-hover); }
+.pocket-spots header.spots-header button.spots-location-cta:active { background: var(--spots-cta-pressed); }
+.pocket-spots .needs-city .spots-language-trigger:hover,
+.pocket-spots .needs-city .spots-header-actions > .spots-account-trigger:hover { background: var(--spots-card); }
+.pocket-spots .spots-login-trigger {
+  min-width: max-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px !important;
+  background: var(--spots-cta);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pocket-spots .spots-login-trigger:hover { background: var(--spots-cta-hover); }
+.pocket-spots .spots-login-trigger:active { background: var(--spots-cta-pressed); }
+.pocket-spots .spots-account-menu > .spots-account-logout {
+  width: auto;
+  min-height: 44px;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px auto 0;
+  padding: 10px 14px;
+  border-radius: 0 !important;
+  background: transparent;
+  color: var(--spots-secondary);
+  font-size: 15px;
+  font-weight: 650;
+}
+.pocket-spots .spots-account-menu > .spots-account-logout svg { color: inherit; }
+.pocket-spots .spots-account-menu > .spots-account-logout:hover { background: transparent; color: var(--spots-error); }
+
+.pocket-spots .spots-category-navigation { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
+.pocket-spots .spots-category-tile { height: 144px; padding: 13px; border-radius: 16px; align-items: flex-start; background: var(--category-gradient); }
+.pocket-spots .spots-category-label { font-size: 15px; line-height: 1.35; overflow-wrap: anywhere; }
+.pocket-spots .spots-category-tile[data-category="restaurants"] { --category-gradient: var(--spots-gradient-restaurants); }
+.pocket-spots .spots-category-tile[data-category="entertainment"] { --category-gradient: var(--spots-gradient-entertainment); }
+.pocket-spots .spots-category-tile[data-category="activities"] { --category-gradient: var(--spots-gradient-activities); }
+.pocket-spots .spots-category-tile[data-category="sports"] { --category-gradient: var(--spots-gradient-sports); }
+.pocket-spots .spots-category-tile[data-category="yoga-pilates"] { --category-gradient: var(--spots-gradient-yoga); }
+.pocket-spots .spots-category-tile[data-category="spa-massage"] { --category-gradient: var(--spots-gradient-spa); }
+.pocket-spots .spots-category-tile[data-category="beauty"] { --category-gradient: var(--spots-gradient-beauty); }
+.pocket-spots .spots-category-tile[data-category="masterclasses"] { --category-gradient: var(--spots-gradient-workshops); }
+.spots-category-illustration { position: absolute; right: 4px; bottom: 2px; width: 100px; height: 100px; object-fit: contain; pointer-events: none; transition: transform 220ms ease; }
+.pocket-spots .spots-category-tile[aria-pressed="true"],
+.pocket-spots .spots-category-tile[aria-pressed="true"]:hover { background: var(--spots-cta); color: #fff; }
+.pocket-spots .spots-category-tile:hover { transform: none; background: var(--category-gradient); }
+.pocket-spots .spots-category-tile:hover .spots-category-illustration { transform: translateY(-3px); }
+.pocket-spots .spots-category-tile:active .spots-category-illustration { transform: scale(.96); }
+.pocket-spots .spots-category-tile[aria-pressed="true"]:active { background: var(--spots-cta-pressed); }
+.pocket-spots .spots-category-navigation-heading h1 { font-size: 24px; }
+.pocket-spots .spots-category-catalog .cuisine-section { background: transparent; padding: 0; border-radius: 0; }
+.pocket-spots .spots-category-catalog .spots-category-filters {
+  position: sticky;
+  z-index: 40;
+  top: 80px;
+  padding: 8px 0 10px;
+  background: #fff;
+}
+.pocket-spots .spots-category-catalog .cuisine-strip { gap: 8px; }
+.pocket-spots .spots-category-catalog .cuisine-strip button { background: #f1f2f3; min-height: 40px; }
+.pocket-spots .spots-category-catalog .cuisine-strip button.spots-filter-trigger { position: static; flex: 0 0 40px; width: 40px; height: 40px; margin-left: 0; background: #f1f2f3; box-shadow: none; }
+.pocket-spots .spots-category-catalog .cuisine-strip button.active { background: var(--spots-active); color: var(--spots-cta); }
+.pocket-spots .venue-card-image .icon-button { color: var(--spots-brand); }
+.pocket-spots .venue-card-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background: #eef1f3;
+  color: #4d5963;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.spots-venue-carousel { position: relative; }
+.spots-carousel-button {
+  position: absolute;
+  z-index: 3;
+  top: clamp(83px, 7.22vw, 92px);
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50% !important;
+  background: #fff;
+  color: var(--spots-text);
+  box-shadow: 0 8px 24px rgba(23, 33, 43, .16);
+  cursor: pointer;
+  transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+.spots-carousel-button.previous { left: -26px; }
+.spots-carousel-button.next { right: -26px; }
+.spots-carousel-button:disabled { opacity: .34; cursor: default; }
+.spots-carousel-button:not(:disabled):hover { transform: translateY(-50%) scale(1.06); box-shadow: 0 10px 28px rgba(23, 33, 43, .22); }
+.spots-carousel-button:not(:disabled):active { transform: translateY(-50%) scale(.96); }
+.pocket-spots .text-venue-image { background: var(--spots-aqua); }
+.pocket-spots .illustrated-venue-image {
+  background-color: #f5f4f2;
+  background-image: var(--venue-illustration), var(--venue-illustration-background);
+  background-position: center, center;
+  background-repeat: no-repeat;
+  background-size: 58% auto, cover;
+}
+.pocket-spots .text-venue-name { position: absolute; left: 18px; top: 18px; right: 58px; font-size: 20px; line-height: 1.2; color: var(--spots-text); pointer-events: none; }
+.pocket-spots .text-venue-image > span { font-size: 12px; max-width: calc(100% - 24px); }
+.pocket-spots .spots-main [data-tooltip]::after { display: none; }
+.pocket-spots .spots-section-heading h1 { margin: 0; font-size: 24px; line-height: 1.3; }
+.pocket-spots .spots-search-context { display: inline-flex; align-items: center; gap: 8px; max-width: 45%; min-height: 36px; flex: 0 0 auto; padding: 6px 12px; border: 0; border-radius: 999px !important; background: #dde2e6; color: #303941; font-size: 14px; font-weight: 700; cursor: pointer; }
+.pocket-spots .spots-global-search .spots-search-context span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.spots-search-context svg { flex-shrink: 0; }
+.pocket-spots .spots-global-search.has-context { gap: 10px; padding-left: 10px; }
+.pocket-spots .spots-global-search.has-context > svg { display: none; }
+
+.spots-profile-dialog { width: min(520px, calc(100vw - 48px)); max-height: calc(100dvh - 64px); margin: auto; padding: 0; border: 0; border-radius: 24px; color: var(--spots-text); background: #fff; }
+.spots-profile-dialog::backdrop { background: rgba(24, 30, 36, .42); }
+.spots-profile-dialog-content { padding: 24px; }
+.spots-dialog-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 24px; }
+.spots-dialog-heading h2 { margin: 0; font-size: 22px; }
+.spots-profile-dialog .account-settings-layout { display: block; }
+.spots-profile-dialog .account-profile-hero, .spots-profile-dialog .panel-title { display: none; }
+.spots-profile-dialog .account-section-panel { padding: 0; border: 0; border-radius: 0; min-height: 0; }
+.spots-profile-dialog .form-grid { grid-template-columns: 1fr; }
+.spots-profile-dialog .field input { min-height: 52px; background: var(--spots-card); border: 0; }
+.spots-profile-dialog .account-profile-form > footer .button { width: 100%; }
+
+.spots-profile, .spots-settings { width: min(760px, 100%); margin: 0 auto; }
+.spots-account-heading { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 12px; margin-bottom: 28px; }
+.spots-account-heading h1 { margin: 0; font-size: 24px; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
+.spots-account-heading > button { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; background: var(--spots-card); color: var(--spots-text); cursor: pointer; }
+.spots-profile-identity { display: grid; grid-template-columns: 80px minmax(0, 1fr) 24px; align-items: center; gap: 20px; width: 100%; padding: 12px 0 32px; text-align: left; border: 0; background: transparent; color: var(--spots-text); cursor: pointer; }
+.spots-profile-avatar { display: grid; place-items: center; width: 80px; height: 80px; flex-shrink: 0; border-radius: 50%; background: var(--spots-sky) center / cover no-repeat; color: var(--spots-cta); font-size: 26px; font-weight: 700; }
+.spots-profile-identity strong { display: block; font-size: 23px; line-height: 1.3; overflow-wrap: anywhere; }
+.spots-profile-identity small { display: block; margin-top: 6px; color: var(--spots-secondary); font-size: 15px; }
+.spots-profile-links { display: grid; border-top: 1px solid var(--spots-divider); }
+.spots-profile-links > button { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 76px; padding: 16px 4px; border: 0; border-bottom: 1px solid var(--spots-divider); border-radius: 0; background: transparent; color: var(--spots-text); font-size: 17px; text-align: left; cursor: pointer; transition: background-color 180ms ease; }
+.spots-profile-links > button > span:not(.spots-profile-icon) { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.spots-profile-links > button > svg { flex-shrink: 0; }
+.spots-profile-links > button > svg:last-child { color: var(--spots-muted); }
+.spots-profile-icon { display: grid; place-items: center; flex: 0 0 40px; height: 40px; border-radius: 8px; color: var(--spots-text); }
+.spots-profile-icon.blue { background: var(--spots-sky); color: var(--spots-cta); }
+.spots-profile-icon.pink { background: var(--spots-pink); }
+.spots-profile-icon.mint { background: var(--spots-mint); }
+.spots-profile-icon.yellow { background: var(--spots-yellow); }
+.spots-profile-icon.lilac { background: var(--spots-lilac); }
+.spots-signout { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 52px; margin: 24px auto 0; padding: 12px 20px; border: 0; border-radius: 999px; background: transparent; color: var(--spots-secondary); font-size: 16px; font-weight: 600; cursor: pointer; }
+.spots-settings-identity { display: flex; flex-direction: column; align-items: center; padding: 8px 0 32px; text-align: center; }
+.spots-settings-identity .spots-profile-avatar { width: 96px; height: 96px; font-size: 30px; }
+.spots-settings-identity h2 { margin: 20px 0 6px; font-size: 24px; overflow-wrap: anywhere; max-width: 100%; }
+.spots-settings-identity p { margin: 0; color: var(--spots-secondary); font-size: 15px; overflow-wrap: anywhere; max-width: 100%; }
+.spots-settings-detail .account-page > .page-header,
+.spots-settings-detail .account-section-list,
+.spots-settings-detail .account-profile-actions,
+.spots-settings-detail .panel-title { display: none; }
+.spots-settings-detail .account-settings-layout { display: block; }
+.spots-settings-detail .account-section-panel { min-height: 0; padding: 20px 0; border: 0; border-radius: 0; box-shadow: none; }
+.spots-settings-detail .account-profile-hero { grid-template-columns: 80px minmax(0, 1fr); gap: 20px; padding: 0 0 24px; border-radius: 0; border: 0; border-bottom: 1px solid var(--spots-divider); box-shadow: none; }
+.spots-settings-detail:not([data-section="profile"]) .account-profile-hero { display: none; }
+.spots-settings-detail .account-profile-hero p { overflow-wrap: anywhere; }
+.spots-settings-detail .field input { min-height: 48px; }
+.spots-settings-detail .account-setting-rows { border-top: 1px solid var(--spots-divider); }
+.pocket-spots .spots-account-heading > button { border-radius: 50% !important; }
+.pocket-spots .spots-profile-links > button { border-radius: 0 !important; }
+@media (hover: hover) {
+  .spots-profile-links > button:hover { background: var(--spots-card); }
+  .spots-profile-identity:hover small { color: var(--spots-cta); }
+  .spots-signout:hover { background: var(--spots-card); color: var(--spots-text); }
+  .pocket-spots .spots-city-options button { transition: background-color 180ms ease, color 180ms ease; }
+  .pocket-spots .spots-city-options button:hover { background: #f0f2f4; }
+  .pocket-spots header.spots-header button.spots-location:not(.spots-location-cta):hover { background: #e8e7e4; transform: translateY(-1px); }
+  .pocket-spots .spots-category-catalog .cuisine-strip button:hover { background: #e1e4e6; color: var(--spots-text); }
+  .pocket-spots .spots-category-catalog .cuisine-strip button.active:hover { background: #cdeafa; color: var(--spots-cta); }
+  .pocket-spots .spots-search-context:hover { background: #cfd6db; color: #202831; }
+  .pocket-spots .spots-brand:hover { opacity: .72; }
+  .pocket-spots .spots-category-navigation-heading button:hover,
+  .pocket-spots .spots-section-heading > button:hover { background: #e8e9e9; color: var(--spots-text); }
+}
+@media (max-width: 1399px) {
+  .pocket-spots .spots-category-navigation { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 900px) {
+  .pocket-spots .spots-venue-shelf { grid-auto-columns: clamp(300px, 26vw, 333px); }
+  .pocket-spots .spots-venue-carousel.expanded .venue-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .pocket-spots .spots-venue-carousel.expanded .venue-card { flex: 0 0 clamp(300px, 26vw, 333px); }
+}
+@media (min-width: 761px) and (max-width: 899px) {
+  .pocket-spots .spots-carousel-button.previous { left: -10px; }
+  .pocket-spots .spots-carousel-button.next { right: -10px; }
+  .pocket-spots .spots-venue-carousel.expanded .venue-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+  .pocket-spots .spots-venue-carousel.expanded .venue-card { flex: 0 0 250px; }
+}
+@media (max-width: 760px) {
+  .pocket-spots .spots-header {
+    position: sticky;
+    top: 0;
+    height: auto;
+    background: #fff;
+    box-shadow: none;
+  }
+  .pocket-spots .spots-header.has-city { background: #fff; }
+  .pocket-spots .spots-header.scrolled { background: #fff; box-shadow: 0 5px 18px rgba(23, 33, 43, .1); }
+  .pocket-spots .spots-header.account-screen { display: none; }
+  .pocket-spots .spots-header-inner { grid-template-columns: 52px minmax(0, 1fr) 52px; grid-template-rows: 52px 52px; padding: 10px 16px 8px; column-gap: 8px; row-gap: 14px; transition: padding 180ms ease; }
+  .pocket-spots .spots-header-inner > .spots-brand { display: inline-flex; grid-column: 1; grid-row: 1; justify-self: start; width: 52px; min-width: 52px; margin: 0; padding: 0; }
+  .pocket-spots .spots-header-inner > .spots-brand strong { display: none; }
+  .pocket-spots .spots-header-inner > .spots-brand img { width: 30px; height: 30px; }
+  .pocket-spots .spots-header-inner > .spots-location { z-index: 1; grid-column: 2; grid-row: 1; justify-self: center; width: auto; min-width: 0; max-width: 100%; padding: 0 16px; }
+  .pocket-spots header.spots-header.has-city button.spots-location { background: transparent; }
+  .pocket-spots .spots-location span { min-width: 0; }
+  .pocket-spots .spots-location b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+  .pocket-spots .spots-header-actions { grid-column: 3; grid-row: 1; width: 52px; justify-content: flex-end; pointer-events: auto; transition: opacity 150ms ease; }
+  .pocket-spots .spots-header-actions > .spots-account-trigger { display: none; }
+  .pocket-spots .spots-language-control { display: inline-flex; }
+  .pocket-spots .spots-header [data-tooltip]::after { display: none; }
+  .pocket-spots .spots-global-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: 52px;
+    margin: 0;
+    border: 0;
+    background: #f5f4f2;
+    box-shadow: none;
+  }
+  .pocket-spots .spots-header.has-city .spots-global-search { background: #f5f4f2; }
+  .pocket-spots .spots-global-search:focus-within { border: 0; background: #efeeec; box-shadow: none; }
+  .pocket-spots .spots-global-search input:focus,
+  .pocket-spots .spots-global-search input:focus-visible { outline: none; box-shadow: none; }
+  .pocket-spots .spots-header button:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(32, 40, 49, .12); }
+  .pocket-spots .spots-header.scrolled .spots-header-inner { grid-template-rows: 52px; padding-top: 10px; padding-bottom: 10px; }
+  .pocket-spots .spots-header.scrolled .spots-location,
+  .pocket-spots .spots-header.scrolled .spots-header-actions,
+  .pocket-spots .spots-header.scrolled .spots-brand { position: absolute; opacity: 0; visibility: hidden; pointer-events: none; }
+  .pocket-spots .spots-header.scrolled .spots-global-search { grid-row: 1; }
+  .pocket-spots .spots-page { padding: 16px 16px calc(88px + env(safe-area-inset-bottom)); }
+  .pocket-spots .spots-category-navigation-heading { min-height: 36px; gap: 8px; margin-bottom: 14px; }
+  .pocket-spots .spots-category-navigation-heading h1 { font-size: 22px; }
+  .pocket-spots .spots-category-navigation-heading button { font-size: 13px; padding: 10px 12px; }
+  .pocket-spots .spots-category-navigation {
+    display: flex;
+    gap: 12px;
+    margin: 0 -16px 8px 0;
+    padding: 8px 0 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    overscroll-behavior-inline: contain;
+  }
+  .pocket-spots .spots-category-navigation::-webkit-scrollbar { display: none; }
+  .pocket-spots .spots-category-tile:last-child { margin-right: 16px; }
+  .pocket-spots .spots-category-tile,
+  .pocket-spots .spots-category-tile:hover,
+  .pocket-spots .spots-category-tile[aria-pressed="true"],
+  .pocket-spots .spots-category-tile[aria-pressed="true"]:hover {
+    flex: 0 0 144px;
+    width: 144px;
+    height: 124px;
+    padding: 0 0 22px;
+    overflow: visible;
+    align-items: flex-end;
+    justify-content: center;
+    border-radius: 15px;
+    background: transparent;
+    color: var(--spots-text);
+    scroll-snap-align: start;
+  }
+  .pocket-spots .spots-category-tile::before {
+    position: absolute;
+    inset: 28px 8px 34px;
+    border-radius: 15px;
+    background: var(--category-gradient);
+    content: "";
+    transition: filter 180ms ease, transform 180ms ease;
+  }
+  .pocket-spots .spots-category-tile[aria-pressed="true"]::before { background: var(--spots-active); }
+  .spots-category-illustration {
+    right: 50%;
+    bottom: 20px;
+    width: 112px;
+    height: 112px;
+    transform: translateX(50%);
+  }
+  .pocket-spots .spots-category-tile:hover .spots-category-illustration { transform: translate(50%, -3px); }
+  .pocket-spots .spots-category-tile:active .spots-category-illustration { transform: translateX(50%) scale(.96); }
+  .pocket-spots .spots-global-search.has-context input { font-size: 14px; }
+  .pocket-spots .spots-category-label { position: absolute; z-index: 2; bottom: 0; left: 0; width: 100%; font-size: 13px; line-height: 18px; text-align: center; }
+  .pocket-spots .spots-results { padding-top: 20px; }
+  .pocket-spots .spots-category-catalog.category-selected .spots-results { padding-top: 4px; }
+  .pocket-spots .spots-category-catalog .spots-category-filters {
+    top: 72px;
+    overflow: visible;
+    margin-right: -16px;
+    margin-left: -16px;
+    padding: 8px 0 10px 16px;
+  }
+  .pocket-spots .spots-category-catalog .spots-category-filters .cuisine-strip {
+    width: 100%;
+    overflow-x: auto;
+    padding-right: 16px;
+    scroll-padding-right: 16px;
+    overscroll-behavior-inline: contain;
+  }
+  .pocket-spots .spots-category-catalog .spots-category-filters .cuisine-strip button.spots-filter-trigger {
+    position: static;
+    box-shadow: none;
+  }
+  .pocket-spots .spots-carousel-button { display: none; }
+  .pocket-spots .spots-venue-shelf {
+    width: calc(100% + 16px);
+    grid-auto-columns: min(300px, 86vw);
+    gap: 18px;
+    padding-right: 16px;
+    scroll-padding-right: 16px;
+  }
+  .pocket-spots .spots-venue-carousel.expanded .venue-grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+    gap: 18px;
+  }
+  .pocket-spots .spots-venue-carousel.expanded .venue-card { width: 100%; }
+  .pocket-spots .spots-bottom-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--spots-page); border-top: 1px solid var(--spots-divider); box-shadow: none; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); }
+  .pocket-spots .spots-bottom-nav button { min-height: 52px; gap: 4px; color: var(--spots-text); background: transparent; opacity: .42; }
+  .pocket-spots .spots-bottom-nav button:hover { background: transparent; opacity: .68; }
+  .pocket-spots .spots-bottom-nav button.active { color: var(--spots-text); background: transparent; opacity: 1; }
+  .pocket-spots .spots-bottom-nav button:focus-visible { outline: none; box-shadow: none; opacity: .78; }
+  .pocket-spots .spots-bottom-nav button:focus-visible span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .pocket-spots .spots-bottom-nav button span { font-size: 12px; }
+  .spots-account-heading { margin-bottom: 20px; gap: 8px; }
+  .spots-account-heading h1 { font-size: 22px; }
+  .spots-profile-identity { grid-template-columns: 64px minmax(0, 1fr) 20px; gap: 14px; padding-bottom: 28px; }
+  .spots-profile-avatar { width: 64px; height: 64px; font-size: 23px; }
+  .spots-profile-identity strong { font-size: 21px; }
+  .spots-profile-identity small { font-size: 14px; }
+  .spots-profile-links > button { min-height: 72px; font-size: 16px; gap: 12px; }
+  .spots-profile-links { border-top: 0; }
+  .spots-profile-links > button { border-bottom: 0; }
+  .spots-profile-icon { flex-basis: 44px; height: 44px; border-radius: 12px; }
+  .spots-profile-icon.blue { background: linear-gradient(135deg, #edf8ff, #b9ddfa); color: #087fbb; }
+  .spots-profile-icon.pink { background: linear-gradient(135deg, #fff1f6, #f7c3d8); }
+  .spots-profile-icon.mint { background: linear-gradient(135deg, #edfbf6, #bce9d5); }
+  .spots-profile-icon.yellow { background: linear-gradient(135deg, #fff9df, #ffe39a); }
+  .spots-profile-icon.lilac { background: linear-gradient(135deg, #f7f0ff, #dac3f7); }
+  .spots-settings-detail .account-profile-hero { grid-template-columns: 64px minmax(0, 1fr); gap: 16px; }
+  .spots-settings-detail .account-section-panel { padding-top: 8px; }
+  .spots-settings-detail[data-section="notifications"] .account-setting-rows { border-top: 0; gap: 8px; }
+  .spots-settings-detail[data-section="notifications"] .account-setting-rows > div { min-height: 86px; padding: 12px 4px; }
+  .spots-settings-detail[data-section="notifications"] .account-setting-rows strong { font-size: 17px; }
+  .spots-settings-detail[data-section="notifications"] .account-setting-rows p { margin-top: 5px; font-size: 15px; line-height: 1.35; }
+  .spots-settings-detail[data-section="notifications"] .switch { width: 50px; height: 30px; }
+  .spots-settings-detail[data-section="notifications"] .switch span { border-radius: 15px; }
+  .spots-settings-detail[data-section="notifications"] .switch span::before { width: 24px; height: 24px; top: 3px; left: 3px; }
+  .spots-settings-detail[data-section="notifications"] .switch input:checked + span::before { transform: translateX(20px); }
+  .spots-settings-detail[data-section="security"] .account-security-list { gap: 14px; }
+  .spots-settings-detail[data-section="security"] .account-security-list > div { min-height: 78px; }
+  .spots-settings-detail[data-section="security"] .account-security-list strong { font-size: 18px; }
+  .spots-settings-detail[data-section="security"] .account-security-list p { margin-top: 5px; font-size: 15px; }
+  .spots-settings-detail[data-section="security"] .account-security-list .button { font-size: 16px; }
+  .spots-settings-detail[data-section="profile"] .account-profile-hero { padding-bottom: 24px; }
+  .spots-settings-detail[data-section="profile"] .account-avatar-editor > span {
+    right: -7px;
+    bottom: -5px;
+    left: auto;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    padding: 0;
+    border-width: 3px;
+    border-radius: 50%;
+    transform: none;
+  }
+  .spots-reservations-empty { gap: 10px; }
+  .spots-reservations-empty .button { margin-top: 18px; }
+}
+@media (max-width: 380px) {
+  .pocket-spots .spots-header-inner > .spots-location { padding: 0 10px; }
+  .pocket-spots .spots-location b { font-size: 14px; }
+}
+@media (max-width: 360px) {
+  .pocket-spots .spots-category-tile,
+  .pocket-spots .spots-category-tile:hover,
+  .pocket-spots .spots-category-tile[aria-pressed="true"],
+  .pocket-spots .spots-category-tile[aria-pressed="true"]:hover { flex-basis: 136px; width: 136px; height: 120px; }
+  .pocket-spots .spots-category-label { font-size: 12px; }
+  .spots-category-illustration { width: 106px; height: 106px; right: 50%; bottom: 20px; }
+}
+
+.pocket-spots .spots-language-dialog {
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: #fff;
+  color: var(--spots-text);
+  box-shadow: 0 18px 56px rgba(23, 33, 43, .18);
+}
+.pocket-spots .spots-language-dialog::backdrop { background: rgba(23, 33, 43, .32); }
+.pocket-spots .spots-language-dialog-content { padding: 20px; }
+.pocket-spots .spots-language-dialog-options { display: grid; gap: 4px; }
+.pocket-spots .spots-language-dialog-options button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--spots-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pocket-spots .spots-language-dialog-options button[aria-pressed="true"] { background: #edf0f2; font-weight: 700; }
+@media (hover: hover) {
+  .pocket-spots .spots-language-dialog-options button:hover { background: #f1f2f3; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-spots *, .pocket-spots *::before, .pocket-spots *::after { scroll-behavior: auto !important; transition: none !important; }
+}
+
+/* Public venue page: compact, section-based catalog card. */
+.pocket-spots .spots-main:has(.venue-detail-page) { background: #f3f3f1; }
+@media (min-width: 901px) {
+  .pocket-spots .spots-page:has(.venue-detail-page) {
+    width: min(1900px, 100%);
+    padding-right: 32px;
+    padding-left: 32px;
+  }
+}
+.pocket-spots .venue-detail-page {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  align-items: start;
+  gap: 16px;
+  margin: 0 auto;
+  color: var(--spots-text);
+}
+.pocket-spots .venue-primary-column {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.pocket-spots .venue-overview-block {
+  overflow: clip;
+  border-radius: 24px;
+  background: #fff;
+}
+.pocket-spots .venue-scroll-section { scroll-margin-top: 160px; }
+.pocket-spots .venue-detail-hero {
+  overflow: hidden;
+  background: transparent;
+}
+.pocket-spots .venue-gallery-photo {
+  min-width: 0;
+  background-image: url('/assets/venue-interior-sprite.png');
+  background-size: 300% 200%;
+  background-repeat: no-repeat;
+  transition: transform 260ms ease;
+}
+.pocket-spots .venue-gallery-photo:hover { transform: scale(1.015); }
+.pocket-spots .venue-gallery-photo.pos-0 { background-position: 0% 0%; }
+.pocket-spots .venue-gallery-photo.pos-1 { background-position: 50% 0%; }
+.pocket-spots .venue-gallery-photo.pos-2 { background-position: 100% 0%; }
+.pocket-spots .venue-detail-summary {
+  min-height: 154px;
+  padding: 28px 32px;
+}
+.pocket-spots .venue-detail-heading { min-width: 0; }
+.pocket-spots .venue-title-row { display: flex; align-items: center; gap: 10px; }
+.pocket-spots .venue-title-row .icon-button { width: 36px; height: 36px; border: 0; background: transparent; }
+.pocket-spots .venue-title-row .icon-button:hover,
+.pocket-spots .venue-title-row .icon-button.active { background: var(--spots-active); color: var(--spots-cta); }
+.pocket-spots .venue-title-row .icon-button.active::after { display: none; }
+.pocket-spots .venue-open-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #26704f;
+  font-size: 13px;
+  font-weight: 700;
+}
+.pocket-spots .venue-open-status i { width: 7px; height: 7px; border-radius: 50%; background: #35a66f; }
+.pocket-spots .venue-detail-heading h1 { margin: 0; font-size: 30px; line-height: 1.05; letter-spacing: -.035em; }
+.pocket-spots .venue-detail-heading > p { margin: 8px 0 0; color: var(--spots-secondary); font-size: 15px; }
+.pocket-spots .venue-facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.pocket-spots .venue-facts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: var(--spots-card);
+  color: #37434c;
+  font-size: 14px;
+  font-weight: 650;
+}
+.pocket-spots .venue-facts > span:first-child { color: #906617; }
+.pocket-spots .venue-facts small { color: var(--spots-secondary); font-size: 13px; font-weight: 500; }
+.pocket-spots .venue-detail-page button { border: 0; border-radius: 999px !important; }
+.pocket-spots .venue-detail-page button:focus-visible { outline: 0; background: #dcefff; color: var(--spots-cta); }
+
+.pocket-spots .venue-section-nav {
+  position: sticky;
+  z-index: 12;
+  top: 80px;
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0 24px;
+  overflow-x: auto;
+  border-radius: 0;
+  background: rgba(255,255,255,.97);
+  scrollbar-width: none;
+  backdrop-filter: blur(14px);
+}
+.pocket-spots .venue-section-nav::after {
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: #e8ebed;
+  content: "";
+}
+.pocket-spots .venue-section-nav::-webkit-scrollbar { display: none; }
+.pocket-spots .venue-section-nav button {
+  position: relative;
+  z-index: 1;
+  min-width: max-content;
+  min-height: 56px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--spots-secondary);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.pocket-spots .venue-section-nav button::after {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  left: 12px;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: var(--spots-cta);
+  content: "";
+  opacity: 0;
+  transform: scaleX(.4);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+.pocket-spots .venue-section-nav button:hover { background: var(--spots-card); color: var(--spots-text); }
+.pocket-spots .venue-section-nav button.active { background: transparent; color: var(--spots-text); }
+.pocket-spots .venue-section-nav button.active::after { opacity: 1; transform: scaleX(1); }
+.pocket-spots .venue-detail-content {
+  min-width: 0;
+  display: grid;
+  gap: 0;
+  overflow: clip;
+  border-radius: 24px;
+  background: #fff;
+}
+.pocket-spots .venue-content-section { padding: 36px 32px; border-radius: 0; background: transparent; }
+.pocket-spots .venue-menu-section { overflow: clip; padding: 24px 32px 34px; }
+.pocket-spots .venue-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+.pocket-spots .venue-menu-section .venue-section-heading { margin-bottom: 12px; }
+.pocket-spots .venue-section-heading h2 { margin: 0; font-size: 30px; line-height: 1.1; letter-spacing: -.025em; }
+.pocket-spots .venue-section-link { min-height: 38px; padding: 0 14px; border: 0; background: transparent; color: var(--spots-cta); font-size: 14px; font-weight: 700; cursor: pointer; }
+.pocket-spots .venue-section-link:hover { background: var(--spots-card); }
+
+.pocket-spots .venue-menu-categories {
+  display: flex;
+  gap: 5px;
+  margin: 0 0 20px;
+  padding: 0;
+  overflow-x: auto;
+  background: transparent;
+  scrollbar-width: none;
+}
+.pocket-spots .venue-menu-categories::-webkit-scrollbar { display: none; }
+.pocket-spots .venue-menu-categories button {
+  min-width: max-content;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--spots-card);
+  color: var(--spots-secondary);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.pocket-spots .venue-menu-categories button.active { background: var(--spots-active); color: var(--spots-cta); }
+.pocket-spots .venue-menu-categories button:hover { background: #eaedef; color: var(--spots-text); }
+.pocket-spots .venue-menu-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 28px 14px; }
+.pocket-spots .venue-menu-card { min-width: 0; }
+.pocket-spots .venue-menu-card-media { position: relative; overflow: hidden; aspect-ratio: 1 / 1; border-radius: 20px; background: var(--spots-card); }
+.pocket-spots .venue-menu-card-media > .food-image { width: 100%; height: 100%; }
+.pocket-spots .venue-menu-card-copy { min-width: 0; padding: 9px 5px 0; }
+.pocket-spots .venue-menu-card-copy > strong { display: block; font-size: 17px; }
+.pocket-spots .venue-menu-card h3 { margin: 5px 0 0; overflow: hidden; font-size: 15px; line-height: 1.3; text-overflow: ellipsis; white-space: nowrap; }
+.pocket-spots .venue-menu-card p { display: -webkit-box; margin: 4px 0 0; overflow: hidden; color: var(--spots-secondary); font-size: 13px; line-height: 1.4; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.pocket-spots .venue-menu-card .food-add-button { position: absolute; right: 10px; bottom: 10px; width: 42px; min-width: 42px; height: 42px; display: grid; place-items: center; padding: 0; background: rgba(255,255,255,.95); color: var(--spots-text); box-shadow: 0 5px 16px rgba(23,33,43,.14); }
+.pocket-spots .venue-menu-card .food-add-button:hover { background: var(--spots-cta); color: #fff; }
+.pocket-spots .venue-menu-card .qty-inline { position: absolute; right: 10px; bottom: 10px; height: 42px; background: rgba(255,255,255,.96); box-shadow: 0 5px 16px rgba(23,33,43,.14); }
+.pocket-spots .venue-menu-hit { position: absolute; top: 10px; left: 10px; padding: 5px 9px; border-radius: 999px; background: #fff; color: #8a621c; font-size: 11px; font-weight: 800; box-shadow: 0 3px 10px rgba(23,33,43,.1); }
+
+.pocket-spots .venue-rating-summary { display: flex; align-items: center; gap: 16px; padding: 8px 0 22px; }
+.pocket-spots .venue-rating-summary > strong { font-size: 48px; line-height: 1; letter-spacing: -.05em; }
+.pocket-spots .venue-rating-summary span { color: #e2a62b; font-size: 20px; letter-spacing: 2px; }
+.pocket-spots .venue-rating-summary p { margin: 6px 0 0; color: var(--spots-secondary); font-size: 15px; }
+.pocket-spots .venue-review-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.pocket-spots .venue-review-list article { min-width: 0; padding: 20px; border-radius: 17px; background: var(--spots-card); }
+.pocket-spots .venue-review-list header { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 12px; align-items: center; }
+.pocket-spots .venue-review-list header > span { grid-column: 1 / -1; color: #d89c23; font-size: 14px; letter-spacing: 1px; }
+.pocket-spots .venue-review-avatar { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; background: #ddecf5; color: #255e7b; font-size: 16px; font-weight: 800; }
+.pocket-spots .venue-review-list strong,
+.pocket-spots .venue-review-list small { display: block; }
+.pocket-spots .venue-review-list strong { font-size: 16px; }
+.pocket-spots .venue-review-list small { margin-top: 3px; color: var(--spots-secondary); font-size: 13px; }
+.pocket-spots .venue-review-list article > p { display: -webkit-box; margin: 14px 0 0; overflow: hidden; color: #46535d; font-size: 15px; line-height: 1.6; -webkit-box-orient: vertical; -webkit-line-clamp: 5; }
+
+.pocket-spots .venue-about-copy { max-width: 780px; margin: 0; color: #46535d; font-size: 15px; line-height: 1.7; }
+.pocket-spots .venue-about-gallery { height: 220px; display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 4px; margin-top: 22px; overflow: hidden; border-radius: 18px; background: var(--spots-card); }
+.pocket-spots .venue-feature-list { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+.pocket-spots .venue-feature-list span { display: inline-flex; align-items: center; gap: 7px; padding: 9px 12px; border-radius: 12px; background: var(--spots-card); color: #3d4952; font-size: 13px; }
+.pocket-spots .venue-feature-list svg { color: #289065; }
+.pocket-spots .venue-feature-list-primary { gap: 7px; margin-top: 14px; }
+.pocket-spots .venue-feature-list-primary span { padding: 8px 12px; border-radius: 999px; font-size: 13px; }
+.pocket-spots .venue-contact-grid { display: grid; grid-template-columns: minmax(0, 1fr) 42%; gap: 22px; }
+.pocket-spots .venue-contact-details { display: grid; gap: 6px; }
+.pocket-spots .venue-contact-details > div { min-height: 62px; display: flex; align-items: center; gap: 13px; padding: 10px 12px; border-radius: 14px; }
+.pocket-spots .venue-contact-details > div:hover { border-radius: 999px; background: var(--spots-card); }
+.pocket-spots .venue-contact-details svg { color: var(--spots-cta); }
+.pocket-spots .venue-contact-details strong,
+.pocket-spots .venue-contact-details small { display: block; }
+.pocket-spots .venue-contact-details strong { font-size: 14px; }
+.pocket-spots .venue-contact-details small { margin-top: 4px; color: var(--spots-secondary); font-size: 12px; }
+.pocket-spots .venue-map-preview {
+  min-height: 196px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: 18px;
+  background-color: #e7eff1;
+  background-image: linear-gradient(30deg, transparent 49%, rgba(255,255,255,.72) 50%, transparent 53%), linear-gradient(120deg, transparent 47%, rgba(255,255,255,.75) 48%, transparent 52%);
+  background-size: 56px 56px, 74px 74px;
+  color: var(--spots-secondary);
+}
+.pocket-spots .venue-map-preview > span { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; background: var(--spots-cta); color: #fff; box-shadow: 0 8px 20px rgba(0,109,168,.22); }
+.pocket-spots .venue-map-preview small { padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.86); font-weight: 700; }
+
+.pocket-spots .venue-booking-card { position: sticky; top: 96px; min-height: calc(100dvh - 112px); display: flex; flex-direction: column; padding: 22px; border-radius: 24px; background: #fff; }
+.pocket-spots .venue-booking-heading { display: block; }
+.pocket-spots .venue-booking-heading h2 { margin: 0; font-size: 22px; }
+.pocket-spots .venue-booking-toolbar { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: 8px; margin: 16px 0 18px; }
+.pocket-spots .venue-date-picker { position: relative; min-width: 0; }
+.pocket-spots .venue-date-trigger { width: 100%; min-height: 48px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 7px; padding: 0 12px; background: #f3f4f4; color: var(--spots-text); font-size: 13px; font-weight: 700; cursor: pointer; }
+.pocket-spots .venue-date-trigger span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pocket-spots .venue-date-trigger:hover,
+.pocket-spots .venue-date-trigger.active { background: var(--spots-active); color: var(--spots-cta); }
+.pocket-spots .venue-date-trigger.active .venue-date-chevron { transform: rotate(180deg); }
+.pocket-spots .venue-date-chevron { transition: transform 180ms ease; }
+.pocket-spots .venue-calendar-popover { position: absolute; z-index: 30; top: calc(100% + 10px); right: 0; width: 300px; padding: 16px; border-radius: 22px; background: #fff; box-shadow: 0 18px 48px rgba(23,33,43,.16); }
+.pocket-spots .venue-calendar-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.pocket-spots .venue-calendar-header > strong { font-size: 15px; }
+.pocket-spots .venue-calendar-header > div { display: flex; gap: 4px; }
+.pocket-spots .venue-calendar-header button { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; background: transparent; color: var(--spots-text); cursor: pointer; }
+.pocket-spots .venue-calendar-header button:hover { background: var(--spots-card); }
+.pocket-spots .venue-calendar-header button:disabled { color: #cbd0d4; cursor: default; }
+.pocket-spots .venue-calendar-weekdays,
+.pocket-spots .venue-calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.pocket-spots .venue-calendar-weekdays { margin: 10px 0 5px; }
+.pocket-spots .venue-calendar-weekdays span { color: #a2abb2; font-size: 10px; font-weight: 700; text-align: center; text-transform: uppercase; }
+.pocket-spots .venue-calendar-grid button { aspect-ratio: 1; min-width: 0; padding: 0; background: transparent; color: var(--spots-text); font-size: 12px; font-weight: 650; cursor: pointer; }
+.pocket-spots .venue-calendar-grid button:hover { background: var(--spots-card); }
+.pocket-spots .venue-calendar-grid button.outside { color: #aeb6bc; }
+.pocket-spots .venue-calendar-grid button.selected { background: var(--spots-cta); color: #fff; }
+.pocket-spots .venue-calendar-grid button:disabled { color: #d6dbde; background: transparent; cursor: default; }
+.pocket-spots .venue-guests { min-width: 0; min-height: 48px; display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; gap: 4px; padding: 0 8px; border-radius: 999px; background: #f3f4f4; }
+.pocket-spots .venue-guests button { width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--spots-card); cursor: pointer; }
+.pocket-spots .venue-guests button:disabled { opacity: .35; }
+.pocket-spots .venue-guests strong { min-width: 0; overflow: hidden; font-size: 12px; text-align: center; text-overflow: ellipsis; white-space: nowrap; }
+.pocket-spots .venue-booking-label { margin: 0 0 10px; font-size: 14px; font-weight: 700; }
+.pocket-spots .venue-time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.pocket-spots .venue-time-grid button { min-height: 40px; border: 0; border-radius: 999px; background: #f3f4f4; color: #46535d; font-size: 14px; cursor: pointer; }
+.pocket-spots .venue-time-grid button:hover { background: #e9edef; color: var(--spots-text); }
+.pocket-spots .venue-time-grid button.active { background: var(--spots-active); color: var(--spots-cta); font-weight: 750; }
+.pocket-spots .venue-booking-card > .button { min-height: 46px; margin-top: 18px; border-radius: 14px !important; background: var(--spots-cta); }
+.pocket-spots .venue-booking-card > .button:hover { background: var(--spots-cta-hover); }
+.pocket-spots .venue-booking-card > .button:focus-visible { background: var(--spots-cta-pressed); color: #fff; }
+.pocket-spots .venue-booking-details-selection { min-height: 0; flex: 1; display: grid; grid-template-rows: minmax(0, 1fr); margin-top: 18px; }
+.pocket-spots .venue-booking-preorder-step { min-height: 0; flex: 1; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; margin-top: 16px; }
+.pocket-spots .venue-reservation-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 2px 12px; }
+.pocket-spots .venue-reservation-summary > div { min-width: 0; }
+.pocket-spots .venue-reservation-summary strong,
+.pocket-spots .venue-reservation-summary small { display: block; }
+.pocket-spots .venue-reservation-summary strong { font-size: 15px; }
+.pocket-spots .venue-reservation-summary small { margin-top: 4px; color: var(--spots-secondary); font-size: 13px; }
+.pocket-spots .venue-reservation-summary > button { min-height: 38px; padding: 0 15px; background: var(--spots-card); color: var(--spots-cta); font-size: 13px; font-weight: 750; cursor: pointer; }
+.pocket-spots .venue-reservation-summary > button:hover { background: var(--spots-active); }
+.pocket-spots .venue-booking-preorder-list { min-height: 0; display: grid; align-content: start; gap: 8px; overflow-y: auto; }
+.pocket-spots .venue-booking-preorder-list article { min-width: 0; min-height: 84px; display: grid; grid-template-columns: 68px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 2px; border-radius: 18px; background: transparent; }
+.pocket-spots .venue-booking-preorder-list article:hover { background: #fafafa; }
+.pocket-spots .venue-booking-preorder-list .food-image { width: 68px; height: 68px; border-radius: 15px; }
+.pocket-spots .venue-booking-preorder-list article > div:nth-child(2) { min-width: 0; }
+.pocket-spots .venue-booking-preorder-list article > div:nth-child(2) strong { display: -webkit-box; overflow: hidden; font-size: 14px; line-height: 1.25; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.pocket-spots .venue-booking-preorder-list article > div:nth-child(2) small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pocket-spots .venue-booking-preorder-list article > div:nth-child(2) small { margin-top: 6px; color: var(--spots-secondary); font-size: 13px; }
+.pocket-spots .venue-preorder-quantity { height: 42px; display: grid; grid-template-columns: 36px 28px 36px; align-items: center; padding: 3px; border-radius: 999px; background: var(--spots-card); }
+.pocket-spots .venue-preorder-quantity button { width: 36px; height: 36px; display: grid; place-items: center; padding: 0; background: #fff; color: var(--spots-text); cursor: pointer; }
+.pocket-spots .venue-preorder-quantity strong { font-size: 14px; text-align: center; }
+.pocket-spots .venue-preorder-empty { min-height: 0; display: grid; place-items: center; padding: 24px; color: var(--spots-text); text-align: center; }
+.pocket-spots .venue-preorder-empty h3 { margin: 0; font-size: 17px; line-height: 1.25; }
+.pocket-spots .venue-preorder-empty p { max-width: 250px; margin: 8px auto 0; color: var(--spots-secondary); font-size: 13px; line-height: 1.4; }
+.pocket-spots .venue-detail-page .venue-booking-next { min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-radius: 14px !important; background: var(--spots-cta); color: #fff; font-size: 14px; font-weight: 750; cursor: pointer; }
+.pocket-spots .venue-booking-next:hover { background: var(--spots-cta-hover); }
+.pocket-spots .venue-booking-next strong { font-size: 15px; }
+.pocket-spots .venue-booking-next span:only-child { margin: 0 auto; }
+
+@media (max-width: 1700px) {
+  .pocket-spots .venue-menu-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+}
+@media (max-width: 1400px) {
+  .pocket-spots .venue-menu-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 1100px) {
+  .pocket-spots .venue-menu-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pocket-spots .venue-review-list { grid-template-columns: 1fr; }
+  .pocket-spots .venue-review-list article > p { -webkit-line-clamp: 3; }
+}
+@media (max-width: 900px) {
+  .pocket-spots .venue-detail-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "overview" "booking" "content";
+  }
+  .pocket-spots .venue-primary-column { display: contents; }
+  .pocket-spots .venue-overview-block { grid-area: overview; }
+  .pocket-spots .venue-detail-content { grid-area: content; }
+  .pocket-spots .venue-booking-card { grid-area: booking; }
+  .pocket-spots .venue-booking-card { position: static; }
+  .pocket-spots .venue-time-grid { grid-template-columns: repeat(6, 1fr); }
+  .pocket-spots .venue-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .pocket-spots .venue-scroll-section { scroll-margin-top: 190px; }
+  .pocket-spots .venue-overview-block,
+  .pocket-spots .venue-detail-content { border-radius: 18px; }
+  .pocket-spots .venue-detail-summary { min-height: 0; padding: 20px; }
+  .pocket-spots .venue-detail-heading h1 { font-size: 30px; }
+  .pocket-spots .venue-section-nav { top: 128px; margin: 0; border-radius: 0; }
+  .pocket-spots .venue-section-nav button { min-height: 50px; padding: 0 12px; }
+  .pocket-spots .venue-detail-page,
+  .pocket-spots .venue-detail-content { gap: 12px; }
+  .pocket-spots .venue-content-section,
+  .pocket-spots .venue-booking-card { padding: 20px; border-radius: 18px; }
+  .pocket-spots .venue-menu-section { padding: 20px; }
+  .pocket-spots .venue-time-grid { grid-template-columns: repeat(3, 1fr); }
+  .pocket-spots .venue-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pocket-spots .venue-about-gallery { height: 180px; grid-template-columns: 1.5fr 1fr; }
+  .pocket-spots .venue-about-gallery .pos-2 { display: none; }
+  .pocket-spots .venue-contact-grid { grid-template-columns: 1fr; }
+  .pocket-spots .venue-map-preview { min-height: 160px; }
+}
+@media (max-width: 600px) {
+  .pocket-spots .venue-menu-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  .pocket-spots .venue-facts small { display: none; }
+}

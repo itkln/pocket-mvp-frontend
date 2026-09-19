@@ -1,4 +1,6 @@
-import { type ReactNode } from "react";
+"use client";
+
+import { createContext, useContext, type ReactNode } from "react";
 import { type LucideIcon } from "lucide-react";
 import { type MenuItem } from "./model";
 
@@ -10,8 +12,11 @@ export function Button({ children, icon: Icon, kind = "primary", onClick, type =
   return <button type={type} className={`button ${kind} ${className}`} onClick={onClick} disabled={disabled} aria-label={ariaLabel}>{Icon && <Icon size={17} />}{children}</button>;
 }
 
+export const TooltipContext = createContext(true);
+
 export function IconButton({ icon: Icon, label, onClick, active = false, className = "" }: { icon: LucideIcon; label: string; onClick?: () => void; active?: boolean; className?: string }) {
-  return <button className={`icon-button ${active ? "active" : ""} ${className}`} onClick={onClick} aria-label={label} title={label}><Icon size={19} /></button>;
+  const showTooltip = useContext(TooltipContext);
+  return <button className={`icon-button ${active ? "active" : ""} ${className}`} onClick={onClick} aria-label={label} title={showTooltip ? label : undefined}><Icon size={19} /></button>;
 }
 
 export function StatusPill({ status }: { status: string }) {

@@ -1,11 +1,17 @@
 {
-  "name": "pocket-mvp-frontend",
+  "name": "pocket-frontends",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "npm run dev:vendor",
+    "dev:vendor": "next dev apps/vendor -p 3000",
+    "dev:spots": "next dev apps/spots -p 3001",
+    "build": "npm run build:vendor && npm run build:spots",
+    "build:vendor": "next build apps/vendor",
+    "build:spots": "next build apps/spots",
+    "start": "npm run start:vendor",
+    "start:vendor": "next start apps/vendor -p 3000",
+    "start:spots": "next start apps/spots -p 3001",
     "lint": "eslint .",
     "test": "vitest run"
   },

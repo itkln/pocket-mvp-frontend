@@ -1,13 +1,27 @@
-# Pocket MVP Frontend
+# Pocket Frontends
 
-Next.js frontend for Pocket MVP venue ordering, reservations, payments, and operations.
+The frontend is split into two independently runnable Next.js applications:
+
+- **Pocket Vendor** (`apps/vendor`) for venue owners and staff.
+- **Pocket Spots** (`apps/spots`) for guests, reservations, and reservation preorders.
+
+Authentication, API clients, localization, UI primitives, and domain features are
+shared from `shared`, `features`, and `lib`. The applications have separate routes,
+bundles, metadata, ports, and Docker images.
 
 ## Development
 
 ```bash
 npm install
-npm run dev
+npm run dev:vendor
+npm run dev:spots
 ```
+
+- Pocket Vendor: http://localhost:3000
+- Pocket Spots: http://localhost:3001
+
+`npm run dev` remains an alias for Pocket Vendor. Build both applications with
+`npm run build`, or use `npm run build:vendor` and `npm run build:spots` separately.
 
 The browser uses the same-origin `/api/v1` route. Next.js proxies it to
 `INTERNAL_API_URL` (`http://localhost:8080` for local development and the
@@ -22,15 +36,14 @@ npm test
 
 ## Production container
 
-Build and run the standalone Next.js image:
+Build the images independently:
 
 ```bash
-docker build -t pocket-mvp-frontend .
-docker run --rm -p 3000:3000 pocket-mvp-frontend
+docker build --build-arg APP_TARGET=vendor -t pocket-vendor .
+docker build --build-arg APP_TARGET=spots -t pocket-spots .
 ```
 
-The full frontend, API, migrations, and PostgreSQL stack is orchestrated by
-`docker-compose.yml` in the sibling backend repository.
+The full stack starts both applications through `backend/docker-compose.yml`.
 
 ## Product documentation
 

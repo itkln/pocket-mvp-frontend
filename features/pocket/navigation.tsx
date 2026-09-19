@@ -10,11 +10,12 @@ import { IconButton } from "./ui";
 import { localeOptions, localeTags, useI18n } from "./i18n";
 import { replacePathLocale } from "./locales";
 
-export function Sidebar({ user, role, screen, navigation, venue, venues: availableVenues, mobileNav, collapsed, onNavigate, onRole, onVenue, onAddVenue, onClose, onToggleCollapsed }: { user: AuthUser; role: Role; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue | null; venues: Venue[]; mobileNav: boolean; collapsed: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onAddVenue: () => void; onClose: () => void; onToggleCollapsed: () => void }) {
+export function Sidebar({ user, role, availableRoles, brand = "Pocket", screen, navigation, venue, venues: availableVenues, mobileNav, collapsed, onNavigate, onRole, onVenue, onAddVenue, onClose, onToggleCollapsed }: { user: AuthUser; role: Role; availableRoles?: Role[]; brand?: string; screen: string; navigation: { id: string; label: string; icon: LucideIcon; count?: number }[]; venue: Venue | null; venues: Venue[]; mobileNav: boolean; collapsed: boolean; onNavigate: (id: string) => void; onRole: (role: Role) => void; onVenue: (venue: Venue) => void; onAddVenue: () => void; onClose: () => void; onToggleCollapsed: () => void }) {
   const { t } = useI18n();
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [venueMenuOpen, setVenueMenuOpen] = useState(false);
   const canSwitchVenue = availableVenues.length > 1;
+  const selectableRoles = availableRoles ?? (["owner", ...(user.capabilities.includes("staff") ? ["staff" as const] : []), "customer"] satisfies Role[]);
   const roleMeta = role === "owner" ? { label: "Владелец", icon: Store } : role === "staff" ? { label: "Сотрудник", icon: BadgeCheck } : { label: "Гость", icon: UserRound };
   const CurrentRoleIcon = roleMeta.icon;
   const selectRole = (nextRole: Role) => {
@@ -31,7 +32,7 @@ export function Sidebar({ user, role, screen, navigation, venue, venues: availab
   };
   return (
     <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
-      <div className="brand-row"><button className="brand-toggle" onClick={toggleNavigation} aria-label={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"} title={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"}><span className="brand-toggle-logo"><Image src="/logo.svg" alt="" width={28} height={28} priority /></span><span className="brand-toggle-panel">{collapsed ? <PanelLeftOpen size={20} strokeWidth={1.9} /> : <PanelLeftClose size={20} strokeWidth={1.9} />}</span></button><strong>Pocket</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} className="mobile-sidebar-close" /></div>
+      <div className="brand-row"><button className="brand-toggle" onClick={toggleNavigation} aria-label={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"} title={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"}><span className="brand-toggle-logo"><Image src="/logo.svg" alt="" width={28} height={28} priority /></span><span className="brand-toggle-panel">{collapsed ? <PanelLeftOpen size={20} strokeWidth={1.9} /> : <PanelLeftClose size={20} strokeWidth={1.9} />}</span></button><strong>{brand}</strong><IconButton icon={X} label="Закрыть меню" onClick={onClose} className="mobile-sidebar-close" /></div>
 	  {role === "customer" ? <div className="venue-switcher personal-context collapsed-tooltip" data-tooltip={collapsed ? t("Все заведения") : undefined}><span className="venue-avatar">P</span><div><strong>Все заведения</strong></div><Search size={16} /></div> : role === "owner" ? <div className="venue-menu"><button type="button" className={`venue-switcher collapsed-tooltip ${canSwitchVenue ? "can-switch" : ""}`} data-tooltip={collapsed ? (venue?.name ?? t("Заведения")) : undefined} disabled={!canSwitchVenue} onClick={() => setVenueMenuOpen((open) => !open)} aria-expanded={canSwitchVenue ? venueMenuOpen : undefined} aria-label={collapsed ? `${t("Заведение")}: ${venue?.name ?? t("Заведения")}` : undefined}><span className="venue-avatar">{venue ? venueInitials(venue) : <Store size={18} />}</span><div><strong>{venue?.name ?? "Заведения"}</strong></div>{canSwitchVenue && <ChevronDown className="venue-switcher-chevron" size={16} />}</button>{canSwitchVenue && venueMenuOpen && <div className="venue-menu-popover"><p className="venue-menu-label">Мои заведения</p>{availableVenues.map((item) => <button key={item.id} className={item.id === venue?.id ? "active" : ""} onClick={() => { onVenue(item); setVenueMenuOpen(false); }}><span className="venue-avatar">{venueInitials(item)}</span><span><strong>{item.name}</strong></span>{item.id === venue?.id && <Check size={16} />}</button>)}</div>}<button type="button" className="sidebar-add-venue collapsed-tooltip" data-tooltip={collapsed ? t("Добавить заведение") : undefined} onClick={startVenueCreation}><Plus size={20} strokeWidth={1.9} /><span>Добавить заведение</span></button></div> : <div className="venue-switcher personal-context collapsed-tooltip" data-tooltip={collapsed ? (venue?.name ?? t("Рабочая смена")) : undefined}><span className="venue-avatar">{venue ? venueInitials(venue) : "P"}</span><div><strong>{venue?.name ?? "Рабочая смена"}</strong></div><BadgeCheck size={16} /></div>}
       <nav className="side-nav">
         {navigationGroups[role].map((group) => {
@@ -46,16 +47,16 @@ export function Sidebar({ user, role, screen, navigation, venue, venues: availab
           </div>;
         })}
       </nav>
-      <div className="sidebar-bottom">
-        <p className="nav-label">Текущая роль</p>
+      <div className={`sidebar-bottom ${selectableRoles.length === 1 ? "single-role" : ""}`}>
+        {selectableRoles.length > 1 && <><p className="nav-label">Текущая роль</p>
         <div className="role-menu">
           <button className="role-menu-trigger collapsed-tooltip" data-tooltip={collapsed ? t("Сменить роль") : undefined} onClick={() => setRoleMenuOpen((open) => !open)} aria-expanded={roleMenuOpen}><span><CurrentRoleIcon size={20} strokeWidth={1.9} /></span><div><strong>{roleMeta.label}</strong></div><ChevronDown size={16} strokeWidth={1.9} /></button>
           {roleMenuOpen && <div className="role-menu-popover">
-            <button className={role === "owner" ? "active" : ""} onClick={() => selectRole("owner")}><Store size={20} strokeWidth={1.9} /><span><strong>Владелец</strong></span>{role === "owner" && <Check size={16} />}</button>
-            {user.capabilities.includes("staff") && <button className={role === "staff" ? "active" : ""} onClick={() => selectRole("staff")}><BadgeCheck size={20} strokeWidth={1.9} /><span><strong>Сотрудник</strong></span>{role === "staff" && <Check size={16} />}</button>}
-            <button className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}><UserRound size={20} strokeWidth={1.9} /><span><strong>Гость</strong></span>{role === "customer" && <Check size={16} />}</button>
+            {selectableRoles.includes("owner") && <button className={role === "owner" ? "active" : ""} onClick={() => selectRole("owner")}><Store size={20} strokeWidth={1.9} /><span><strong>Владелец</strong></span>{role === "owner" && <Check size={16} />}</button>}
+            {selectableRoles.includes("staff") && <button className={role === "staff" ? "active" : ""} onClick={() => selectRole("staff")}><BadgeCheck size={20} strokeWidth={1.9} /><span><strong>Сотрудник</strong></span>{role === "staff" && <Check size={16} />}</button>}
+            {selectableRoles.includes("customer") && <button className={role === "customer" ? "active" : ""} onClick={() => selectRole("customer")}><UserRound size={20} strokeWidth={1.9} /><span><strong>Гость</strong></span>{role === "customer" && <Check size={16} />}</button>}
           </div>}
-        </div>
+        </div></>}
 		<button className={`user-chip collapsed-tooltip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`} data-tooltip={collapsed ? t("Управление аккаунтом") : undefined} onClick={() => onNavigate(role === "customer" ? "profile" : "account")} aria-label={collapsed ? t("Управление аккаунтом") : undefined}><span className={user.avatar_url ? "has-photo" : ""} style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{user.avatar_url ? "" : userInitials(user)}</span><div><strong>{user.first_name} {user.last_name}</strong></div><Settings size={20} strokeWidth={1.9} /></button>
       </div>
     </aside>
