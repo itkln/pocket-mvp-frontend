@@ -136,6 +136,13 @@
   font-weight: 750;
   cursor: pointer;
 }
+@media (min-width: 761px) {
+  .pocket-spots .spots-login-trigger {
+    min-width: 136px;
+    min-height: 48px;
+    padding-inline: 28px;
+  }
+}
 .pocket-spots .spots-login-trigger:hover { background: var(--spots-cta-hover); }
 .pocket-spots .spots-login-trigger:active { background: var(--spots-cta-pressed); }
 .pocket-spots .spots-account-menu > .spots-account-logout {

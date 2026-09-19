@@ -88,7 +88,9 @@ describe("Pocket Spots discovery", () => {
     expect(listPublicVenues).toHaveBeenCalledWith(expect.objectContaining({ category: "restaurants", query: "Итальянский ресторан" }), expect.any(AbortSignal));
     expect(screen.queryByRole("button", { name: "Открыть North & Vine" })).not.toBeInTheDocument();
     view.rerender(<DiscoverScreen {...defaults} categorySlug="sports" query="Casa Forma" />);
-    expect(await screen.findByText("Ничего не нашли")).toBeInTheDocument();
+    expect(await screen.findByText("В этой категории пока нет мест")).toBeInTheDocument();
+    expect(screen.queryByText("Ничего не нашли")).not.toBeInTheDocument();
+    expect(screen.queryByText("В этом городе пока нет заведений")).not.toBeInTheDocument();
     expect(screen.queryByText("Casa Forma")).not.toBeInTheDocument();
   });
 

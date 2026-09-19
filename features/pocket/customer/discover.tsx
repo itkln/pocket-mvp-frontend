@@ -79,7 +79,7 @@ export function DiscoverScreen({ city = "", query, categorySlug, filter = "Вс�
     <div className="spots-results" aria-busy={state === "loading"}>
       {state === "loading" && <CatalogStatus><span className="spots-catalog-spinner" />{t("Загружаем заведения...")}</CatalogStatus>}
       {state === "error" && <CatalogStatus alert><strong>{t("Не удалось загрузить заведения")}</strong><button type="button" className="button secondary" onClick={() => setReload((value) => value + 1)}><RefreshCw size={17} />{t("Повторить")}</button></CatalogStatus>}
-      {state === "ready" && result.total === 0 && <div className="spots-search-empty"><Search size={24} /><strong>{t(city ? "В этом городе пока нет заведений" : "Ничего не нашли")}</strong>{city && <p>{t(city)}</p>}</div>}
+      {state === "ready" && result.total === 0 && !category && <div className="spots-search-empty"><Search size={24} /><strong>{t(city ? "В этом городе пока нет заведений" : "Ничего не нашли")}</strong>{city && <p>{t(city)}</p>}</div>}
       {state === "ready" && visibleCategories.map((item) => <CategorySection
         key={item.slug} category={item.label} venues={venuesByCategory.get(item.slug) ?? []}
         expanded={Boolean(category)} selected={Boolean(category)} filters={item.filters} activeFilter={activeFilter}

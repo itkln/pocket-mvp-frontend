@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, Bookmark, CalendarDays, Check, Globe, LogIn, LogOut, MapPin, Search, ShieldCheck, Store, UserRound, X } from "lucide-react";
+import { Bell, Bookmark, CalendarDays, Check, Globe, LogOut, MapPin, Search, ShieldCheck, Store, UserRound, X } from "lucide-react";
 import { categoryForRoute } from "./categories";
 import { localeOptions, useI18n } from "../i18n";
 import { replacePathLocale } from "../locales";
@@ -113,7 +113,7 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
         </span>
         {user ? <button ref={accountTrigger} type="button" className={`spots-account-trigger ${screen === "profile" || accountOpen ? "active" : ""}`} onClick={() => { setLanguageOpen(false); setAccountOpen(!accountOpen); }} aria-label={t("Меню аккаунта")} data-tooltip={t("Меню аккаунта")} data-tooltip-placement="bottom" aria-haspopup="menu" aria-expanded={accountOpen} aria-controls={accountOpen ? "spots-account-menu" : undefined}>
           {user.avatar_url ? <i style={{ backgroundImage: `url("${user.avatar_url}")` }} /> : <i>{userInitials(user)}</i>}
-        </button> : <button type="button" className="spots-login-trigger" onClick={onLogin}><LogIn size={18} /><span>{t("Войти")}</span></button>}
+        </button> : <button type="button" className="spots-login-trigger" onClick={onLogin}><span>{t("Войти")}</span></button>}
         {user && accountOpen && <div className="spots-account-menu" id="spots-account-menu" role="menu" aria-label="Аккаунт" onKeyDown={(event) => {
           const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
           const index = items.indexOf(document.activeElement as HTMLButtonElement);

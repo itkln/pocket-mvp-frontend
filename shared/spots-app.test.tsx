@@ -47,7 +47,9 @@ describe("Spots guest experience", () => {
     vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
     render(<SpotsApp initialScreen="discover" />);
 
-    expect(await screen.findByRole("button", { name: "Войти" })).toBeInTheDocument();
+    const login = await screen.findByRole("button", { name: "Войти" });
+    expect(login).toBeInTheDocument();
+    expect(login.querySelector("svg")).toBeNull();
     expect(within(screen.getByRole("navigation", { name: "Категории" })).getAllByRole("button")).toHaveLength(8);
     expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();
     expect(router.replace).not.toHaveBeenCalledWith("/ru/login");
