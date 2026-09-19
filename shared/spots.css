@@ -136,6 +136,7 @@
   font-weight: 750;
   cursor: pointer;
 }
+.pocket-spots .spots-login-icon { display: none; }
 @media (min-width: 761px) {
   .pocket-spots .spots-login-trigger {
     min-width: 136px;
@@ -376,6 +377,7 @@
   .pocket-spots .spots-header.scrolled { background: #fff; box-shadow: 0 5px 18px rgba(23, 33, 43, .1); }
   .pocket-spots .spots-header.account-screen { display: none; }
   .pocket-spots .spots-header-inner { grid-template-columns: 52px minmax(0, 1fr) 52px; grid-template-rows: 52px 52px; padding: 10px 16px 8px; column-gap: 8px; row-gap: 14px; transition: padding 180ms ease; }
+  .pocket-spots .spots-header.guest .spots-header-inner { grid-template-columns: 52px minmax(0, 1fr) 96px; }
   .pocket-spots .spots-header-inner > .spots-brand { display: inline-flex; grid-column: 1; grid-row: 1; justify-self: start; width: 52px; min-width: 52px; margin: 0; padding: 0; }
   .pocket-spots .spots-header-inner > .spots-brand strong { display: none; }
   .pocket-spots .spots-header-inner > .spots-brand img { width: 30px; height: 30px; }
@@ -384,6 +386,13 @@
   .pocket-spots .spots-location span { min-width: 0; }
   .pocket-spots .spots-location b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
   .pocket-spots .spots-header-actions { grid-column: 3; grid-row: 1; width: 52px; justify-content: flex-end; pointer-events: auto; transition: opacity 150ms ease; }
+  .pocket-spots .spots-header.guest .spots-header-actions { width: 96px; gap: 8px; }
+  .pocket-spots .spots-header.guest .spots-language-control,
+  .pocket-spots .spots-header.guest .spots-language-trigger,
+  .pocket-spots .spots-header.guest .spots-login-trigger { width: 44px; min-width: 44px; height: 44px; min-height: 44px; }
+  .pocket-spots .spots-login-trigger { padding: 0; border-radius: 50% !important; }
+  .pocket-spots .spots-login-trigger span { display: none; }
+  .pocket-spots .spots-login-icon { display: block; }
   .pocket-spots .spots-header-actions > .spots-account-trigger { display: none; }
   .pocket-spots .spots-language-control { display: inline-flex; }
   .pocket-spots .spots-header [data-tooltip]::after { display: none; }
@@ -407,6 +416,7 @@
   .pocket-spots .spots-header.scrolled .spots-brand { position: absolute; opacity: 0; visibility: hidden; pointer-events: none; }
   .pocket-spots .spots-header.scrolled .spots-global-search { grid-row: 1; }
   .pocket-spots .spots-page { padding: 16px 16px calc(88px + env(safe-area-inset-bottom)); }
+  .pocket-spots.guest .spots-page { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
   .pocket-spots .spots-category-navigation-heading { min-height: 36px; gap: 8px; margin-bottom: 14px; }
   .pocket-spots .spots-category-navigation-heading h1 { font-size: 22px; }
   .pocket-spots .spots-category-navigation-heading button { font-size: 13px; padding: 10px 12px; }
@@ -493,7 +503,7 @@
     gap: 18px;
   }
   .pocket-spots .spots-venue-carousel.expanded .venue-card { width: 100%; }
-  .pocket-spots .spots-bottom-nav { grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--spots-page); border-top: 1px solid var(--spots-divider); box-shadow: none; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); }
+  .pocket-spots .spots-bottom-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--spots-page); border-top: 1px solid var(--spots-divider); box-shadow: none; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); }
   .pocket-spots .spots-bottom-nav button { min-height: 52px; gap: 4px; color: var(--spots-text); background: transparent; opacity: .42; }
   .pocket-spots .spots-bottom-nav button:hover { background: transparent; opacity: .68; }
   .pocket-spots .spots-bottom-nav button.active { color: var(--spots-text); background: transparent; opacity: 1; }

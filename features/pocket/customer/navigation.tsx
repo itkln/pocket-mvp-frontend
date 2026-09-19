@@ -3,8 +3,7 @@
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, Bookmark, CalendarDays, Check, Globe, LogOut, MapPin, Search, ShieldCheck, Store, UserRound, X } from "lucide-react";
-import { categoryForRoute } from "./categories";
+import { Bell, Bookmark, CalendarDays, Check, Globe, LogIn, LogOut, MapPin, Search, ShieldCheck, UserRound, X } from "lucide-react";
 import { localeOptions, useI18n } from "../i18n";
 import { replacePathLocale } from "../locales";
 import { userInitials } from "../model";
@@ -85,7 +84,7 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
   ];
   const matchingCities = spotsCities.filter((name) => name.toLocaleLowerCase("ru").includes(cityQuery.trim().toLocaleLowerCase("ru")));
   const accountScreen = ["profile", "settings", "notifications"].includes(screen);
-  return <header className={`spots-header ${city ? "has-city" : "needs-city"} ${categoryLabel ? "has-category" : ""} ${scrolled ? "scrolled" : ""} ${accountScreen ? "account-screen" : ""}`}>
+  return <header className={`spots-header ${user ? "signed-in" : "guest"} ${city ? "has-city" : "needs-city"} ${categoryLabel ? "has-category" : ""} ${scrolled ? "scrolled" : ""} ${accountScreen ? "account-screen" : ""}`}>
     <div className="spots-header-inner">
       <button type="button" className="spots-brand" onClick={() => onNavigate("discover")} aria-label="Pocket Spots, главная">
         <Image src="/logo.svg" alt="" width={30} height={30} priority />
@@ -113,7 +112,7 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
         </span>
         {user ? <button ref={accountTrigger} type="button" className={`spots-account-trigger ${screen === "profile" || accountOpen ? "active" : ""}`} onClick={() => { setLanguageOpen(false); setAccountOpen(!accountOpen); }} aria-label={t("Меню аккаунта")} data-tooltip={t("Меню аккаунта")} data-tooltip-placement="bottom" aria-haspopup="menu" aria-expanded={accountOpen} aria-controls={accountOpen ? "spots-account-menu" : undefined}>
           {user.avatar_url ? <i style={{ backgroundImage: `url("${user.avatar_url}")` }} /> : <i>{userInitials(user)}</i>}
-        </button> : <button type="button" className="spots-login-trigger" onClick={onLogin}><span>{t("Войти")}</span></button>}
+        </button> : <button type="button" className="spots-login-trigger" aria-label={t("Войти")} onClick={onLogin}><LogIn className="spots-login-icon" size={21} aria-hidden="true" /><span>{t("Войти")}</span></button>}
         {user && accountOpen && <div className="spots-account-menu" id="spots-account-menu" role="menu" aria-label="Аккаунт" onKeyDown={(event) => {
           const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
           const index = items.indexOf(document.activeElement as HTMLButtonElement);
@@ -152,7 +151,6 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
 }
 
 const mobileItems = [
-  { id: "discover", label: "Главная", icon: Store },
   { id: "saved", label: "Избранное", icon: Bookmark },
   { id: "reservations", label: "Мои брони", icon: CalendarDays },
   { id: "profile", label: "Профиль", icon: UserRound },
@@ -162,7 +160,7 @@ export function SpotsBottomNavigation({ screen, onNavigate }: Pick<SpotsNavigati
   const { t } = useI18n();
   return <nav className="spots-bottom-nav" aria-label="Основная навигация Pocket Spots">
     {mobileItems.map(({ id, label, icon: Icon }) => {
-      const active = screen === id || (id === "discover" && Boolean(categoryForRoute(screen))) || (id === "profile" && ["settings", "notifications"].includes(screen)) || (id === "reservations" && screen === "reservation");
+      const active = screen === id || (id === "profile" && ["settings", "notifications"].includes(screen)) || (id === "reservations" && screen === "reservation");
       return <button type="button" key={id} className={active ? "active" : ""} aria-current={active ? "page" : undefined} onClick={() => onNavigate(id)}><Icon size={22} /><span>{t(label)}</span></button>;
     })}
   </nav>;

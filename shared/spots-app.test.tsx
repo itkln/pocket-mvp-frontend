@@ -43,19 +43,31 @@ beforeEach(() => {
 });
 
 describe("Spots guest experience", () => {
-  it("shows discover without a session and asks guests to sign in for protected sections", async () => {
+  it("shows guest discovery without bottom navigation and opens sign in from the header", async () => {
     vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
     render(<SpotsApp initialScreen="discover" />);
 
     const login = await screen.findByRole("button", { name: "Войти" });
     expect(login).toBeInTheDocument();
-    expect(login.querySelector("svg")).toBeNull();
+    expect(login.querySelector(".spots-login-icon")).toBeInTheDocument();
     expect(within(screen.getByRole("navigation", { name: "Категории" })).getAllByRole("button")).toHaveLength(8);
     expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Основная навигация Pocket Spots" })).not.toBeInTheDocument();
     expect(router.replace).not.toHaveBeenCalledWith("/ru/login");
 
-    fireEvent.click(screen.getByRole("button", { name: "Профиль", exact: true }));
+    fireEvent.click(login);
     expect(router.push).toHaveBeenLastCalledWith("/ru/login");
+  });
+
+  it("keeps authenticated mobile navigation compact without a duplicate home action", async () => {
+    render(<SpotsApp initialScreen="discover" />);
+    await screen.findByRole("button", { name: "Меню аккаунта" });
+    const navigation = screen.getByRole("navigation", { name: "Основная навигация Pocket Spots" });
+    expect(within(navigation).getAllByRole("button")).toHaveLength(3);
+    expect(within(navigation).queryByRole("button", { name: "Главная" })).not.toBeInTheDocument();
+    expect(within(navigation).getByRole("button", { name: "Избранное" })).toBeInTheDocument();
+    expect(within(navigation).getByRole("button", { name: "Мои брони" })).toBeInTheDocument();
+    expect(within(navigation).getByRole("button", { name: "Профиль" })).toBeInTheDocument();
   });
 
   it("migrates saved guest state from the previous product namespace", async () => {

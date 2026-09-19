@@ -194,7 +194,7 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
 
   const cartTotal = menuItems.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0);
 
-  return <div className="pocket-spots">
+  return <div className={`pocket-spots ${currentUser ? "signed-in" : "guest"}`}>
     <SpotsHeader user={currentUser} screen={screen} city={city} onCityChange={(value) => {
       setCity(value);
       try { localStorage.setItem("pocket:spots-city", value); } catch { /* Keep the selection for this session. */ }
@@ -213,7 +213,7 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
         {["settings", "notifications"].includes(screen) && currentUser && <GuestSettings key={screen} notifications={screen === "notifications"} onEditProfile={editProfile} user={currentUser} onNavigate={navigate} notify={shell.notify} onLogout={signOut} onUpdate={setCurrentUser} />}
       </div>
     </main>{currentUser && <GuestProfileDialog open={Boolean(accountDialogSection)} section={accountDialogSection ?? "profile"} user={currentUser} notify={shell.notify} onUpdate={setCurrentUser} onClose={closeAccountDialog} />}</TooltipContext.Provider>
-    <SpotsBottomNavigation screen={screen} onNavigate={navigate} />
+    {currentUser && <SpotsBottomNavigation screen={screen} onNavigate={navigate} />}
     {shell.toast && <div className="toast"><CheckCircle2 size={18} />{t(shell.toast)}</div>}
   </div>;
 }
