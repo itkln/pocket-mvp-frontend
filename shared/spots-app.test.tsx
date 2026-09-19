@@ -49,7 +49,6 @@ describe("Spots guest experience", () => {
 
     const login = await screen.findByRole("button", { name: "Войти" });
     expect(login).toBeInTheDocument();
-    expect(login.querySelector(".spots-login-icon")).toBeInTheDocument();
     expect(within(screen.getByRole("navigation", { name: "Категории" })).getAllByRole("button")).toHaveLength(8);
     expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Основная навигация Pocket Spots" })).not.toBeInTheDocument();
@@ -57,6 +56,18 @@ describe("Spots guest experience", () => {
 
     fireEvent.click(login);
     expect(router.push).toHaveBeenLastCalledWith("/ru/login");
+  });
+
+  it("opens the mobile menu with sign in and language actions", async () => {
+    vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
+    render(<SpotsApp initialScreen="discover" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Открыть меню" }));
+    const menu = screen.getByRole("dialog", { name: "Меню" });
+    expect(within(menu).getByRole("heading", { name: "Войдите в аккаунт" })).toBeInTheDocument();
+    expect(within(menu).getByRole("button", { name: "Войти" })).toBeInTheDocument();
+    expect(within(menu).getByRole("button", { name: "Русский" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(menu).getByRole("button", { name: "English" }));
+    expect(router.replace).toHaveBeenLastCalledWith("/en/discover");
   });
 
   it("keeps authenticated mobile navigation compact without a duplicate home action", async () => {

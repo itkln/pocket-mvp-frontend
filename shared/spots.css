@@ -136,7 +136,7 @@
   font-weight: 750;
   cursor: pointer;
 }
-.pocket-spots .spots-login-icon { display: none; }
+.pocket-spots .spots-mobile-menu-trigger { display: none; }
 @media (min-width: 761px) {
   .pocket-spots .spots-login-trigger {
     min-width: 136px;
@@ -377,7 +377,6 @@
   .pocket-spots .spots-header.scrolled { background: #fff; box-shadow: 0 5px 18px rgba(23, 33, 43, .1); }
   .pocket-spots .spots-header.account-screen { display: none; }
   .pocket-spots .spots-header-inner { grid-template-columns: 52px minmax(0, 1fr) 52px; grid-template-rows: 52px 52px; padding: 10px 16px 8px; column-gap: 8px; row-gap: 14px; transition: padding 180ms ease; }
-  .pocket-spots .spots-header.guest .spots-header-inner { grid-template-columns: 52px minmax(0, 1fr) 96px; }
   .pocket-spots .spots-header-inner > .spots-brand { display: inline-flex; grid-column: 1; grid-row: 1; justify-self: start; width: 52px; min-width: 52px; margin: 0; padding: 0; }
   .pocket-spots .spots-header-inner > .spots-brand strong { display: none; }
   .pocket-spots .spots-header-inner > .spots-brand img { width: 30px; height: 30px; }
@@ -386,15 +385,22 @@
   .pocket-spots .spots-location span { min-width: 0; }
   .pocket-spots .spots-location b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
   .pocket-spots .spots-header-actions { grid-column: 3; grid-row: 1; width: 52px; justify-content: flex-end; pointer-events: auto; transition: opacity 150ms ease; }
-  .pocket-spots .spots-header.guest .spots-header-actions { width: 96px; gap: 8px; }
-  .pocket-spots .spots-header.guest .spots-language-control,
-  .pocket-spots .spots-header.guest .spots-language-trigger,
-  .pocket-spots .spots-header.guest .spots-login-trigger { width: 44px; min-width: 44px; height: 44px; min-height: 44px; }
-  .pocket-spots .spots-login-trigger { padding: 0; border-radius: 50% !important; }
-  .pocket-spots .spots-login-trigger span { display: none; }
-  .pocket-spots .spots-login-icon { display: block; }
+  .pocket-spots .spots-language-control,
+  .pocket-spots .spots-login-trigger,
   .pocket-spots .spots-header-actions > .spots-account-trigger { display: none; }
-  .pocket-spots .spots-language-control { display: inline-flex; }
+  .pocket-spots .spots-mobile-menu-trigger {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50% !important;
+    background: transparent;
+    color: var(--spots-text);
+  }
   .pocket-spots .spots-header [data-tooltip]::after { display: none; }
   .pocket-spots .spots-global-search {
     grid-column: 1 / -1;
@@ -569,38 +575,82 @@
   .spots-category-illustration { width: 106px; height: 106px; right: 50%; bottom: 20px; }
 }
 
-.pocket-spots .spots-language-dialog {
-  width: min(360px, calc(100vw - 32px));
-  max-height: calc(100dvh - 40px);
-  margin: auto;
+.pocket-spots .spots-mobile-menu-dialog {
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 24px;
-  background: #fff;
+  background: #f3f3f1;
   color: var(--spots-text);
-  box-shadow: 0 18px 56px rgba(23, 33, 43, .18);
 }
-.pocket-spots .spots-language-dialog::backdrop { background: rgba(23, 33, 43, .32); }
-.pocket-spots .spots-language-dialog-content { padding: 20px; }
-.pocket-spots .spots-language-dialog-options { display: grid; gap: 4px; }
-.pocket-spots .spots-language-dialog-options button {
+.pocket-spots .spots-mobile-menu-dialog::backdrop { background: rgba(23, 33, 43, .24); }
+.pocket-spots .spots-mobile-menu-shell { min-height: 100%; background: #f3f3f1; }
+.pocket-spots .spots-mobile-menu-heading {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  padding: 8px 14px;
+  background: #fff;
+}
+.pocket-spots .spots-mobile-menu-heading h2 { margin: 0; font-size: 21px; text-align: center; }
+.pocket-spots .spots-mobile-menu-heading > button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--spots-text);
+  cursor: pointer;
+}
+.pocket-spots .spots-mobile-menu-content { display: grid; gap: 12px; padding: 12px; }
+.pocket-spots .spots-mobile-menu-card { padding: 24px 20px; border-radius: 24px; background: #fff; }
+.pocket-spots .spots-mobile-menu-card h3 { margin: 0; font-size: 24px; line-height: 1.2; letter-spacing: -.02em; }
+.pocket-spots .spots-mobile-auth-card p { margin: 10px 0 22px; color: var(--spots-secondary); font-size: 16px; line-height: 1.4; }
+.pocket-spots .spots-mobile-auth-card .spots-mobile-login {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 999px !important;
+  background: var(--spots-cta);
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pocket-spots .spots-mobile-language-card h3 { margin-bottom: 12px; font-size: 18px; }
+.pocket-spots .spots-mobile-language-options { display: grid; }
+.pocket-spots .spots-mobile-language-options button {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: 50px;
-  padding: 10px 14px;
+  min-height: 56px;
+  padding: 10px 4px;
   border: 0;
-  border-radius: 14px;
+  border-bottom: 1px solid var(--spots-divider);
+  border-radius: 0 !important;
   background: transparent;
   color: var(--spots-text);
   font: inherit;
+  font-size: 16px;
   text-align: left;
   cursor: pointer;
 }
-.pocket-spots .spots-language-dialog-options button[aria-pressed="true"] { background: #edf0f2; font-weight: 700; }
+.pocket-spots .spots-mobile-language-options button:last-child { border-bottom: 0; }
+.pocket-spots .spots-mobile-language-options button[aria-pressed="true"] { color: var(--spots-cta); font-weight: 700; }
 @media (hover: hover) {
-  .pocket-spots .spots-language-dialog-options button:hover { background: #f1f2f3; }
+  .pocket-spots .spots-mobile-menu-heading > button:hover,
+  .pocket-spots .spots-mobile-language-options button:hover { background: #f1f2f3; }
+  .pocket-spots .spots-mobile-auth-card .spots-mobile-login:hover { background: var(--spots-cta-hover); }
 }
 @media (prefers-reduced-motion: reduce) {
   .pocket-spots *, .pocket-spots *::before, .pocket-spots *::after { scroll-behavior: auto !important; transition: none !important; }

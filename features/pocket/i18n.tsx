@@ -617,6 +617,8 @@ const rows: TranslationRow[] = [
   ["Один аккаунт для бронирований, заказов и управления заведениями.", "One account for reservations, orders, and venue management.", "Один акаунт для бронювань, замовлень і керування закладами.", "Jeden účet na rezervácie, objednávky a správu prevádzok."],
   ["Уже есть аккаунт?", "Already have an account?", "Уже маєте акаунт?", "Už máte účet?"],
   ["Войти", "Sign in", "Увійти", "Prihlásiť sa"],
+  ["Войдите в аккаунт", "Sign in to your account", "Увійдіть в акаунт", "Prihláste sa do svojho účtu"],
+  ["Сохраняйте места и управляйте бронированиями.", "Save places and manage your bookings.", "Зберігайте місця та керуйте бронюваннями.", "Ukladajte si miesta a spravujte svoje rezervácie."],
   ["Войти в Pocket", "Sign in to Pocket", "Увійти в Pocket", "Prihlásiť sa do Pocket"],
   ["Управляйте заведениями или продолжите как гость.", "Manage venues or continue as a guest.", "Керуйте закладами або продовжуйте як гість.", "Spravujte prevádzky alebo pokračujte ako hosť."],
   ["Нет аккаунта?", "No account?", "Немає акаунта?", "Nemáte účet?"],

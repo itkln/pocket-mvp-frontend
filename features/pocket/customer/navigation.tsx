@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Bell, Bookmark, CalendarDays, Check, Globe, LogIn, LogOut, MapPin, Search, ShieldCheck, UserRound, X } from "lucide-react";
+import { ArrowLeft, Bell, Bookmark, CalendarDays, Check, Globe, LogOut, MapPin, Menu, Search, ShieldCheck, UserRound, X } from "lucide-react";
 import { localeOptions, useI18n } from "../i18n";
 import { replacePathLocale } from "../locales";
 import { userInitials } from "../model";
@@ -32,7 +32,7 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
   const router = useRouter();
   const pathname = usePathname();
   const cityDialog = useRef<HTMLDialogElement>(null);
-  const languageDialog = useRef<HTMLDialogElement>(null);
+  const mobileMenuDialog = useRef<HTMLDialogElement>(null);
   const accountRoot = useRef<HTMLElement>(null);
   const accountTrigger = useRef<HTMLButtonElement>(null);
   const languageTrigger = useRef<HTMLButtonElement>(null);
@@ -72,7 +72,7 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
   const selectLanguage = (value: (typeof localeOptions)[number]["value"]) => {
     setLocale(value);
     setLanguageOpen(false);
-    languageDialog.current?.close();
+    mobileMenuDialog.current?.close();
     router.replace(`${replacePathLocale(pathname, value)}${window.location.search}`);
   };
   const accountItems = [
@@ -103,8 +103,7 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
         <span className="spots-language-control">
           <button ref={languageTrigger} type="button" className={`spots-language-trigger ${languageOpen ? "active" : ""}`} aria-label={t("Язык интерфейса")} data-tooltip={t("Язык интерфейса")} data-tooltip-placement="bottom" aria-haspopup="menu" aria-expanded={languageOpen} aria-controls={languageOpen ? "spots-language-menu" : undefined} onClick={() => {
             setAccountOpen(false);
-            if (window.matchMedia("(max-width: 760px)").matches) languageDialog.current?.showModal();
-            else setLanguageOpen(!languageOpen);
+            setLanguageOpen(!languageOpen);
           }}><Globe size={22} /></button>
           {languageOpen && <div className="spots-language-menu" id="spots-language-menu" role="menu" aria-label={t("Язык интерфейса")}>
             {localeOptions.map((option) => <button type="button" role="menuitem" key={option.value} lang={option.value === "ua" ? "uk" : option.value} onClick={() => selectLanguage(option.value)}><span>{option.label}</span>{locale === option.value && <Check size={18} />}</button>)}
@@ -112,7 +111,8 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
         </span>
         {user ? <button ref={accountTrigger} type="button" className={`spots-account-trigger ${screen === "profile" || accountOpen ? "active" : ""}`} onClick={() => { setLanguageOpen(false); setAccountOpen(!accountOpen); }} aria-label={t("Меню аккаунта")} data-tooltip={t("Меню аккаунта")} data-tooltip-placement="bottom" aria-haspopup="menu" aria-expanded={accountOpen} aria-controls={accountOpen ? "spots-account-menu" : undefined}>
           {user.avatar_url ? <i style={{ backgroundImage: `url("${user.avatar_url}")` }} /> : <i>{userInitials(user)}</i>}
-        </button> : <button type="button" className="spots-login-trigger" aria-label={t("Войти")} onClick={onLogin}><LogIn className="spots-login-icon" size={21} aria-hidden="true" /><span>{t("Войти")}</span></button>}
+        </button> : <button type="button" className="spots-login-trigger" onClick={onLogin}><span>{t("Войти")}</span></button>}
+        <button type="button" className="spots-mobile-menu-trigger" aria-label={t("Открыть меню")} aria-haspopup="dialog" onClick={() => mobileMenuDialog.current?.showModal()}><Menu size={24} /></button>
         {user && accountOpen && <div className="spots-account-menu" id="spots-account-menu" role="menu" aria-label="Аккаунт" onKeyDown={(event) => {
           const items = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'));
           const index = items.indexOf(document.activeElement as HTMLButtonElement);
@@ -139,11 +139,25 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
         </div>
       </div>
     </dialog>
-    <dialog ref={languageDialog} className="spots-language-dialog" aria-labelledby="spots-language-dialog-title" onClick={(event) => { if (event.target === event.currentTarget) languageDialog.current?.close(); }}>
-      <div className="spots-language-dialog-content">
-        <div className="spots-picker-heading"><h2 id="spots-language-dialog-title">{t("Язык интерфейса")}</h2><button type="button" className="icon-button" aria-label={t("Закрыть")} onClick={() => languageDialog.current?.close()}><X size={20} /></button></div>
-        <div className="spots-language-dialog-options">
-          {localeOptions.map((option) => <button type="button" key={option.value} lang={option.value === "ua" ? "uk" : option.value} aria-pressed={locale === option.value} onClick={() => selectLanguage(option.value)}><span>{option.label}</span>{locale === option.value && <Check size={18} />}</button>)}
+    <dialog ref={mobileMenuDialog} className="spots-mobile-menu-dialog" aria-labelledby="spots-mobile-menu-title">
+      <div className="spots-mobile-menu-shell">
+        <div className="spots-mobile-menu-heading">
+          <button type="button" aria-label={t("Назад")} onClick={() => mobileMenuDialog.current?.close()}><ArrowLeft size={26} /></button>
+          <h2 id="spots-mobile-menu-title">{t("Меню")}</h2>
+          <span aria-hidden="true" />
+        </div>
+        <div className="spots-mobile-menu-content">
+          {!user && <section className="spots-mobile-menu-card spots-mobile-auth-card">
+            <h3>{t("Войдите в аккаунт")}</h3>
+            <p>{t("Сохраняйте места и управляйте бронированиями.")}</p>
+            <button type="button" className="spots-mobile-login" onClick={() => { mobileMenuDialog.current?.close(); onLogin(); }}>{t("Войти")}</button>
+          </section>}
+          <section className="spots-mobile-menu-card spots-mobile-language-card" aria-labelledby="spots-mobile-language-title">
+            <h3 id="spots-mobile-language-title">{t("Язык интерфейса")}</h3>
+            <div className="spots-mobile-language-options">
+              {localeOptions.map((option) => <button type="button" key={option.value} lang={option.value === "ua" ? "uk" : option.value} aria-pressed={locale === option.value} onClick={() => selectLanguage(option.value)}><span>{option.label}</span>{locale === option.value && <Check size={19} />}</button>)}
+            </div>
+          </section>
         </div>
       </div>
     </dialog>
