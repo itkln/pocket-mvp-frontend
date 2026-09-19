@@ -28,6 +28,11 @@ The browser uses the same-origin `/api/v1` route. Next.js proxies it to
 `backend` service in Docker). Authentication uses a server-issued HttpOnly
 cookie and does not store session secrets in browser storage.
 
+Pocket Spots `/discover` uses the public `/api/v1/public/venues` catalog. City,
+search, category, filters, and pagination are evaluated by the backend; the UI
+provides loading, error/retry, empty, and paginated result states. The route
+remains available without a session, while favorites stay hidden for guests.
+
 Run the UI and API-client tests:
 
 ```bash

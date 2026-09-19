@@ -15,6 +15,13 @@ export const localeOptions: { value: Locale; short: string; label: string }[] = 
 ];
 
 const rows: TranslationRow[] = [
+  ["Загружаем заведения...", "Loading places...", "Завантажуємо заклади...", "Načítavajú sa prevádzky..."],
+  ["Не удалось загрузить заведения", "Places could not be loaded", "Не вдалося завантажити заклади", "Prevádzky sa nepodarilo načítať"],
+  ["Повторить", "Try again", "Спробувати ще раз", "Skúsiť znova"],
+  ["Страницы каталога", "Catalog pages", "Сторінки каталогу", "Stránky katalógu"],
+  ["Страница", "Page", "Сторінка", "Strana"],
+  ["Далее", "Next", "Далі", "Ďalej"],
+  ["Назад", "Back", "Назад", "Späť"],
   ["Сбросить категорию", "Clear category", "Скинути категорію", "Zrušiť kategóriu"],
   ["Искать в категории", "Search this category", "Шукати в категорії", "Hľadať v kategórii"],
   ["Назад к результатам", "Back to results", "Назад до результатів", "Späť na výsledky"],

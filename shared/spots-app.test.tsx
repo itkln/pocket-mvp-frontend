@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SpotsApp from "./spots-app";
 import { AuthAPIError, getCurrentUser, updateProfile } from "../lib/auth-api";
+import { listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
 
 const router = { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() };
 vi.mock("next/navigation", () => ({
@@ -14,6 +15,11 @@ vi.mock("next/navigation", () => ({
   }, () => window.location.search)),
 }));
 vi.mock("../lib/auth-api", async (original) => ({ ...await original<object>(), getCurrentUser: vi.fn(), updateProfile: vi.fn() }));
+vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn() }));
+const publicVenues: PublicVenue[] = [
+  { id: "north", slug: "north", name: "North & Vine", category_slug: "restaurants", cuisine_type: "Европейская", address: "Dunajská 12", city: "Bratislava", country_code: "SK", rating: 4.8, review_count: 12, tags: ["Стол через 20 мин"], filters: ["Лучшие"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
+  { id: "casa", slug: "casa", name: "Casa Forma", category_slug: "restaurants", cuisine_type: "Итальянская", address: "Obchodná 24", city: "Bratislava", country_code: "SK", rating: 4.7, review_count: 8, tags: ["Есть места сегодня"], filters: ["Итальянская"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
+];
 const nativeReplace = window.history.replaceState.bind(window.history);
 let desktop = false;
 
@@ -30,6 +36,7 @@ beforeEach(() => {
   });
   router.push.mockImplementation((url: string) => { window.history.pushState(null, "", url); window.dispatchEvent(new PopStateEvent("popstate")); });
   vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer" });
+  vi.mocked(listPublicVenues).mockResolvedValue({ venues: publicVenues, page: 1, page_size: 24, total: publicVenues.length, total_pages: 1, has_next: false });
   window.scrollTo = vi.fn();
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
   HTMLDialogElement.prototype.close = function () { if (this.hasAttribute("open")) { this.removeAttribute("open"); this.dispatchEvent(new Event("close")); } };
@@ -54,7 +61,7 @@ describe("Spots guest experience", () => {
     localStorage.setItem("pocket:eats-saved:guest", JSON.stringify(["Casa Forma"]));
     render(<SpotsApp initialScreen="saved" />);
     expect(await screen.findByRole("button", { name: "Выбрать город: Братислава" })).toBeInTheDocument();
-    expect(screen.getByText("Casa Forma")).toBeInTheDocument();
+    expect(await screen.findByText("Casa Forma")).toBeInTheDocument();
     expect(localStorage.getItem("pocket:spots-city")).toBe("Братислава");
     expect(localStorage.getItem("pocket:spots-saved:guest")).toBe(JSON.stringify(["Casa Forma"]));
     expect(localStorage.getItem("pocket:eats-city")).toBeNull();
@@ -111,19 +118,19 @@ describe("Spots guest experience", () => {
     const input = await screen.findByRole("textbox", { name: "Поиск: Рестораны" });
     fireEvent.change(input, { target: { value: "Итальянский ресторан" } });
     expect(new URLSearchParams(window.location.search).get("q")).toBe("Итальянский ресторан");
-    fireEvent.click(screen.getByRole("button", { name: "Итальянская", exact: true }));
+    fireEvent.click(await screen.findByRole("button", { name: "Итальянская", exact: true }));
     expect(new URLSearchParams(window.location.search).get("filter")).toBe("Итальянская");
     expect(screen.queryByRole("region", { name: "Спорт", exact: true })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Открыть Casa Forma" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Forma" }));
     expect(window.location.pathname).toBe("/ru/browse-menu");
     fireEvent.click(screen.getByRole("button", { name: "Назад к результатам" }));
     expect(window.location.pathname).toBe("/ru/restaurants");
     expect(screen.getByRole("textbox", { name: "Поиск: Рестораны" })).toHaveValue("Итальянский ресторан");
-    expect(screen.getByRole("button", { name: "Итальянская", exact: true })).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByRole("button", { name: "Итальянская", exact: true })).toHaveAttribute("aria-pressed", "true");
     view.unmount();
     render(<SpotsApp initialScreen="restaurants" />);
     expect(await screen.findByRole("textbox", { name: "Поиск: Рестораны" })).toHaveValue("Итальянский ресторан");
-    expect(screen.getByRole("button", { name: "Открыть Casa Forma" })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Открыть Casa Forma" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Сбросить категорию" }));
     expect(window.location.pathname).toBe("/ru/discover");
   });
