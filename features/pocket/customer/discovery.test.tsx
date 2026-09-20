@@ -221,11 +221,12 @@ describe("Pocket Spots discovery", () => {
     expect(screen.queryByRole("menu", { name: "Interface language" })).not.toBeInTheDocument();
   });
 
-  it("opens language selection inside the mobile menu", () => {
+  it("keeps the previous language modal for authenticated mobile users", () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
     render(<I18nProvider initialLocale="ru"><SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer" }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogout={vi.fn()} /></I18nProvider>);
-    fireEvent.click(screen.getByRole("button", { name: "Открыть меню", exact: true }));
-    const dialog = screen.getByRole("dialog", { name: "Меню" });
+    expect(screen.queryByRole("button", { name: "Открыть меню" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса", exact: true }));
+    const dialog = screen.getByRole("dialog", { name: "Язык интерфейса" });
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "English", exact: true }));
     expect(replace).toHaveBeenCalledWith("/en/discover");

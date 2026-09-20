@@ -58,13 +58,23 @@ describe("Spots guest experience", () => {
     expect(router.push).toHaveBeenLastCalledWith("/ru/login");
   });
 
-  it("opens the mobile menu with sign in and language actions", async () => {
+  it("opens guest city and language choices from collapsed mobile menu rows", async () => {
     vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
     render(<SpotsApp initialScreen="discover" />);
     fireEvent.click(await screen.findByRole("button", { name: "Открыть меню" }));
-    const menu = screen.getByRole("dialog", { name: "Меню" });
+    let menu = screen.getByRole("dialog", { name: "Меню" });
     expect(within(menu).getByRole("heading", { name: "Войдите в аккаунт" })).toBeInTheDocument();
     expect(within(menu).getByRole("button", { name: "Войти" })).toBeInTheDocument();
+    expect(within(menu).queryByRole("button", { name: "English" })).not.toBeInTheDocument();
+
+    fireEvent.click(within(menu).getByRole("button", { name: "Город: Выбрать место" }));
+    menu = screen.getByRole("dialog", { name: "Город" });
+    fireEvent.click(within(menu).getByRole("button", { name: "Братислава" }));
+    menu = screen.getByRole("dialog", { name: "Меню" });
+    expect(within(menu).getByRole("button", { name: "Город: Братислава" })).toBeInTheDocument();
+
+    fireEvent.click(within(menu).getByRole("button", { name: "Язык интерфейса: Русский" }));
+    menu = screen.getByRole("dialog", { name: "Язык интерфейса" });
     expect(within(menu).getByRole("button", { name: "Русский" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(within(menu).getByRole("button", { name: "English" }));
     expect(router.replace).toHaveBeenLastCalledWith("/en/discover");
@@ -73,6 +83,7 @@ describe("Spots guest experience", () => {
   it("keeps authenticated mobile navigation compact without a duplicate home action", async () => {
     render(<SpotsApp initialScreen="discover" />);
     await screen.findByRole("button", { name: "Меню аккаунта" });
+    expect(screen.queryByRole("button", { name: "Открыть меню" })).not.toBeInTheDocument();
     const navigation = screen.getByRole("navigation", { name: "Основная навигация Pocket Spots" });
     expect(within(navigation).getAllByRole("button")).toHaveLength(3);
     expect(within(navigation).queryByRole("button", { name: "Главная" })).not.toBeInTheDocument();
