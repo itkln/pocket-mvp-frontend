@@ -122,10 +122,10 @@ function CategorySection({ category, venues, expanded, selected, filters, active
   };
   const Heading = expanded ? "h1" : "h2";
   return <section className="discover-section spots-category-section" aria-label={t(category)}>
-    <div className="spots-section-heading">
+    {!selected && <div className="spots-section-heading">
       <Heading>{t(category)}</Heading>
       <div className="spots-section-actions">{!expanded && venues.length > 0 && <button type="button" className="spots-show-category" onClick={onExpand} aria-label={`${t("Все")}: ${t(category)}`}>{t("Все")}</button>}</div>
-    </div>
+    </div>}
     {selected && <section className="cuisine-section spots-category-filters" aria-label={`${t("Фильтры заведений")}: ${t(category)}`}>
       <div className="cuisine-strip">
         <button type="button" className={`spots-filter-trigger ${activeFilter !== "Все" ? "active" : ""}`} aria-label={t("Фильтры")} aria-haspopup="dialog" onClick={onOpenFilters}><SlidersHorizontal size={17} /></button>

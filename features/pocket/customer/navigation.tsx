@@ -167,10 +167,10 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
           </section>
           <section className="spots-mobile-menu-card spots-mobile-settings-card" aria-label={t("Меню")}>
             <button type="button" className="spots-mobile-menu-row" aria-label={`${t("Город")}: ${city ? t(city) : t("Выбрать место")}`} onClick={() => setMobileMenuView("city")}>
-              <MapPin size={21} /><span><small>{t("Город")}</small><strong>{city ? t(city) : t("Выбрать место")}</strong></span><ChevronRight size={21} />
+              <MapPin size={21} /><span><strong>{city ? t(city) : t("Выбрать место")}</strong></span><ChevronRight size={21} />
             </button>
             <button type="button" className="spots-mobile-menu-row" aria-label={`${t("Язык интерфейса")}: ${localeOptions.find((option) => option.value === locale)?.label ?? locale.toUpperCase()}`} onClick={() => setMobileMenuView("language")}>
-              <Globe size={21} /><span><small>{t("Язык интерфейса")}</small><strong>{localeOptions.find((option) => option.value === locale)?.label}</strong></span><ChevronRight size={21} />
+              <Globe size={21} /><span><strong>{localeOptions.find((option) => option.value === locale)?.label}</strong></span><ChevronRight size={21} />
             </button>
           </section>
         </div>}

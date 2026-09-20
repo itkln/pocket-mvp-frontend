@@ -73,7 +73,9 @@ describe("Pocket Spots discovery", () => {
 
   it.each(spotCategories)("limits $slug to its own data and filters", async ({ slug, label, filters }) => {
     render(<DiscoverScreen {...defaults} categorySlug={slug} />);
-    expect(await screen.findByRole("region", { name: label, exact: true })).toBeInTheDocument();
+    const category = await screen.findByRole("region", { name: label, exact: true });
+    expect(category).toBeInTheDocument();
+    expect(within(category).queryByRole("heading", { name: label, exact: true })).not.toBeInTheDocument();
     for (const other of spotCategories.filter((item) => item.slug !== slug)) {
       expect(screen.queryByRole("region", { name: other.label, exact: true })).not.toBeInTheDocument();
     }

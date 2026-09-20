@@ -636,7 +636,7 @@
 .pocket-spots .spots-mobile-settings-card { flex: 1; padding-top: 8px; border-radius: 24px 24px 0 0; }
 .pocket-spots .spots-mobile-menu-row {
   width: 100%;
-  min-height: 76px;
+  min-height: 68px;
   display: grid;
   grid-template-columns: 28px minmax(0, 1fr) 24px;
   align-items: center;
@@ -652,8 +652,7 @@
 }
 .pocket-spots .spots-mobile-menu-row:last-child { border-bottom: 0; }
 .pocket-spots .spots-mobile-menu-row > svg { color: var(--spots-secondary); }
-.pocket-spots .spots-mobile-menu-row > span { min-width: 0; display: grid; gap: 4px; }
-.pocket-spots .spots-mobile-menu-row small { color: var(--spots-secondary); font-size: 13px; }
+.pocket-spots .spots-mobile-menu-row > span { min-width: 0; }
 .pocket-spots .spots-mobile-menu-row strong { overflow: hidden; font-size: 17px; text-overflow: ellipsis; white-space: nowrap; }
 .pocket-spots .spots-mobile-menu-subpage { gap: 0; }
 .pocket-spots .spots-mobile-selection-card { flex: 1; padding-top: 8px; border-radius: 0; }
