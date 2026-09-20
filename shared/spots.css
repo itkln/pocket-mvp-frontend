@@ -301,17 +301,18 @@
 .spots-profile-avatar { display: grid; place-items: center; width: 80px; height: 80px; flex-shrink: 0; border-radius: 50%; background: var(--spots-sky) center / cover no-repeat; color: var(--spots-cta); font-size: 26px; font-weight: 700; }
 .spots-profile-identity strong { display: block; font-size: 23px; line-height: 1.3; overflow-wrap: anywhere; }
 .spots-profile-identity small { display: block; margin-top: 6px; color: var(--spots-secondary); font-size: 15px; }
+.spots-profile-edit-icon { color: var(--spots-secondary); }
 .spots-profile-links { display: grid; border-top: 1px solid var(--spots-divider); }
 .spots-profile-links > button { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 76px; padding: 16px 4px; border: 0; border-bottom: 1px solid var(--spots-divider); border-radius: 0; background: transparent; color: var(--spots-text); font-size: 17px; text-align: left; cursor: pointer; transition: background-color 180ms ease; }
 .spots-profile-links > button > span:not(.spots-profile-icon) { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .spots-profile-links > button > svg { flex-shrink: 0; }
 .spots-profile-links > button > svg:last-child { color: var(--spots-muted); }
 .spots-profile-icon { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 10px; color: #fff; }
-.spots-profile-icon.blue { background: #1f96d1; color: #fff; }
-.spots-profile-icon.pink { background: #e9588d; color: #fff; }
-.spots-profile-icon.mint { background: #35a76d; color: #fff; }
-.spots-profile-icon.yellow { background: #eaa61a; color: #fff; }
-.spots-profile-icon.lilac { background: #8866d7; color: #fff; }
+.spots-profile-icon.blue { background: linear-gradient(145deg, #55baf0, #087fc7); color: #fff; }
+.spots-profile-icon.pink { background: linear-gradient(145deg, #f17eac, #d93f79); color: #fff; }
+.spots-profile-icon.mint { background: linear-gradient(145deg, #62c991, #238e58); color: #fff; }
+.spots-profile-icon.yellow { background: linear-gradient(145deg, #f7c955, #de8f08); color: #fff; }
+.spots-profile-icon.lilac { background: linear-gradient(145deg, #ac8dec, #714ac4); color: #fff; }
 .spots-signout { display: flex; justify-content: center; align-items: center; gap: 12px; min-height: 52px; margin: 24px auto 0; padding: 12px 20px; border: 0; border-radius: 999px; background: transparent; color: var(--spots-secondary); font-size: 16px; font-weight: 600; cursor: pointer; }
 .spots-settings-identity { display: flex; flex-direction: column; align-items: center; padding: 8px 0 32px; text-align: center; }
 .spots-settings-identity .spots-profile-avatar { width: 96px; height: 96px; font-size: 30px; }
