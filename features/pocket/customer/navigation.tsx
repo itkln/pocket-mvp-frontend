@@ -155,7 +155,7 @@ export function SpotsHeader({ user, screen, city, onCityChange, searchQuery, cat
     {!user && <dialog ref={mobileMenuDialog} className="spots-mobile-menu-dialog" aria-labelledby="spots-mobile-menu-title">
       <div className="spots-mobile-menu-shell">
         <div className="spots-mobile-menu-heading">
-          <button type="button" aria-label={t("Назад")} onClick={() => { if (mobileMenuView === "menu") mobileMenuDialog.current?.close(); else setMobileMenuView("menu"); }}><ArrowLeft size={26} /></button>
+          <button type="button" className="spots-back-button" aria-label={t("Назад")} onClick={() => { if (mobileMenuView === "menu") mobileMenuDialog.current?.close(); else setMobileMenuView("menu"); }}><ArrowLeft size={26} /></button>
           <h2 id="spots-mobile-menu-title">{t(mobileMenuView === "city" ? "Город" : mobileMenuView === "language" ? "Язык интерфейса" : "Меню")}</h2>
           <span aria-hidden="true" />
         </div>

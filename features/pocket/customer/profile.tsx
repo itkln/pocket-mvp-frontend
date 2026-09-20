@@ -22,13 +22,13 @@ export function GuestProfile({ user, onNavigate, onLogout, onEditProfile }: Prof
     { label: "Уведомления", screen: "notifications", icon: Bell, tone: "yellow" },
   ];
   return <section className="spots-profile">
-    <div className="spots-account-heading"><button type="button" aria-label={t("Назад")} onClick={() => onNavigate("discover")}><ArrowLeft size={22} /></button><h1>{t("Профиль")}</h1><span /></div>
+    <div className="spots-account-heading"><button type="button" className="spots-back-button" aria-label={t("Назад")} onClick={() => onNavigate("discover")}><ArrowLeft size={26} /></button><h1>{t("Профиль")}</h1><span /></div>
     <button type="button" className="spots-profile-identity" onClick={onEditProfile}>
       <span className="spots-profile-avatar" style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{!user.avatar_url && userInitials(user)}</span>
       <span><strong>{user.first_name} {user.last_name}</strong><small>{t("Редактировать профиль")}</small></span><ChevronRight size={22} />
     </button>
     <nav className="spots-profile-links" aria-label={t("Профиль")}>
-      {links.map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={22} /></span><span>{t(label)}</span><ChevronRight size={19} /></button>)}
+      {links.map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span><ChevronRight size={19} /></button>)}
     </nav>
     <button type="button" className="spots-signout" onClick={onLogout}><LogOut size={20} />{t("Выйти из аккаунта")}</button>
   </section>;
@@ -38,11 +38,11 @@ export function GuestSettings({ user, onNavigate, onLogout, onUpdate, notify, on
   const { t } = useI18n();
   const [section, setSection] = useState<"profile" | "security" | "notifications" | null>(notifications ? "notifications" : null);
   return <section className="spots-settings">
-    <div className="spots-account-heading"><button type="button" aria-label={t("Назад")} onClick={() => section && !notifications ? setSection(null) : onNavigate("profile")}><ArrowLeft size={22} /></button><h1>{t(section === "profile" ? "Личные данные" : section === "security" ? "Безопасность" : section === "notifications" ? "Уведомления" : "Настройки")}</h1><span /></div>
+    <div className="spots-account-heading"><button type="button" className="spots-back-button" aria-label={t("Назад")} onClick={() => section && !notifications ? setSection(null) : onNavigate("profile")}><ArrowLeft size={26} /></button><h1>{t(section === "profile" ? "Личные данные" : section === "security" ? "Безопасность" : section === "notifications" ? "Уведомления" : "Настройки")}</h1><span /></div>
     {section ? <div className="spots-settings-detail" data-section={section}><AccountScreen embedded key={section} initialSection={section} user={user} notify={notify} onLogout={onLogout} onUpdate={onUpdate} /></div> : <>
       <div className="spots-settings-identity"><span className="spots-profile-avatar" style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{!user.avatar_url && userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>{user.email}</p></div>
       <nav className="spots-profile-links" aria-label={t("Разделы настроек")}>
-        {[{ id: "profile" as const, label: "Личные данные", icon: UserRound, tone: "blue" }, { id: "security" as const, label: "Безопасность", icon: ShieldCheck, tone: "mint" }].map(({ id, label, icon: Icon, tone }) => <button type="button" key={id} onClick={() => id === "profile" && window.matchMedia("(min-width: 761px)").matches ? onEditProfile() : setSection(id)}><span className={`spots-profile-icon ${tone}`}><Icon size={21} /></span><span>{t(label)}</span><ChevronRight size={19} /></button>)}
+        {[{ id: "profile" as const, label: "Личные данные", icon: UserRound, tone: "blue" }, { id: "security" as const, label: "Безопасность", icon: ShieldCheck, tone: "mint" }].map(({ id, label, icon: Icon, tone }) => <button type="button" key={id} onClick={() => id === "profile" && window.matchMedia("(min-width: 761px)").matches ? onEditProfile() : setSection(id)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span><ChevronRight size={19} /></button>)}
       </nav>
     </>}
   </section>;
