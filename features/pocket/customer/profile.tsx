@@ -61,7 +61,7 @@ export function GuestProfile({ user, onNavigate, onLogout, onEditProfile }: Prof
     </button>
     <div className="spots-profile-menu">
       <nav className="spots-profile-links" aria-label={t("Профиль")}>
-        {links.map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span></button>)}
+        {links.map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={24} /></span><span>{t(label)}</span></button>)}
       </nav>
       <button type="button" className="spots-signout" onClick={onLogout}><LogOut size={20} />{t("Выйти из аккаунта")}</button>
     </div>
@@ -76,7 +76,7 @@ export function GuestSettings({ user, onNavigate, onLogout, onUpdate, notify, on
     {section ? <div className="spots-settings-detail" data-section={section}><AccountScreen embedded key={section} initialSection={section} user={user} notify={notify} onLogout={onLogout} onUpdate={onUpdate} /></div> : <>
       <div className="spots-settings-identity"><span className="spots-profile-avatar" style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{!user.avatar_url && userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>{user.email}</p></div>
       <nav className="spots-profile-links" aria-label={t("Разделы настроек")}>
-        {[{ id: "profile" as const, label: "Личные данные", icon: UserSolid, tone: "blue" }, { id: "security" as const, label: "Безопасность", icon: ShieldSolid, tone: "mint" }].map(({ id, label, icon: Icon, tone }) => <button type="button" key={id} onClick={() => id === "profile" && window.matchMedia("(min-width: 761px)").matches ? onEditProfile() : setSection(id)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span></button>)}
+        {[{ id: "profile" as const, label: "Личные данные", icon: UserSolid, tone: "blue" }, { id: "security" as const, label: "Безопасность", icon: ShieldSolid, tone: "mint" }].map(({ id, label, icon: Icon, tone }) => <button type="button" key={id} onClick={() => id === "profile" && window.matchMedia("(min-width: 761px)").matches ? onEditProfile() : setSection(id)}><span className={`spots-profile-icon ${tone}`}><Icon size={24} /></span><span>{t(label)}</span></button>)}
       </nav>
     </>}
   </section>;

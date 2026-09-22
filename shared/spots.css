@@ -524,7 +524,7 @@
   .pocket-spots .spots-bottom-nav button:focus-visible { outline: none; box-shadow: none; opacity: .78; }
   .pocket-spots .spots-bottom-nav button:focus-visible span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
   .pocket-spots .spots-bottom-nav button span { font-size: 12px; }
-  .pocket-spots .spots-main:has(.spots-profile) { background: #f3f3f1; }
+  .pocket-spots .spots-main:has(.spots-profile) { background: #f4f4f5; }
   .pocket-spots .spots-page:has(.spots-profile) { padding: 0 0 calc(68px + env(safe-area-inset-bottom)); }
   .pocket-spots .spots-profile { display: flex; flex-direction: column; width: 100%; min-height: calc(100dvh - 68px - env(safe-area-inset-bottom)); }
   .pocket-spots .spots-profile > .spots-account-heading { margin: 0; padding: 14px 16px 0; }
