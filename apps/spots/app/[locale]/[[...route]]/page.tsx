@@ -28,6 +28,7 @@ export default async function LocalizedSpotsPage({ params, searchParams }: { par
     const query = await searchParams;
     return <PasswordRecoveryPage mode="reset" product="spots" token={typeof query.token === "string" ? query.token : ""} />;
   }
+  if (route[0] === "venue" && route.length === 2) return <SpotsApp initialScreen="venue" initialVenueId={route[1]} />;
   if (route.length > 1) notFound();
   return <SpotsApp initialScreen={route[0]} />;
 }

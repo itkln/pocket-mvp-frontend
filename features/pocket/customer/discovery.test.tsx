@@ -5,11 +5,11 @@ import { DiscoverScreen, SavedPlacesScreen } from "./discover";
 import { SpotsHeader } from "./navigation";
 import { I18nProvider } from "../i18n";
 import { spotCategories } from "./categories";
-import { listPublicVenues, type PublicVenue, type PublicVenueSearch } from "../../../lib/public-catalog-api";
+import { getPublicVenue, listPublicVenues, type PublicVenue, type PublicVenueSearch } from "../../../lib/public-catalog-api";
 
 const replace = vi.fn();
 vi.mock("next/navigation", () => ({ usePathname: () => "/ru/discover", useRouter: () => ({ replace }) }));
-vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn() }));
+vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn() }));
 
 const venue = (id: string, name: string, category: string, cuisine: string, filters: string[] = [], image = ""): PublicVenue => ({
   id, slug: id, name, category_slug: category, cuisine_type: cuisine, address: "Dunajská 12", city: "Bratislava", country_code: "SK",
@@ -34,6 +34,7 @@ const catalogVenues = [
 
 const catalogResponse = (search: PublicVenueSearch = {}) => {
   let items = search.city === "Кошице" ? [] : catalogVenues;
+  if (search.ids) items = items.filter((item) => search.ids!.includes(item.id));
   if (search.category) items = items.filter((item) => item.category_slug === search.category);
   if (search.query) {
     const query = search.query.toLocaleLowerCase();
@@ -50,6 +51,7 @@ beforeAll(() => {
 beforeEach(() => {
   window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
   vi.mocked(listPublicVenues).mockImplementation(catalogResponse);
+  vi.mocked(getPublicVenue).mockImplementation(async (id) => catalogVenues.find((item) => item.id === id)!);
 });
 const defaults = { query: "", onVenue: vi.fn(), onReservation: vi.fn(), onCategoryChange: vi.fn(), onFilterChange: vi.fn() };
 function FilterHarness() {
@@ -170,11 +172,24 @@ describe("Pocket Spots discovery", () => {
 
   it("shows only saved venues from the API and allows removing them", async () => {
     const onToggleSaved = vi.fn();
-    render(<SavedPlacesScreen savedPlaces={["Casa Forma"]} onToggleSaved={onToggleSaved} onVenue={vi.fn()} />);
+    render(<SavedPlacesScreen savedPlaces={["casa"]} onToggleSaved={onToggleSaved} onVenue={vi.fn()} />);
     expect(await screen.findByText("Casa Forma")).toBeInTheDocument();
     expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Убрать из избранного" }));
-    expect(onToggleSaved).toHaveBeenCalledWith("Casa Forma");
+    expect(onToggleSaved).toHaveBeenCalledWith("casa");
+  });
+
+  it("resolves saved venue IDs to current names and opens the selected venue", async () => {
+    const renamed = { ...catalogVenues[1], name: "Casa Nuova" };
+    vi.mocked(listPublicVenues).mockImplementation(async (search = {}) => ({
+      venues: search.ids?.includes("casa") ? [renamed] : [], page: 1, page_size: 50,
+      total: 1, total_pages: 1, has_next: false,
+    }));
+    const onVenue = vi.fn();
+    render(<SavedPlacesScreen savedPlaces={["casa"]} onVenue={onVenue} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Nuova" }));
+    expect(onVenue).toHaveBeenCalledWith(renamed);
+    expect(screen.queryByText("Casa Forma")).not.toBeInTheDocument();
   });
 
   it("searches and selects a city, with no cart button in the header", () => {

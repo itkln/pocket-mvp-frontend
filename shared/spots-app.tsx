@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
 import { customerNavigation, menuItems } from "../features/pocket/model";
 import { Checkout, CustomerMenu, DiscoverScreen, HistoryScreen, ReservationScreen } from "../features/pocket/customer";
 import { spotsCities, SpotsBottomNavigation, SpotsHeader } from "../features/pocket/customer/navigation";
-import { SavedPlacesScreen } from "../features/pocket/customer/discover";
+import { SavedPlacesScreen, VenueDetailsScreen } from "../features/pocket/customer/discover";
+import type { PublicVenue } from "../lib/public-catalog-api";
+import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
 import { CalendarDays } from "lucide-react";
 import { Button, PageHeader, TooltipContext } from "../features/pocket/ui";
 import { GuestProfile, GuestSettings, GuestProfileDialog } from "../features/pocket/customer/profile";
@@ -16,10 +18,10 @@ import { localeFromPathname, type Locale } from "../features/pocket/locales";
 import { useAppShell } from "./use-app-shell";
 import { categoryForRoute, spotCategories } from "../features/pocket/customer/categories";
 
-const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.map((item) => item.id), "checkout", "saved", "reservations", "settings", "notifications"];
+const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.map((item) => item.id), "checkout", "saved", "reservations", "settings", "notifications", "venue"];
 const screenForRoute = (screen?: string) => screen && screens.includes(screen) ? screen : "discover";
 const spotsPath = (locale: Locale, screen: string) => `/${locale}/${screen}`;
-const isPublicScreen = (screen: string) => screen === "discover" || screen === "browse-menu" || Boolean(categoryForRoute(screen));
+const isPublicScreen = (screen: string) => screen === "discover" || screen === "browse-menu" || screen === "venue" || Boolean(categoryForRoute(screen));
 type AccountDialogSection = "profile" | "security" | "notifications";
 const isAccountDialogSection = (value: string | null): value is AccountDialogSection => value === "profile" || value === "security" || value === "notifications";
 
@@ -43,7 +45,7 @@ const initialCity = () => {
   }
 };
 
-export default function SpotsApp({ initialScreen }: { initialScreen?: string }) {
+export default function SpotsApp({ initialScreen, initialVenueId }: { initialScreen?: string; initialVenueId?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { locale, t } = useI18n();
@@ -57,16 +59,30 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
   const filter = searchParams.get("filter") ?? "Все";
   const [accountDialogSection, setAccountDialogSection] = useState<AccountDialogSection | null>(null);
   const [savedPlaces, setSavedPlaces] = useState<string[]>([]);
+	const [savedForUser, setSavedForUser] = useState("");
+	const [savedErrorUser, setSavedErrorUser] = useState("");
+	const [savedRetry, setSavedRetry] = useState(0);
+	const pendingSaved = useRef(new Set<string>());
+	const [selectedVenueID, setSelectedVenueID] = useState(initialVenueId ?? "");
+	const savedReady = Boolean(currentUser && savedForUser === currentUser.id);
 
-  const toggleSaved = (name: string) => {
+  const toggleSaved = async (id: string) => {
     if (!currentUser) {
       router.push(`/${locale}/login`);
       return;
     }
-    const next = savedPlaces.includes(name) ? savedPlaces.filter((place) => place !== name) : [...savedPlaces, name];
-    setSavedPlaces(next);
-    if (currentUser) {
-      try { localStorage.setItem(`pocket:spots-saved:${currentUser.id}`, JSON.stringify(next)); } catch { /* Retain favorites for this session. */ }
+    if (!savedReady || pendingSaved.current.has(id)) return;
+    pendingSaved.current.add(id);
+    const wasSaved = savedPlaces.includes(id);
+    setSavedPlaces((current) => wasSaved ? current.filter((value) => value !== id) : [id, ...current]);
+    try {
+      if (wasSaved) await removeSavedVenue(id);
+      else await addSavedVenue(id);
+    } catch {
+      setSavedPlaces((current) => wasSaved ? [id, ...current] : current.filter((value) => value !== id));
+      shell.notify("Не удалось обновить избранное");
+    } finally {
+      pendingSaved.current.delete(id);
     }
   };
 
@@ -87,11 +103,8 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
               : nextScreen === "settings" ? settingsSection === "security" ? "security" : "profile"
                 : null;
         const requestedAccountSection = desktop && isAccountDialogSection(urlParams.get("account")) ? urlParams.get("account") as AccountDialogSection : null;
-        try {
-          const stored: unknown = JSON.parse(migratedStorageValue(`pocket:spots-saved:${user.id}`, `pocket:eats-saved:${user.id}`) ?? "[]");
-          setSavedPlaces(Array.isArray(stored) ? stored.filter((name): name is string => typeof name === "string") : []);
-        } catch { /* Keep session favorites when storage is unavailable. */ }
         setCurrentUser(user);
+        setSelectedVenueID(initialVenueId ?? "");
         setScreen(directAccountSection ? "discover" : nextScreen);
         setAccountDialogSection(directAccountSection || requestedAccountSection);
         setAuthReady(true);
@@ -105,6 +118,9 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
         const routeLocale = localeFromPathname(window.location.pathname) ?? "ru";
         if (isPublicScreen(nextScreen)) {
           setCurrentUser(null);
+          setSavedPlaces([]);
+          setSavedForUser("");
+          setSelectedVenueID(initialVenueId ?? "");
           setScreen(nextScreen);
           setAuthReady(true);
           return;
@@ -112,14 +128,25 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
         router.replace(error instanceof AuthAPIError && error.status === 401 ? `/${routeLocale}/login` : `/${routeLocale}/login?error=unavailable`);
       });
     return () => { active = false; };
-  }, [initialScreen, router]);
+  }, [initialScreen, initialVenueId, router]);
+
+  useEffect(() => {
+    const userID = currentUser?.id;
+    if (!userID) return;
+    const controller = new AbortController();
+    listSavedVenueIDs(controller.signal)
+      .then((ids) => { if (!controller.signal.aborted) { setSavedPlaces(ids); setSavedForUser(userID); setSavedErrorUser(""); } })
+      .catch(() => { if (!controller.signal.aborted) setSavedErrorUser(userID); });
+    return () => controller.abort();
+  }, [currentUser?.id, savedRetry]);
 
   const navigate = (next: string, params = new URLSearchParams()) => {
-    if (!currentUser && !isPublicScreen(next)) {
+    const nextScreen = next.startsWith("venue/") ? "venue" : next;
+    if (!currentUser && !isPublicScreen(nextScreen)) {
       router.push(`/${locale}/login`);
       return;
     }
-    setScreen(next);
+    setScreen(nextScreen);
     router.push(`${spotsPath(locale, next)}${params.size ? `?${params}` : ""}`);
     shell.setMobileNav(false);
     window.scrollTo(0, 0);
@@ -159,10 +186,11 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
   const source = searchParams.get("from");
   const sourceURL = source?.startsWith(`/${locale}/`) ? new URL(source, "http://pocket.local") : null;
   const sourceScreen = sourceURL?.pathname.split("/")[2];
-  const validSource = sourceURL && (sourceScreen === "discover" || categoryForRoute(sourceScreen));
-  const openVenue = () => {
+  const validSource = sourceURL && (sourceScreen === "discover" || sourceScreen === "saved" || categoryForRoute(sourceScreen));
+  const openVenue = (venue: PublicVenue) => {
     const from = `${spotsPath(locale, screen)}${searchParams.size ? `?${searchParams}` : ""}`;
-    navigate("browse-menu", new URLSearchParams({ from }));
+    setSelectedVenueID(venue.id);
+    navigate(`venue/${venue.id}`, new URLSearchParams({ from }));
   };
 
   const signOut = async () => {
@@ -202,8 +230,9 @@ export default function SpotsApp({ initialScreen }: { initialScreen?: string }) 
     }} searchQuery={searchQuery} categoryLabel={category?.label} onClearCategory={() => navigateCategory("discover")} onSearch={(value) => updateSearch("q", value)} onNavigate={navigate} onLogin={() => router.push(`/${locale}/login`)} onLogout={signOut} onEditProfile={editProfile} onAccountSection={openAccountSection} />
     <TooltipContext.Provider value={false}><main className="spots-main">
       <div className={`spots-page ${category ? "has-category" : ""}`}>
-        {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedPlaces} onToggleSaved={currentUser ? toggleSaved : undefined} onVenue={openVenue} onReservation={() => navigate("reservation")} />}
-        {screen === "saved" && <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={() => navigate("browse-menu")} />}
+        {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedReady ? savedPlaces : []} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onVenue={openVenue} onReservation={() => navigate("reservation")} />}
+        {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
+        {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={() => validSource ? navigate(sourceScreen!, sourceURL.searchParams) : navigate("discover")} />}
         {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("reservation")}>{t("Забронировать стол")}</Button></div></section>}
         {screen === "browse-menu" && <>{validSource && <button type="button" className="back-link" onClick={() => navigate(sourceScreen!, sourceURL.searchParams)}><ArrowLeft size={18} />{t("Назад к результатам")}</button>}<CustomerMenu cart={cart} onAdd={addItem} onUpdateQty={updateQty} onCart={() => navigate("checkout")} onReserve={() => navigate("reservation")} /></>}
         {screen === "checkout" && <Checkout cart={cart} total={cartTotal} updateQty={updateQty} onBack={() => navigate("browse-menu")} onDone={() => { setCart({}); navigate("history"); shell.notify("Предзаказ принят"); }} />}

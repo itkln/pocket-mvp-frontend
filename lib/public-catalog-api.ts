@@ -33,6 +33,7 @@ export type PublicVenueSearch = {
   query?: string;
   category?: string;
   filter?: string;
+  ids?: string[];
   page?: number;
   pageSize?: number;
 };
@@ -54,7 +55,13 @@ export async function listPublicVenues(search: PublicVenueSearch = {}, signal?: 
   if (search.query?.trim()) params.set("q", search.query.trim());
   if (search.category) params.set("category", search.category);
   if (search.filter && search.filter !== "Все") params.set("filter", search.filter);
+  if (search.ids?.length) params.set("ids", search.ids.join(","));
   params.set("page", String(search.page ?? 1));
   params.set("page_size", String(search.pageSize ?? 24));
   return apiRequest<PublicVenuePage>(`/public/venues?${params}`, { signal });
+}
+
+export async function getPublicVenue(id: string, signal?: AbortSignal): Promise<PublicVenue> {
+  const result = await apiRequest<{ venue: PublicVenue }>(`/public/venues/${encodeURIComponent(id)}`, { signal });
+  return result.venue;
 }

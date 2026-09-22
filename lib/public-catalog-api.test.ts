@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { catalogCityValue, listPublicVenues } from "./public-catalog-api";
+import { catalogCityValue, getPublicVenue, listPublicVenues } from "./public-catalog-api";
 
 describe("public catalog API", () => {
   const fetchMock = vi.fn();
@@ -26,5 +26,18 @@ describe("public catalog API", () => {
     expect(url.searchParams.get("city")).toBe("Bratislava");
     expect(url.searchParams.has("filter")).toBe(false);
     expect(catalogCityValue("Кошице")).toBe("Košice");
+  });
+
+  it("hydrates a bounded list of stable venue IDs", async () => {
+    await listPublicVenues({ ids: ["first-uuid", "second-uuid"], pageSize: 50 });
+    const url = new URL(fetchMock.mock.calls[0][0] as string, "http://pocket.local");
+    expect(url.searchParams.get("ids")).toBe("first-uuid,second-uuid");
+    expect(url.searchParams.get("page_size")).toBe("50");
+  });
+
+  it("loads a selected venue by ID", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ venue: { id: "venue-id", name: "Renamed venue" } }), { status: 200 }));
+    await expect(getPublicVenue("venue-id")).resolves.toMatchObject({ id: "venue-id", name: "Renamed venue" });
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/public/venues/venue-id");
   });
 });

@@ -3,7 +3,8 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SpotsApp from "./spots-app";
 import { AuthAPIError, getCurrentUser, updateProfile } from "../lib/auth-api";
-import { listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
+import { getPublicVenue, listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
+import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
 
 const router = { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() };
 vi.mock("next/navigation", () => ({
@@ -15,7 +16,8 @@ vi.mock("next/navigation", () => ({
   }, () => window.location.search)),
 }));
 vi.mock("../lib/auth-api", async (original) => ({ ...await original<object>(), getCurrentUser: vi.fn(), updateProfile: vi.fn() }));
-vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn() }));
+vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn() }));
+vi.mock("../lib/saved-venues-api", () => ({ listSavedVenueIDs: vi.fn(), addSavedVenue: vi.fn(), removeSavedVenue: vi.fn() }));
 const publicVenues: PublicVenue[] = [
   { id: "north", slug: "north", name: "North & Vine", category_slug: "restaurants", cuisine_type: "Европейская", address: "Dunajská 12", city: "Bratislava", country_code: "SK", rating: 4.8, review_count: 12, tags: ["Стол через 20 мин"], filters: ["Лучшие"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
   { id: "casa", slug: "casa", name: "Casa Forma", category_slug: "restaurants", cuisine_type: "Итальянская", address: "Obchodná 24", city: "Bratislava", country_code: "SK", rating: 4.7, review_count: 8, tags: ["Есть места сегодня"], filters: ["Итальянская"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
@@ -36,7 +38,14 @@ beforeEach(() => {
   });
   router.push.mockImplementation((url: string) => { window.history.pushState(null, "", url); window.dispatchEvent(new PopStateEvent("popstate")); });
   vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer" });
-  vi.mocked(listPublicVenues).mockResolvedValue({ venues: publicVenues, page: 1, page_size: 24, total: publicVenues.length, total_pages: 1, has_next: false });
+  vi.mocked(listPublicVenues).mockImplementation(async (search = {}) => {
+    const venues = search.ids ? publicVenues.filter((venue) => search.ids!.includes(venue.id)) : publicVenues;
+    return { venues, page: 1, page_size: search.pageSize ?? 24, total: venues.length, total_pages: venues.length ? 1 : 0, has_next: false };
+  });
+  vi.mocked(getPublicVenue).mockImplementation(async (id) => publicVenues.find((venue) => venue.id === id)!);
+  vi.mocked(listSavedVenueIDs).mockResolvedValue([]);
+  vi.mocked(addSavedVenue).mockResolvedValue();
+  vi.mocked(removeSavedVenue).mockResolvedValue();
   window.scrollTo = vi.fn();
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
   HTMLDialogElement.prototype.close = function () { if (this.hasAttribute("open")) { this.removeAttribute("open"); this.dispatchEvent(new Event("close")); } };
@@ -92,16 +101,37 @@ describe("Spots guest experience", () => {
     expect(within(navigation).getByRole("button", { name: "Профиль" })).toBeInTheDocument();
   });
 
-  it("migrates saved guest state from the previous product namespace", async () => {
+  it("uses the server favorites for the current account while preserving city migration", async () => {
     localStorage.setItem("pocket:eats-city", "Братислава");
     localStorage.setItem("pocket:eats-saved:guest", JSON.stringify(["Casa Forma"]));
+    vi.mocked(listSavedVenueIDs).mockResolvedValue(["casa"]);
     render(<SpotsApp initialScreen="saved" />);
     expect(await screen.findByRole("button", { name: "Выбрать город: Братислава" })).toBeInTheDocument();
     expect(await screen.findByText("Casa Forma")).toBeInTheDocument();
     expect(localStorage.getItem("pocket:spots-city")).toBe("Братислава");
-    expect(localStorage.getItem("pocket:spots-saved:guest")).toBe(JSON.stringify(["Casa Forma"]));
+    expect(listPublicVenues).toHaveBeenCalledWith(expect.objectContaining({ ids: ["casa"] }), expect.any(AbortSignal));
+    expect(localStorage.getItem("pocket:spots-saved:guest")).toBeNull();
     expect(localStorage.getItem("pocket:eats-city")).toBeNull();
-    expect(localStorage.getItem("pocket:eats-saved:guest")).toBeNull();
+    expect(localStorage.getItem("pocket:eats-saved:guest")).toBe(JSON.stringify(["Casa Forma"]));
+  });
+
+  it("saves and removes a venue through the account API using its stable ID", async () => {
+    render(<SpotsApp initialScreen="discover" />);
+    fireEvent.click((await screen.findAllByRole("button", { name: "В избранное" }))[0]);
+    await waitFor(() => expect(addSavedVenue).toHaveBeenCalledWith("north"));
+    expect(screen.getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Убрать из избранного" }));
+    await waitFor(() => expect(removeSavedVenue).toHaveBeenCalledWith("north"));
+  });
+
+  it("opens a venue deep link for a guest using its stable ID", async () => {
+    nativeReplace(null, "", "/ru/venue/casa");
+    vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    expect(await screen.findByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
+    expect(getPublicVenue).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
+    expect(router.replace).not.toHaveBeenCalledWith("/ru/login");
+    expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();
   });
 
   it("requires an explicit city choice, and restores it across pages and reloads", async () => {
@@ -158,8 +188,9 @@ describe("Spots guest experience", () => {
     expect(new URLSearchParams(window.location.search).get("filter")).toBe("Итальянская");
     expect(screen.queryByRole("region", { name: "Спорт", exact: true })).not.toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Forma" }));
-    expect(window.location.pathname).toBe("/ru/browse-menu");
-    fireEvent.click(screen.getByRole("button", { name: "Назад к результатам" }));
+    expect(window.location.pathname).toBe("/ru/venue/casa");
+    expect(await screen.findByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Назад", exact: true }));
     expect(window.location.pathname).toBe("/ru/restaurants");
     expect(screen.getByRole("textbox", { name: "Поиск: Рестораны" })).toHaveValue("Итальянский ресторан");
     expect(await screen.findByRole("button", { name: "Итальянская", exact: true })).toHaveAttribute("aria-pressed", "true");

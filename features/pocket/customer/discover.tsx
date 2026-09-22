@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Heart, RefreshCw, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import Image from "next/image";
-import { listPublicVenues, type PublicVenue, type PublicVenuePage } from "../../../lib/public-catalog-api";
+import { getPublicVenue, listPublicVenues, type PublicVenue, type PublicVenuePage } from "../../../lib/public-catalog-api";
+import { APIError } from "../../../lib/api-client";
 import { useI18n } from "../i18n";
 import { categoryForRoute, spotCategories } from "./categories";
 
@@ -20,12 +21,12 @@ const categoryIllustrations: Record<string, string> = {
   masterclasses: "workshops",
 };
 
-type SavedPlacesProps = { savedPlaces?: string[]; onToggleSaved?: (name: string) => void };
+type SavedPlacesProps = { savedPlaces?: string[]; onToggleSaved?: (id: string) => void; savingIds?: string[] };
 
 export function DiscoverScreen({ city = "", query, categorySlug, filter = "Все", onCategoryChange, onFilterChange, onVenue, savedPlaces, onToggleSaved }: {
   city?: string; query: string; categorySlug?: string; filter?: string;
   onCategoryChange: (slug: string) => void; onFilterChange: (filter: string) => void;
-  onVenue: () => void; onReservation: () => void;
+  onVenue: (venue: PublicVenue) => void; onReservation: () => void;
 } & SavedPlacesProps) {
   const { t } = useI18n();
   const category = categoryForRoute(categorySlug);
@@ -100,7 +101,7 @@ function CatalogStatus({ children, alert = false }: { children: ReactNode; alert
 }
 
 function CategorySection({ category, venues, expanded, selected, filters, activeFilter, onFilter, onOpenFilters, onExpand, onVenue, savedPlaces, onToggleSaved }: {
-  category: string; venues: PublicVenue[]; expanded: boolean; selected: boolean; filters: string[]; activeFilter: string; onFilter: (filter: string) => void; onOpenFilters: () => void; onExpand: () => void; onVenue: () => void;
+  category: string; venues: PublicVenue[]; expanded: boolean; selected: boolean; filters: string[]; activeFilter: string; onFilter: (filter: string) => void; onOpenFilters: () => void; onExpand: () => void; onVenue: (venue: PublicVenue) => void;
 } & SavedPlacesProps) {
   const { t } = useI18n();
   const list = useRef<HTMLDivElement>(null);
@@ -134,7 +135,7 @@ function CategorySection({ category, venues, expanded, selected, filters, active
     </section>}
     {venues.length ? <div className={`spots-venue-carousel ${expanded ? "expanded" : ""}`}>
       <div ref={list} onScroll={updateScroll} className={expanded ? "venue-grid" : "spots-venue-shelf"}>
-        {venues.map((venue) => <VenueCard key={venue.id} venue={venue} saved={savedPlaces?.includes(venue.name)} onToggleSaved={onToggleSaved} onClick={onVenue} />)}
+        {venues.map((venue) => <VenueCard key={venue.id} venue={venue} saved={savedPlaces?.includes(venue.id)} onToggleSaved={onToggleSaved} onClick={() => onVenue(venue)} />)}
       </div>
       {!expanded && (scrollState.previous || scrollState.next) && <>
         <button type="button" className="spots-carousel-button previous" disabled={!scrollState.previous} onClick={() => scroll(-1)} aria-label={`${t(category)}: ${t("Назад")}`}><ChevronLeft size={26} /></button>
@@ -144,35 +145,57 @@ function CategorySection({ category, venues, expanded, selected, filters, active
   </section>;
 }
 
-export function SavedPlacesScreen({ savedPlaces = [], onToggleSaved, onVenue }: SavedPlacesProps & { onVenue: () => void }) {
+export function SavedPlacesScreen({ savedPlaces = [], onToggleSaved, onVenue }: SavedPlacesProps & { onVenue: (venue: PublicVenue) => void }) {
   const [venues, setVenues] = useState<PublicVenue[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [reload, setReload] = useState(0);
+  const idsKey = savedPlaces.join(",");
   useEffect(() => {
     const controller = new AbortController();
     let active = true;
-    listPublicVenues({ pageSize: 50 }, controller.signal)
-      .then((result) => { if (active) setVenues(result.venues); })
-      .catch((error: unknown) => { if (active && !(error instanceof DOMException && error.name === "AbortError")) setVenues([]); })
+    const ids = idsKey ? idsKey.split(",") : [];
+    const batches: string[][] = [];
+    for (let index = 0; index < ids.length; index += 50) batches.push(ids.slice(index, index + 50));
+    Promise.allSettled(batches.map((batch) => listPublicVenues({ ids: batch, pageSize: 50 }, controller.signal)))
+      .then((results) => {
+        if (!active) return;
+        const byID = new Map(results.flatMap((result) => result.status === "fulfilled" ? result.value.venues : []).map((venue) => [venue.id, venue]));
+        setVenues(ids.flatMap((id) => byID.has(id) ? [byID.get(id)!] : []));
+        setError(results.some((result) => result.status === "rejected"));
+      })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; controller.abort(); };
-  }, []);
-  const savedVenues = venues.filter((venue) => savedPlaces.includes(venue.name));
-  return <section><div className="page-header"><h1>Сохранённые места</h1></div>{loading ? <CatalogStatus>Загружаем заведения...</CatalogStatus> : savedVenues.length ? <div className="venue-grid">{savedVenues.map((venue) => <VenueCard key={venue.id} venue={venue} saved onToggleSaved={onToggleSaved} onClick={onVenue} />)}</div> : <div className="spots-search-empty"><Heart size={28} /><strong>Пока нет сохранённых мест</strong></div>}</section>;
+  }, [idsKey, reload]);
+  return <section><div className="page-header"><h1>Сохранённые места</h1></div>{loading ? <CatalogStatus>Загружаем заведения...</CatalogStatus> : <>{error && <CatalogStatus alert><strong>Не удалось загрузить часть заведений</strong><button type="button" className="button secondary" onClick={() => { setLoading(true); setReload((value) => value + 1); }}>Повторить</button></CatalogStatus>}{venues.length ? <div className="venue-grid">{venues.map((venue) => <VenueCard key={venue.id} venue={venue} saved onToggleSaved={onToggleSaved} onClick={() => onVenue(venue)} />)}</div> : !error && <div className="spots-search-empty"><Heart size={28} /><strong>Пока нет сохранённых мест</strong></div>}</>}</section>;
 }
 
-export function VenueCard({ venue, onClick, saved, onToggleSaved }: { venue: PublicVenue; onClick: () => void; saved?: boolean; onToggleSaved?: (name: string) => void }) {
+export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: { venueID: string; onBack: () => void; saved: boolean; onToggleSaved?: (id: string) => void }) {
+  const [state, setState] = useState<{ venue?: PublicVenue; error?: string }>({});
+  const [reload, setReload] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    getPublicVenue(venueID, controller.signal)
+      .then((venue) => setState({ venue }))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setState({ error: error instanceof APIError && error.status === 404 ? "Заведение больше недоступно" : "Не удалось загрузить заведение" });
+      });
+    return () => controller.abort();
+  }, [venueID, reload]);
+  const venue = state.venue;
+  return <section className="spots-venue-detail"><button type="button" className="back-link" onClick={onBack}><ChevronLeft size={18} />Назад</button>{venue ? <article className="spots-venue-detail-card"><div className={`spots-venue-detail-photo ${venue.image_url ? "has-image" : ""}`} style={venue.image_url ? { backgroundImage: `url(${JSON.stringify(venue.image_url)})` } : undefined}>{!venue.image_url && <Image src={`/assets/categories/${categoryIllustrations[venue.category_slug] ?? "restaurants"}.png`} alt="" width={180} height={180} />}</div><div className="spots-venue-detail-copy"><div className="spots-venue-detail-heading"><h1>{venue.name}</h1>{onToggleSaved && <button type="button" className="icon-button" aria-label={saved ? "Убрать из избранного" : "В избранное"} aria-pressed={saved} onClick={() => onToggleSaved(venueID)}><Heart size={22} fill={saved ? "currentColor" : "none"} /></button>}</div><p>{[venue.cuisine_type, venue.address, venue.city].filter(Boolean).join(" · ")}</p>{venue.review_count > 0 && <p className="spots-venue-detail-rating"><Star size={17} fill="currentColor" />{venue.rating.toFixed(1)} · {venue.review_count}</p>}{venue.description && <p>{venue.description}</p>}</div></article> : state.error ? <CatalogStatus alert><strong>{state.error}</strong>{state.error !== "Заведение больше недоступно" && <button type="button" className="button secondary" onClick={() => { setState({}); setReload((value) => value + 1); }}>Повторить</button>}</CatalogStatus> : <CatalogStatus>Загружаем заведение...</CatalogStatus>}</section>;
+}
+
+export function VenueCard({ venue, onClick, saved, onToggleSaved }: { venue: PublicVenue; onClick: () => void; saved?: boolean; onToggleSaved?: (id: string) => void }) {
   const { t } = useI18n();
   const [localFavorite, setLocalFavorite] = useState(false);
   const favorite = saved ?? localFavorite;
-  const setFavorite = (value: boolean) => {
-    setLocalFavorite(value);
-    onToggleSaved?.(venue.name);
-  };
   const illustration = categoryIllustrations[venue.category_slug] ?? venue.category_slug;
   const imageStyle = venue.image_url
     ? { backgroundImage: `url(${JSON.stringify(venue.image_url)})`, backgroundPosition: "center", backgroundSize: "cover" } as CSSProperties
     : { "--venue-illustration": `url('/assets/categories/${illustration}.png')`, "--venue-illustration-background": "var(--spots-gradient-restaurants)" } as CSSProperties;
   const tag = venue.tags[0] || (venue.preorder_enabled ? "Предзаказ доступен" : "Открыто");
   const details = [venue.cuisine_type, venue.address, venue.city].filter(Boolean).join(" · ");
-  return <article className="venue-card"><div className={`venue-card-image ${venue.image_url ? "remote-venue-image" : "illustrated-venue-image"}`} style={imageStyle}><button type="button" className="venue-image-link" aria-label={`Открыть ${venue.name}`} onClick={onClick} />{onToggleSaved && <button type="button" className="icon-button" aria-label={favorite ? "Убрать из избранного" : "В избранное"} aria-pressed={favorite} onClick={() => setFavorite(!favorite)}><Heart size={19} fill={favorite ? "currentColor" : "none"} /></button>}</div><button type="button" className="venue-card-copy" onClick={onClick}><span><h3>{venue.name}</h3><b><Star size={14} fill="currentColor" />{venue.review_count ? venue.rating.toFixed(1) : "—"}</b></span><p>{t(details)}</p><small className="venue-card-tag">{t(tag)}</small></button></article>;
+  return <article className="venue-card"><div className={`venue-card-image ${venue.image_url ? "remote-venue-image" : "illustrated-venue-image"}`} style={imageStyle}><button type="button" className="venue-image-link" aria-label={`Открыть ${venue.name}`} onClick={onClick} />{onToggleSaved && <button type="button" className="icon-button" aria-label={favorite ? "Убрать из избранного" : "В избранное"} aria-pressed={favorite} onClick={() => { if (saved === undefined) setLocalFavorite(!favorite); onToggleSaved(venue.id); }}><Heart size={19} fill={favorite ? "currentColor" : "none"} /></button>}</div><button type="button" className="venue-card-copy" onClick={onClick}><span><h3>{venue.name}</h3><b><Star size={14} fill="currentColor" />{venue.review_count ? venue.rating.toFixed(1) : "—"}</b></span><p>{t(details)}</p><small className="venue-card-tag">{t(tag)}</small></button></article>;
 }
