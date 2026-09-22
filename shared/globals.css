@@ -5241,7 +5241,7 @@ body { font-size: 16px; }
   margin-bottom: 28px;
   padding: 10px 12px;
   border-radius: 999px;
-  background: #f3f3f1;
+  background: #f4f4f5;
 }
 .pocket-spots .spots-category-catalog .cuisine-strip { align-items: center; padding: 0; }
 .pocket-spots .spots-category-catalog .cuisine-strip button {
@@ -5266,7 +5266,7 @@ body { font-size: 16px; }
 .spots-section-actions { display: flex; align-items: center; flex: 0 0 auto; gap: 8px; }
 .spots-section-actions .icon-button { width: 36px; height: 36px; background: #f1f3f4; }
 .spots-section-actions .icon-button:disabled { opacity: .35; cursor: default; }
-.spots-show-category { min-width: 54px; min-height: 36px; display: flex; align-items: center; justify-content: center; padding: 8px 14px; border: 0; border-radius: 999px !important; background: #f3f3f1; color: #39444b; font-size: 14px; font-weight: 600; cursor: pointer; }
+.spots-show-category { min-width: 54px; min-height: 36px; display: flex; align-items: center; justify-content: center; padding: 8px 14px; border: 0; border-radius: 999px !important; background: #f4f4f5; color: #39444b; font-size: 14px; font-weight: 600; cursor: pointer; }
 .spots-venue-shelf { --spots-columns: 6; display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - (var(--spots-columns) - 1) * 24px) / var(--spots-columns)); gap: 24px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; }
 .spots-venue-shelf::-webkit-scrollbar { display: none; }
 .spots-venue-shelf > .venue-card { scroll-snap-align: start; min-width: 0; }
@@ -5288,7 +5288,7 @@ body { font-size: 16px; }
   padding: 9px 14px;
   border: 0;
   border-radius: 999px;
-  background: #f3f3f1;
+  background: #f4f4f5;
   color: #39444b;
   font-size: 14px;
   font-weight: 600;
@@ -5445,7 +5445,7 @@ body { font-size: 16px; }
   .pocket-spots .spots-category-catalog .cuisine-strip button.spots-filter-trigger {
     position: sticky;
     right: 0;
-    box-shadow: -10px 0 12px #f3f3f1;
+    box-shadow: -10px 0 12px #f4f4f5;
   }
   .spots-results { padding: 20px 0; border-radius: 0; }
   .pocket-spots .spots-category-catalog .spots-category-section { margin-bottom: 28px; }

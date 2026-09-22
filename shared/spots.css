@@ -592,12 +592,12 @@
   margin: 0;
   padding: 0;
   border: 0;
-  background: #f3f3f1;
+  background: #f4f4f5;
   color: var(--spots-text);
 }
 .pocket-spots .spots-mobile-menu-dialog[open] { animation: spots-menu-dialog-in 220ms cubic-bezier(.2, .8, .2, 1); }
 .pocket-spots .spots-mobile-menu-dialog::backdrop { background: rgba(23, 33, 43, .24); }
-.pocket-spots .spots-mobile-menu-shell { min-height: 100%; display: flex; flex-direction: column; background: #f3f3f1; }
+.pocket-spots .spots-mobile-menu-shell { min-height: 100%; display: flex; flex-direction: column; background: #f4f4f5; }
 .pocket-spots .spots-mobile-menu-heading {
   min-height: 72px;
   display: grid;
@@ -726,7 +726,7 @@
 }
 
 /* Public venue page: compact, section-based catalog card. */
-.pocket-spots .spots-main:has(.venue-detail-page) { background: #f3f3f1; }
+.pocket-spots .spots-main:has(.venue-detail-page) { background: #f4f4f5; }
 @media (min-width: 901px) {
   .pocket-spots .spots-page:has(.venue-detail-page) {
     width: min(1900px, 100%);
