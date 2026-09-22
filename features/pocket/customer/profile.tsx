@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, Bell, CalendarDays, Heart, LogOut, Pencil, ShieldCheck, UserRound, X } from "lucide-react";
+import { ArrowLeft, LogOut, Pencil, X } from "lucide-react";
 import { type AuthUser } from "../../../lib/auth-api";
 import { userInitials } from "../model";
 import { useI18n } from "../i18n";
@@ -14,12 +14,44 @@ type ProfileProps = {
   onEditProfile: () => void;
 };
 
+type ProfileIconProps = { size?: number };
+
+function CalendarSolid({ size = 18 }: ProfileIconProps) {
+  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path fillRule="evenodd" d="M7 2a1 1 0 0 1 1 1v1h8V3a1 1 0 1 1 2 0v1h1a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h1V3a1 1 0 0 1 1-1ZM4 8h16V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v1Zm3 3h3v3H7v-3Zm7 0h3v3h-3v-3Zm-7 5h3v3H7v-3Zm7 0h3v3h-3v-3Z" clipRule="evenodd" />
+  </svg>;
+}
+
+function HeartSolid({ size = 18 }: ProfileIconProps) {
+  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21.35 10.55 20C5.4 15.36 2 12.28 2 8.5A5.5 5.5 0 0 1 7.5 3 6 6 0 0 1 12 5.09 6 6 0 0 1 16.5 3 5.5 5.5 0 0 1 22 8.5c0 3.78-3.4 6.86-8.55 11.51L12 21.35Z" />
+  </svg>;
+}
+
+function BellSolid({ size = 18 }: ProfileIconProps) {
+  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 23a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 23Zm8-6-1.5-2.5V9a6.5 6.5 0 0 0-5-6.32V2a1.5 1.5 0 0 0-3 0v.68A6.5 6.5 0 0 0 5.5 9v5.5L4 17a1.33 1.33 0 0 0 1.14 2h13.72A1.33 1.33 0 0 0 20 17Z" />
+  </svg>;
+}
+
+function UserSolid({ size = 18 }: ProfileIconProps) {
+  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <circle cx="12" cy="7.5" r="4.5" /><path d="M3.5 21a8.5 8.5 0 0 1 17 0H3.5Z" />
+  </svg>;
+}
+
+function ShieldSolid({ size = 18 }: ProfileIconProps) {
+  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="m12 2 8 3v6c0 5.2-3.35 9.72-8 11-4.65-1.28-8-5.8-8-11V5l8-3Z" />
+  </svg>;
+}
+
 export function GuestProfile({ user, onNavigate, onLogout, onEditProfile }: ProfileProps) {
   const { t } = useI18n();
   const links = [
-    { label: "Мои брони", screen: "reservations", icon: CalendarDays, tone: "blue" },
-    { label: "Сохранённые места", screen: "saved", icon: Heart, tone: "pink" },
-    { label: "Уведомления", screen: "notifications", icon: Bell, tone: "yellow" },
+    { label: "Мои брони", screen: "reservations", icon: CalendarSolid, tone: "blue" },
+    { label: "Сохранённые места", screen: "saved", icon: HeartSolid, tone: "pink" },
+    { label: "Уведомления", screen: "notifications", icon: BellSolid, tone: "yellow" },
   ];
   return <section className="spots-profile">
     <div className="spots-account-heading"><button type="button" className="spots-back-button" aria-label={t("Назад")} onClick={() => onNavigate("discover")}><ArrowLeft size={26} /></button><h1>{t("Профиль")}</h1><span /></div>
@@ -27,10 +59,12 @@ export function GuestProfile({ user, onNavigate, onLogout, onEditProfile }: Prof
       <span className="spots-profile-avatar" style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{!user.avatar_url && userInitials(user)}</span>
       <span><strong>{user.first_name} {user.last_name}</strong><small>{t("Редактировать профиль")}</small></span><Pencil className="spots-profile-edit-icon" size={18} />
     </button>
-    <nav className="spots-profile-links" aria-label={t("Профиль")}>
-      {links.map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span></button>)}
-    </nav>
-    <button type="button" className="spots-signout" onClick={onLogout}><LogOut size={20} />{t("Выйти из аккаунта")}</button>
+    <div className="spots-profile-menu">
+      <nav className="spots-profile-links" aria-label={t("Профиль")}>
+        {links.map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span></button>)}
+      </nav>
+      <button type="button" className="spots-signout" onClick={onLogout}><LogOut size={20} />{t("Выйти из аккаунта")}</button>
+    </div>
   </section>;
 }
 
@@ -42,7 +76,7 @@ export function GuestSettings({ user, onNavigate, onLogout, onUpdate, notify, on
     {section ? <div className="spots-settings-detail" data-section={section}><AccountScreen embedded key={section} initialSection={section} user={user} notify={notify} onLogout={onLogout} onUpdate={onUpdate} /></div> : <>
       <div className="spots-settings-identity"><span className="spots-profile-avatar" style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{!user.avatar_url && userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>{user.email}</p></div>
       <nav className="spots-profile-links" aria-label={t("Разделы настроек")}>
-        {[{ id: "profile" as const, label: "Личные данные", icon: UserRound, tone: "blue" }, { id: "security" as const, label: "Безопасность", icon: ShieldCheck, tone: "mint" }].map(({ id, label, icon: Icon, tone }) => <button type="button" key={id} onClick={() => id === "profile" && window.matchMedia("(min-width: 761px)").matches ? onEditProfile() : setSection(id)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span></button>)}
+        {[{ id: "profile" as const, label: "Личные данные", icon: UserSolid, tone: "blue" }, { id: "security" as const, label: "Безопасность", icon: ShieldSolid, tone: "mint" }].map(({ id, label, icon: Icon, tone }) => <button type="button" key={id} onClick={() => id === "profile" && window.matchMedia("(min-width: 761px)").matches ? onEditProfile() : setSection(id)}><span className={`spots-profile-icon ${tone}`}><Icon size={18} /></span><span>{t(label)}</span></button>)}
       </nav>
     </>}
   </section>;
