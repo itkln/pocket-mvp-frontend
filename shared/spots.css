@@ -429,7 +429,7 @@
   .pocket-spots .spots-header.scrolled .spots-header-actions,
   .pocket-spots .spots-header.scrolled .spots-brand { position: absolute; opacity: 0; visibility: hidden; pointer-events: none; }
   .pocket-spots .spots-header.scrolled .spots-global-search { grid-row: 1; }
-  .pocket-spots .spots-page { padding: 16px 16px calc(88px + env(safe-area-inset-bottom)); }
+  .pocket-spots .spots-page { padding: 16px 16px calc(76px + env(safe-area-inset-bottom)); }
   .pocket-spots.guest .spots-page { padding-bottom: calc(32px + env(safe-area-inset-bottom)); }
   .pocket-spots .spots-category-navigation-heading { min-height: 36px; gap: 8px; margin-bottom: 14px; }
   .pocket-spots .spots-category-navigation-heading h1 { font-size: 22px; }
@@ -517,16 +517,17 @@
     gap: 18px;
   }
   .pocket-spots .spots-venue-carousel.expanded .venue-card { width: 100%; }
-  .pocket-spots .spots-bottom-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--spots-page); border-top: 1px solid var(--spots-divider); box-shadow: none; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); }
-  .pocket-spots .spots-bottom-nav button { min-height: 52px; gap: 4px; color: var(--spots-text); background: transparent; opacity: .42; }
+  .pocket-spots .spots-bottom-nav { min-height: calc(56px + env(safe-area-inset-bottom)); grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 4px 8px calc(4px + env(safe-area-inset-bottom)); border-top: 0; background: var(--spots-page); box-shadow: 0 -6px 18px rgba(23, 33, 43, .1); }
+  .pocket-spots .spots-bottom-nav button { min-height: 48px; gap: 2px; color: var(--spots-text); background: transparent; opacity: .42; }
+  .pocket-spots .spots-bottom-nav button svg { width: 20px; height: 20px; }
   .pocket-spots .spots-bottom-nav button:hover { background: transparent; opacity: .68; }
   .pocket-spots .spots-bottom-nav button.active { color: var(--spots-text); background: transparent; opacity: 1; }
   .pocket-spots .spots-bottom-nav button:focus-visible { outline: none; box-shadow: none; opacity: .78; }
   .pocket-spots .spots-bottom-nav button:focus-visible span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
-  .pocket-spots .spots-bottom-nav button span { font-size: 12px; }
+  .pocket-spots .spots-bottom-nav button span { font-size: 11px; }
   .pocket-spots .spots-main:has(.spots-profile) { background: #f4f4f5; }
-  .pocket-spots .spots-page:has(.spots-profile) { padding: 0 0 calc(68px + env(safe-area-inset-bottom)); }
-  .pocket-spots .spots-profile { display: flex; flex-direction: column; width: 100%; min-height: calc(100dvh - 68px - env(safe-area-inset-bottom)); }
+  .pocket-spots .spots-page:has(.spots-profile) { padding: 0 0 calc(56px + env(safe-area-inset-bottom)); }
+  .pocket-spots .spots-profile { display: flex; flex-direction: column; width: 100%; min-height: calc(100dvh - 56px - env(safe-area-inset-bottom)); }
   .pocket-spots .spots-profile > .spots-account-heading { margin: 0; padding: 14px 16px 0; }
   .pocket-spots .spots-profile > .spots-profile-identity { padding: 20px 16px 36px; }
   .pocket-spots .spots-profile-menu { flex: 1; padding: 16px 16px 28px; border-radius: 24px 24px 0 0; background: #fff; }
