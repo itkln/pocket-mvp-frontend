@@ -7,7 +7,8 @@ import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth
 import { customerNavigation, menuItems } from "../features/pocket/model";
 import { Checkout, CustomerMenu, DiscoverScreen, HistoryScreen, ReservationScreen } from "../features/pocket/customer";
 import { spotsCities, SpotsBottomNavigation, SpotsHeader } from "../features/pocket/customer/navigation";
-import { SavedPlacesScreen, VenueDetailsScreen } from "../features/pocket/customer/discover";
+import { SavedPlacesScreen } from "../features/pocket/customer/discover";
+import { VenueDetailsScreen } from "../features/pocket/customer/venue-details";
 import type { PublicVenue } from "../lib/public-catalog-api";
 import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
 import { CalendarDays } from "lucide-react";
@@ -188,9 +189,22 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
   const sourceScreen = sourceURL?.pathname.split("/")[2];
   const validSource = sourceURL && (sourceScreen === "discover" || sourceScreen === "saved" || categoryForRoute(sourceScreen));
   const openVenue = (venue: PublicVenue) => {
-    const from = `${spotsPath(locale, screen)}${searchParams.size ? `?${searchParams}` : ""}`;
+    const sourceParams = new URLSearchParams(searchParams.toString());
+    if (city) sourceParams.set("city", city);
+    const from = `${spotsPath(locale, screen)}${sourceParams.size ? `?${sourceParams}` : ""}`;
     setSelectedVenueID(venue.id);
     navigate(`venue/${venue.id}`, new URLSearchParams({ from }));
+  };
+  const backToSource = () => {
+    if (!validSource) return navigate("discover");
+    const sourceCity = sourceURL.searchParams.get("city");
+    if (sourceCity && spotsCities.includes(sourceCity)) {
+      setCity(sourceCity);
+      try { localStorage.setItem("pocket:spots-city", sourceCity); } catch { /* Keep the city for this session. */ }
+    }
+    const params = new URLSearchParams(sourceURL.searchParams);
+    params.delete("city");
+    navigate(sourceScreen!, params);
   };
 
   const signOut = async () => {
@@ -232,7 +246,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
       <div className={`spots-page ${category ? "has-category" : ""}`}>
         {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedReady ? savedPlaces : []} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onVenue={openVenue} onReservation={() => navigate("reservation")} />}
         {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
-        {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={() => validSource ? navigate(sourceScreen!, sourceURL.searchParams) : navigate("discover")} />}
+        {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} />}
         {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("reservation")}>{t("Забронировать стол")}</Button></div></section>}
         {screen === "browse-menu" && <>{validSource && <button type="button" className="back-link" onClick={() => navigate(sourceScreen!, sourceURL.searchParams)}><ArrowLeft size={18} />{t("Назад к результатам")}</button>}<CustomerMenu cart={cart} onAdd={addItem} onUpdateQty={updateQty} onCart={() => navigate("checkout")} onReserve={() => navigate("reservation")} /></>}
         {screen === "checkout" && <Checkout cart={cart} total={cartTotal} updateQty={updateQty} onBack={() => navigate("browse-menu")} onDone={() => { setCart({}); navigate("history"); shell.notify("Предзаказ принят"); }} />}

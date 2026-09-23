@@ -726,17 +726,26 @@
   .pocket-spots *, .pocket-spots *::before, .pocket-spots *::after { scroll-behavior: auto !important; transition: none !important; }
 }
 
-/* Public venue page: compact, section-based catalog card. */
-.pocket-spots .spots-venue-detail { max-width: 940px; margin: 0 auto; padding: 16px 0 48px; }
-.pocket-spots .spots-venue-detail-card { overflow: hidden; border-radius: 24px; background: #fff; box-shadow: 0 8px 30px rgba(23, 33, 43, .08); }
-.pocket-spots .spots-venue-detail-photo { display: grid; place-items: center; height: clamp(220px, 32vw, 350px); background: var(--spots-gradient-restaurants); }
-.pocket-spots .spots-venue-detail-photo.has-image { background-position: center; background-size: cover; }
-.pocket-spots .spots-venue-detail-photo img { object-fit: contain; }
-.pocket-spots .spots-venue-detail-copy { padding: clamp(20px, 4vw, 36px); }
-.pocket-spots .spots-venue-detail-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.pocket-spots .spots-venue-detail-heading h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); }
-.pocket-spots .spots-venue-detail-copy p { margin: 14px 0 0; color: var(--spots-secondary); }
-.pocket-spots .spots-venue-detail-rating { display: flex; align-items: center; gap: 6px; color: var(--spots-warning) !important; }
+/* Public venue page uses the same layout language as the former demo detail screen. */
+.pocket-spots .spots-venue-detail { width: 100%; margin: 0 auto; padding: 16px 0 48px; }
+.pocket-spots .spots-real-venue-detail > .back-link { min-height: 38px; margin-bottom: 12px; color: var(--spots-cta); font-weight: 650; }
+.pocket-spots .venue-public-photo {
+  height: clamp(260px, 31vw, 430px);
+  display: grid;
+  place-items: center;
+  background: var(--spots-gradient-restaurants);
+}
+.pocket-spots .venue-public-photo.has-image { background-position: center; background-size: cover; }
+.pocket-spots .venue-public-photo img { width: min(220px, 45%); height: auto; object-fit: contain; }
+.pocket-spots .venue-public-category { display: inline-block; margin-bottom: 10px; color: var(--spots-cta); font-size: 13px; font-weight: 750; }
+.pocket-spots .venue-public-empty { min-height: 104px; display: flex; align-items: center; gap: 16px; padding: 20px; border-radius: 16px; background: var(--spots-card); color: var(--spots-secondary); }
+.pocket-spots .venue-public-empty svg { flex: 0 0 auto; color: var(--spots-muted); }
+.pocket-spots .venue-public-empty p { margin: 0; line-height: 1.5; }
+.pocket-spots .venue-public-booking { min-height: 0; gap: 10px; }
+.pocket-spots .venue-public-booking > svg { color: var(--spots-cta); }
+.pocket-spots .venue-public-booking > h2 { margin: 4px 0 0; font-size: 23px; }
+.pocket-spots .venue-public-booking > p { margin: 0 0 8px; color: var(--spots-secondary); line-height: 1.5; }
+.pocket-spots .venue-public-booking > .button:disabled { margin-top: 8px; background: var(--spots-card); color: var(--spots-disabled); cursor: not-allowed; }
 .pocket-spots .spots-main:has(.venue-detail-page) { background: #f4f4f5; }
 @media (min-width: 901px) {
   .pocket-spots .spots-page:has(.venue-detail-page) {
@@ -1013,6 +1022,9 @@
 .pocket-spots .venue-booking-card > .button { min-height: 46px; margin-top: 18px; border-radius: 14px !important; background: var(--spots-cta); }
 .pocket-spots .venue-booking-card > .button:hover { background: var(--spots-cta-hover); }
 .pocket-spots .venue-booking-card > .button:focus-visible { background: var(--spots-cta-pressed); color: #fff; }
+.pocket-spots .venue-booking-card.venue-public-booking { min-height: 0; }
+.pocket-spots .venue-booking-card.venue-public-booking > .button:disabled,
+.pocket-spots .venue-booking-card.venue-public-booking > .button:disabled:hover { background: var(--spots-card); color: var(--spots-disabled); }
 .pocket-spots .venue-booking-details-selection { min-height: 0; flex: 1; display: grid; grid-template-rows: minmax(0, 1fr); margin-top: 18px; }
 .pocket-spots .venue-booking-preorder-step { min-height: 0; flex: 1; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; margin-top: 16px; }
 .pocket-spots .venue-reservation-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 2px 12px; }
@@ -1067,6 +1079,9 @@
   .pocket-spots .venue-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
+  .pocket-spots .spots-real-venue-detail { padding-top: 2px; }
+  .pocket-spots .venue-public-photo { height: clamp(230px, 62vw, 340px); }
+  .pocket-spots .venue-public-empty { min-height: 82px; padding: 16px; }
   .pocket-spots .venue-scroll-section { scroll-margin-top: 190px; }
   .pocket-spots .venue-overview-block,
   .pocket-spots .venue-detail-content { border-radius: 18px; }

@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, Heart, RefreshCw, Search, SlidersHorizontal, Star, X } from "lucide-react";
 import Image from "next/image";
-import { getPublicVenue, listPublicVenues, type PublicVenue, type PublicVenuePage } from "../../../lib/public-catalog-api";
-import { APIError } from "../../../lib/api-client";
+import { listPublicVenues, type PublicVenue, type PublicVenuePage } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { categoryForRoute, spotCategories } from "./categories";
 
@@ -168,23 +167,6 @@ export function SavedPlacesScreen({ savedPlaces = [], onToggleSaved, onVenue }: 
     return () => { active = false; controller.abort(); };
   }, [idsKey, reload]);
   return <section><div className="page-header"><h1>Сохранённые места</h1></div>{loading ? <CatalogStatus>Загружаем заведения...</CatalogStatus> : <>{error && <CatalogStatus alert><strong>Не удалось загрузить часть заведений</strong><button type="button" className="button secondary" onClick={() => { setLoading(true); setReload((value) => value + 1); }}>Повторить</button></CatalogStatus>}{venues.length ? <div className="venue-grid">{venues.map((venue) => <VenueCard key={venue.id} venue={venue} saved onToggleSaved={onToggleSaved} onClick={() => onVenue(venue)} />)}</div> : !error && <div className="spots-search-empty"><Heart size={28} /><strong>Пока нет сохранённых мест</strong></div>}</>}</section>;
-}
-
-export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: { venueID: string; onBack: () => void; saved: boolean; onToggleSaved?: (id: string) => void }) {
-  const [state, setState] = useState<{ venue?: PublicVenue; error?: string }>({});
-  const [reload, setReload] = useState(0);
-  useEffect(() => {
-    const controller = new AbortController();
-    getPublicVenue(venueID, controller.signal)
-      .then((venue) => setState({ venue }))
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setState({ error: error instanceof APIError && error.status === 404 ? "Заведение больше недоступно" : "Не удалось загрузить заведение" });
-      });
-    return () => controller.abort();
-  }, [venueID, reload]);
-  const venue = state.venue;
-  return <section className="spots-venue-detail"><button type="button" className="back-link" onClick={onBack}><ChevronLeft size={18} />Назад</button>{venue ? <article className="spots-venue-detail-card"><div className={`spots-venue-detail-photo ${venue.image_url ? "has-image" : ""}`} style={venue.image_url ? { backgroundImage: `url(${JSON.stringify(venue.image_url)})` } : undefined}>{!venue.image_url && <Image src={`/assets/categories/${categoryIllustrations[venue.category_slug] ?? "restaurants"}.png`} alt="" width={180} height={180} />}</div><div className="spots-venue-detail-copy"><div className="spots-venue-detail-heading"><h1>{venue.name}</h1>{onToggleSaved && <button type="button" className="icon-button" aria-label={saved ? "Убрать из избранного" : "В избранное"} aria-pressed={saved} onClick={() => onToggleSaved(venueID)}><Heart size={22} fill={saved ? "currentColor" : "none"} /></button>}</div><p>{[venue.cuisine_type, venue.address, venue.city].filter(Boolean).join(" · ")}</p>{venue.review_count > 0 && <p className="spots-venue-detail-rating"><Star size={17} fill="currentColor" />{venue.rating.toFixed(1)} · {venue.review_count}</p>}{venue.description && <p>{venue.description}</p>}</div></article> : state.error ? <CatalogStatus alert><strong>{state.error}</strong>{state.error !== "Заведение больше недоступно" && <button type="button" className="button secondary" onClick={() => { setState({}); setReload((value) => value + 1); }}>Повторить</button>}</CatalogStatus> : <CatalogStatus>Загружаем заведение...</CatalogStatus>}</section>;
 }
 
 export function VenueCard({ venue, onClick, saved, onToggleSaved }: { venue: PublicVenue; onClick: () => void; saved?: boolean; onToggleSaved?: (id: string) => void }) {

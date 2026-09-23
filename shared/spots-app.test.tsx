@@ -19,8 +19,8 @@ vi.mock("../lib/auth-api", async (original) => ({ ...await original<object>(), g
 vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn() }));
 vi.mock("../lib/saved-venues-api", () => ({ listSavedVenueIDs: vi.fn(), addSavedVenue: vi.fn(), removeSavedVenue: vi.fn() }));
 const publicVenues: PublicVenue[] = [
-  { id: "north", slug: "north", name: "North & Vine", category_slug: "restaurants", cuisine_type: "Европейская", address: "Dunajská 12", city: "Bratislava", country_code: "SK", rating: 4.8, review_count: 12, tags: ["Стол через 20 мин"], filters: ["Лучшие"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
-  { id: "casa", slug: "casa", name: "Casa Forma", category_slug: "restaurants", cuisine_type: "Итальянская", address: "Obchodná 24", city: "Bratislava", country_code: "SK", rating: 4.7, review_count: 8, tags: ["Есть места сегодня"], filters: ["Итальянская"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
+  { id: "north", slug: "north", name: "North & Vine", description: "A small neighborhood bistro.", category_slug: "restaurants", cuisine_type: "Европейская", address: "Dunajská 12", city: "Bratislava", country_code: "SK", rating: 4.8, review_count: 12, tags: ["Стол через 20 мин"], filters: ["Лучшие"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
+  { id: "casa", slug: "casa", name: "Casa Forma", description: "Fresh pasta on Obchodná.", category_slug: "restaurants", cuisine_type: "Итальянская", address: "Obchodná 24", city: "Bratislava", country_code: "SK", rating: 4.7, review_count: 8, tags: ["Есть места сегодня"], filters: ["Итальянская"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
 ];
 const nativeReplace = window.history.replaceState.bind(window.history);
 let desktop = false;
@@ -132,6 +132,47 @@ describe("Spots guest experience", () => {
     expect(getPublicVenue).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
     expect(router.replace).not.toHaveBeenCalledWith("/ru/login");
     expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Разделы заведения" })).toBeInTheDocument();
+    expect(screen.getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
+    expect(screen.getByText("Меню этого заведения пока недоступно")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Забронировать" })).toBeDisabled();
+    expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
+  });
+
+  it("opens each selected venue in the rich detail layout without mixing demo data", async () => {
+    render(<SpotsApp initialScreen="discover" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Открыть North & Vine" }));
+    expect(window.location.pathname).toBe("/ru/venue/north");
+    expect(await screen.findByRole("heading", { name: "North & Vine" })).toBeInTheDocument();
+    expect(screen.getByText("A small neighborhood bistro.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Назад", exact: true }));
+    fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Forma" }));
+    expect(window.location.pathname).toBe("/ru/venue/casa");
+    expect(await screen.findByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
+    expect(screen.getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
+    expect(screen.queryByText("A small neighborhood bistro.")).not.toBeInTheDocument();
+    expect(getPublicVenue).toHaveBeenCalledWith("north", expect.any(AbortSignal));
+    expect(getPublicVenue).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
+  });
+
+  it("restores city, category, query and filter after reloading a venue deep link", async () => {
+    localStorage.setItem("pocket:spots-city", "Братислава");
+    nativeReplace(null, "", "/ru/restaurants?q=pasta&filter=Итальянская");
+    const view = render(<SpotsApp initialScreen="restaurants" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Forma" }));
+    expect(window.location.pathname).toBe("/ru/venue/casa");
+    expect(new URLSearchParams(window.location.search).get("from")).toContain("city=");
+    await screen.findByRole("heading", { name: "Casa Forma" });
+    view.unmount();
+    localStorage.removeItem("pocket:spots-city");
+
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Назад", exact: true }));
+    expect(window.location.pathname).toBe("/ru/restaurants");
+    expect(new URLSearchParams(window.location.search).get("q")).toBe("pasta");
+    expect(new URLSearchParams(window.location.search).get("filter")).toBe("Итальянская");
+    expect(localStorage.getItem("pocket:spots-city")).toBe("Братислава");
+    expect(screen.getByRole("button", { name: "Выбрать город: Братислава" })).toBeInTheDocument();
   });
 
   it("requires an explicit city choice, and restores it across pages and reloads", async () => {
