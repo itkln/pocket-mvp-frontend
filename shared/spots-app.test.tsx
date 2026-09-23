@@ -136,7 +136,11 @@ describe("Spots guest experience", () => {
     expect(screen.getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
     expect(screen.getByText("Меню этого заведения пока недоступно")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Забронировать" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Назад к результатам" })).toBeInTheDocument();
+    expect(screen.getByText("Бронирование пока недоступно")).toBeInTheDocument();
     expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "К поиску" }));
+    expect(window.location.pathname).toBe("/ru/discover");
   });
 
   it("opens each selected venue in the rich detail layout without mixing demo data", async () => {

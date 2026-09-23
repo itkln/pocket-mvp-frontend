@@ -236,7 +236,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
 
   const cartTotal = menuItems.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0);
 
-  return <div className={`pocket-spots ${currentUser ? "signed-in" : "guest"}`}>
+  return <div className={`pocket-spots ${currentUser ? "signed-in" : "guest"} ${screen === "venue" ? "venue-detail-active" : ""}`}>
     <SpotsHeader user={currentUser} screen={screen} city={city} onCityChange={(value) => {
       setCity(value);
       try { localStorage.setItem("pocket:spots-city", value); } catch { /* Keep the selection for this session. */ }
@@ -246,7 +246,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
       <div className={`spots-page ${category ? "has-category" : ""}`}>
         {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedReady ? savedPlaces : []} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onVenue={openVenue} onReservation={() => navigate("reservation")} />}
         {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
-        {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} />}
+        {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} onSearch={() => navigate("discover")} />}
         {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("reservation")}>{t("Забронировать стол")}</Button></div></section>}
         {screen === "browse-menu" && <>{validSource && <button type="button" className="back-link" onClick={() => navigate(sourceScreen!, sourceURL.searchParams)}><ArrowLeft size={18} />{t("Назад к результатам")}</button>}<CustomerMenu cart={cart} onAdd={addItem} onUpdateQty={updateQty} onCart={() => navigate("checkout")} onReserve={() => navigate("reservation")} /></>}
         {screen === "checkout" && <Checkout cart={cart} total={cartTotal} updateQty={updateQty} onBack={() => navigate("browse-menu")} onDone={() => { setCart({}); navigate("history"); shell.notify("Предзаказ принят"); }} />}
