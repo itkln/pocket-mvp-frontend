@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SpotsApp from "./spots-app";
-import { AuthAPIError, getCurrentUser, updateProfile } from "../lib/auth-api";
+import { AuthAPIError, getCurrentUser, logout, updateProfile } from "../lib/auth-api";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
 import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
 
@@ -15,7 +15,7 @@ vi.mock("next/navigation", () => ({
     return () => window.removeEventListener("popstate", callback);
   }, () => window.location.search)),
 }));
-vi.mock("../lib/auth-api", async (original) => ({ ...await original<object>(), getCurrentUser: vi.fn(), updateProfile: vi.fn() }));
+vi.mock("../lib/auth-api", async (original) => ({ ...await original<object>(), getCurrentUser: vi.fn(), logout: vi.fn(), updateProfile: vi.fn() }));
 vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn(), getPublicVenueMenu: vi.fn(), getPublicVenueReviews: vi.fn() }));
 vi.mock("../lib/saved-venues-api", () => ({ listSavedVenueIDs: vi.fn(), addSavedVenue: vi.fn(), removeSavedVenue: vi.fn() }));
 const publicVenues: PublicVenue[] = [
@@ -38,6 +38,7 @@ beforeEach(() => {
   });
   router.push.mockImplementation((url: string) => { window.history.pushState(null, "", url); window.dispatchEvent(new PopStateEvent("popstate")); });
   vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer" });
+  vi.mocked(logout).mockResolvedValue();
   vi.mocked(listPublicVenues).mockImplementation(async (search = {}) => {
     const venues = search.ids ? publicVenues.filter((venue) => search.ids!.includes(venue.id)) : publicVenues;
     return { venues, page: 1, page_size: search.pageSize ?? 24, total: venues.length, total_pages: venues.length ? 1 : 0, has_next: false };
@@ -102,6 +103,39 @@ describe("Spots guest experience", () => {
     expect(within(navigation).getByRole("button", { name: "Избранное" })).toBeInTheDocument();
     expect(within(navigation).getByRole("button", { name: "Мои брони" })).toBeInTheDocument();
     expect(within(navigation).getByRole("button", { name: "Профиль" })).toBeInTheDocument();
+  });
+
+  it("returns to guest discovery after signing out from the account menu, even when already there", async () => {
+    render(<SpotsApp initialScreen="discover" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Меню аккаунта" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Выйти" }));
+
+    await waitFor(() => expect(router.replace).toHaveBeenLastCalledWith("/ru/discover"));
+    expect(logout).toHaveBeenCalledOnce();
+    expect(screen.getByRole("button", { name: "Войти" })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Основная навигация Pocket Spots" })).not.toBeInTheDocument();
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+
+  it("returns to discovery after signing out from the mobile profile", async () => {
+    nativeReplace(null, "", "/ru/profile");
+    render(<SpotsApp initialScreen="profile" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Выйти из аккаунта" }));
+
+    await waitFor(() => expect(router.replace).toHaveBeenLastCalledWith("/ru/discover"));
+    expect(screen.getByRole("navigation", { name: "Категории" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Выйти из аккаунта" })).not.toBeInTheDocument();
+  });
+
+  it("keeps the account active when the sign-out request fails", async () => {
+    vi.mocked(logout).mockRejectedValue(new Error("Network unavailable"));
+    render(<SpotsApp initialScreen="discover" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Меню аккаунта" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Выйти" }));
+
+    expect(await screen.findByText("Не удалось выйти из аккаунта")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Основная навигация Pocket Spots" })).toBeInTheDocument();
+    expect(router.replace).not.toHaveBeenCalledWith("/ru/discover");
   });
 
   it("uses the server favorites for the current account while preserving city migration", async () => {

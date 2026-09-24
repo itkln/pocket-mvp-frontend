@@ -208,10 +208,23 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
   };
 
   const signOut = async () => {
-    try { await logout(); } finally {
-      router.replace(`/${locale}/login`);
-      router.refresh();
+    try {
+      await logout();
+    } catch {
+      shell.notify("Не удалось выйти из аккаунта");
+      return;
     }
+    setCurrentUser(null);
+    setSavedPlaces([]);
+    setSavedForUser("");
+    setSavedErrorUser("");
+    setCart({});
+    setAccountDialogSection(null);
+    setSelectedVenueID("");
+    setScreen("discover");
+    shell.setMobileNav(false);
+    router.replace(spotsPath(locale, "discover"));
+    window.scrollTo(0, 0);
   };
 
   const addItem = (id: number) => {

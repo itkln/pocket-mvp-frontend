@@ -122,6 +122,7 @@ const rows: TranslationRow[] = [
   ["Мои брони", "My bookings", "Мої бронювання", "Moje rezervácie"],
   ["Список броней пока недоступен", "Bookings are not available yet", "Список бронювань поки недоступний", "Zoznam rezervácií zatiaľ nie je dostupný"],
   ["Выйти", "Sign out", "Вийти", "Odhlásiť sa"],
+  ["Не удалось выйти из аккаунта", "Could not sign out", "Не вдалося вийти з акаунта", "Nepodarilo sa odhlásiť"],
   ["Меню аккаунта", "Account menu", "Меню акаунта", "Ponuka účtu"],
   ["Аккаунт", "Account", "Акаунт", "Účet"],
   ["Ваш город", "Your city", "Ваше місто", "Vaše mesto"],
