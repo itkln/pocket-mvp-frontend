@@ -930,7 +930,7 @@
   font-size: 16px;
   font-weight: 650;
   cursor: pointer;
-  transition: background-color 180ms ease, color 180ms ease;
+  transition: color 180ms ease;
 }
 .pocket-spots .venue-section-nav button::after {
   position: absolute;
@@ -944,9 +944,6 @@
   opacity: 0;
   transform: scaleX(.4);
   transition: opacity 180ms ease, transform 180ms ease;
-}
-@media (hover: hover) {
-  .pocket-spots .venue-section-nav button:hover { background: var(--spots-card); color: var(--spots-text); }
 }
 .pocket-spots .venue-section-nav button.active { background: transparent; color: var(--spots-text); }
 .pocket-spots .venue-section-nav button.active::after { opacity: 1; transform: scaleX(1); }
