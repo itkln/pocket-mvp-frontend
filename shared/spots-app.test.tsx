@@ -60,6 +60,7 @@ describe("Spots guest experience", () => {
 
     const login = await screen.findByRole("button", { name: "Войти" });
     expect(login).toBeInTheDocument();
+    expect(login.querySelector(".lucide-log-in")).toBeInTheDocument();
     expect(within(screen.getByRole("navigation", { name: "Категории" })).getAllByRole("button")).toHaveLength(8);
     expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();
     expect(screen.queryByRole("navigation", { name: "Основная навигация Pocket Spots" })).not.toBeInTheDocument();
@@ -139,6 +140,7 @@ describe("Spots guest experience", () => {
     expect(screen.getByText("Меню этого заведения пока недоступно")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Забронировать" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Назад к результатам" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Назад", exact: true }).querySelector(".lucide-arrow-left")).toBeInTheDocument();
     expect(screen.getByText("Бронирование пока недоступно")).toBeInTheDocument();
     expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Поиск по меню" }));

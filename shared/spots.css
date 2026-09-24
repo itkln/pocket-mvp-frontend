@@ -114,10 +114,10 @@
   .pocket-spots header.spots-header button.spots-location > span { width: auto; text-align: center; }
 }
 .pocket-spots .spots-picker-search:focus-within { outline: none; }
-.pocket-spots header.spots-header button.spots-location-cta { background: var(--spots-cta); color: #fff; }
+.pocket-spots header.spots-header button.spots-location-cta { background: var(--spots-header-selected); color: var(--spots-text); }
 .pocket-spots .spots-location-cta svg { color: inherit; }
-.pocket-spots header.spots-header button.spots-location-cta:hover { background: var(--spots-cta-hover); }
-.pocket-spots header.spots-header button.spots-location-cta:active { background: var(--spots-cta-pressed); }
+.pocket-spots header.spots-header button.spots-location-cta:hover { background: #e8e7e4; }
+.pocket-spots header.spots-header button.spots-location-cta:active { background: #dddcda; }
 .pocket-spots .needs-city .spots-language-trigger:hover,
 .pocket-spots .needs-city .spots-header-actions > .spots-account-trigger:hover { background: var(--spots-card); }
 .pocket-spots .spots-login-trigger {
@@ -728,7 +728,7 @@
 
 /* Public venue page uses the same layout language as the former demo detail screen. */
 .pocket-spots .spots-venue-detail { width: 100%; margin: 0 auto; padding: 16px 0 48px; }
-.pocket-spots .spots-real-venue-detail > .back-link { min-height: 44px; margin-bottom: 12px; padding: 0 14px; color: var(--spots-cta); font-size: 16px; font-weight: 650; transition: background-color 180ms ease, color 180ms ease; }
+.pocket-spots .spots-real-venue-detail > .back-link { width: 48px; height: 48px; display: grid; place-items: center; margin-bottom: 12px; padding: 0; border-radius: 50%; background: #fff; color: var(--spots-text); transition: background-color 180ms ease; }
 .pocket-spots .venue-mobile-toolbar,
 .pocket-spots .venue-mobile-booking-status,
 .pocket-spots .venue-about-photo,

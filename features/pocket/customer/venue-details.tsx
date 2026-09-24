@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
-import { CalendarDays, Check, ChevronLeft, Ellipsis, Heart, Info, MapPin, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Ellipsis, Heart, Info, MapPin, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
 import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
@@ -147,7 +147,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
 
   return <section className={`spots-venue-detail spots-real-venue-detail ${searchOpen ? "venue-search-active" : ""}`}>
     <header className={`venue-mobile-toolbar ${compactHeader ? "compact" : ""}`}>
-      <button type="button" aria-label={t("Назад к результатам")} onClick={onBack}><ChevronLeft size={24} /></button>
+      <button type="button" aria-label={t("Назад к результатам")} onClick={onBack}><ArrowLeft size={24} /></button>
       <span className="venue-mobile-toolbar-title" aria-hidden={!compactHeader}>{venue?.name}</span>
       <div className="venue-mobile-toolbar-actions">
         <button type="button" aria-label={t("Поиск по меню")} onClick={() => setSearchOpen(true)}><Search size={23} /></button>
@@ -161,7 +161,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
       <div className="venue-search-results" aria-live="polite">{!normalizedQuery ? <h2>{t("Что будем искать?")}</h2> : menuState.loading ? <p>{t("Загружаем меню...")}</p> : menuState.error ? <p>{t("Не удалось загрузить меню")}</p> : searchResults.length ? menuCards(searchResults) : <div className="venue-search-no-results"><Search size={28} /><h2>{t("Ничего не нашли")}</h2><p>{t("Попробуйте другое название блюда")}</p></div>}</div>
       <div className="venue-mobile-booking-status" role="status"><span><CalendarDays size={16} />{t("Бронирование пока недоступно")}</span></div>
     </div>}
-    <button type="button" className="back-link" onClick={onBack}><ChevronLeft size={18} />{t("Назад")}</button>
+    <button type="button" className="back-link" aria-label={t("Назад")} onClick={onBack}><ArrowLeft size={23} aria-hidden="true" /></button>
     {venue ? <article className="spots-restaurant venue-detail-page" aria-labelledby="venue-title">
       <div className="venue-primary-column">
         <div className="venue-overview-block">
