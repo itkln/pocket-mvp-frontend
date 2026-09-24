@@ -131,6 +131,7 @@ describe("Spots guest experience", () => {
     vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
     render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
     expect(await screen.findByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
+    expect(document.querySelector(".venue-public-category")).toBeNull();
     expect(getPublicVenue).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
     expect(router.replace).not.toHaveBeenCalledWith("/ru/login");
     expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();

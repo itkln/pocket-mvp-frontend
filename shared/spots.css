@@ -728,7 +728,7 @@
 
 /* Public venue page uses the same layout language as the former demo detail screen. */
 .pocket-spots .spots-venue-detail { width: 100%; margin: 0 auto; padding: 16px 0 48px; }
-.pocket-spots .spots-real-venue-detail > .back-link { min-height: 38px; margin-bottom: 12px; color: var(--spots-cta); font-weight: 650; }
+.pocket-spots .spots-real-venue-detail > .back-link { min-height: 44px; margin-bottom: 12px; padding: 0 14px; color: var(--spots-cta); font-size: 16px; font-weight: 650; transition: background-color 180ms ease, color 180ms ease; }
 .pocket-spots .venue-mobile-toolbar,
 .pocket-spots .venue-mobile-booking-status,
 .pocket-spots .venue-about-photo,
@@ -750,12 +750,21 @@
 .pocket-spots .spots-real-venue-detail .venue-overview-block { overflow: visible; }
 .pocket-spots .spots-real-venue-detail .venue-public-photo { border-radius: 24px 24px 0 0; }
 .pocket-spots .spots-real-venue-detail .venue-detail-summary { position: relative; }
-.pocket-spots .venue-public-rating { display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 13px; background: var(--spots-card); color: #906617; font-size: 14px; cursor: pointer; }
+.pocket-spots .venue-public-rating { display: inline-flex; align-items: center; gap: 9px; min-height: 48px; padding: 0 18px; background: var(--spots-card); color: #906617; font-size: 16px; cursor: pointer; transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
 .pocket-spots .venue-public-rating > span { display: inline-flex; align-items: center; gap: 5px; }
-.pocket-spots .venue-public-rating b { font-size: 14px; }
+.pocket-spots .venue-public-rating b { font-size: 16px; }
 .pocket-spots .venue-public-rating small { color: var(--spots-secondary); font-size: 13px; font-weight: 500; }
 .pocket-spots .venue-desktop-info-wrap { display: block; }
-.pocket-spots .venue-desktop-info-button { width: 38px; height: 38px; display: grid; place-items: center; padding: 0; border: 1px solid var(--spots-divider) !important; background: #fff; color: var(--spots-text); cursor: pointer; }
+.pocket-spots .venue-desktop-info-button { width: 48px; height: 48px; display: grid; place-items: center; padding: 0; border: 1px solid var(--spots-divider) !important; background: #fff; color: var(--spots-text); cursor: pointer; transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease; }
+.pocket-spots .venue-desktop-info-button svg { width: 21px; height: 21px; }
+@media (hover: hover) {
+  .pocket-spots .spots-real-venue-detail > .back-link:hover { background: var(--spots-active); color: var(--spots-cta); }
+  .pocket-spots .venue-public-rating:hover { background: #fff5dc; box-shadow: 0 5px 16px rgba(104, 75, 20, .12); transform: translateY(-2px); }
+  .pocket-spots .venue-desktop-info-button:hover { border-color: var(--spots-cta) !important; background: var(--spots-active); color: var(--spots-cta); box-shadow: 0 5px 16px rgba(23, 33, 43, .1); transform: translateY(-2px); }
+}
+.pocket-spots .venue-public-rating:focus-visible,
+.pocket-spots .venue-desktop-info-button:focus-visible,
+.pocket-spots .venue-public-category-nav button:focus-visible { outline: 2px solid var(--spots-cta) !important; outline-offset: 2px; }
 .pocket-spots .venue-info-overlay { position: absolute; z-index: 45; top: calc(100% - 6px); left: 24px; width: min(420px, calc(100% - 48px)); }
 .pocket-spots .venue-info-sheet { padding: 28px; border: 1px solid var(--spots-divider); border-radius: 20px; background: #fff; box-shadow: 0 16px 42px rgba(23,33,43,.16); }
 .pocket-spots .venue-info-handle,
@@ -786,14 +795,13 @@
 .pocket-spots .venue-review-reply strong { font-size: 13px; }
 .pocket-spots .venue-review-reply p { margin: 6px 0 0; font-size: 14px; line-height: 1.5; }
 .pocket-spots .venue-public-photo {
-  height: clamp(260px, 31vw, 430px);
+  height: clamp(180px, 16vw, 240px);
   display: grid;
   place-items: center;
   background: var(--spots-gradient-restaurants);
 }
-.pocket-spots .venue-public-photo.has-image { background-position: center; background-size: cover; }
+.pocket-spots .venue-public-photo.has-image { background-position: center 68%; background-size: cover; }
 .pocket-spots .venue-public-photo img { width: min(220px, 45%); height: auto; object-fit: contain; }
-.pocket-spots .venue-public-category { display: inline-block; margin-bottom: 10px; color: var(--spots-cta); font-size: 13px; font-weight: 750; }
 .pocket-spots .venue-public-empty { min-height: 104px; display: flex; align-items: center; gap: 16px; padding: 20px; border-radius: 16px; background: var(--spots-card); color: var(--spots-secondary); }
 .pocket-spots .venue-public-empty svg { flex: 0 0 auto; color: var(--spots-muted); }
 .pocket-spots .venue-public-empty p { margin: 0; line-height: 1.5; }
@@ -913,15 +921,16 @@
   position: relative;
   z-index: 1;
   min-width: max-content;
-  min-height: 56px;
-  padding: 0 12px;
+  min-height: 64px;
+  padding: 0 18px;
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: var(--spots-secondary);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 650;
   cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 .pocket-spots .venue-section-nav button::after {
   position: absolute;
@@ -936,7 +945,9 @@
   transform: scaleX(.4);
   transition: opacity 180ms ease, transform 180ms ease;
 }
-.pocket-spots .venue-section-nav button:hover { background: var(--spots-card); color: var(--spots-text); }
+@media (hover: hover) {
+  .pocket-spots .venue-section-nav button:hover { background: var(--spots-active); color: var(--spots-cta); }
+}
 .pocket-spots .venue-section-nav button.active { background: transparent; color: var(--spots-text); }
 .pocket-spots .venue-section-nav button.active::after { opacity: 1; transform: scaleX(1); }
 .pocket-spots .venue-detail-content {
@@ -1218,7 +1229,6 @@
   .pocket-spots .spots-real-venue-detail .venue-detail-content { overflow: visible; border-radius: 0; }
   .pocket-spots .spots-real-venue-detail .venue-public-photo { display: none; }
   .pocket-spots .spots-real-venue-detail .venue-detail-summary { padding: 16px 16px 22px; }
-  .pocket-spots .spots-real-venue-detail .venue-public-category,
   .pocket-spots .spots-real-venue-detail .venue-title-row .icon-button { display: none; }
   .pocket-spots .spots-real-venue-detail .venue-detail-heading h1 { font-size: clamp(26px, 7vw, 32px); line-height: 1.12; }
   .pocket-spots .spots-real-venue-detail .venue-detail-heading > p { margin-top: 8px; font-size: 13px; line-height: 1.4; }

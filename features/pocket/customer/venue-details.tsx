@@ -6,7 +6,6 @@ import { CalendarDays, Check, ChevronLeft, Ellipsis, Heart, Info, MapPin, Refres
 import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
-import { categoryForRoute } from "./categories";
 
 const illustrations: Record<string, string> = {
   activities: "travel", "yoga-pilates": "yoga", "spa-massage": "spa", masterclasses: "workshops",
@@ -133,7 +132,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   const openReviews = () => { setReviewsState({ items: [], loading: true, error: false }); setReviewsOpen(true); };
   const photoStyle = venue?.image_url ? { backgroundImage: `url(${JSON.stringify(venue.image_url)})` } as CSSProperties : undefined;
   const illustration = venue ? illustrations[venue.category_slug] ?? venue.category_slug : "restaurants";
-  const categoryLabel = venue ? categoryForRoute(venue.category_slug)?.label : undefined;
   const details = venue ? [venue.cuisine_type ? t(venue.cuisine_type) : "", venue.address, venue.city].filter(Boolean).join(" · ") : "";
   const normalizedQuery = menuQuery.trim().toLocaleLowerCase(locale);
   const searchResults = normalizedQuery ? menuState.categories.flatMap((category) => category.items.filter((item) =>
@@ -172,7 +170,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
           </div>
           <div className="venue-detail-summary">
             <div className="venue-detail-heading">
-              {categoryLabel && <span className="venue-public-category">{t(categoryLabel)}</span>}
               <div className="venue-title-row"><h1 id="venue-title">{venue.name}</h1>{onToggleSaved && <button type="button" className={`icon-button ${saved ? "active" : ""}`} aria-label={t(saved ? "Убрать из избранного" : "В избранное")} aria-pressed={saved} onClick={() => onToggleSaved(venue.id)}><Heart size={22} fill={saved ? "currentColor" : "none"} /></button>}</div>
               <p>{details}</p>
               <div className="venue-facts" aria-label={t("Краткая информация")}>
