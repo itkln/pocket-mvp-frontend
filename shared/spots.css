@@ -1173,6 +1173,9 @@
 
 /* Compact public venue page: contextual toolbar, sticky sections and a small bottom status. */
 @media (max-width: 760px) {
+  /* Keep Chrome's pull-to-refresh from reloading mobile Spots at the scroll boundary. */
+  html, body { overscroll-behavior-y: none; }
+
   .pocket-spots.venue-detail-active .spots-header,
   .pocket-spots.venue-detail-active .spots-bottom-nav { display: none; }
   .pocket-spots.venue-detail-active .spots-main { background: #fff; }
