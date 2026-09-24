@@ -1176,6 +1176,10 @@
   /* Keep Chrome's pull-to-refresh from reloading mobile Spots at the scroll boundary. */
   html, body { overscroll-behavior-y: none; }
 
+  /* Native dialogs and custom venue sheets must not scroll the page behind them. */
+  html:has(.pocket-spots dialog[open], .pocket-spots [aria-modal="true"]),
+  body:has(.pocket-spots dialog[open], .pocket-spots [aria-modal="true"]) { overflow: hidden; }
+
   .pocket-spots.venue-detail-active .spots-header,
   .pocket-spots.venue-detail-active .spots-bottom-nav { display: none; }
   .pocket-spots.venue-detail-active .spots-main { background: #fff; }
