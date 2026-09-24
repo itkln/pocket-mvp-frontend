@@ -43,6 +43,14 @@ export type PublicMenuCategory = {
   items: PublicMenuItem[];
 };
 
+export type PublicReview = {
+  id: string;
+  rating: number;
+  body?: string;
+  owner_reply?: string;
+  created_at: string;
+};
+
 export type PublicVenueSearch = {
   city?: string;
   query?: string;
@@ -84,4 +92,9 @@ export async function getPublicVenue(id: string, signal?: AbortSignal): Promise<
 export async function getPublicVenueMenu(id: string, signal?: AbortSignal): Promise<PublicMenuCategory[]> {
   const result = await apiRequest<{ categories: PublicMenuCategory[] }>(`/public/venues/${encodeURIComponent(id)}/menu`, { signal });
   return result.categories;
+}
+
+export async function getPublicVenueReviews(id: string, signal?: AbortSignal): Promise<PublicReview[]> {
+  const result = await apiRequest<{ reviews: PublicReview[] }>(`/public/venues/${encodeURIComponent(id)}/reviews`, { signal });
+  return result.reviews;
 }

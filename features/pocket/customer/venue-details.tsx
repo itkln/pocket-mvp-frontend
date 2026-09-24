@@ -2,19 +2,12 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
-import { CalendarDays, Check, ChevronLeft, Ellipsis, Heart, MapPin, MessageSquareText, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
+import { CalendarDays, Check, ChevronLeft, Ellipsis, Heart, Info, MapPin, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
 import { APIError } from "../../../lib/api-client";
-import { getPublicVenue, getPublicVenueMenu, type PublicMenuCategory, type PublicMenuItem, type PublicVenue } from "../../../lib/public-catalog-api";
+import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { categoryForRoute } from "./categories";
 
-type VenueSection = "menu" | "reviews" | "about" | "contacts";
-const sections: { id: VenueSection; label: string }[] = [
-  { id: "menu", label: "Меню" },
-  { id: "reviews", label: "Отзывы" },
-  { id: "about", label: "О месте" },
-  { id: "contacts", label: "Контакты" },
-];
 const illustrations: Record<string, string> = {
   activities: "travel", "yoga-pilates": "yoga", "spa-massage": "spa", masterclasses: "workshops",
 };
@@ -28,17 +21,23 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   const { locale, t } = useI18n();
   const [state, setState] = useState<{ venue?: PublicVenue; error?: "missing" | "failed" }>({});
   const [menuState, setMenuState] = useState<{ categories: PublicMenuCategory[]; loading: boolean; error: boolean }>({ categories: [], loading: true, error: false });
+  const [reviewsState, setReviewsState] = useState<{ items: PublicReview[]; loading: boolean; error: boolean }>({ items: [], loading: true, error: false });
   const [reload, setReload] = useState(0);
-  const [activeSection, setActiveSection] = useState<VenueSection>("menu");
+  const [reviewsReload, setReviewsReload] = useState(0);
+  const [activeCategory, setActiveCategory] = useState("");
   const [compactHeader, setCompactHeader] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [reviewsOpen, setReviewsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const infoCloseRef = useRef<HTMLButtonElement>(null);
+  const reviewsCloseRef = useRef<HTMLButtonElement>(null);
+  const infoRef = useRef<HTMLDivElement>(null);
+  const infoOverlayRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = useRef<Partial<Record<VenueSection, HTMLElement | null>>>({});
+  const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
     const controller = new AbortController();
@@ -50,6 +49,18 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
       });
     return () => controller.abort();
   }, [venueID, reload]);
+
+  useEffect(() => {
+    if (!reviewsOpen) return;
+    const controller = new AbortController();
+    getPublicVenueReviews(venueID, controller.signal)
+      .then((items) => setReviewsState({ items, loading: false, error: false }))
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setReviewsState({ items: [], loading: false, error: true });
+      });
+    return () => controller.abort();
+  }, [venueID, reviewsOpen, reviewsReload]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -75,35 +86,51 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   }, [moreOpen]);
   useEffect(() => {
     if (!infoOpen) return;
-    infoCloseRef.current?.focus();
+    if (window.innerWidth <= 760) infoCloseRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setInfoOpen(false); };
+    const onPointerDown = (event: PointerEvent) => {
+      if (window.innerWidth > 760 && !infoRef.current?.contains(event.target as Node) && !infoOverlayRef.current?.contains(event.target as Node)) setInfoOpen(false);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => { document.removeEventListener("keydown", onKeyDown); document.removeEventListener("pointerdown", onPointerDown); };
+  }, [infoOpen]);
+  useEffect(() => {
+    if (!reviewsOpen) return;
+    reviewsCloseRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setReviewsOpen(false); };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [infoOpen]);
+  }, [reviewsOpen]);
 
   useEffect(() => {
     const updateScrollState = () => {
       setCompactHeader(window.scrollY > 115);
-      const offset = window.innerWidth <= 760 ? 220 : 170;
-      let current: VenueSection = "menu";
-      sections.forEach(({ id }) => {
-        if ((sectionRefs.current[id]?.getBoundingClientRect().top ?? Infinity) <= offset) current = id;
+      if (window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) {
+        setActiveCategory(menuState.categories.at(-1)?.id ?? "");
+        return;
+      }
+      const offset = 164;
+      let current = menuState.categories[0]?.id ?? "";
+      menuState.categories.forEach(({ id }) => {
+        if ((categoryRefs.current[id]?.getBoundingClientRect().top ?? Infinity) <= offset) current = id;
       });
-      setActiveSection(current);
+      setActiveCategory(current);
     };
     updateScrollState();
     window.addEventListener("scroll", updateScrollState, { passive: true });
     return () => window.removeEventListener("scroll", updateScrollState);
-  }, [state.venue?.id]);
+  }, [menuState.categories]);
 
   const venue = state.venue;
-  const openSection = (section: VenueSection) => {
-    setActiveSection(section);
-    sectionRefs.current[section]?.scrollIntoView?.({
+  const openCategory = (id: string) => {
+    setActiveCategory(id);
+    categoryRefs.current[id]?.scrollIntoView?.({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "start",
     });
   };
+  const openReviews = () => { setReviewsState({ items: [], loading: true, error: false }); setReviewsOpen(true); };
   const photoStyle = venue?.image_url ? { backgroundImage: `url(${JSON.stringify(venue.image_url)})` } as CSSProperties : undefined;
   const illustration = venue ? illustrations[venue.category_slug] ?? venue.category_slug : "restaurants";
   const categoryLabel = venue ? categoryForRoute(venue.category_slug)?.label : undefined;
@@ -149,39 +176,32 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
               <div className="venue-title-row"><h1 id="venue-title">{venue.name}</h1>{onToggleSaved && <button type="button" className={`icon-button ${saved ? "active" : ""}`} aria-label={t(saved ? "Убрать из избранного" : "В избранное")} aria-pressed={saved} onClick={() => onToggleSaved(venue.id)}><Heart size={22} fill={saved ? "currentColor" : "none"} /></button>}</div>
               <p>{details}</p>
               <div className="venue-facts" aria-label={t("Краткая информация")}>
-                {venue.review_count > 0 && <span className="venue-public-rating"><Star size={16} fill="currentColor" /><span><b>{venue.rating.toFixed(1)}</b><small>{t("Оценок: {count}", { count: venue.review_count })}</small></span></span>}
+                <button type="button" className="venue-public-rating" aria-label={t("Открыть отзывы")} onClick={openReviews}><Star size={16} fill="currentColor" /><span><b>{venue.review_count > 0 ? venue.rating.toFixed(1) : t("Отзывы")}</b>{venue.review_count > 0 && <small>{t("Оценок: {count}", { count: venue.review_count })}</small>}</span></button>
                 {venue.preorder_enabled && <span><Check size={16} />{t("Предзаказ доступен")}</span>}
                 {venue.tags.map((tag) => <span key={tag}>{t(tag)}</span>)}
+                <div ref={infoRef} className="venue-desktop-info-wrap"><button type="button" className="venue-desktop-info-button" aria-label={t("Информация о заведении")} aria-expanded={infoOpen} onClick={() => setInfoOpen((value) => !value)}><Info size={17} /></button></div>
                 <div ref={moreRef} className="venue-public-more-wrap"><button type="button" className="venue-public-more" aria-label={t("Ещё о заведении")} aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)}><Ellipsis size={21} /></button>
                   {moreOpen && <div className="venue-more-popover"><button type="button" onClick={() => { setMoreOpen(false); setInfoOpen(true); }}>{t("Информация о заведении")}</button></div>}
                 </div>
               </div>
             </div>
+            {infoOpen && <div ref={infoOverlayRef} className="venue-info-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setInfoOpen(false); }}>
+              <section className="venue-info-sheet" role="dialog" aria-modal="true" aria-labelledby="venue-info-title">
+                <div className="venue-info-handle" aria-hidden="true" /><button ref={infoCloseRef} type="button" className="venue-info-close" aria-label={t("Закрыть")} onClick={() => setInfoOpen(false)}><X size={22} /></button>
+                <h2 id="venue-info-title">{t("Информация о заведении")}</h2><h3>{venue.name}</h3>
+                <div className="venue-info-group"><strong>{t("Контакты")}</strong><p><MapPin size={18} />{venue.address}, {venue.city}, {venue.country_code}</p></div>
+                <div className="venue-info-group"><strong>{t("О месте")}</strong><p>{venue.description || t("Описание заведения пока не добавлено")}</p>
+                  <div className={`venue-about-photo ${venue.image_url ? "has-image" : ""}`} style={photoStyle} role="img" aria-label={t("Фото заведения: {name}", { name: venue.name })}>{!venue.image_url && <Image src={`/assets/categories/${illustration}.png`} alt="" width={170} height={170} />}</div>
+                  {venue.filters.length > 0 && <div className="venue-feature-list">{venue.filters.map((filter) => <span key={filter}><Check size={15} />{t(filter)}</span>)}</div>}
+                </div>
+              </section>
+            </div>}
           </div>
         </div>
 
         <div className="venue-detail-content">
-          <nav className="venue-section-nav" aria-label={t("Разделы заведения")}>
-            {sections.map(({ id, label }) => <button type="button" key={id} className={activeSection === id ? "active" : ""} aria-current={activeSection === id ? "location" : undefined} onClick={() => openSection(id)}>{t(label)}</button>)}
-          </nav>
-          <section ref={(node) => { sectionRefs.current.menu = node; }} className="venue-content-section venue-scroll-section" aria-labelledby="venue-menu-title">
-            <div className="venue-section-heading"><h2 id="venue-menu-title">{t("Меню")}</h2></div>
-            {menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <div className="venue-public-menu-category" key={category.id}><h3>{category.name}</h3>{menuCards(category.items)}</div>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}
-          </section>
-          <section ref={(node) => { sectionRefs.current.reviews = node; }} className="venue-content-section venue-scroll-section" aria-labelledby="venue-reviews-title">
-            <div className="venue-section-heading"><h2 id="venue-reviews-title">{t("Отзывы")}</h2></div>
-            {venue.review_count > 0 && <div className="venue-rating-summary"><strong>{venue.rating.toFixed(1)}</strong><div><span aria-label={t("Рейтинг заведения")}><Star size={21} fill="currentColor" /></span><p>{t("Оценок: {count}", { count: venue.review_count })}</p></div></div>}
-            <div className="venue-public-empty"><MessageSquareText size={24} /><p>{t("Подробные отзывы пока недоступны")}</p></div>
-          </section>
-          <section ref={(node) => { sectionRefs.current.about = node; }} className="venue-content-section venue-scroll-section" aria-labelledby="venue-about-title">
-            <div className="venue-section-heading"><h2 id="venue-about-title">{t("О месте")}</h2></div>
-            <p className="venue-about-copy">{venue.description || t("Описание заведения пока не добавлено")}</p>
-            {venue.filters.length > 0 && <div className="venue-feature-list">{venue.filters.map((filter) => <span key={filter}><Check size={15} />{t(filter)}</span>)}</div>}
-          </section>
-          <section ref={(node) => { sectionRefs.current.contacts = node; }} className="venue-content-section venue-scroll-section" aria-labelledby="venue-contacts-title">
-            <div className="venue-section-heading"><h2 id="venue-contacts-title">{t("Контакты")}</h2></div>
-            <div className="venue-contact-details"><div><MapPin size={20} /><span><strong>{venue.address}</strong><small>{`${venue.city}, ${venue.country_code}`}</small></span></div></div>
-          </section>
+          {menuState.categories.length > 0 && <nav className="venue-section-nav venue-public-category-nav" aria-label={t("Категории меню")}>{menuState.categories.map((category) => <button type="button" key={category.id} className={(activeCategory || menuState.categories[0].id) === category.id ? "active" : ""} aria-current={(activeCategory || menuState.categories[0].id) === category.id ? "location" : undefined} onClick={() => openCategory(category.id)}>{category.name}</button>)}</nav>}
+          <div className="venue-public-menu-content">{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
         </div>
       </div>
       <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
@@ -191,15 +211,13 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
         <button type="button" className="button" disabled>{t("Забронировать")}</button>
       </aside>
       <div className="venue-mobile-booking-status" role="status"><span><CalendarDays size={16} />{t("Бронирование пока недоступно")}</span></div>
-      {infoOpen && <div className="venue-info-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setInfoOpen(false); }}>
-        <section className="venue-info-sheet" role="dialog" aria-modal="true" aria-labelledby="venue-info-title">
-          <div className="venue-info-handle" aria-hidden="true" /><button ref={infoCloseRef} type="button" className="venue-info-close" aria-label={t("Закрыть")} onClick={() => setInfoOpen(false)}><X size={22} /></button>
-          <h2 id="venue-info-title">{t("Информация о заведении")}</h2><h3>{venue.name}</h3>
-          <div className="venue-info-group"><strong>{t("О месте")}</strong><p>{venue.description || t("Описание заведения пока не добавлено")}</p>
-            <div className={`venue-about-photo ${venue.image_url ? "has-image" : ""}`} style={photoStyle} role="img" aria-label={t("Фото заведения: {name}", { name: venue.name })}>{!venue.image_url && <Image src={`/assets/categories/${illustration}.png`} alt="" width={170} height={170} />}</div>
-            {venue.filters.length > 0 && <div className="venue-feature-list">{venue.filters.map((filter) => <span key={filter}><Check size={15} />{t(filter)}</span>)}</div>}
+      {reviewsOpen && <div className="venue-reviews-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setReviewsOpen(false); }}>
+        <section className="venue-reviews-dialog" role="dialog" aria-modal="true" aria-labelledby="venue-reviews-dialog-title">
+          <header><h2 id="venue-reviews-dialog-title">{t("Рейтинг и отзывы")}</h2><button ref={reviewsCloseRef} type="button" aria-label={t("Закрыть")} onClick={() => setReviewsOpen(false)}><X size={21} /></button></header>
+          <div className="venue-reviews-score"><strong>{venue.review_count > 0 ? venue.rating.toFixed(1) : "—"}</strong><span>{t("Оценок: {count}", { count: venue.review_count })}</span></div>
+          <div className="venue-reviews-list"><h3>{t("Отзывы")}</h3>
+            {reviewsState.loading ? <p role="status">{t("Загружаем отзывы...")}</p> : reviewsState.error ? <div role="alert"><p>{t("Не удалось загрузить отзывы")}</p><button type="button" onClick={() => { setReviewsState({ items: [], loading: true, error: false }); setReviewsReload((value) => value + 1); }}>{t("Повторить")}</button></div> : reviewsState.items.length ? reviewsState.items.map((review) => <article key={review.id}><div className="venue-review-meta"><strong>{t("Гость")}</strong><span aria-label={t("Оценка: {rating} из 5", { rating: review.rating })}>{Array.from({ length: 5 }, (_, index) => <Star key={index} size={16} fill={index < review.rating ? "currentColor" : "none"} />)}</span></div><small>{new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(review.created_at))}</small>{review.body && <p>{review.body}</p>}{review.owner_reply && <div className="venue-review-reply"><strong>{t("Ответ заведения")}</strong><p>{review.owner_reply}</p></div>}</article>) : <p>{t("Отзывов пока нет")}</p>}
           </div>
-          <div className="venue-info-group"><strong>{t("Контакты")}</strong><p><MapPin size={18} />{venue.address}, {venue.city}, {venue.country_code}</p></div>
         </section>
       </div>}
     </article> : state.error ? <div className="spots-catalog-status" role="alert"><strong>{t(state.error === "missing" ? "Заведение больше недоступно" : "Не удалось загрузить заведение")}</strong>{state.error === "failed" && <button type="button" className="button secondary" onClick={() => { setState({}); setReload((value) => value + 1); }}><RefreshCw size={17} />{t("Повторить")}</button>}</div> : <div className="spots-catalog-status" role="status">{t("Загружаем заведение...")}</div>}

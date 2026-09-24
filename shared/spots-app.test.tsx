@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SpotsApp from "./spots-app";
 import { AuthAPIError, getCurrentUser, updateProfile } from "../lib/auth-api";
-import { getPublicVenue, getPublicVenueMenu, listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
+import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
 import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
 
 const router = { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() };
@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   }, () => window.location.search)),
 }));
 vi.mock("../lib/auth-api", async (original) => ({ ...await original<object>(), getCurrentUser: vi.fn(), updateProfile: vi.fn() }));
-vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn(), getPublicVenueMenu: vi.fn() }));
+vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn(), getPublicVenueMenu: vi.fn(), getPublicVenueReviews: vi.fn() }));
 vi.mock("../lib/saved-venues-api", () => ({ listSavedVenueIDs: vi.fn(), addSavedVenue: vi.fn(), removeSavedVenue: vi.fn() }));
 const publicVenues: PublicVenue[] = [
   { id: "north", slug: "north", name: "North & Vine", description: "A small neighborhood bistro.", category_slug: "restaurants", cuisine_type: "Европейская", address: "Dunajská 12", city: "Bratislava", country_code: "SK", rating: 4.8, review_count: 12, tags: ["Стол через 20 мин"], filters: ["Лучшие"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
@@ -44,6 +44,7 @@ beforeEach(() => {
   });
   vi.mocked(getPublicVenue).mockImplementation(async (id) => publicVenues.find((venue) => venue.id === id)!);
   vi.mocked(getPublicVenueMenu).mockResolvedValue([]);
+  vi.mocked(getPublicVenueReviews).mockResolvedValue([]);
   vi.mocked(listSavedVenueIDs).mockResolvedValue([]);
   vi.mocked(addSavedVenue).mockResolvedValue();
   vi.mocked(removeSavedVenue).mockResolvedValue();
@@ -133,8 +134,7 @@ describe("Spots guest experience", () => {
     expect(getPublicVenue).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
     expect(router.replace).not.toHaveBeenCalledWith("/ru/login");
     expect(screen.queryByRole("button", { name: "В избранное" })).not.toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Разделы заведения" })).toBeInTheDocument();
-    expect(screen.getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Разделы заведения" })).not.toBeInTheDocument();
     expect(screen.getByText("Меню этого заведения пока недоступно")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Забронировать" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Назад к результатам" })).toBeInTheDocument();
@@ -149,15 +149,22 @@ describe("Spots guest experience", () => {
 
   it("searches published menu items and opens venue information from More", async () => {
     nativeReplace(null, "", "/ru/venue/casa");
-    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ id: "pasta", name: "Паста", items: [
-      { id: "carbonara", name: "Карбонара", price_minor: 1290, currency: "EUR", description: "Сливочная паста" },
-      { id: "bolognese", name: "Болоньезе", price_minor: 1190, currency: "EUR" },
-    ] }]);
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([
+      { id: "pasta", name: "Паста", items: [
+        { id: "carbonara", name: "Карбонара", price_minor: 1290, currency: "EUR", description: "Сливочная паста" },
+        { id: "bolognese", name: "Болоньезе", price_minor: 1190, currency: "EUR" },
+      ] },
+      { id: "drinks", name: "Напитки", items: [{ id: "tea", name: "Чай", price_minor: 390, currency: "EUR" }] },
+    ]);
     render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
     expect(await screen.findByText("Карбонара")).toBeInTheDocument();
     expect(getPublicVenueMenu).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
+    const categories = screen.getByRole("navigation", { name: "Категории меню" });
+    fireEvent.click(within(categories).getByRole("button", { name: "Напитки" }));
+    expect(within(categories).getByRole("button", { name: "Напитки" })).toHaveAttribute("aria-current", "location");
     fireEvent.click(screen.getByRole("button", { name: "Ещё о заведении" }));
-    fireEvent.click(screen.getByRole("button", { name: "Информация о заведении" }));
+    const moreMenu = document.querySelector(".venue-more-popover") as HTMLElement;
+    fireEvent.click(within(moreMenu).getByRole("button", { name: "Информация о заведении" }));
     const info = screen.getByRole("dialog", { name: "Информация о заведении" });
     expect(within(info).getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
     expect(within(info).getByText(/Obchodná 24/)).toBeInTheDocument();
@@ -171,18 +178,32 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("heading", { name: "Что будем искать?" })).toBeInTheDocument();
   });
 
+  it("opens real published reviews from the rating without exposing private order data", async () => {
+    nativeReplace(null, "", "/ru/venue/casa");
+    vi.mocked(getPublicVenueReviews).mockResolvedValue([{ id: "review-1", rating: 5, body: "Отличная паста", owner_reply: "Спасибо!", created_at: "2026-09-20T10:00:00Z" }]);
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    await screen.findByRole("heading", { name: "Casa Forma" });
+    fireEvent.click(screen.getByRole("button", { name: "Открыть отзывы" }));
+    const reviews = screen.getByRole("dialog", { name: "Рейтинг и отзывы" });
+    expect(await within(reviews).findByText("Отличная паста")).toBeInTheDocument();
+    expect(within(reviews).getByText("Спасибо!")).toBeInTheDocument();
+    expect(within(reviews).getByText("Гость")).toBeInTheDocument();
+    expect(getPublicVenueReviews).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
+    fireEvent.click(within(reviews).getByRole("button", { name: "Закрыть" }));
+    expect(screen.queryByRole("dialog", { name: "Рейтинг и отзывы" })).not.toBeInTheDocument();
+  });
+
   it("opens each selected venue in the rich detail layout without mixing demo data", async () => {
     render(<SpotsApp initialScreen="discover" />);
     fireEvent.click(await screen.findByRole("button", { name: "Открыть North & Vine" }));
     expect(window.location.pathname).toBe("/ru/venue/north");
     expect(await screen.findByRole("heading", { name: "North & Vine" })).toBeInTheDocument();
-    expect(screen.getByText("A small neighborhood bistro.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Информация о заведении" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Назад", exact: true }));
     fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Forma" }));
     expect(window.location.pathname).toBe("/ru/venue/casa");
     expect(await screen.findByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
-    expect(screen.getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
-    expect(screen.queryByText("A small neighborhood bistro.")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
     expect(getPublicVenue).toHaveBeenCalledWith("north", expect.any(AbortSignal));
     expect(getPublicVenue).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
   });
