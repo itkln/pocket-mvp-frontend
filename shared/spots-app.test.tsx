@@ -181,6 +181,33 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("heading", { name: "Что будем искать?" })).toBeInTheDocument();
   });
 
+  it("closes the mobile venue information sheet with a downward swipe but not while scrolling its content", async () => {
+    const originalWidth = window.innerWidth;
+    Object.defineProperty(window, "innerWidth", { configurable: true, value: 390 });
+    try {
+      nativeReplace(null, "", "/ru/venue/casa");
+      render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+      await screen.findByRole("heading", { name: "Casa Forma" });
+      fireEvent.click(screen.getByRole("button", { name: "Ещё о заведении" }));
+      fireEvent.click(within(document.querySelector(".venue-more-popover") as HTMLElement).getByRole("button", { name: "Информация о заведении" }));
+      const info = screen.getByRole("dialog", { name: "Информация о заведении" });
+      info.scrollTop = 20;
+      fireEvent.touchStart(info, { touches: [{ clientX: 100, clientY: 100 }] });
+      fireEvent.touchMove(info, { touches: [{ clientX: 100, clientY: 220 }] });
+      fireEvent.touchEnd(info);
+      expect(info).toBeInTheDocument();
+
+      info.scrollTop = 0;
+      fireEvent.touchStart(info, { touches: [{ clientX: 100, clientY: 100 }] });
+      fireEvent.touchMove(info, { touches: [{ clientX: 100, clientY: 220 }] });
+      expect(info).toHaveStyle({ transform: "translateY(120px)" });
+      fireEvent.touchEnd(info);
+      expect(screen.queryByRole("dialog", { name: "Информация о заведении" })).not.toBeInTheDocument();
+    } finally {
+      Object.defineProperty(window, "innerWidth", { configurable: true, value: originalWidth });
+    }
+  });
+
   it("opens real published reviews from the rating without exposing private order data", async () => {
     nativeReplace(null, "", "/ru/venue/casa");
     vi.mocked(getPublicVenueReviews).mockResolvedValue([{ id: "review-1", rating: 5, body: "Отличная паста", owner_reply: "Спасибо!", created_at: "2026-09-20T10:00:00Z" }]);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type TouchEvent } from "react";
 import Image from "next/image";
 import { ArrowLeft, CalendarDays, Check, Ellipsis, Heart, Info, MapPin, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
 import { APIError } from "../../../lib/api-client";
@@ -27,6 +27,8 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   const [compactHeader, setCompactHeader] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [infoDrag, setInfoDrag] = useState(0);
+  const [infoDragging, setInfoDragging] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
@@ -35,6 +37,8 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   const reviewsCloseRef = useRef<HTMLButtonElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
   const infoOverlayRef = useRef<HTMLDivElement>(null);
+  const infoTouchStart = useRef<{ x: number; y: number } | null>(null);
+  const infoDragRef = useRef(0);
   const moreRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
 
@@ -130,6 +134,28 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
     });
   };
   const openReviews = () => { setReviewsState({ items: [], loading: true, error: false }); setReviewsOpen(true); };
+  const onInfoTouchStart = (event: TouchEvent<HTMLElement>) => {
+    if (window.innerWidth > 760 || event.currentTarget.scrollTop > 0) return;
+    const touch = event.touches[0];
+    if (touch) infoTouchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+  const onInfoTouchMove = (event: TouchEvent<HTMLElement>) => {
+    const start = infoTouchStart.current;
+    const touch = event.touches[0];
+    if (!start || !touch || event.currentTarget.scrollTop > 0) return;
+    const distance = touch.clientY - start.y;
+    if (distance <= 0 || Math.abs(touch.clientX - start.x) > distance) return;
+    infoDragRef.current = Math.min(distance, 320);
+    setInfoDragging(true);
+    setInfoDrag(infoDragRef.current);
+  };
+  const onInfoTouchEnd = () => {
+    if (infoDragRef.current >= 80) setInfoOpen(false);
+    infoTouchStart.current = null;
+    infoDragRef.current = 0;
+    setInfoDragging(false);
+    setInfoDrag(0);
+  };
   const photoStyle = venue?.image_url ? { backgroundImage: `url(${JSON.stringify(venue.image_url)})` } as CSSProperties : undefined;
   const illustration = venue ? illustrations[venue.category_slug] ?? venue.category_slug : "restaurants";
   const details = venue ? [venue.cuisine_type ? t(venue.cuisine_type) : "", venue.address, venue.city].filter(Boolean).join(" · ") : "";
@@ -183,7 +209,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
               </div>
             </div>
             {infoOpen && <div ref={infoOverlayRef} className="venue-info-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setInfoOpen(false); }}>
-              <section className="venue-info-sheet" role="dialog" aria-modal="true" aria-labelledby="venue-info-title">
+              <section className={`venue-info-sheet ${infoDragging ? "dragging" : ""}`} role="dialog" aria-modal="true" aria-labelledby="venue-info-title" style={infoDrag ? { transform: `translateY(${infoDrag}px)` } : undefined} onTouchStart={onInfoTouchStart} onTouchMove={onInfoTouchMove} onTouchEnd={onInfoTouchEnd} onTouchCancel={onInfoTouchEnd}>
                 <div className="venue-info-handle" aria-hidden="true" /><button ref={infoCloseRef} type="button" className="venue-info-close" aria-label={t("Закрыть")} onClick={() => setInfoOpen(false)}><X size={22} /></button>
                 <h2 id="venue-info-title">{t("Информация о заведении")}</h2><h3>{venue.name}</h3>
                 <div className="venue-info-group"><strong>{t("Контакты")}</strong><p><MapPin size={18} />{venue.address}, {venue.city}, {venue.country_code}</p></div>
