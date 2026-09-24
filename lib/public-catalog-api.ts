@@ -28,6 +28,21 @@ export type PublicVenuePage = {
   has_next: boolean;
 };
 
+export type PublicMenuItem = {
+  id: string;
+  name: string;
+  description?: string;
+  price_minor: number;
+  currency: string;
+  image_url?: string;
+};
+
+export type PublicMenuCategory = {
+  id: string;
+  name: string;
+  items: PublicMenuItem[];
+};
+
 export type PublicVenueSearch = {
   city?: string;
   query?: string;
@@ -64,4 +79,9 @@ export async function listPublicVenues(search: PublicVenueSearch = {}, signal?: 
 export async function getPublicVenue(id: string, signal?: AbortSignal): Promise<PublicVenue> {
   const result = await apiRequest<{ venue: PublicVenue }>(`/public/venues/${encodeURIComponent(id)}`, { signal });
   return result.venue;
+}
+
+export async function getPublicVenueMenu(id: string, signal?: AbortSignal): Promise<PublicMenuCategory[]> {
+  const result = await apiRequest<{ categories: PublicMenuCategory[] }>(`/public/venues/${encodeURIComponent(id)}/menu`, { signal });
+  return result.categories;
 }

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { catalogCityValue, getPublicVenue, listPublicVenues } from "./public-catalog-api";
+import { catalogCityValue, getPublicVenue, getPublicVenueMenu, listPublicVenues } from "./public-catalog-api";
 
 describe("public catalog API", () => {
   const fetchMock = vi.fn();
@@ -39,5 +39,11 @@ describe("public catalog API", () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ venue: { id: "venue-id", name: "Renamed venue" } }), { status: 200 }));
     await expect(getPublicVenue("venue-id")).resolves.toMatchObject({ id: "venue-id", name: "Renamed venue" });
     expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/public/venues/venue-id");
+  });
+
+  it("loads the published menu without owner credentials", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ categories: [{ id: "lunch", name: "Lunch", items: [] }] }), { status: 200 }));
+    await expect(getPublicVenueMenu("venue-id")).resolves.toMatchObject([{ id: "lunch" }]);
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/public/venues/venue-id/menu");
   });
 });
