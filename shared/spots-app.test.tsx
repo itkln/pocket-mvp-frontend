@@ -229,6 +229,7 @@ describe("Spots guest experience", () => {
     expect(await screen.findByText("Карбонара")).toBeInTheDocument();
     expect(getPublicVenueMenu).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
     const categories = screen.getByRole("navigation", { name: "Категории меню" });
+    expect(categories.parentElement).toHaveClass("venue-public-category-sticky-shell");
     fireEvent.click(within(categories).getByRole("button", { name: "Напитки" }));
     expect(within(categories).getByRole("button", { name: "Напитки" })).toHaveAttribute("aria-current", "location");
     fireEvent.click(screen.getByRole("button", { name: "Ещё о заведении" }));

@@ -956,12 +956,25 @@
   background: #fff;
 }
 .pocket-spots .spots-real-venue-detail .venue-detail-content { overflow: visible; }
+.pocket-spots .spots-real-venue-detail .venue-public-category-sticky-shell { display: contents; }
 .pocket-spots .spots-real-venue-detail .venue-public-category-nav { border-radius: 24px 24px 0 0; }
 @media (min-width: 901px) {
-  /* Cover the scrolling column behind the menu so its top gap matches the booking card. */
-  .pocket-spots .spots-real-venue-detail .venue-public-category-nav {
+  /* A solid sticky shell masks the scrolling content while keeping the booking-card gap. */
+  .pocket-spots .spots-real-venue-detail .venue-public-category-sticky-shell {
+    position: sticky;
+    z-index: 12;
+    top: 80px;
+    display: block;
     margin-top: -16px;
-    border-top: 16px solid #f4f4f5;
+    padding-top: 16px;
+    background: #f4f4f5;
+  }
+  .pocket-spots .spots-real-venue-detail .venue-public-category-nav {
+    position: relative;
+    z-index: auto;
+    top: auto;
+    background: #fff;
+    backdrop-filter: none;
   }
 }
 .pocket-spots .venue-content-section { padding: 36px 32px; border-radius: 0; background: transparent; }
