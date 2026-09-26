@@ -66,6 +66,36 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
 	const pendingSaved = useRef(new Set<string>());
 	const [selectedVenueID, setSelectedVenueID] = useState(initialVenueId ?? "");
 	const savedReady = Boolean(currentUser && savedForUser === currentUser.id);
+  const appRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (screen !== "discover" || !authReady) return;
+    const app = appRef.current;
+    if (!app) return;
+    let start: { x: number; y: number } | null = null;
+    const onTouchStart = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      start = event.touches.length === 1 && touch ? { x: touch.clientX, y: touch.clientY } : null;
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!start || !touch || event.touches.length !== 1 || !event.cancelable) return;
+      if (event.target instanceof Element && event.target.closest('dialog[open], [aria-modal="true"], input, textarea, select, [contenteditable="true"]')) return;
+      const deltaX = touch.clientX - start.x;
+      const deltaY = touch.clientY - start.y;
+      if (Math.abs(deltaY) < 6 || Math.abs(deltaY) <= Math.abs(deltaX)) return;
+      const scrollRoot = document.scrollingElement ?? document.documentElement;
+      const scrollTop = Math.max(0, scrollRoot.scrollTop, window.scrollY);
+      const maxScroll = Math.max(0, scrollRoot.scrollHeight - window.innerHeight);
+      if (maxScroll <= 1 || (deltaY > 0 && scrollTop <= 1) || (deltaY < 0 && scrollTop >= maxScroll - 1)) event.preventDefault();
+    };
+    app.addEventListener("touchstart", onTouchStart, { passive: true });
+    app.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      app.removeEventListener("touchstart", onTouchStart);
+      app.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [authReady, screen]);
 
   const toggleSaved = async (id: string) => {
     if (!currentUser) {
@@ -249,7 +279,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
 
   const cartTotal = menuItems.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0);
 
-  return <div className={`pocket-spots ${currentUser ? "signed-in" : "guest"} ${screen === "venue" ? "venue-detail-active" : ""}`}>
+  return <div ref={appRef} className={`pocket-spots ${currentUser ? "signed-in" : "guest"} ${screen === "venue" ? "venue-detail-active" : ""}`}>
     <SpotsHeader user={currentUser} screen={screen} city={city} onCityChange={(value) => {
       setCity(value);
       try { localStorage.setItem("pocket:spots-city", value); } catch { /* Keep the selection for this session. */ }

@@ -203,8 +203,8 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
                 {venue.preorder_enabled && <span><Check size={16} />{t("Предзаказ доступен")}</span>}
                 {venue.tags.map((tag) => <span key={tag}>{t(tag)}</span>)}
                 <div ref={infoRef} className="venue-desktop-info-wrap"><button type="button" className="venue-desktop-info-button" aria-label={t("Информация о заведении")} aria-expanded={infoOpen} onClick={() => setInfoOpen((value) => !value)}><Info size={17} /></button></div>
-                <div ref={moreRef} className="venue-public-more-wrap"><button type="button" className="venue-public-more" aria-label={t("Ещё о заведении")} aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)}><Ellipsis size={21} /></button>
-                  {moreOpen && <div className="venue-more-popover"><button type="button" onClick={() => { setMoreOpen(false); setInfoOpen(true); }}>{t("Информация о заведении")}</button></div>}
+                <div ref={moreRef} className="venue-public-more-wrap"><button type="button" className="venue-public-more" aria-label={t("Ещё о заведении")} aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)}><Ellipsis size={24} strokeWidth={2.5} /></button>
+                  {moreOpen && <div className="venue-more-popover"><button type="button" onClick={() => { setMoreOpen(false); setInfoOpen(true); }}><Info size={18} aria-hidden="true" /><span>{t("Информация о заведении")}</span></button></div>}
                 </div>
               </div>
             </div>

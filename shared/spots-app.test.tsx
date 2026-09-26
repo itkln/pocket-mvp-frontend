@@ -55,6 +55,38 @@ beforeEach(() => {
 });
 
 describe("Spots guest experience", () => {
+  it("blocks vertical overscroll on a short discovery page without blocking horizontal carousels", async () => {
+    vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
+    const { container } = render(<SpotsApp initialScreen="discover" />);
+    await screen.findByRole("navigation", { name: "Категории" });
+    const app = container.querySelector(".pocket-spots") as HTMLElement;
+    const touch = (type: string, x: number, y: number) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, "touches", { value: [{ clientX: x, clientY: y }] });
+      app.dispatchEvent(event);
+      return event;
+    };
+
+    touch("touchstart", 100, 100);
+    expect(touch("touchmove", 100, 160).defaultPrevented).toBe(true);
+    touch("touchstart", 100, 100);
+    expect(touch("touchmove", 160, 105).defaultPrevented).toBe(false);
+
+    const heightDescriptor = Object.getOwnPropertyDescriptor(document.documentElement, "scrollHeight");
+    const scrollDescriptor = Object.getOwnPropertyDescriptor(window, "scrollY");
+    try {
+      Object.defineProperty(document.documentElement, "scrollHeight", { configurable: true, value: 2000 });
+      Object.defineProperty(window, "scrollY", { configurable: true, value: 100 });
+      touch("touchstart", 100, 100);
+      expect(touch("touchmove", 100, 40).defaultPrevented).toBe(false);
+    } finally {
+      if (heightDescriptor) Object.defineProperty(document.documentElement, "scrollHeight", heightDescriptor);
+      else Reflect.deleteProperty(document.documentElement, "scrollHeight");
+      if (scrollDescriptor) Object.defineProperty(window, "scrollY", scrollDescriptor);
+      else Reflect.deleteProperty(window, "scrollY");
+    }
+  });
+
   it("shows guest discovery without bottom navigation and opens sign in from the header", async () => {
     vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
     render(<SpotsApp initialScreen="discover" />);
