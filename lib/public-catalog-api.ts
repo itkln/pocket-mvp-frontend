@@ -90,7 +90,7 @@ export async function getPublicVenue(id: string, signal?: AbortSignal): Promise<
 }
 
 export async function getPublicVenueMenu(id: string, signal?: AbortSignal): Promise<PublicMenuCategory[]> {
-  const result = await apiRequest<{ categories: PublicMenuCategory[] }>(`/public/venues/${encodeURIComponent(id)}/menu`, { signal });
+  const result = await apiRequest<{ categories: PublicMenuCategory[] }>(`/public/venues/${encodeURIComponent(id)}/menu`, { signal, cache: "no-store" });
   return result.categories;
 }
 

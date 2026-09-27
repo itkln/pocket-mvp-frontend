@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
-import { customerNavigation, menuItems } from "../features/pocket/model";
-import { Checkout, CustomerMenu, DiscoverScreen, HistoryScreen, ReservationScreen } from "../features/pocket/customer";
+import { customerNavigation } from "../features/pocket/model";
+import { DiscoverScreen, HistoryScreen, ReservationScreen } from "../features/pocket/customer";
 import { spotsCities, SpotsBottomNavigation, SpotsHeader } from "../features/pocket/customer/navigation";
 import { SavedPlacesScreen } from "../features/pocket/customer/discover";
 import { VenueDetailsScreen } from "../features/pocket/customer/venue-details";
@@ -19,10 +19,10 @@ import { localeFromPathname, type Locale } from "../features/pocket/locales";
 import { useAppShell } from "./use-app-shell";
 import { categoryForRoute, spotCategories } from "../features/pocket/customer/categories";
 
-const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.map((item) => item.id), "checkout", "saved", "reservations", "settings", "notifications", "venue"];
+const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.filter((item) => item.id !== "browse-menu").map((item) => item.id), "saved", "reservations", "settings", "notifications", "venue"];
 const screenForRoute = (screen?: string) => screen && screens.includes(screen) ? screen : "discover";
 const spotsPath = (locale: Locale, screen: string) => `/${locale}/${screen}`;
-const isPublicScreen = (screen: string) => screen === "discover" || screen === "browse-menu" || screen === "venue" || Boolean(categoryForRoute(screen));
+const isPublicScreen = (screen: string) => screen === "discover" || screen === "venue" || Boolean(categoryForRoute(screen));
 type AccountDialogSection = "profile" | "security" | "notifications";
 const isAccountDialogSection = (value: string | null): value is AccountDialogSection => value === "profile" || value === "security" || value === "notifications";
 
@@ -54,7 +54,6 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
   const [authReady, setAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [screen, setScreen] = useState(screenForRoute(initialScreen));
-  const [cart, setCart] = useState<Record<number, number>>({});
   const searchQuery = searchParams.get("q") ?? "";
   const category = categoryForRoute(screen);
   const filter = searchParams.get("filter") ?? "Все";
@@ -154,6 +153,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
           setSelectedVenueID(initialVenueId ?? "");
           setScreen(nextScreen);
           setAuthReady(true);
+          if (initialScreen !== nextScreen) router.replace(spotsPath(routeLocale, nextScreen));
           return;
         }
         router.replace(error instanceof AuthAPIError && error.status === 401 ? `/${routeLocale}/login` : `/${routeLocale}/login?error=unavailable`);
@@ -248,7 +248,6 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
     setSavedPlaces([]);
     setSavedForUser("");
     setSavedErrorUser("");
-    setCart({});
     setAccountDialogSection(null);
     setSelectedVenueID("");
     setScreen("discover");
@@ -257,27 +256,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
     window.scrollTo(0, 0);
   };
 
-  const addItem = (id: number) => {
-    if (!currentUser) {
-      router.push(`/${locale}/login`);
-      return;
-    }
-    setCart((current) => ({ ...current, [id]: (current[id] || 0) + 1 }));
-    shell.notify("Добавлено в заказ");
-  };
-
-  const updateQty = (id: number, delta: number) => {
-    setCart((current) => {
-      const next = Math.max(0, (current[id] || 0) + delta);
-      const copy = { ...current };
-      if (next === 0) delete copy[id]; else copy[id] = next;
-      return copy;
-    });
-  };
-
   if (!authReady) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
-
-  const cartTotal = menuItems.reduce((sum, item) => sum + item.price * (cart[item.id] || 0), 0);
 
   return <div ref={appRef} className={`pocket-spots ${currentUser ? "signed-in" : "guest"} ${screen === "venue" ? "venue-detail-active" : ""}`}>
     <SpotsHeader user={currentUser} screen={screen} city={city} onCityChange={(value) => {
@@ -291,9 +270,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
         {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
         {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} />}
         {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("reservation")}>{t("Забронировать стол")}</Button></div></section>}
-        {screen === "browse-menu" && <>{validSource && <button type="button" className="back-link" onClick={() => navigate(sourceScreen!, sourceURL.searchParams)}><ArrowLeft size={18} />{t("Назад к результатам")}</button>}<CustomerMenu cart={cart} onAdd={addItem} onUpdateQty={updateQty} onCart={() => navigate("checkout")} onReserve={() => navigate("reservation")} /></>}
-        {screen === "checkout" && <Checkout cart={cart} total={cartTotal} updateQty={updateQty} onBack={() => navigate("browse-menu")} onDone={() => { setCart({}); navigate("history"); shell.notify("Предзаказ принят"); }} />}
-        {screen === "reservation" && <ReservationScreen onMenu={() => navigate("browse-menu")} notify={shell.notify} />}
+        {screen === "reservation" && <ReservationScreen onMenu={() => navigate("discover")} notify={shell.notify} />}
         {screen === "history" && <HistoryScreen notify={shell.notify} />}
         {screen === "profile" && currentUser && <GuestProfile user={currentUser} onEditProfile={editProfile} onNavigate={navigate} onLogout={signOut} />}
         {["settings", "notifications"].includes(screen) && currentUser && <GuestSettings key={screen} notifications={screen === "notifications"} onEditProfile={editProfile} user={currentUser} onNavigate={navigate} notify={shell.notify} onLogout={signOut} onUpdate={setCurrentUser} />}

@@ -66,14 +66,29 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   }, [venueID, reviewsOpen, reviewsReload]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    getPublicVenueMenu(venueID, controller.signal)
-      .then((categories) => setMenuState({ categories, loading: false, error: false }))
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setMenuState({ categories: [], loading: false, error: true });
-      });
-    return () => controller.abort();
+    let controller: AbortController | undefined;
+    const loadMenu = () => {
+      controller?.abort();
+      const request = new AbortController();
+      controller = request;
+      getPublicVenueMenu(venueID, request.signal)
+        .then((categories) => {
+          if (!request.signal.aborted) setMenuState({ categories, loading: false, error: false });
+        })
+        .catch((error: unknown) => {
+          if (request.signal.aborted || error instanceof DOMException && error.name === "AbortError") return;
+          setMenuState({ categories: [], loading: false, error: true });
+        });
+    };
+    const onVisibilityChange = () => { if (document.visibilityState === "visible") loadMenu(); };
+    loadMenu();
+    window.addEventListener("focus", loadMenu);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      controller?.abort();
+      window.removeEventListener("focus", loadMenu);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [venueID, reload]);
 
   useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);

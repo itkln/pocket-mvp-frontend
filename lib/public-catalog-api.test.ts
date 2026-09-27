@@ -45,6 +45,7 @@ describe("public catalog API", () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ categories: [{ id: "lunch", name: "Lunch", items: [] }] }), { status: 200 }));
     await expect(getPublicVenueMenu("venue-id")).resolves.toMatchObject([{ id: "lunch" }]);
     expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/public/venues/venue-id/menu");
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({ cache: "no-store" });
   });
 
   it("loads published reviews without owner credentials", async () => {

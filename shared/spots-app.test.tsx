@@ -216,6 +216,22 @@ describe("Spots guest experience", () => {
     expect(screen.queryByRole("search", { name: "Поиск по меню" })).not.toBeInTheDocument();
   });
 
+  it("redirects legacy demo menu and checkout routes to real venue discovery", async () => {
+    nativeReplace(null, "", "/ru/browse-menu");
+    vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
+    const guest = render(<SpotsApp initialScreen="browse-menu" />);
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/ru/discover"));
+    expect(screen.queryByRole("button", { name: /Добавить в заказ/ })).not.toBeInTheDocument();
+    guest.unmount();
+
+    router.replace.mockClear();
+    nativeReplace(null, "", "/ru/checkout");
+    vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer" });
+    render(<SpotsApp initialScreen="checkout" />);
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/ru/discover"));
+    expect(screen.queryByText("Предзаказ принят")).not.toBeInTheDocument();
+  });
+
   it("searches published menu items and opens venue information from More", async () => {
     nativeReplace(null, "", "/ru/venue/casa");
     vi.mocked(getPublicVenueMenu).mockResolvedValue([
@@ -246,6 +262,38 @@ describe("Spots guest experience", () => {
     expect(within(search).queryByText("Болоньезе")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Очистить поиск" }));
     expect(screen.getByRole("heading", { name: "Что будем искать?" })).toBeInTheDocument();
+  });
+
+  it("renders server menu order, prices and photos, then refreshes changed availability on focus", async () => {
+    nativeReplace(null, "", "/ru/venue/casa");
+    vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
+    vi.mocked(getPublicVenueMenu)
+      .mockResolvedValueOnce([
+        { id: "food", name: "Еда", items: [
+          { id: "salad", name: "Салат", price_minor: 990, currency: "EUR", image_url: "https://example.test/salad.jpg" },
+          { id: "soup", name: "Суп", price_minor: 825, currency: "USD" },
+        ] },
+        { id: "drinks", name: "Напитки", items: [{ id: "tea", name: "Чай", price_minor: 390, currency: "EUR" }] },
+      ])
+      .mockResolvedValue([
+        { id: "drinks", name: "Напитки", items: [{ id: "tea", name: "Чай", price_minor: 450, currency: "EUR" }] },
+      ]);
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    await screen.findByRole("heading", { name: "Салат" });
+    const sections = document.querySelectorAll(".venue-public-menu-category");
+    expect(Array.from(sections, (section) => section.getAttribute("aria-label"))).toEqual(["Еда", "Напитки"]);
+    expect(Array.from(sections[0].querySelectorAll(".venue-public-menu-card h3"), (name) => name.textContent)).toEqual(["Салат", "Суп"]);
+    expect(within(sections[0] as HTMLElement).getByText(/9,90\s*€/)).toBeInTheDocument();
+    expect(within(sections[0] as HTMLElement).getByText(/8,25\s*\$/)).toBeInTheDocument();
+    expect(within(sections[0] as HTMLElement).getByRole("img", { name: "Салат" })).toHaveStyle({ backgroundImage: 'url("https://example.test/salad.jpg")' });
+    expect(screen.queryByRole("button", { name: /Добавить в заказ/ })).not.toBeInTheDocument();
+
+    fireEvent(window, new Event("focus"));
+    await waitFor(() => expect(getPublicVenueMenu).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.queryByRole("heading", { name: "Салат" })).not.toBeInTheDocument());
+    expect(screen.queryByRole("heading", { name: "Суп" })).not.toBeInTheDocument();
+    expect(document.querySelectorAll(".venue-public-menu-category")).toHaveLength(1);
+    expect(screen.getByText(/4,50\s*€/)).toBeInTheDocument();
   });
 
   it("closes the mobile venue information sheet with a downward swipe but not while scrolling its content", async () => {
