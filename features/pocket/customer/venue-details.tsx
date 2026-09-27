@@ -203,7 +203,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
       <div className="venue-search-results" aria-live="polite">{!normalizedQuery ? <h2>{t("Что будем искать?")}</h2> : menuState.loading ? <p>{t("Загружаем меню...")}</p> : menuState.error ? <p>{t("Не удалось загрузить меню")}</p> : searchResults.length ? menuCards(searchResults) : <div className="venue-search-no-results"><Search size={28} /><h2>{t("Ничего не нашли")}</h2><p>{t("Попробуйте другое название блюда")}</p></div>}</div>
       <div className="venue-mobile-booking-status" role="status"><span><CalendarDays size={16} />{t("Бронирование пока недоступно")}</span></div>
     </div>}
-    <button type="button" className="back-link" aria-label={t("Назад")} onClick={onBack}><ArrowLeft size={23} aria-hidden="true" /></button>
+    <button type="button" className="back-link" aria-label={t("Назад")} onClick={onBack}><ArrowLeft size={30} strokeWidth={2.3} aria-hidden="true" /></button>
     {venue ? <article className="spots-restaurant venue-detail-page" aria-labelledby="venue-title">
       <div className="venue-primary-column">
         <div className="venue-overview-block">

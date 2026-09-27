@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { createPortal } from "react-dom";
-import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { getVenueAvailability, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
@@ -30,27 +29,6 @@ const wishOptions = [
   { id: "children", icon: "🧸", label: "С детьми" },
 ] as const;
 
-function BookingOverlay({ children }: { children: ReactNode }) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const previousFocus = document.activeElement as HTMLElement | null;
-    const dialog = rootRef.current?.querySelector<HTMLElement>('[role="dialog"]');
-    dialog?.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
-    const trapFocus = (event: KeyboardEvent) => {
-      if (event.key !== "Tab" || !dialog) return;
-      const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
-      if (!buttons.length) return;
-      const first = buttons[0];
-      const last = buttons[buttons.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    };
-    document.addEventListener("keydown", trapFocus);
-    return () => { document.removeEventListener("keydown", trapFocus); previousFocus?.focus(); };
-  }, []);
-  return createPortal(<div className="pocket-spots" ref={rootRef}><div className="venue-detail-page venue-public-booking">{children}</div></div>, document.body);
-}
-
 export function BookingPicker({ venueID }: { venueID: string }) {
   const { locale, t } = useI18n();
   const [date, setDate] = useState("");
@@ -64,6 +42,7 @@ export function BookingPicker({ venueID }: { venueID: string }) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [month, setMonth] = useState("");
   const [revision, setRevision] = useState(0);
+  const calendarRef = useRef<HTMLDivElement>(null);
   const formatter = new Intl.DateTimeFormat(localeTags[locale], { day: "numeric", month: "short", timeZone: "UTC" });
   const longFormatter = new Intl.DateTimeFormat(localeTags[locale], { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const monthFormatter = new Intl.DateTimeFormat(localeTags[locale], { month: "long", year: "numeric", timeZone: "UTC" });
@@ -92,11 +71,11 @@ export function BookingPicker({ venueID }: { venueID: string }) {
 
   useEffect(() => {
     if (!calendarOpen) return;
+    const outside = (event: PointerEvent) => { if (!calendarRef.current?.contains(event.target as Node)) setCalendarOpen(false); };
     const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setCalendarOpen(false); };
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", escape);
-    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener("keydown", escape); };
+    return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
   }, [calendarOpen]);
 
   const chooseDate = (value: string) => {
@@ -127,22 +106,21 @@ export function BookingPicker({ venueID }: { venueID: string }) {
   return <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
     <div className="venue-booking-heading"><h2 id="venue-booking-title">{t("Бронирование")}</h2></div>
     <div className="venue-booking-toolbar">
-      <div className="venue-date-picker">
+      <div className="venue-date-picker" ref={calendarRef}>
         <button type="button" className={`venue-date-trigger ${calendarOpen ? "active" : ""}`} aria-label={t("Выбрать дату")} aria-expanded={calendarOpen} aria-haspopup="dialog" disabled={!date} onClick={() => setCalendarOpen((value) => !value)}><CalendarDays size={17} /><span>{date ? formatter.format(day(date)) : t("Дата")}</span><ChevronDown className="venue-date-chevron" size={16} /></button>
-        {calendarOpen && month && <BookingOverlay><div className="venue-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setCalendarOpen(false); }}><div className="venue-calendar-popover" role="dialog" aria-modal="true" aria-label={t("Выбор даты")}>
-          <button type="button" className="venue-dialog-close" aria-label={t("Закрыть")} onClick={() => setCalendarOpen(false)}><X size={18} /></button>
+        {calendarOpen && month && <div className="venue-calendar-popover" role="dialog" aria-label={t("Выбор даты")}>
           <div className="venue-calendar-header"><strong>{monthFormatter.format(day(month))}</strong><div><button type="button" aria-label={t("Предыдущий месяц")} disabled={month <= monthStart(today)} onClick={() => setMonth(moveMonth(month, -1))}><ChevronLeft size={17} /></button><button type="button" aria-label={t("Следующий месяц")} disabled={moveMonth(month, 1) > monthStart(latest)} onClick={() => setMonth(moveMonth(month, 1))}><ChevronRight size={17} /></button></div></div>
           <div className="venue-calendar-weekdays" aria-hidden="true">{Array.from({ length: 7 }, (_, index) => new Intl.DateTimeFormat(localeTags[locale], { weekday: "short", timeZone: "UTC" }).format(day(addDays("2026-09-28", index)))).map((label, index) => <span key={index}>{label}</span>)}</div>
           <div className="venue-calendar-grid">{calendarDays(month).map((value) => <button type="button" key={value} className={`${value.slice(0, 7) !== month.slice(0, 7) ? "outside" : ""} ${value === date ? "selected" : ""}`} aria-label={longFormatter.format(day(value))} aria-pressed={value === date} disabled={value < today || value > latest} onClick={() => chooseDate(value)}>{Number(value.slice(8))}</button>)}</div>
-        </div></div></BookingOverlay>}
+        </div>}
       </div>
       <div className="venue-guests"><button type="button" aria-label={t("Уменьшить количество гостей")} disabled={guests === 1} onClick={() => changeGuests(guests - 1)}><Minus size={16} /></button><strong>{t("Гостей: {count}", { count: guests })}</strong><button type="button" aria-label={t("Увеличить количество гостей")} disabled={guests === 20} onClick={() => changeGuests(guests + 1)}><Plus size={16} /></button></div>
     </div>
-    <p className="venue-booking-label">{t("Свободное время")}</p>
+    <div className="venue-booking-scroll"><p className="venue-booking-label">{t("Свободное время")}</p>
     {loading ? <p role="status">{t("Ищем свободные столы...")}</p> : error ? <div role="alert"><p>{t("Не удалось проверить свободные столы")}</p><button type="button" onClick={() => { setLoading(true); setError(false); setRevision((value) => value + 1); }}>{t("Повторить")}</button></div> : current?.slots.length ? <>
       <div className="venue-time-grid">{current.slots.map((slot) => <button type="button" key={slot.time} className={time === slot.time ? "active" : ""} aria-pressed={time === slot.time} onClick={() => setTime(slot.time)}>{slot.time}</button>)}</div>
       {selectedSlot && <div className="venue-booking-wishes"><h3>{t("Пожелания к брони")}</h3><div className="venue-wish-options">{wishOptions.map((wish) => <button type="button" key={wish.id} className={wishes.includes(wish.id) ? "active" : ""} aria-pressed={wishes.includes(wish.id)} onClick={() => toggleWish(wish.id)}><span aria-hidden="true">{wish.icon}</span>{t(wish.label)}</button>)}</div><textarea aria-label={t("Комментарий к ресторану")} placeholder={t("Комментарий к ресторану")} value={comment} maxLength={500} onChange={(event) => setComment(event.target.value)} /></div>}
       <small className="venue-booking-note">{t("Подтверждение брони пока недоступно")}</small>
-    </> : <p role="status">{t("На эту дату свободных столов нет")}</p>}
+    </> : <p role="status">{t("На эту дату свободных столов нет")}</p>}</div>
   </aside>;
 }

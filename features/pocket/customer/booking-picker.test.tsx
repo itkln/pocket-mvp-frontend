@@ -18,6 +18,17 @@ beforeEach(() => {
 });
 
 describe("BookingPicker", () => {
+  it("opens an anchored date picker and closes it on an outside click", async () => {
+    render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" /></I18nProvider>);
+    const trigger = await screen.findByRole("button", { name: "Выбрать дату" });
+    await waitFor(() => expect(trigger).toBeEnabled());
+    fireEvent.click(trigger);
+    expect(screen.getByRole("dialog", { name: "Выбор даты" })).toBeInTheDocument();
+    expect(document.querySelector(".venue-dialog-backdrop")).not.toBeInTheDocument();
+    fireEvent.pointerDown(document.body);
+    expect(screen.queryByRole("dialog", { name: "Выбор даты" })).not.toBeInTheDocument();
+  });
+
   it("offers booking wishes and keeps the comment while date, guests and time change", async () => {
     render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" /></I18nProvider>);
     expect(screen.getByRole("heading", { name: "Бронирование" })).toBeInTheDocument();
