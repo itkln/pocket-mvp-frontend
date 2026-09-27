@@ -18,6 +18,31 @@ beforeEach(() => {
 });
 
 describe("BookingPicker", () => {
+  it("separates day and evening slots at 18:00", async () => {
+    vi.mocked(getVenueAvailability).mockImplementation(async (venueID, date, guests) => ({
+      venue_id: venueID, date: date || bookingDate, timezone: "Europe/Bratislava", guests, duration_minutes: 120,
+      slots: ["12:00", "17:30", "18:00", "20:00"].map((time) => ({
+        time, starts_at: `${bookingDate}T12:00:00Z`, ends_at: `${bookingDate}T14:00:00Z`, tables: [],
+      })),
+    }));
+    render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" /></I18nProvider>);
+    const day = await screen.findByRole("button", { name: "День" });
+    const evening = screen.getByRole("button", { name: "Вечер" });
+    expect(day).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "12:00" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "17:30" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "18:00" })).not.toBeInTheDocument();
+    fireEvent.click(evening);
+    expect(evening).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("button", { name: "17:30" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "18:00" }));
+    expect(screen.getByRole("button", { name: "18:00" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(day);
+    expect(screen.getByRole("button", { name: "12:00" })).toBeInTheDocument();
+    fireEvent.click(evening);
+    expect(screen.getByRole("button", { name: "18:00" })).toHaveAttribute("aria-pressed", "false");
+  });
+
   it("opens an anchored date picker and closes it on an outside click", async () => {
     render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" /></I18nProvider>);
     const trigger = await screen.findByRole("button", { name: "Выбрать дату" });

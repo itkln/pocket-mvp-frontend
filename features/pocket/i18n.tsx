@@ -62,6 +62,8 @@ const rows: TranslationRow[] = [
   ["Увеличить количество гостей", "Increase guests", "Збільшити кількість гостей", "Zvýšiť počet hostí"],
   ["Гостей: {count}", "Guests: {count}", "Гостей: {count}", "Hostia: {count}"],
   ["Свободное время", "Available times", "Вільний час", "Voľné časy"],
+  ["День", "Day", "День", "Deň"],
+  ["Вечер", "Evening", "Вечір", "Večer"],
   ["Пожелания к брони", "Booking requests", "Побажання до бронювання", "Požiadavky k rezervácii"],
   ["Свидание", "Date", "Побачення", "Rande"],
   ["День рождения", "Birthday", "День народження", "Narodeniny"],

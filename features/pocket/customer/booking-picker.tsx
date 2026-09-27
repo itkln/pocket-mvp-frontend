@@ -28,12 +28,15 @@ const wishOptions = [
   { id: "birthday", icon: "🎂", label: "День рождения" },
   { id: "children", icon: "🧸", label: "С детьми" },
 ] as const;
+type TimePeriod = "day" | "evening";
+const periodForTime = (time: string): TimePeriod => time < "18:00" ? "day" : "evening";
 
 export function BookingPicker({ venueID }: { venueID: string }) {
   const { locale, t } = useI18n();
   const [date, setDate] = useState("");
   const [guests, setGuests] = useState(2);
   const [time, setTime] = useState("");
+  const [period, setPeriod] = useState<TimePeriod>("day");
   const [wishes, setWishes] = useState<string[]>([]);
   const [comment, setComment] = useState("");
   const [availability, setAvailability] = useState<VenueAvailability | null>(null);
@@ -94,7 +97,12 @@ export function BookingPicker({ venueID }: { venueID: string }) {
     setLoading(true);
   };
   const current = availability?.date === date ? availability : null;
+  const daySlots = current?.slots.filter((slot) => periodForTime(slot.time) === "day") ?? [];
+  const eveningSlots = current?.slots.filter((slot) => periodForTime(slot.time) === "evening") ?? [];
+  const activePeriod = period === "day" && !daySlots.length ? "evening" : period === "evening" && !eveningSlots.length ? "day" : period;
+  const visibleSlots = activePeriod === "day" ? daySlots : eveningSlots;
   const selectedSlot = current?.slots.find((slot) => slot.time === time);
+  const choosePeriod = (value: TimePeriod) => { if (value !== activePeriod) { setPeriod(value); setTime(""); } };
   const toggleWish = (id: string) => setWishes((selected) => selected.includes(id) ? selected.filter((value) => value !== id) : [...selected, id]);
   const today = current ? (() => {
     const parts = new Intl.DateTimeFormat("en-US", { timeZone: current.timezone, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date());
@@ -116,11 +124,15 @@ export function BookingPicker({ venueID }: { venueID: string }) {
       </div>
       <div className="venue-guests"><button type="button" aria-label={t("Уменьшить количество гостей")} disabled={guests === 1} onClick={() => changeGuests(guests - 1)}><Minus size={16} /></button><strong>{t("Гостей: {count}", { count: guests })}</strong><button type="button" aria-label={t("Увеличить количество гостей")} disabled={guests === 20} onClick={() => changeGuests(guests + 1)}><Plus size={16} /></button></div>
     </div>
-    <div className="venue-booking-scroll"><p className="venue-booking-label">{t("Свободное время")}</p>
+    <div className="venue-booking-scroll">
     {loading ? <p role="status">{t("Ищем свободные столы...")}</p> : error ? <div role="alert"><p>{t("Не удалось проверить свободные столы")}</p><button type="button" onClick={() => { setLoading(true); setError(false); setRevision((value) => value + 1); }}>{t("Повторить")}</button></div> : current?.slots.length ? <>
-      <div className="venue-time-grid">{current.slots.map((slot) => <button type="button" key={slot.time} className={time === slot.time ? "active" : ""} aria-pressed={time === slot.time} onClick={() => setTime(slot.time)}>{slot.time}</button>)}</div>
+      <div className="venue-time-periods" role="group" aria-label={t("Свободное время")}>
+        <button type="button" aria-pressed={activePeriod === "day"} disabled={!daySlots.length} className={activePeriod === "day" ? "active" : ""} onClick={() => choosePeriod("day")}>{t("День")}</button>
+        <button type="button" aria-pressed={activePeriod === "evening"} disabled={!eveningSlots.length} className={activePeriod === "evening" ? "active" : ""} onClick={() => choosePeriod("evening")}>{t("Вечер")}</button>
+      </div>
+      <div className="venue-time-grid">{visibleSlots.map((slot) => <button type="button" key={slot.time} className={time === slot.time ? "active" : ""} aria-pressed={time === slot.time} onClick={() => setTime(slot.time)}>{slot.time}</button>)}</div>
       {selectedSlot && <div className="venue-booking-wishes"><h3>{t("Пожелания к брони")}</h3><div className="venue-wish-options">{wishOptions.map((wish) => <button type="button" key={wish.id} className={wishes.includes(wish.id) ? "active" : ""} aria-pressed={wishes.includes(wish.id)} onClick={() => toggleWish(wish.id)}><span aria-hidden="true">{wish.icon}</span>{t(wish.label)}</button>)}</div><textarea aria-label={t("Комментарий к ресторану")} placeholder={t("Комментарий к ресторану")} value={comment} maxLength={500} onChange={(event) => setComment(event.target.value)} /></div>}
       <small className="venue-booking-note">{t("Подтверждение брони пока недоступно")}</small>
-    </> : <p role="status">{t("На эту дату свободных столов нет")}</p>}</div>
+    </> : <><p className="venue-booking-label">{t("Свободное время")}</p><p role="status">{t("На эту дату свободных столов нет")}</p></>}</div>
   </aside>;
 }
