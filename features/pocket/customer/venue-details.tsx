@@ -243,7 +243,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
           <div className="venue-public-menu-content">{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
         </div>
       </div>
-      {venue.category_slug === "restaurants" ? <BookingPicker key={venue.id} venueID={venue.id} venueName={venue.name} /> : <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
+      {venue.category_slug === "restaurants" ? <BookingPicker key={venue.id} venueID={venue.id} /> : <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
         <CalendarDays size={25} aria-hidden="true" />
         <h2 id="venue-booking-title">{t("Бронирование")}</h2>
         <p>{t("Онлайн-бронирование этого заведения пока недоступно")}</p>
