@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
 import { customerNavigation } from "../features/pocket/model";
-import { DiscoverScreen, HistoryScreen, ReservationScreen } from "../features/pocket/customer";
+import { DiscoverScreen, HistoryScreen } from "../features/pocket/customer";
 import { spotsCities, SpotsBottomNavigation, SpotsHeader } from "../features/pocket/customer/navigation";
 import { SavedPlacesScreen } from "../features/pocket/customer/discover";
 import { VenueDetailsScreen } from "../features/pocket/customer/venue-details";
@@ -19,7 +19,7 @@ import { localeFromPathname, type Locale } from "../features/pocket/locales";
 import { useAppShell } from "./use-app-shell";
 import { categoryForRoute, spotCategories } from "../features/pocket/customer/categories";
 
-const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.filter((item) => item.id !== "browse-menu").map((item) => item.id), "saved", "reservations", "settings", "notifications", "venue"];
+const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.filter((item) => !["browse-menu", "reservation"].includes(item.id)).map((item) => item.id), "saved", "reservations", "settings", "notifications", "venue"];
 const screenForRoute = (screen?: string) => screen && screens.includes(screen) ? screen : "discover";
 const spotsPath = (locale: Locale, screen: string) => `/${locale}/${screen}`;
 const isPublicScreen = (screen: string) => screen === "discover" || screen === "venue" || Boolean(categoryForRoute(screen));
@@ -266,11 +266,10 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
     }} searchQuery={searchQuery} categoryLabel={category?.label} onClearCategory={() => navigateCategory("discover")} onSearch={(value) => updateSearch("q", value)} onNavigate={navigate} onLogin={() => router.push(`/${locale}/login`)} onLogout={signOut} onEditProfile={editProfile} onAccountSection={openAccountSection} />
     <TooltipContext.Provider value={false}><main className="spots-main">
       <div className={`spots-page ${category ? "has-category" : ""}`}>
-        {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedReady ? savedPlaces : []} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onVenue={openVenue} onReservation={() => navigate("reservation")} />}
+        {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedReady ? savedPlaces : []} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onVenue={openVenue} />}
         {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
         {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} />}
-        {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("reservation")}>{t("Забронировать стол")}</Button></div></section>}
-        {screen === "reservation" && <ReservationScreen onMenu={() => navigate("discover")} notify={shell.notify} />}
+        {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("discover")}>{t("Выбрать заведение")}</Button></div></section>}
         {screen === "history" && <HistoryScreen notify={shell.notify} />}
         {screen === "profile" && currentUser && <GuestProfile user={currentUser} onEditProfile={editProfile} onNavigate={navigate} onLogout={signOut} />}
         {["settings", "notifications"].includes(screen) && currentUser && <GuestSettings key={screen} notifications={screen === "notifications"} onEditProfile={editProfile} user={currentUser} onNavigate={navigate} notify={shell.notify} onLogout={signOut} onUpdate={setCurrentUser} />}

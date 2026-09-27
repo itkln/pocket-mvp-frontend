@@ -25,7 +25,7 @@ type SavedPlacesProps = { savedPlaces?: string[]; onToggleSaved?: (id: string) =
 export function DiscoverScreen({ city = "", query, categorySlug, filter = "Все", onCategoryChange, onFilterChange, onVenue, savedPlaces, onToggleSaved }: {
   city?: string; query: string; categorySlug?: string; filter?: string;
   onCategoryChange: (slug: string) => void; onFilterChange: (filter: string) => void;
-  onVenue: (venue: PublicVenue) => void; onReservation: () => void;
+  onVenue: (venue: PublicVenue) => void;
 } & SavedPlacesProps) {
   const { t } = useI18n();
   const category = categoryForRoute(categorySlug);

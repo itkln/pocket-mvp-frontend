@@ -1109,6 +1109,13 @@
 .pocket-spots .venue-booking-card > .button:hover { background: var(--spots-cta-hover); }
 .pocket-spots .venue-booking-card > .button:focus-visible { background: var(--spots-cta-pressed); color: #fff; }
 .pocket-spots .venue-booking-card.venue-public-booking { min-height: 0; }
+.pocket-spots .venue-booking-tables-label { margin-top: 18px; }
+.pocket-spots .venue-available-tables { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pocket-spots .venue-available-tables button { min-width: 0; display: grid; gap: 3px; padding: 10px; border: 1px solid #e5e9eb; border-radius: 12px; background: #f7f8f8; color: var(--spots-text); text-align: left; cursor: pointer; }
+.pocket-spots .venue-available-tables button.active { border-color: var(--spots-cta); background: var(--spots-active); }
+.pocket-spots .venue-available-tables small, .pocket-spots .venue-booking-note { color: var(--spots-secondary); }
+.pocket-spots .venue-booking-selection { margin: 16px 0 6px; padding: 12px; border-radius: 12px; background: var(--spots-active); color: var(--spots-text); line-height: 1.4; }
+.pocket-spots .venue-booking-note { display: block; margin-top: 14px; line-height: 1.4; }
 .pocket-spots .venue-booking-card.venue-public-booking > .button:disabled,
 .pocket-spots .venue-booking-card.venue-public-booking > .button:disabled:hover { background: var(--spots-card); color: var(--spots-disabled); }
 .pocket-spots .venue-booking-details-selection { min-height: 0; flex: 1; display: grid; grid-template-rows: minmax(0, 1fr); margin-top: 18px; }
@@ -1333,7 +1340,7 @@
   }
   .pocket-spots .spots-real-venue-detail .venue-about-photo.has-image { background-position: center; background-size: cover; }
   .pocket-spots .spots-real-venue-detail .venue-about-photo img { width: 150px; height: auto; object-fit: contain; }
-  .pocket-spots .spots-real-venue-detail .venue-public-booking { display: none; }
+  .pocket-spots .spots-real-venue-detail .venue-public-booking { display: flex; margin: 16px 0; }
   .pocket-spots .spots-real-venue-detail .venue-mobile-booking-status {
     position: fixed;
     z-index: 40;

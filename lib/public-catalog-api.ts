@@ -51,6 +51,17 @@ export type PublicReview = {
   created_at: string;
 };
 
+export type AvailableTable = { id: string; identifier: string; seats: number };
+export type AvailabilitySlot = { time: string; starts_at: string; ends_at: string; tables: AvailableTable[] };
+export type VenueAvailability = {
+  venue_id: string;
+  date: string;
+  timezone: string;
+  guests: number;
+  duration_minutes: number;
+  slots: AvailabilitySlot[];
+};
+
 export type PublicVenueSearch = {
   city?: string;
   query?: string;
@@ -97,4 +108,10 @@ export async function getPublicVenueMenu(id: string, signal?: AbortSignal): Prom
 export async function getPublicVenueReviews(id: string, signal?: AbortSignal): Promise<PublicReview[]> {
   const result = await apiRequest<{ reviews: PublicReview[] }>(`/public/venues/${encodeURIComponent(id)}/reviews`, { signal });
   return result.reviews;
+}
+
+export async function getVenueAvailability(id: string, date: string, guests: number, signal?: AbortSignal): Promise<VenueAvailability> {
+  const params = new URLSearchParams({ guests: String(guests) });
+  if (date) params.set("date", date);
+  return apiRequest<VenueAvailability>(`/public/venues/${encodeURIComponent(id)}/availability?${params}`, { signal, cache: "no-store" });
 }
