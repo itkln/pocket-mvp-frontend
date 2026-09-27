@@ -48,7 +48,7 @@ beforeEach(() => {
   vi.mocked(getPublicVenueReviews).mockResolvedValue([]);
   vi.mocked(getVenueAvailability).mockImplementation(async (id, date, guests) => ({
     venue_id: id, date: date || new Date().toISOString().slice(0, 10), timezone: "Europe/Bratislava", guests,
-    duration_minutes: 120, slots: [{ time: "19:00", starts_at: "2026-09-27T17:00:00Z", ends_at: "2026-09-27T19:00:00Z", tables: [{ id: "table-1", identifier: "01", seats: 4 }] }],
+    duration_minutes: 120, floors: [], slots: [{ time: "19:00", starts_at: "2026-09-27T17:00:00Z", ends_at: "2026-09-27T19:00:00Z", tables: [{ id: "table-1", identifier: "01", seats: 4 }] }],
   }));
   vi.mocked(listSavedVenueIDs).mockResolvedValue([]);
   vi.mocked(addSavedVenue).mockResolvedValue();

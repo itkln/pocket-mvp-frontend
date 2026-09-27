@@ -52,6 +52,9 @@ export type PublicReview = {
 };
 
 export type AvailableTable = { id: string; identifier: string; seats: number };
+export type AvailabilityFloorTable = AvailableTable & { shape: string; x: number; y: number; width: number; height: number };
+export type AvailabilityFixture = { id: string; type: "bar" | "window" | "entrance"; x: number; y: number; rotation: number; size: number };
+export type AvailabilityFloor = { id: string; name: string; tables: AvailabilityFloorTable[]; fixtures: AvailabilityFixture[] };
 export type AvailabilitySlot = { time: string; starts_at: string; ends_at: string; tables: AvailableTable[] };
 export type VenueAvailability = {
   venue_id: string;
@@ -59,6 +62,7 @@ export type VenueAvailability = {
   timezone: string;
   guests: number;
   duration_minutes: number;
+  floors: AvailabilityFloor[];
   slots: AvailabilitySlot[];
 };
 
