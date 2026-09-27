@@ -32,10 +32,14 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   const [infoDragging, setInfoDragging] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const infoCloseRef = useRef<HTMLButtonElement>(null);
   const reviewsCloseRef = useRef<HTMLButtonElement>(null);
+  const bookingTriggerRef = useRef<HTMLButtonElement>(null);
+  const bookingCloseRef = useRef<HTMLButtonElement>(null);
+  const bookingOverlayRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
   const infoOverlayRef = useRef<HTMLDivElement>(null);
   const infoTouchStart = useRef<{ x: number; y: number } | null>(null);
@@ -121,6 +125,23 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [reviewsOpen]);
+  useEffect(() => {
+    if (!bookingOpen) return;
+    const trigger = bookingTriggerRef.current;
+    bookingCloseRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !bookingOverlayRef.current?.querySelector(".venue-calendar-popover")) setBookingOpen(false);
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(bookingOverlayRef.current?.querySelectorAll<HTMLElement>("button:not(:disabled), textarea") ?? []);
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => { document.removeEventListener("keydown", onKeyDown); trigger?.focus(); };
+  }, [bookingOpen]);
 
   useEffect(() => {
     const updateScrollState = () => {
@@ -201,7 +222,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
         {menuQuery && <button type="button" className="venue-search-clear" aria-label={t("Очистить поиск")} onClick={() => { setMenuQuery(""); searchRef.current?.focus(); }}><X size={18} /></button>}
         <button type="button" className="venue-search-cancel" onClick={() => { setSearchOpen(false); setMenuQuery(""); }}>{t("Отменить")}</button></div>
       <div className="venue-search-results" aria-live="polite">{!normalizedQuery ? <h2>{t("Что будем искать?")}</h2> : menuState.loading ? <p>{t("Загружаем меню...")}</p> : menuState.error ? <p>{t("Не удалось загрузить меню")}</p> : searchResults.length ? menuCards(searchResults) : <div className="venue-search-no-results"><Search size={28} /><h2>{t("Ничего не нашли")}</h2><p>{t("Попробуйте другое название блюда")}</p></div>}</div>
-      <div className="venue-mobile-booking-status" role="status"><span><CalendarDays size={16} />{t("Бронирование пока недоступно")}</span></div>
+      {venue?.category_slug !== "restaurants" && <div className="venue-mobile-booking-status" role="status"><span><CalendarDays size={16} />{t("Бронирование пока недоступно")}</span></div>}
     </div>}
     <button type="button" className="back-link" aria-label={t("Назад")} onClick={onBack}><ArrowLeft size={24} strokeWidth={2.3} aria-hidden="true" /></button>
     {venue ? <article className="spots-restaurant venue-detail-page" aria-labelledby="venue-title">
@@ -243,7 +264,10 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
           <div className="venue-public-menu-content">{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
         </div>
       </div>
-      {venue.category_slug === "restaurants" ? <BookingPicker key={venue.id} venueID={venue.id} /> : <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
+      {venue.category_slug === "restaurants" ? <div ref={bookingOverlayRef} className={`venue-public-booking-shell ${bookingOpen ? "open" : ""}`} role={bookingOpen ? "dialog" : undefined} aria-modal={bookingOpen || undefined} aria-labelledby={bookingOpen ? "venue-booking-title" : undefined}>
+        <button ref={bookingCloseRef} type="button" className="venue-mobile-booking-close" aria-label={t("Закрыть")} onClick={() => setBookingOpen(false)}><X size={24} /></button>
+        <BookingPicker key={venue.id} venueID={venue.id} />
+      </div> : <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
         <CalendarDays size={25} aria-hidden="true" />
         <h2 id="venue-booking-title">{t("Бронирование")}</h2>
         <p>{t("Онлайн-бронирование этого заведения пока недоступно")}</p>
@@ -260,5 +284,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
         </section>
       </div>}
     </article> : state.error ? <div className="spots-catalog-status" role="alert"><strong>{t(state.error === "missing" ? "Заведение больше недоступно" : "Не удалось загрузить заведение")}</strong>{state.error === "failed" && <button type="button" className="button secondary" onClick={() => { setState({}); setReload((value) => value + 1); }}><RefreshCw size={17} />{t("Повторить")}</button>}</div> : <div className="spots-catalog-status" role="status">{t("Загружаем заведение...")}</div>}
+    {venue?.category_slug === "restaurants" && <div className={`venue-mobile-booking-cta ${bookingOpen ? "booking-open" : ""}`}><button ref={bookingTriggerRef} type="button" onClick={() => { setSearchOpen(false); setBookingOpen(true); }}>{t("Забронировать")}</button></div>}
   </section>;
 }

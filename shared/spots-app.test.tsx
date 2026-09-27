@@ -364,6 +364,25 @@ describe("Spots guest experience", () => {
     expect(getPublicVenue).toHaveBeenCalledWith("casa", expect.any(AbortSignal));
   });
 
+  it("opens mobile booking from the bottom action and keeps the selection after closing", async () => {
+    nativeReplace(null, "", "/ru/venue/casa");
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    await screen.findByRole("heading", { name: "Casa Forma" });
+    const open = screen.getByRole("button", { name: "Забронировать", exact: true });
+    expect(screen.queryByText("Бронирование пока недоступно")).not.toBeInTheDocument();
+    fireEvent.click(open);
+    const booking = screen.getByRole("dialog", { name: "Бронирование" });
+    expect(booking).toHaveAttribute("aria-modal", "true");
+    expect(within(booking).getByRole("button", { name: "Выбрать дату" })).toBeInTheDocument();
+    fireEvent.click(await within(booking).findByRole("button", { name: "19:00" }));
+    fireEvent.change(within(booking).getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "Тихий стол" } });
+    fireEvent.click(within(booking).getByRole("button", { name: "Закрыть" }));
+    expect(screen.queryByRole("dialog", { name: "Бронирование" })).not.toBeInTheDocument();
+    await waitFor(() => expect(open).toHaveFocus());
+    fireEvent.click(open);
+    expect(within(screen.getByRole("dialog", { name: "Бронирование" })).getByRole("textbox", { name: "Комментарий к ресторану" })).toHaveValue("Тихий стол");
+  });
+
   it("restores city, category, query and filter after reloading a venue deep link", async () => {
     localStorage.setItem("pocket:spots-city", "Братислава");
     nativeReplace(null, "", "/ru/restaurants?q=pasta&filter=Итальянская");
