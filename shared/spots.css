@@ -728,7 +728,8 @@
 
 /* Public venue page uses the same layout language as the former demo detail screen. */
 .pocket-spots .spots-venue-detail { width: 100%; margin: 0 auto; padding: 16px 0 48px; }
-.pocket-spots .spots-real-venue-detail > .back-link { width: 64px; height: 64px; display: grid; place-items: center; margin-bottom: 12px; padding: 0; border: 0; border-radius: 50%; background: #fff; color: var(--spots-text); cursor: pointer; transition: background-color 180ms ease; }
+.pocket-spots .spots-real-venue-detail { position: relative; padding-left: 64px; }
+.pocket-spots .spots-real-venue-detail > .back-link { position: absolute; top: 16px; left: 0; width: 48px; height: 48px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; color: var(--spots-text); cursor: pointer; transition: background-color 180ms ease; }
 .pocket-spots .venue-mobile-toolbar,
 .pocket-spots .venue-mobile-booking-status,
 .pocket-spots .venue-about-photo,
@@ -814,8 +815,8 @@
 @media (min-width: 901px) {
   .pocket-spots .spots-page:has(.venue-detail-page) {
     width: min(1900px, 100%);
-    padding-right: 32px;
-    padding-left: 32px;
+    padding-right: 24px;
+    padding-left: 24px;
   }
 }
 .pocket-spots .venue-detail-page {
