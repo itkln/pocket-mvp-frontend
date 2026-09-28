@@ -1336,10 +1336,10 @@
   .pocket-spots .venue-mobile-booking-close { position: fixed; z-index: 81; top: calc(21px + env(safe-area-inset-top)); right: 16px; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; color: var(--spots-text); cursor: pointer; }
   .pocket-spots .venue-mobile-booking-cta:not(.booking-open) { position: fixed; z-index: 40; right: 0; bottom: 0; left: 0; display: flex; gap: 8px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); background: #fff; box-shadow: 0 -8px 24px rgba(23, 33, 43, .08); }
   .pocket-spots .venue-mobile-booking-cta button { min-height: 52px; border: 0; border-radius: 16px; font-size: 16px; font-weight: 750; cursor: pointer; }
-  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-primary { min-width: 0; flex: 1; background: var(--spots-cta-pressed); color: #fff; }
-  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-primary:hover { background: #064a6d; }
-  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-primary:active { background: #043c5a; }
-  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-info { width: 52px; flex: 0 0 52px; display: grid; place-items: center; background: var(--spots-card); color: var(--spots-text); }
+  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-primary { min-width: 0; flex: 1; background: var(--spots-cta); color: #fff; }
+  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-info { width: 52px; flex: 0 0 52px; display: grid; place-items: center; background: #e1e5e9; color: var(--spots-text); }
+  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-info:hover { background: #d3d9de; }
+  .pocket-spots .venue-mobile-booking-cta .venue-mobile-booking-info:active { background: #c7d0d7; }
   .pocket-spots .venue-mobile-booking-cta button:focus-visible { outline: 2px solid var(--spots-cta); outline-offset: 2px; }
   .pocket-spots .spots-real-venue-detail .venue-mobile-booking-status {
     position: fixed;
