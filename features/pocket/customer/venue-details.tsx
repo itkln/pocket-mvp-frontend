@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type TouchEvent } from "react";
 import Image from "next/image";
-import { ArrowLeft, CalendarDays, Check, Ellipsis, Heart, Info, MapPin, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, Check, Heart, Info, MapPin, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
 import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
@@ -26,7 +26,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   const [reviewsReload, setReviewsReload] = useState(0);
   const [activeCategory, setActiveCategory] = useState("");
   const [compactHeader, setCompactHeader] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
   const [infoDrag, setInfoDrag] = useState(0);
   const [infoDragging, setInfoDragging] = useState(false);
@@ -44,7 +43,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   const infoOverlayRef = useRef<HTMLDivElement>(null);
   const infoTouchStart = useRef<{ x: number; y: number } | null>(null);
   const infoDragRef = useRef(0);
-  const moreRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
 
   useEffect(() => {
@@ -97,16 +95,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
   }, [venueID, reload]);
 
   useEffect(() => { if (searchOpen) searchRef.current?.focus(); }, [searchOpen]);
-  useEffect(() => {
-    if (!moreOpen) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (!moreRef.current?.contains(event.target as Node)) setMoreOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setMoreOpen(false); };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => { document.removeEventListener("pointerdown", onPointerDown); document.removeEventListener("keydown", onKeyDown); };
-  }, [moreOpen]);
   useEffect(() => {
     if (!infoOpen) return;
     if (window.innerWidth <= 760) infoCloseRef.current?.focus();
@@ -213,6 +201,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
       <button type="button" aria-label={t("Назад к результатам")} onClick={onBack}><ArrowLeft size={24} /></button>
       <span className="venue-mobile-toolbar-title" aria-hidden={!compactHeader}>{venue?.name}</span>
       <div className="venue-mobile-toolbar-actions">
+        {venue && venue.category_slug !== "restaurants" && <button type="button" aria-label={t("Открыть информацию о заведении")} aria-expanded={infoOpen} onClick={() => setInfoOpen(true)}><Info size={23} aria-hidden="true" /></button>}
         <button type="button" aria-label={t("Поиск по меню")} onClick={() => setSearchOpen(true)}><Search size={23} /></button>
         {venue && onToggleSaved && <button type="button" aria-label={t(saved ? "Убрать из избранного" : "В избранное")} aria-pressed={saved} onClick={() => onToggleSaved(venue.id)}><Heart size={23} fill={saved ? "currentColor" : "none"} /></button>}
       </div>
@@ -240,9 +229,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
                 {venue.preorder_enabled && <span><Check size={16} />{t("Предзаказ доступен")}</span>}
                 {venue.tags.map((tag) => <span key={tag}>{t(tag)}</span>)}
                 <div ref={infoRef} className="venue-desktop-info-wrap"><button type="button" className="venue-desktop-info-button" aria-label={t("Информация о заведении")} aria-expanded={infoOpen} onClick={() => setInfoOpen((value) => !value)}><Info size={17} /></button></div>
-                <div ref={moreRef} className="venue-public-more-wrap"><button type="button" className="venue-public-more" aria-label={t("Ещё о заведении")} aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)}><Ellipsis size={24} strokeWidth={2.5} /></button>
-                  {moreOpen && <div className="venue-more-popover"><button type="button" onClick={() => { setMoreOpen(false); setInfoOpen(true); }}><Info size={18} aria-hidden="true" /><span>{t("Информация о заведении")}</span></button></div>}
-                </div>
               </div>
             </div>
             {infoOpen && <div ref={infoOverlayRef} className="venue-info-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setInfoOpen(false); }}>
@@ -284,6 +270,9 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
         </section>
       </div>}
     </article> : state.error ? <div className="spots-catalog-status" role="alert"><strong>{t(state.error === "missing" ? "Заведение больше недоступно" : "Не удалось загрузить заведение")}</strong>{state.error === "failed" && <button type="button" className="button secondary" onClick={() => { setState({}); setReload((value) => value + 1); }}><RefreshCw size={17} />{t("Повторить")}</button>}</div> : <div className="spots-catalog-status" role="status">{t("Загружаем заведение...")}</div>}
-    {venue?.category_slug === "restaurants" && <div className={`venue-mobile-booking-cta ${bookingOpen ? "booking-open" : ""}`}><button ref={bookingTriggerRef} type="button" onClick={() => { setSearchOpen(false); setBookingOpen(true); }}>{t("Забронировать")}</button></div>}
+    {venue?.category_slug === "restaurants" && <div className={`venue-mobile-booking-cta ${bookingOpen ? "booking-open" : ""}`}>
+      <button ref={bookingTriggerRef} type="button" className="venue-mobile-booking-primary" onClick={() => { setSearchOpen(false); setBookingOpen(true); }}>{t("Забронировать онлайн")}</button>
+      <button type="button" className="venue-mobile-booking-info" aria-label={t("Открыть информацию о заведении")} aria-expanded={infoOpen} onClick={() => { setSearchOpen(false); setInfoOpen(true); }}><Info size={24} aria-hidden="true" /></button>
+    </div>}
   </section>;
 }

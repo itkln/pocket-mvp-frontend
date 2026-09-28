@@ -243,7 +243,7 @@ describe("Spots guest experience", () => {
     expect(screen.queryByText("19 июля")).not.toBeInTheDocument();
   });
 
-  it("searches published menu items and opens venue information from More", async () => {
+  it("searches published menu items and opens venue information from the mobile action", async () => {
     nativeReplace(null, "", "/ru/venue/casa");
     vi.mocked(getPublicVenueMenu).mockResolvedValue([
       { id: "pasta", name: "Паста", items: [
@@ -259,9 +259,8 @@ describe("Spots guest experience", () => {
     expect(categories.parentElement).toHaveClass("venue-public-category-sticky-shell");
     fireEvent.click(within(categories).getByRole("button", { name: "Напитки" }));
     expect(within(categories).getByRole("button", { name: "Напитки" })).toHaveAttribute("aria-current", "location");
-    fireEvent.click(screen.getByRole("button", { name: "Ещё о заведении" }));
-    const moreMenu = document.querySelector(".venue-more-popover") as HTMLElement;
-    fireEvent.click(within(moreMenu).getByRole("button", { name: "Информация о заведении" }));
+    expect(screen.queryByRole("button", { name: "Ещё о заведении" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Открыть информацию о заведении" }));
     const info = screen.getByRole("dialog", { name: "Информация о заведении" });
     expect(within(info).getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
     expect(within(info).getByText(/Obchodná 24/)).toBeInTheDocument();
@@ -314,8 +313,7 @@ describe("Spots guest experience", () => {
       nativeReplace(null, "", "/ru/venue/casa");
       render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
       await screen.findByRole("heading", { name: "Casa Forma" });
-      fireEvent.click(screen.getByRole("button", { name: "Ещё о заведении" }));
-      fireEvent.click(within(document.querySelector(".venue-more-popover") as HTMLElement).getByRole("button", { name: "Информация о заведении" }));
+      fireEvent.click(screen.getByRole("button", { name: "Открыть информацию о заведении" }));
       const info = screen.getByRole("dialog", { name: "Информация о заведении" });
       info.scrollTop = 20;
       fireEvent.touchStart(info, { touches: [{ clientX: 100, clientY: 100 }] });
@@ -368,7 +366,7 @@ describe("Spots guest experience", () => {
     nativeReplace(null, "", "/ru/venue/casa");
     render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
     await screen.findByRole("heading", { name: "Casa Forma" });
-    const open = screen.getByRole("button", { name: "Забронировать", exact: true });
+    const open = screen.getByRole("button", { name: "Забронировать онлайн" });
     expect(screen.queryByText("Бронирование пока недоступно")).not.toBeInTheDocument();
     fireEvent.click(open);
     const booking = screen.getByRole("dialog", { name: "Бронирование" });
