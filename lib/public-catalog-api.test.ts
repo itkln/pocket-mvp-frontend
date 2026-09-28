@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { catalogCityValue, getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, listPublicVenues } from "./public-catalog-api";
+import { catalogCityValue, createPublicReservation, getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, listPublicVenues } from "./public-catalog-api";
 
 describe("public catalog API", () => {
   const fetchMock = vi.fn();
@@ -52,5 +52,15 @@ describe("public catalog API", () => {
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ reviews: [{ id: "review-1", rating: 5 }] }), { status: 200 }));
     await expect(getPublicVenueReviews("venue-id")).resolves.toMatchObject([{ id: "review-1", rating: 5 }]);
     expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/public/venues/venue-id/reviews");
+  });
+
+  it("posts one reservation contract with its preorder items", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ reservation: { id: "booking-1", code: "ABC123" } }), { status: 201 }));
+    const input = { starts_at: "2026-10-01T16:00:00Z", guests: 2, guest_name: "Anna", guest_phone: "+421900123456", guest_email: "", notes: "Window", items: [{ menu_item_id: "dish-1", quantity: 2, expected_price_minor: 1200 }], idempotency_key: "booking-key-123456" };
+    await expect(createPublicReservation("venue-id", input)).resolves.toMatchObject({ id: "booking-1" });
+    const [path, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(path).toBe("/api/v1/public/venues/venue-id/reservations");
+    expect(init).toMatchObject({ method: "POST", credentials: "include", cache: "no-store" });
+    expect(JSON.parse(init.body as string)).toEqual(input);
   });
 });

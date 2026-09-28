@@ -212,7 +212,7 @@ describe("Spots guest experience", () => {
     expect(await screen.findByRole("button", { name: "19:00" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Назад к результатам" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Назад", exact: true }).querySelector(".lucide-arrow-left")).toBeInTheDocument();
-    expect(screen.getByText("Подтверждение брони пока недоступно")).toBeInTheDocument();
+    expect(screen.queryByText("Подтверждение брони пока недоступно")).not.toBeInTheDocument();
     expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Поиск по меню" }));
     expect(screen.getByRole("search", { name: "Поиск по меню" })).toBeInTheDocument();

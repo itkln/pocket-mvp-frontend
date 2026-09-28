@@ -62,6 +62,25 @@ export type VenueAvailability = {
   slots: AvailabilitySlot[];
 };
 
+export type ReservationInput = {
+  starts_at: string;
+  guests: number;
+  guest_name: string;
+  guest_phone: string;
+  guest_email: string;
+  notes: string;
+  items: { menu_item_id: string; quantity: number; expected_price_minor: number }[];
+  idempotency_key: string;
+};
+export type CreatedReservation = {
+  id: string;
+  code: string;
+  starts_at: string;
+  guest_count: number;
+  preorder_total_minor: number;
+  currency: string;
+};
+
 export type PublicVenueSearch = {
   city?: string;
   query?: string;
@@ -114,4 +133,11 @@ export async function getVenueAvailability(id: string, date: string, guests: num
   const params = new URLSearchParams({ guests: String(guests) });
   if (date) params.set("date", date);
   return apiRequest<VenueAvailability>(`/public/venues/${encodeURIComponent(id)}/availability?${params}`, { signal, cache: "no-store" });
+}
+
+export async function createPublicReservation(id: string, input: ReservationInput): Promise<CreatedReservation> {
+  const result = await apiRequest<{ reservation: CreatedReservation }>(`/public/venues/${encodeURIComponent(id)}/reservations`, {
+    method: "POST", body: JSON.stringify(input), cache: "no-store",
+  });
+  return result.reservation;
 }

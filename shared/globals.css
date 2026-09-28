@@ -5502,3 +5502,8 @@ body { font-size: 16px; }
   left: auto;
   color: var(--blue);
 }
+.order-reservation-code { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.order-preorder-items { margin-top: 8px; font-size: 13px; }
+.order-preorder-items summary { color: var(--ink); cursor: pointer; font-weight: 600; }
+.order-preorder-items ul { margin: 6px 0 0; padding-left: 18px; }
+.order-preorder-items li { padding: 2px 0; }

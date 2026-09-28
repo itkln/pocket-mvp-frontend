@@ -1128,6 +1128,31 @@
 .pocket-spots .venue-booking-wishes textarea::placeholder { color: #90999f; }
 .pocket-spots .venue-booking-wishes textarea:focus { border-color: var(--spots-cta); background: #fff; }
 .pocket-spots .venue-booking-note { display: block; margin-top: 14px; color: var(--spots-secondary); line-height: 1.4; }
+.pocket-spots .venue-booking-menu,
+.pocket-spots .venue-booking-contact { display: grid; gap: 12px; margin-top: 25px; }
+.pocket-spots .venue-booking-menu h3,
+.pocket-spots .venue-booking-contact h3 { margin: 0; color: var(--spots-text); font-size: 19px; }
+.pocket-spots .venue-booking-menu-items { display: grid; gap: 8px; max-height: 230px; overflow-y: auto; }
+.pocket-spots .venue-booking-menu-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid #e4e7e8; border-radius: 14px; }
+.pocket-spots .venue-booking-menu-item > span { min-width: 0; display: grid; gap: 3px; }
+.pocket-spots .venue-booking-menu-item strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.pocket-spots .venue-booking-menu-item small { color: var(--spots-secondary); font-size: 12px; }
+.pocket-spots .venue-booking-menu-item > div { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+.pocket-spots .venue-booking-menu-item button { width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #eeeeee; color: var(--spots-text); cursor: pointer; }
+.pocket-spots .venue-booking-menu-item button:disabled { opacity: .4; cursor: default; }
+.pocket-spots .venue-booking-menu-item b { min-width: 12px; text-align: center; }
+.pocket-spots .venue-booking-menu-item.unavailable { color: #a34536; }
+.pocket-spots .venue-booking-menu-item.unavailable button { width: auto; padding: 0 10px; border-radius: 8px; }
+.pocket-spots .venue-booking-preorder-total { justify-self: end; font-size: 14px; }
+.pocket-spots .venue-booking-contact label { display: grid; gap: 5px; color: var(--spots-secondary); font-size: 13px; }
+.pocket-spots .venue-booking-contact input { box-sizing: border-box; width: 100%; min-height: 40px; padding: 8px 12px; border: 1px solid #dce1e3; border-radius: 12px; background: #fff; color: var(--spots-text); font: inherit; }
+.pocket-spots .venue-booking-contact input:focus-visible { outline: 2px solid var(--spots-cta); outline-offset: 1px; }
+.pocket-spots .venue-booking-submit { width: 100%; min-height: 48px; margin-top: 18px; border: 0; border-radius: 14px; background: var(--spots-cta); color: #fff; font: inherit; font-weight: 750; cursor: pointer; }
+.pocket-spots .venue-booking-submit:disabled { background: #e4e7e8; color: var(--spots-disabled); cursor: default; }
+.pocket-spots .venue-booking-submit-error { margin: 12px 0 0; color: #a34536; font-size: 13px; line-height: 1.4; }
+.pocket-spots .venue-booking-confirmed { display: grid; gap: 10px; padding: 20px; border-radius: 16px; background: #eef8f1; color: var(--spots-text); }
+.pocket-spots .venue-booking-confirmed > strong { font-size: 20px; }
+.pocket-spots .venue-booking-confirmed p { margin: 0; }
 .pocket-spots .venue-booking-card.venue-public-booking > .button:disabled,
 .pocket-spots .venue-booking-card.venue-public-booking > .button:disabled:hover { background: var(--spots-card); color: var(--spots-disabled); }
 .pocket-spots .venue-booking-details-selection { min-height: 0; flex: 1; display: grid; grid-template-rows: minmax(0, 1fr); margin-top: 18px; }
@@ -1329,6 +1354,7 @@
   .pocket-spots .spots-real-venue-detail .venue-public-booking-shell { display: none; }
   .pocket-spots .spots-real-venue-detail .venue-public-booking-shell.open { position: fixed; z-index: 80; inset: 0; display: block; background: #fff; }
   .pocket-spots .spots-real-venue-detail .venue-public-booking-shell.open .venue-public-booking { box-sizing: border-box; width: 100%; height: 100dvh; min-height: 0; margin: 0; padding: calc(28px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom)); border-radius: 0; }
+  .pocket-spots .venue-public-booking-shell .venue-booking-menu-items { max-height: none; overflow: visible; }
   .pocket-spots .venue-public-booking-shell .venue-booking-heading { padding-right: 48px; }
   .pocket-spots .venue-public-booking-shell .venue-calendar-popover { right: auto; left: 0; width: min(300px, calc(100vw - 40px)); }
   .pocket-spots .venue-public-booking-shell .venue-wish-options { padding-right: 20px; scroll-snap-type: x proximity; }

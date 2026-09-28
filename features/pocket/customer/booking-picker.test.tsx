@@ -2,13 +2,18 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { BookingPicker } from "./booking-picker";
 import { I18nProvider } from "../i18n";
-import { getVenueAvailability } from "../../../lib/public-catalog-api";
+import { APIError } from "../../../lib/api-client";
+import { createPublicReservation, getPublicVenueMenu, getVenueAvailability, type PublicMenuCategory } from "../../../lib/public-catalog-api";
 
-vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), getVenueAvailability: vi.fn() }));
+vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), getVenueAvailability: vi.fn(), getPublicVenueMenu: vi.fn(), createPublicReservation: vi.fn() }));
+
+const menu: PublicMenuCategory[] = [{ id: "food", name: "Еда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR" }] }];
 
 const bookingDate = (() => { const value = new Date(); value.setUTCDate(value.getUTCDate() + 2); return value.toISOString().slice(0, 10); })();
 
 beforeEach(() => {
+  vi.mocked(createPublicReservation).mockReset();
+  vi.mocked(getPublicVenueMenu).mockReset();
   vi.mocked(getVenueAvailability).mockImplementation(async (venueID, date, guests) => ({
     venue_id: venueID, date: date || bookingDate, timezone: "Europe/Bratislava", guests, duration_minutes: 120,
     slots: [{ time: "18:00", starts_at: `${bookingDate}T16:00:00Z`, ends_at: `${bookingDate}T18:00:00Z`, tables: [
@@ -77,5 +82,42 @@ describe("BookingPicker", () => {
     expect(screen.getByRole("textbox", { name: "Комментарий к ресторану" })).toHaveValue("Нужен детский стул");
     fireEvent.click(screen.getByRole("button", { name: "Свидание" }));
     expect(screen.getByRole("button", { name: "Свидание" })).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("saves contact, time and selected dishes as one reservation", async () => {
+    vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-1", code: "ABC123", starts_at: `${bookingDate}T16:00:00Z`, guest_count: 2, preorder_total_minor: 2400, currency: "EUR" });
+    render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" menu={menu} preorderEnabled /></I18nProvider>);
+    fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Анна Гость" } });
+    fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "У окна" } });
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    await waitFor(() => expect(createPublicReservation).toHaveBeenCalledWith("venue-a", expect.objectContaining({
+      starts_at: `${bookingDate}T16:00:00Z`, guests: 2, guest_name: "Анна Гость", guest_phone: "+421900123456", notes: "У окна",
+      items: [{ menu_item_id: "pasta", quantity: 2, expected_price_minor: 1200 }], idempotency_key: expect.any(String),
+    })));
+    expect(await screen.findByText("Бронь подтверждена")).toBeInTheDocument();
+    expect(screen.getByText("Номер брони: ABC123")).toBeInTheDocument();
+  });
+
+  it("requires a second confirmation after the server reports a new price", async () => {
+    vi.mocked(createPublicReservation).mockRejectedValueOnce(new APIError("price_changed", "Price changed", 409))
+      .mockResolvedValueOnce({ id: "reservation-2", code: "DEF456", starts_at: `${bookingDate}T16:00:00Z`, guest_count: 2, preorder_total_minor: 1400, currency: "EUR" });
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ ...menu[0], items: [{ ...menu[0].items[0], price_minor: 1400 }] }]);
+    render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" menu={menu} preorderEnabled /></I18nProvider>);
+    fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Анна Гость" } });
+    fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Цена изменилась");
+    expect(createPublicReservation).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Подтвердить новую сумму" }));
+    await waitFor(() => expect(createPublicReservation).toHaveBeenLastCalledWith("venue-a", expect.objectContaining({
+      items: [{ menu_item_id: "pasta", quantity: 1, expected_price_minor: 1400 }],
+    })));
+    expect(await screen.findByText("Номер брони: DEF456")).toBeInTheDocument();
   });
 });

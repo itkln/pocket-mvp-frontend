@@ -115,7 +115,7 @@ export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID
     inviteStaff: (input) => run(async()=>{const created=await createStaff(venueID!,input);setStaff(current=>[...current,created]);}),
     editStaff: (id,input) => run(async()=>{const updated=await updateStaff(venueID!,id,input);setStaff(current=>current.map(item=>item.id===id?updated:item));}),
     removeStaff: (id) => run(async()=>{await deleteStaff(venueID!,id);setStaff(current=>current.filter(item=>item.id!==id));}),
-    setOrderStatus: (id,status) => run(async()=>{const updated=await updateOrderStatus(venueID!,id,status);setOrders(current=>current.map(item=>item.id===id?updated:item));}),
+    setOrderStatus: (id,status) => run(async()=>{const updated=await updateOrderStatus(venueID!,id,status);setOrders(current=>current.map(item=>item.id===id?{...item,status:updated.status}:item));}),
     answerReview: (id,reply) => run(async()=>{const updated=await replyReview(venueID!,id,reply);setReviews(current=>current.map(item=>item.id===id?updated:item));}),
   }), [loading,error,dashboard,categories,items,staff,orders,reviews,payments,refresh,run,venueID]);
 

@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
-import { getVenueAvailability, type VenueAvailability } from "../../../lib/public-catalog-api";
+import { APIError } from "../../../lib/api-client";
+import { createPublicReservation, getPublicVenueMenu, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
 const day = (value: string) => new Date(`${value}T12:00:00Z`);
@@ -31,7 +32,7 @@ const wishOptions = [
 type TimePeriod = "day" | "evening";
 const periodForTime = (time: string): TimePeriod => time < "18:00" ? "day" : "evening";
 
-export function BookingPicker({ venueID }: { venueID: string }) {
+export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: { venueID: string; menu?: PublicMenuCategory[]; preorderEnabled?: boolean }) {
   const { locale, t } = useI18n();
   const [date, setDate] = useState("");
   const [guests, setGuests] = useState(2);
@@ -45,6 +46,15 @@ export function BookingPicker({ venueID }: { venueID: string }) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [month, setMonth] = useState("");
   const [revision, setRevision] = useState(0);
+  const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [updatedMenu, setUpdatedMenu] = useState<PublicMenuCategory[] | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [confirmed, setConfirmed] = useState<CreatedReservation | null>(null);
+  const submissionKey = useRef(crypto.randomUUID());
   const calendarRef = useRef<HTMLDivElement>(null);
   const formatter = new Intl.DateTimeFormat(localeTags[locale], { day: "numeric", month: "short", timeZone: "UTC" });
   const longFormatter = new Intl.DateTimeFormat(localeTags[locale], { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
@@ -110,9 +120,52 @@ export function BookingPicker({ venueID }: { venueID: string }) {
     return `${get("year")}-${get("month")}-${get("day")}`;
   })() : date;
   const latest = today ? addDays(today, 30) : date;
+  const catalog = (updatedMenu ?? menu).flatMap((category) => category.items);
+  const selectedItems = Object.entries(quantities).filter(([, quantity]) => quantity > 0).map(([id, quantity]) => ({ item: catalog.find((item) => item.id === id), id, quantity }));
+  const missingItems = selectedItems.some(({ item }) => !item);
+  const preorderTotal = selectedItems.reduce((sum, { item, quantity }) => sum + (item?.price_minor ?? 0) * quantity, 0);
+  const currency = selectedItems.find(({ item }) => item)?.item?.currency ?? "EUR";
+  const formatMoney = (minor: number, moneyCurrency = currency) => new Intl.NumberFormat(localeTags[locale], { style: "currency", currency: moneyCurrency }).format(minor / 100);
+  const changeQuantity = (id: string, delta: number) => {
+    setQuantities((previous) => {
+      const next = { ...previous };
+      const quantity = Math.max(0, Math.min(30, (next[id] ?? 0) + delta));
+      if (quantity) next[id] = quantity; else delete next[id];
+      return next;
+    });
+    setSubmitError("");
+  };
+  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time, guestName, guestPhone, guestEmail, comment, wishes, quantities, updatedMenu]);
+  const submit = async () => {
+    if (!selectedSlot || !guestName.trim() || !guestPhone.trim() || missingItems || submitting) return;
+    setSubmitting(true);
+    setSubmitError("");
+    try {
+      const reservation = await createPublicReservation(venueID, {
+        starts_at: selectedSlot.starts_at, guests, guest_name: guestName.trim(), guest_phone: guestPhone.trim(),
+        guest_email: guestEmail.trim(), notes: [wishes.map((id) => wishOptions.find((wish) => wish.id === id)?.label).filter(Boolean).join(", "), comment.trim()].filter(Boolean).join(" · "),
+        items: selectedItems.flatMap(({ item, quantity }) => item ? [{ menu_item_id: item.id, quantity, expected_price_minor: item.price_minor }] : []),
+        idempotency_key: submissionKey.current,
+      });
+      setConfirmed(reservation);
+    } catch (caught) {
+      if (caught instanceof APIError && (caught.code === "price_changed" || caught.code === "item_unavailable")) {
+        try {
+          setUpdatedMenu(await getPublicVenueMenu(venueID));
+          setSubmitError(caught.code === "price_changed" ? t("Цена изменилась. Проверьте новую сумму и подтвердите ещё раз") : t("Одно из блюд больше недоступно. Уберите его из предзаказа"));
+        } catch { setSubmitError(t("Не удалось обновить меню. Попробуйте ещё раз")); }
+      } else if (caught instanceof APIError && caught.code === "slot_unavailable") {
+        setTime(""); setRevision((value) => value + 1);
+        setSubmitError(t("Это время уже занято. Выберите другое"));
+      } else {
+        setSubmitError(t("Не удалось сохранить бронь. Попробуйте ещё раз"));
+      }
+    } finally { setSubmitting(false); }
+  };
 
   return <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
     <div className="venue-booking-heading"><h2 id="venue-booking-title">{t("Бронирование")}</h2></div>
+    {confirmed ? <div className="venue-booking-confirmed" role="status"><strong>{t("Бронь подтверждена")}</strong><p>{t("Номер брони")}: {confirmed.code}</p><p>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "full", timeStyle: "short", timeZone: availability?.timezone ?? "Europe/Bratislava" }).format(new Date(confirmed.starts_at))}</p>{confirmed.preorder_total_minor > 0 && <p>{t("Предзаказ")}: {formatMoney(confirmed.preorder_total_minor, confirmed.currency)}</p>}</div> : <>
     <div className="venue-booking-toolbar">
       <div className="venue-date-picker" ref={calendarRef}>
         <button type="button" className={`venue-date-trigger ${calendarOpen ? "active" : ""}`} aria-label={t("Выбрать дату")} aria-expanded={calendarOpen} aria-haspopup="dialog" disabled={!date} onClick={() => setCalendarOpen((value) => !value)}><CalendarDays size={17} /><span>{date ? formatter.format(day(date)) : t("Дата")}</span><ChevronDown className="venue-date-chevron" size={16} /></button>
@@ -132,7 +185,11 @@ export function BookingPicker({ venueID }: { venueID: string }) {
       </div>
       <div className="venue-time-grid">{visibleSlots.map((slot) => <button type="button" key={slot.time} className={time === slot.time ? "active" : ""} aria-pressed={time === slot.time} onClick={() => setTime(slot.time)}>{slot.time}</button>)}</div>
       {selectedSlot && <div className="venue-booking-wishes"><h3>{t("Пожелания к брони")}</h3><div className="venue-wish-options">{wishOptions.map((wish) => <button type="button" key={wish.id} className={wishes.includes(wish.id) ? "active" : ""} aria-pressed={wishes.includes(wish.id)} onClick={() => toggleWish(wish.id)}><span aria-hidden="true">{wish.icon}</span>{t(wish.label)}</button>)}</div><textarea aria-label={t("Комментарий к ресторану")} placeholder={t("Комментарий к ресторану")} value={comment} maxLength={500} onChange={(event) => setComment(event.target.value)} /></div>}
-      <small className="venue-booking-note">{t("Подтверждение брони пока недоступно")}</small>
+      {preorderEnabled && <div className="venue-booking-menu"><h3>{t("Предзаказ блюд")}</h3>{catalog.length ? <div className="venue-booking-menu-items">{catalog.map((item) => <div key={item.id} className="venue-booking-menu-item"><span><strong>{item.name}</strong><small>{formatMoney(item.price_minor, item.currency)}</small></span><div><button type="button" aria-label={`${t("Убрать")} ${item.name}`} disabled={!quantities[item.id]} onClick={() => changeQuantity(item.id, -1)}><Minus size={15} /></button><b>{quantities[item.id] ?? 0}</b><button type="button" aria-label={`${t("Добавить")} ${item.name}`} onClick={() => changeQuantity(item.id, 1)}><Plus size={15} /></button></div></div>)}{selectedItems.filter(({ item }) => !item).map(({ id, quantity }) => <div key={id} className="venue-booking-menu-item unavailable"><span>{t("Блюдо недоступно")} · {quantity}</span><button type="button" onClick={() => changeQuantity(id, -quantity)}>{t("Убрать")}</button></div>)}</div> : <p>{t("Меню пока недоступно")}</p>}{selectedItems.length > 0 && <strong className="venue-booking-preorder-total">{t("Предзаказ")}: {formatMoney(preorderTotal)}</strong>}</div>}
+      <div className="venue-booking-contact"><h3>{t("Контакты")}</h3><label>{t("Имя")}<input value={guestName} maxLength={120} autoComplete="name" onChange={(event) => setGuestName(event.target.value)} /></label><label>{t("Телефон")}<input value={guestPhone} maxLength={40} type="tel" autoComplete="tel" onChange={(event) => setGuestPhone(event.target.value)} /></label><label>{t("Эл. почта (необязательно)")}<input value={guestEmail} maxLength={254} type="email" autoComplete="email" onChange={(event) => setGuestEmail(event.target.value)} /></label></div>
+      {submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}
+      <button type="button" className="venue-booking-submit" disabled={submitting || guestName.trim().length < 2 || guestPhone.trim().length < 5 || missingItems} onClick={() => void submit()}>{submitting ? t("Сохраняем бронь...") : submitError.includes(t("Цена изменилась")) ? t("Подтвердить новую сумму") : t("Забронировать")}</button>
     </> : <><p className="venue-booking-label">{t("Свободное время")}</p><p role="status">{t("На эту дату свободных столов нет")}</p></>}</div>
+    </>}
   </aside>;
 }
