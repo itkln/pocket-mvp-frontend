@@ -1122,8 +1122,8 @@
 .pocket-spots .venue-wish-options { min-width: 0; display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; touch-action: pan-x; }
 .pocket-spots .venue-wish-options::-webkit-scrollbar { display: none; }
 .pocket-spots .venue-detail-page .venue-wish-options button { min-height: 38px; display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #dce1e3; border-radius: 999px !important; background: #fff; color: var(--spots-text); font-size: 13px; white-space: nowrap; cursor: pointer; }
-.pocket-spots .venue-detail-page .venue-wish-options button:hover,
 .pocket-spots .venue-detail-page .venue-wish-options button.active { border-color: var(--spots-cta); background: var(--spots-active); color: var(--spots-cta); }
+.pocket-spots .venue-detail-page .venue-wish-options button:not(.active):focus-visible { outline: 2px solid var(--spots-cta); outline-offset: 2px; background: #fff; color: var(--spots-text); }
 .pocket-spots .venue-booking-wishes textarea { box-sizing: border-box; width: 100%; min-height: 108px; padding: 15px 16px; border: 1px solid transparent; border-radius: 16px; outline: none; resize: vertical; background: #f3f4f4; color: var(--spots-text); font: inherit; font-size: 14px; line-height: 1.5; }
 .pocket-spots .venue-booking-wishes textarea::placeholder { color: #90999f; }
 .pocket-spots .venue-booking-wishes textarea:focus { border-color: var(--spots-cta); background: #fff; }
