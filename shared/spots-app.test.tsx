@@ -274,7 +274,7 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("heading", { name: "Что будем искать?" })).toBeInTheDocument();
   });
 
-  it("uses the existing full menu block for desktop preorder selection", async () => {
+  it("adds dishes from the venue menu to the desktop preorder cart", async () => {
     desktop = true;
     nativeReplace(null, "", "/ru/venue/casa");
     vi.mocked(getPublicVenue).mockResolvedValue({ ...publicVenues[1], preorder_enabled: true });
@@ -282,6 +282,8 @@ describe("Spots guest experience", () => {
     render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
     await screen.findByRole("heading", { name: "Паста" });
     fireEvent.click(await screen.findByRole("button", { name: "19:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    expect(screen.getByRole("dialog", { name: "Бронирование" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
     fireEvent.click(screen.getByRole("button", { name: "Добавить блюда" }));
 
@@ -291,9 +293,17 @@ describe("Spots guest experience", () => {
     expect(within(menu).getByRole("heading", { name: "Паста" })).toBeInTheDocument();
     fireEvent.click(within(menu).getByRole("button", { name: "Добавить Паста" }));
     expect(within(menu).getByLabelText("Паста: 1")).toBeInTheDocument();
-    fireEvent.click(within(menu).getByRole("button", { name: /Готово/ }));
+    const cart = within(menu).getByRole("complementary", { name: "Предзаказ" });
+    expect(cart).toHaveTextContent("Паста");
+    fireEvent.click(within(menu).getByRole("button", { name: "Подробнее о блюде: Паста" }));
+    const product = within(menu).getByRole("dialog", { name: "Паста" });
+    fireEvent.click(within(product).getByRole("button", { name: "Добавить" }));
+    expect(cart).toHaveTextContent("24,00");
+    fireEvent.click(within(cart).getByRole("button", { name: "Убрать Паста" }));
+    expect(cart).toHaveTextContent("12,00");
+    fireEvent.click(within(menu).getByRole("button", { name: /Далее.*12/ }));
     expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Далее.*12/ })).toBeEnabled();
+    expect(await screen.findByText("Оплата в заведении")).toBeInTheDocument();
   });
 
   it("renders server menu order, prices and photos, then refreshes changed availability on focus", async () => {

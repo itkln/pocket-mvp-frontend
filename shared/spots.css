@@ -1156,6 +1156,25 @@
 .pocket-spots .desktop-booking-header { min-height: 32px; display: flex; align-items: center; gap: 10px; }
 .pocket-spots .desktop-booking-header h2 { margin: 0; font-size: 22px; }
 .pocket-spots .desktop-booking-header > button { width: 32px; height: 32px; display: grid; place-items: center; flex: 0 0 auto; border: 0; border-radius: 50%; background: #f3f4f4; color: var(--spots-text); cursor: pointer; }
+.pocket-spots .desktop-booking-backdrop { position: fixed; z-index: 109; inset: 0; background: rgba(22, 28, 34, .45); animation: desktop-booking-fade 180ms ease-out both; }
+.pocket-spots .venue-booking-card.venue-public-booking.desktop-booking-flow.details-open { position: fixed; z-index: 110; top: 16px; right: 16px; bottom: 16px; box-sizing: border-box; width: min(440px, calc(100vw - 32px)); height: auto; min-height: 0; overflow-y: auto; padding: 26px; border-radius: 26px; box-shadow: 0 18px 70px rgba(22, 28, 34, .18); animation: desktop-booking-slide 220ms ease-out both; scrollbar-width: thin; }
+.pocket-spots .desktop-booking-flow.details-open .desktop-booking-header { justify-content: space-between; }
+.pocket-spots .desktop-booking-flow.details-open .desktop-booking-header h2 { font-size: 26px; }
+.pocket-spots .desktop-booking-flow.details-open .desktop-booking-close { width: 38px; height: 38px; background: transparent; }
+.pocket-spots .desktop-booking-flow.details-open .venue-booking-toolbar { margin-bottom: 12px; }
+.pocket-spots .desktop-booking-flow.details-open .venue-booking-scroll { flex: 0 0 auto; overflow: visible; }
+.pocket-spots .desktop-booking-details-scroll { flex: 0 0 auto; padding-right: 3px; }
+.pocket-spots .desktop-booking-details-scroll .venue-booking-wishes { margin-top: 12px; }
+.pocket-spots .desktop-booking-details-scroll .venue-booking-contact { margin-top: 22px; }
+.pocket-spots .desktop-booking-details-scroll .desktop-booking-account { margin-top: 12px; }
+.pocket-spots .desktop-booking-details-scroll .venue-booking-wishes textarea { min-height: 72px; }
+.pocket-spots .desktop-booking-instant { display: inline-block; margin-top: 10px; padding: 6px 11px; border-radius: 999px; background: #f2f3f4; color: var(--spots-secondary); font-size: 12px; font-weight: 650; }
+.pocket-spots .desktop-booking-flow.details-open .desktop-booking-footer { position: sticky; bottom: 0; z-index: 3; margin-top: 15px; box-shadow: 0 0 0 12px #fff; }
+.pocket-spots .desktop-booking-notes { display: grid; gap: 5px; }
+.pocket-spots .desktop-booking-notes p { margin: 0; color: var(--spots-secondary); font-size: 13px; line-height: 1.4; }
+@keyframes desktop-booking-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes desktop-booking-slide { from { opacity: .5; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) { .pocket-spots .desktop-booking-backdrop, .pocket-spots .venue-booking-card.venue-public-booking.desktop-booking-flow.details-open { animation: none; } }
 .pocket-spots .desktop-booking-flow .venue-booking-toolbar { margin-top: 20px; }
 .pocket-spots .desktop-booking-footer { flex: 0 0 auto; }
 .pocket-spots .desktop-booking-summary { display: grid; gap: 4px; margin-top: 20px; padding: 13px 15px; border-radius: 16px; background: #f3f4f4; }
@@ -1205,18 +1224,21 @@
     z-index: 100;
     inset: 0;
     box-sizing: border-box;
-    display: block;
-    overflow-y: auto;
-    padding: 16px 24px 110px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) min(390px, 30vw);
+    grid-template-rows: 64px minmax(0, 1fr);
+    gap: 0 16px;
+    overflow: hidden;
+    padding: 16px 24px;
     border-radius: 0;
     background: #f4f4f5;
-    overscroll-behavior: contain;
   }
-  .pocket-spots .venue-preorder-menu-mode .venue-public-category-sticky-shell,
   .pocket-spots .spots-real-venue-detail .venue-preorder-menu-mode .venue-public-category-sticky-shell {
-    position: sticky;
+    position: relative;
     z-index: 2;
-    top: 0;
+    top: auto;
+    grid-column: 1;
+    grid-row: 1;
     display: block;
     margin: 0;
     padding: 0;
@@ -1224,41 +1246,51 @@
     border-radius: 24px 24px 0 0;
   }
   .pocket-spots .spots-real-venue-detail .venue-preorder-menu-mode .venue-public-category-nav {
-    padding-right: 84px;
+    padding-left: 64px;
     border-radius: 24px 24px 0 0;
   }
   .pocket-spots .venue-preorder-menu-mode .venue-public-menu-content {
-    min-height: calc(100dvh - 180px);
+    min-height: 0;
+    grid-column: 1;
+    grid-row: 2;
+    overflow-y: auto;
     border-radius: 0 0 24px 24px;
     background: #fff;
+    overscroll-behavior: contain;
   }
-  .pocket-spots .venue-preorder-menu-mode .venue-public-menu-category { scroll-margin-top: 82px; }
+  .pocket-spots .venue-preorder-menu-mode .venue-public-menu-grid { max-width: 920px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pocket-spots .venue-preorder-menu-mode .venue-public-menu-category { scroll-margin-top: 20px; }
   .pocket-spots .venue-preorder-menu-back {
-    position: fixed;
+    position: absolute;
     z-index: 4;
     top: 26px;
-    right: 38px;
+    left: 34px;
     width: 44px;
     height: 44px;
     display: grid;
     place-items: center;
     padding: 0;
-    background: #eeeeee;
+    background: #f2f3f4;
     color: var(--spots-text);
     cursor: pointer;
   }
+  .pocket-spots .venue-preorder-menu-mode .venue-public-menu-photo { position: relative; }
+  .pocket-spots .venue-preorder-product-open { position: absolute; z-index: 1; inset: 0; width: 100%; padding: 0; background: transparent; cursor: pointer; }
   .pocket-spots .venue-preorder-card-control {
-    align-self: end;
-    justify-self: end;
+    position: absolute;
+    z-index: 2;
+    right: 8px;
+    bottom: 8px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    margin: 0 12px 12px 0;
     padding: 4px;
     border-radius: 999px;
     background: #fff;
     box-shadow: 0 2px 12px rgba(24, 33, 42, .12);
   }
+  .pocket-spots .venue-preorder-card-control.has-items { left: 8px; }
   .pocket-spots .venue-preorder-card-control button {
     width: 34px;
     height: 34px;
@@ -1270,24 +1302,54 @@
     cursor: pointer;
   }
   .pocket-spots .venue-preorder-card-control b { min-width: 18px; text-align: center; font-size: 14px; }
-  .pocket-spots .venue-preorder-menu-footer {
-    position: fixed;
-    z-index: 3;
-    right: 0;
-    bottom: 0;
-    left: 0;
+  .pocket-spots .venue-preorder-cart {
+    min-width: 0;
+    min-height: 0;
+    grid-column: 2;
+    grid-row: 1 / 3;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    min-height: 88px;
-    padding: 12px 48px;
-    border-top: 1px solid #e8ebed;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 24px;
     background: #fff;
-    box-shadow: 0 -10px 28px rgba(24, 33, 42, .06);
   }
-  .pocket-spots .venue-preorder-menu-footer span { color: var(--spots-secondary); font-size: 15px; }
-  .pocket-spots .venue-preorder-menu-footer button { min-width: 240px; min-height: 50px; padding: 0 24px; background: var(--spots-cta); color: #fff; font: inherit; font-weight: 750; cursor: pointer; }
+  .pocket-spots .venue-preorder-cart header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 24px 16px; }
+  .pocket-spots .venue-preorder-cart header h2 { margin: 0; font-size: 24px; }
+  .pocket-spots .venue-preorder-cart header button { padding: 6px 0; background: transparent; color: var(--spots-secondary); font: inherit; font-size: 13px; cursor: pointer; }
+  .pocket-spots .venue-preorder-cart-items { min-height: 0; flex: 1; overflow-y: auto; padding: 0 16px; scrollbar-width: thin; }
+  .pocket-spots .venue-preorder-cart-items article { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 11px 4px; border-bottom: 1px solid #f0f1f2; }
+  .pocket-spots .venue-preorder-cart-image { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 13px; background-color: var(--spots-card); background-position: center; background-size: cover; color: var(--spots-muted); }
+  .pocket-spots .venue-preorder-cart-copy { min-width: 0; display: grid; gap: 4px; }
+  .pocket-spots .venue-preorder-cart-copy strong { overflow: hidden; font-size: 13px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+  .pocket-spots .venue-preorder-cart-copy span { font-size: 13px; font-weight: 750; }
+  .pocket-spots .venue-preorder-cart-quantity { display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px; background: #f3f4f4; }
+  .pocket-spots .venue-preorder-cart-quantity button { width: 27px; height: 27px; display: grid; place-items: center; padding: 0; background: transparent; color: var(--spots-text); cursor: pointer; }
+  .pocket-spots .venue-preorder-cart-quantity button:disabled { opacity: .35; cursor: default; }
+  .pocket-spots .venue-preorder-cart-quantity b { min-width: 17px; font-size: 13px; text-align: center; }
+  .pocket-spots .venue-preorder-cart-empty { min-height: 0; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
+  .pocket-spots .venue-preorder-cart-empty > svg { margin-bottom: 18px; color: var(--spots-muted); }
+  .pocket-spots .venue-preorder-cart-empty h3 { max-width: 250px; margin: 0; font-size: 20px; line-height: 1.2; }
+  .pocket-spots .venue-preorder-cart-empty p { max-width: 230px; margin: 9px 0 0; color: var(--spots-secondary); font-size: 13px; line-height: 1.4; }
+  .pocket-spots .venue-preorder-cart-footer { padding: 16px; border-top: 1px solid #e8ebed; }
+  .pocket-spots .venue-preorder-cart-footer button { width: 100%; min-height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--spots-cta); color: #fff; font: inherit; font-weight: 750; cursor: pointer; }
+  .pocket-spots .venue-preorder-cart-footer button:disabled { opacity: .5; cursor: default; }
+  .pocket-spots .venue-preorder-product-backdrop { position: fixed; z-index: 200; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(20, 27, 34, .48); }
+  .pocket-spots .venue-preorder-product-dialog { position: relative; box-sizing: border-box; width: min(960px, 95vw); max-height: min(780px, 92dvh); overflow-y: auto; padding: 34px; border-radius: 28px; background: #fff; }
+  .pocket-spots .venue-preorder-product-close { position: absolute; top: 20px; right: 20px; width: 38px; height: 38px; display: grid; place-items: center; padding: 0; background: #f3f4f4; color: var(--spots-text); cursor: pointer; }
+  .pocket-spots .venue-preorder-product-main { display: grid; grid-template-columns: minmax(0, 43%) minmax(0, 1fr); align-items: center; gap: 40px; padding-right: 20px; }
+  .pocket-spots .venue-preorder-product-image { aspect-ratio: 1; display: grid; place-items: center; border-radius: 20px; background-color: var(--spots-card); background-position: center; background-size: cover; color: var(--spots-muted); }
+  .pocket-spots .venue-preorder-product-info h2 { margin: 0 0 18px; font-size: 28px; line-height: 1.15; }
+  .pocket-spots .venue-preorder-product-info > strong { display: block; font-size: 23px; }
+  .pocket-spots .venue-preorder-product-action { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .pocket-spots .venue-preorder-product-action .venue-preorder-cart-quantity { min-height: 44px; padding: 4px; }
+  .pocket-spots .venue-preorder-product-action .venue-preorder-cart-quantity button { width: 40px; height: 36px; }
+  .pocket-spots .venue-preorder-product-action .venue-preorder-cart-quantity b { min-width: 24px; }
+  .pocket-spots .venue-preorder-product-action > button { min-width: 138px; min-height: 48px; padding: 0 22px; background: var(--spots-cta); color: #fff; font: inherit; font-weight: 750; cursor: pointer; }
+  .pocket-spots .venue-preorder-product-dialog > p { margin: 26px 0 0; padding-top: 22px; border-top: 1px solid #eceeef; color: var(--spots-secondary); line-height: 1.5; }
+  @media (max-width: 1100px) {
+    .pocket-spots .venue-preorder-menu-mode .venue-public-menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pocket-spots .venue-preorder-menu-mode .venue-public-menu-content { padding: 24px 20px 36px; }
+  }
 }
 .pocket-spots .venue-booking-card.venue-public-booking > .button:disabled,
 .pocket-spots .venue-booking-card.venue-public-booking > .button:disabled:hover { background: var(--spots-card); color: var(--spots-disabled); }
