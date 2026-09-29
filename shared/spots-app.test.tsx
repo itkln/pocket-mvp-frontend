@@ -274,6 +274,28 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("heading", { name: "Что будем искать?" })).toBeInTheDocument();
   });
 
+  it("uses the existing full menu block for desktop preorder selection", async () => {
+    desktop = true;
+    nativeReplace(null, "", "/ru/venue/casa");
+    vi.mocked(getPublicVenue).mockResolvedValue({ ...publicVenues[1], preorder_enabled: true });
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ id: "mains", name: "Основные блюда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR" }] }]);
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    await screen.findByRole("heading", { name: "Паста" });
+    fireEvent.click(await screen.findByRole("button", { name: "19:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    fireEvent.click(screen.getByRole("button", { name: "Добавить блюда" }));
+
+    const menu = screen.getByRole("dialog", { name: "Меню для предзаказа" });
+    expect(menu).toHaveClass("venue-detail-content", "venue-preorder-menu-mode");
+    expect(within(menu).getByRole("navigation", { name: "Категории меню" })).toBeInTheDocument();
+    expect(within(menu).getByRole("heading", { name: "Паста" })).toBeInTheDocument();
+    fireEvent.click(within(menu).getByRole("button", { name: "Добавить Паста" }));
+    expect(within(menu).getByLabelText("Паста: 1")).toBeInTheDocument();
+    fireEvent.click(within(menu).getByRole("button", { name: /Готово/ }));
+    expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Далее.*12/ })).toBeEnabled();
+  });
+
   it("renders server menu order, prices and photos, then refreshes changed availability on focus", async () => {
     nativeReplace(null, "", "/ru/venue/casa");
     vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));

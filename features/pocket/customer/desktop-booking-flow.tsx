@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
+import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag } from "lucide-react";
 import type { AuthUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
 import { createPublicReservation, getPublicVenueMenu, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
@@ -27,12 +27,17 @@ const calendarDays = (month: string) => {
   return Array.from({ length: 42 }, (_, index) => addDays(month, index - offset));
 };
 
-export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, user }: {
+export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, user, quantities, onQuantityChange, menuModeOpen, onMenuModeChange, onMenuUpdated }: {
   venueID: string;
   venueName: string;
   menu: PublicMenuCategory[];
   preorderEnabled: boolean;
   user: AuthUser | null;
+  quantities: Record<string, number>;
+  onQuantityChange: (id: string, delta: number) => void;
+  menuModeOpen: boolean;
+  onMenuModeChange: (open: boolean) => void;
+  onMenuUpdated: (categories: PublicMenuCategory[]) => void;
 }) {
   const { locale, t } = useI18n();
   const [step, setStep] = useState<Step>("schedule");
@@ -46,10 +51,6 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
   const [revision, setRevision] = useState(0);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [month, setMonth] = useState("");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [categoryID, setCategoryID] = useState("");
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [updatedMenu, setUpdatedMenu] = useState<PublicMenuCategory[] | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [comment, setComment] = useState("");
@@ -57,8 +58,8 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
   const [submitError, setSubmitError] = useState("");
   const [confirmed, setConfirmed] = useState<CreatedReservation | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
-  const drawerCloseRef = useRef<HTMLButtonElement>(null);
-  const drawerTriggerRef = useRef<HTMLButtonElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const wasMenuOpen = useRef(false);
   const submissionKey = useRef(crypto.randomUUID());
 
   useEffect(() => {
@@ -85,15 +86,11 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
   }, [calendarOpen]);
 
   useEffect(() => {
-    if (!drawerOpen) return;
-    drawerCloseRef.current?.focus();
-    const trigger = drawerTriggerRef.current;
-    const escape = (event: KeyboardEvent) => { if (event.key === "Escape") setDrawerOpen(false); };
-    document.addEventListener("keydown", escape);
-    return () => { document.removeEventListener("keydown", escape); trigger?.focus(); };
-  }, [drawerOpen]);
+    if (wasMenuOpen.current && !menuModeOpen) menuTriggerRef.current?.focus();
+    wasMenuOpen.current = menuModeOpen;
+  }, [menuModeOpen]);
 
-  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time, quantities, guestName, guestEmail, comment, updatedMenu, user?.id]);
+  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time, quantities, guestName, guestEmail, comment, menu, user?.id]);
 
   const current = availability?.date === date ? availability : null;
   const daySlots = current?.slots.filter((slot) => slot.time < "18:00") ?? [];
@@ -106,8 +103,7 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
     return `${get("year")}-${get("month")}-${get("day")}`;
   })() : date;
   const latest = today ? addDays(today, 30) : date;
-  const categories = updatedMenu ?? menu;
-  const catalog = categories.flatMap((category) => category.items);
+  const catalog = menu.flatMap((category) => category.items);
   const selectedItems = Object.entries(quantities).filter(([, quantity]) => quantity > 0).map(([id, quantity]) => ({ id, quantity, item: catalog.find((candidate) => candidate.id === id) }));
   const missingItems = selectedItems.some(({ item }) => !item);
   const totalMinor = selectedItems.reduce((sum, { item, quantity }) => sum + (item?.price_minor ?? 0) * quantity, 0);
@@ -115,15 +111,7 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
   const currency = selectedItems.find(({ item }) => item)?.item?.currency ?? "EUR";
   const formatMoney = (minor: number, code = currency) => new Intl.NumberFormat(localeTags[locale], { style: "currency", currency: code }).format(minor / 100);
   const dateLabel = date ? new Intl.DateTimeFormat(localeTags[locale], { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(asDay(date)) : "";
-  const changeQuantity = (id: string, delta: number) => {
-    setQuantities((previous) => {
-      const next = { ...previous };
-      const count = Math.max(0, Math.min(30, (next[id] ?? 0) + delta));
-      if (count) next[id] = count; else delete next[id];
-      return next;
-    });
-    setSubmitError("");
-  };
+  const changeQuantity = (id: string, delta: number) => { onQuantityChange(id, delta); setSubmitError(""); };
   const changeDate = (value: string) => {
     if (value < today || value > latest) return;
     setDate(value); setTime(""); setAvailability(null); setLoading(true);
@@ -147,7 +135,7 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
     } catch (caught) {
       if (caught instanceof APIError && (caught.code === "price_changed" || caught.code === "item_unavailable")) {
         try {
-          setUpdatedMenu(await getPublicVenueMenu(venueID));
+          onMenuUpdated(await getPublicVenueMenu(venueID));
           setSubmitError(caught.code === "price_changed" ? t("Цена изменилась. Проверьте новую сумму и подтвердите ещё раз") : t("Одно из блюд больше недоступно. Уберите его из предзаказа"));
           if (caught.code === "item_unavailable") setStep("preorder");
         } catch { setSubmitError(t("Не удалось обновить меню. Попробуйте ещё раз")); }
@@ -171,7 +159,7 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
     <div className="desktop-booking-quantity"><button type="button" aria-label={`${t("Убрать")} ${item?.name ?? id}`} onClick={() => changeQuantity(id, -1)}><Minus size={15} /></button><b>{quantity}</b><button type="button" aria-label={`${t("Добавить")} ${item?.name ?? id}`} disabled={!item} onClick={() => changeQuantity(id, 1)}><Plus size={15} /></button></div>
   </article>)}</div> : <div className="desktop-booking-empty"><ShoppingBag size={30} aria-hidden="true" /><strong>{t("В предзаказе пока пусто")}</strong><p>{t("Добавьте блюда из меню или забронируйте без предзаказа")}</p></div>;
 
-  return <aside className={`venue-booking-card venue-public-booking desktop-booking-flow ${drawerOpen ? "drawer-open" : ""}`} aria-labelledby="venue-desktop-booking-title">
+  return <aside className="venue-booking-card venue-public-booking desktop-booking-flow" aria-labelledby="venue-desktop-booking-title">
     <header className="desktop-booking-header">{step !== "schedule" && !confirmed && <button type="button" aria-label={t("Назад")} onClick={goBack}><ArrowLeft size={19} /></button>}<h2 id="venue-desktop-booking-title">{confirmed ? t("Бронь подтверждена") : step === "schedule" ? t("Бронирование") : step === "preorder" ? t("Предзаказ") : step === "guest-contact" ? t("Контакты") : t("Подтверждение брони")}</h2></header>
     {confirmed ? <div className="venue-booking-confirmed" role="status"><strong>{venueName}</strong><p>{t("Номер брони")}: {confirmed.code}</p><p>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "full", timeStyle: "short", timeZone: availability?.timezone ?? "Europe/Bratislava" }).format(new Date(confirmed.starts_at))}</p><p>{t("Гостей: {count}", { count: confirmed.guest_count })}</p>{confirmed.preorder_total_minor > 0 && <p>{t("Предзаказ")}: {formatMoney(confirmed.preorder_total_minor, confirmed.currency)} · {t("Оплата в заведении")}</p>}</div> : <>
       {step === "schedule" && <>
@@ -183,9 +171,8 @@ export function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, 
         {submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}
         <button type="button" className="venue-booking-submit desktop-booking-footer" disabled={!selectedSlot} onClick={() => { if (preorderEnabled) setStep("preorder"); else if (user) void submit(false); else setStep("guest-contact"); setSubmitError(""); }}>{t("Продолжить")}</button>
       </>}
-      {step === "preorder" && <><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div><div className="desktop-booking-preorder-content"><div className="desktop-booking-preorder-heading"><h3>{t("Предзаказ блюд")}</h3><button ref={drawerTriggerRef} type="button" onClick={() => setDrawerOpen(true)}><Plus size={17} />{t("Добавить блюда")}</button></div>{selectedList}</div>{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<div className="desktop-booking-actions">{selectedItems.length ? <button type="button" className="venue-booking-submit" disabled={missingItems} onClick={() => { setStep("checkout"); setSubmitError(""); }}>{t("Далее")} {formatMoney(totalMinor)}</button> : <button type="button" className="venue-booking-submit" disabled={submitting} onClick={() => user ? void submit(false) : setStep("guest-contact")}>{submitting ? t("Сохраняем бронь...") : t("Забронировать без предзаказа")}</button>}</div></>}
+      {step === "preorder" && <><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div><div className="desktop-booking-preorder-content"><div className="desktop-booking-preorder-heading"><h3>{t("Предзаказ блюд")}</h3><button ref={menuTriggerRef} type="button" onClick={() => onMenuModeChange(true)}><Plus size={17} />{t("Добавить блюда")}</button></div>{selectedList}</div>{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<div className="desktop-booking-actions">{selectedItems.length ? <button type="button" className="venue-booking-submit" disabled={missingItems} onClick={() => { setStep("checkout"); setSubmitError(""); }}>{t("Далее")} {formatMoney(totalMinor)}</button> : <button type="button" className="venue-booking-submit" disabled={submitting} onClick={() => user ? void submit(false) : setStep("guest-contact")}>{submitting ? t("Сохраняем бронь...") : t("Забронировать без предзаказа")}</button>}</div></>}
       {(step === "checkout" || step === "guest-contact") && <div className="desktop-booking-checkout"><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div>{step === "checkout" && <><h3>{t("Ваш заказ")}</h3>{selectedList}<div className="desktop-booking-total"><span>{t("Итого к оплате")}</span><strong>{formatMoney(totalMinor)}</strong></div></>}{user ? <div className="desktop-booking-account"><h3>{t("Контакты")}</h3><strong>{[user.first_name, user.last_name].filter(Boolean).join(" ")}</strong><span>{user.email}</span>{user.phone && <span>{user.phone}</span>}</div> : <div className="venue-booking-contact"><h3>{t("Контакты")}</h3><label>{t("Имя")}<input value={guestName} autoComplete="name" maxLength={120} onChange={(event) => setGuestName(event.target.value)} /></label><label>{t("Эл. почта")}<input value={guestEmail} type="email" autoComplete="email" maxLength={254} onChange={(event) => setGuestEmail(event.target.value)} /></label></div>}<label className="desktop-booking-comment">{t("Комментарий к ресторану")}<textarea value={comment} maxLength={500} placeholder={t("Комментарий к ресторану")} onChange={(event) => setComment(event.target.value)} /></label>{step === "checkout" && <div className="desktop-booking-payment"><h3>{t("Оплата предзаказа")}</h3><strong>{t("Оплата в заведении")}</strong><p>{t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}</p></div>}{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<button type="button" className="venue-booking-submit" disabled={submitting || (!user && !validGuestContact) || (step === "checkout" && (missingItems || selectedItems.length === 0))} onClick={() => void submit(step === "checkout")}>{submitting ? t("Сохраняем бронь...") : submitError.includes(t("Цена изменилась")) ? t("Подтвердить новую сумму") : step === "guest-contact" ? t("Забронировать без предзаказа") : t("Подтвердить бронь и предзаказ")}</button></div>}
     </>}
-    {drawerOpen && <div className="desktop-preorder-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setDrawerOpen(false); }}><section className="desktop-preorder-drawer" role="dialog" aria-modal="true" aria-label={t("Меню для предзаказа")}><header><div><small>{venueName}</small><h2>{t("Меню для предзаказа")}</h2></div><button ref={drawerCloseRef} type="button" aria-label={t("Закрыть")} onClick={() => setDrawerOpen(false)}><X size={22} /></button></header><nav aria-label={t("Категории меню")}>{categories.map((category) => <button type="button" key={category.id} className={(categoryID || categories[0]?.id) === category.id ? "active" : ""} onClick={() => setCategoryID(category.id)}>{category.name}</button>)}</nav><div className="desktop-preorder-drawer-list">{(categories.find((category) => category.id === (categoryID || categories[0]?.id))?.items ?? []).map((item) => <article key={item.id}>{item.image_url ? <div className="desktop-booking-item-image" style={{ backgroundImage: `url(${JSON.stringify(item.image_url)})` }} /> : <div className="desktop-booking-item-image placeholder"><ShoppingBag size={20} /></div>}<div><strong>{item.name}</strong>{item.description && <p>{item.description}</p>}<small>{formatMoney(item.price_minor, item.currency)}</small></div><div className="desktop-booking-quantity"><button type="button" aria-label={`${t("Убрать")} ${item.name}`} disabled={!quantities[item.id]} onClick={() => changeQuantity(item.id, -1)}><Minus size={15} /></button><b>{quantities[item.id] ?? 0}</b><button type="button" aria-label={`${t("Добавить")} ${item.name}`} onClick={() => changeQuantity(item.id, 1)}><Plus size={15} /></button></div></article>)}</div><button type="button" className="venue-booking-submit" onClick={() => setDrawerOpen(false)}>{t("Готово")} {selectedItems.length ? `· ${formatMoney(totalMinor)}` : ""}</button></section></div>}
   </aside>;
 }

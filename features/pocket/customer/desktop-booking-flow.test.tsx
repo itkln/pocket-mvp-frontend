@@ -21,7 +21,7 @@ beforeEach(() => {
   vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-1", code: "BOOK123", starts_at: `${date}T16:00:00Z`, guest_count: 2, preorder_total_minor: 0, currency: "EUR" });
 });
 
-const renderFlow = (user: AuthUser | null = null) => render(<I18nProvider initialLocale="ru"><DesktopBookingFlow venueID="venue-1" venueName="Demo Bistro" menu={menu} preorderEnabled user={user} /></I18nProvider>);
+const renderFlow = (user: AuthUser | null = null, quantities: Record<string, number> = {}, onMenuModeChange = vi.fn()) => render(<I18nProvider initialLocale="ru"><DesktopBookingFlow venueID="venue-1" venueName="Demo Bistro" menu={menu} preorderEnabled user={user} quantities={quantities} onQuantityChange={vi.fn()} menuModeOpen={false} onMenuModeChange={onMenuModeChange} onMenuUpdated={vi.fn()} /></I18nProvider>);
 const chooseTime = async () => {
   fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
   fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
@@ -51,14 +51,15 @@ describe("DesktopBookingFlow", () => {
     expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({ guest_name: "Guest Name", guest_email: "guest@example.test", items: [] });
   });
 
-  it("opens only the menu in a left drawer, then shows review and payment details", async () => {
+  it("opens the existing menu for selection, then shows review and payment details", async () => {
     vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-2", code: "FOOD123", starts_at: `${date}T16:00:00Z`, guest_count: 2, preorder_total_minor: 1200, currency: "EUR" });
-    renderFlow();
+    const onMenuModeChange = vi.fn();
+    const { rerender } = renderFlow(null, {}, onMenuModeChange);
     await chooseTime();
     fireEvent.click(screen.getByRole("button", { name: "Добавить блюда" }));
-    expect(screen.getByRole("dialog", { name: "Меню для предзаказа" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
-    fireEvent.click(screen.getByRole("button", { name: /Готово/ }));
+    expect(onMenuModeChange).toHaveBeenCalledWith(true);
+    expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
+    rerender(<I18nProvider initialLocale="ru"><DesktopBookingFlow venueID="venue-1" venueName="Demo Bistro" menu={menu} preorderEnabled user={null} quantities={{ pasta: 1 }} onQuantityChange={vi.fn()} menuModeOpen={false} onMenuModeChange={onMenuModeChange} onMenuUpdated={vi.fn()} /></I18nProvider>);
     fireEvent.click(screen.getByRole("button", { name: /Далее.*12/ }));
     expect(screen.getByText("Оплата в заведении")).toBeInTheDocument();
     expect(createPublicReservation).not.toHaveBeenCalled();
