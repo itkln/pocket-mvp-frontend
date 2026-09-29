@@ -1,24 +1,36 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties, type TouchEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type TouchEvent } from "react";
 import Image from "next/image";
 import { ArrowLeft, CalendarDays, Check, Heart, Info, MapPin, RefreshCw, Search, Star, Utensils, X } from "lucide-react";
 import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { BookingPicker } from "./booking-picker";
+import { DesktopBookingFlow } from "./desktop-booking-flow";
+import type { AuthUser } from "../../../lib/auth-api";
 
 const illustrations: Record<string, string> = {
   activities: "travel", "yoga-pilates": "yoga", "spa-massage": "spa", masterclasses: "workshops",
 };
 
-export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
+const mobileBookingQuery = "(max-width: 760px)";
+const subscribeMobileBooking = (onChange: () => void) => {
+  const query = window.matchMedia(mobileBookingQuery);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+const mobileBookingSnapshot = () => window.matchMedia(mobileBookingQuery).matches;
+
+export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user = null }: {
   venueID: string;
   onBack: () => void;
   saved: boolean;
   onToggleSaved?: (id: string) => void;
+  user?: AuthUser | null;
 }) {
   const { locale, t } = useI18n();
+  const mobileBooking = useSyncExternalStore(subscribeMobileBooking, mobileBookingSnapshot, () => false);
   const [state, setState] = useState<{ venue?: PublicVenue; error?: "missing" | "failed" }>({});
   const [menuState, setMenuState] = useState<{ categories: PublicMenuCategory[]; loading: boolean; error: boolean }>({ categories: [], loading: true, error: false });
   const [reviewsState, setReviewsState] = useState<{ items: PublicReview[]; loading: boolean; error: boolean }>({ items: [], loading: true, error: false });
@@ -252,7 +264,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved }: {
       </div>
       {venue.category_slug === "restaurants" ? <div ref={bookingOverlayRef} className={`venue-public-booking-shell ${bookingOpen ? "open" : ""}`} role={bookingOpen ? "dialog" : undefined} aria-modal={bookingOpen || undefined} aria-labelledby={bookingOpen ? "venue-booking-title" : undefined}>
         <button ref={bookingCloseRef} type="button" className="venue-mobile-booking-close" aria-label={t("Закрыть")} onClick={() => setBookingOpen(false)}><X size={24} /></button>
-        <BookingPicker key={venue.id} venueID={venue.id} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} />
+        {mobileBooking ? <BookingPicker key={venue.id} venueID={venue.id} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} /> : <DesktopBookingFlow key={venue.id} venueID={venue.id} venueName={venue.name} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} user={user} />}
       </div> : <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
         <CalendarDays size={25} aria-hidden="true" />
         <h2 id="venue-booking-title">{t("Бронирование")}</h2>

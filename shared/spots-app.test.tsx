@@ -31,7 +31,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   nativeReplace(null, "", "/ru/discover");
   desktop = false;
-  window.matchMedia = vi.fn().mockImplementation(() => ({ matches: desktop, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+  window.matchMedia = vi.fn().mockImplementation((query: string) => ({ matches: query === "(max-width: 760px)" ? !desktop : desktop, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
   vi.spyOn(window.history, "replaceState").mockImplementation((state, unused, url) => {
     nativeReplace(state, unused, url);
     window.dispatchEvent(new PopStateEvent("popstate"));
