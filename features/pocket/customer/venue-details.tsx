@@ -70,9 +70,12 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const detailCloseRef = useRef<HTMLButtonElement>(null);
   const detailTriggerRef = useRef<HTMLButtonElement | null>(null);
   const detailWasOpenRef = useRef(false);
-  const closePreorder = useCallback(() => {
+  const backToBookingDetails = useCallback(() => {
     setPreorderMenuOpen(false);
     setDetailItemID(null);
+    bookingFlowRef.current?.backToDetails();
+  }, []);
+  const finishBooking = useCallback(() => {
     setPreorderQuantities({});
     setBookingSummary(null);
     setBookingFlowVersion((version) => version + 1);
@@ -143,7 +146,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (detailItemID) { setDetailItemID(null); detailTriggerRef.current?.focus(); }
-        else closePreorder();
+        else backToBookingDetails();
       }
       if (event.key !== "Tab") return;
       const focusable = Array.from((detailItemID ? detailDialogRef.current : preorderMenuRef.current)?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
@@ -155,7 +158,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [preorderMenuOpen, detailItemID, closePreorder]);
+  }, [preorderMenuOpen, detailItemID, backToBookingDetails]);
   useEffect(() => {
     if (!infoOpen) return;
     if (window.innerWidth <= 760) infoCloseRef.current?.focus();
@@ -324,7 +327,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
         </div>
 
         <div ref={preorderMenuRef} className={`venue-detail-content ${preorderMenuOpen ? "venue-preorder-menu-mode" : ""}`} role={preorderMenuOpen ? "dialog" : undefined} aria-modal={preorderMenuOpen || undefined} aria-label={preorderMenuOpen ? t("Меню для предзаказа") : undefined}>
-          {preorderMenuOpen && <button ref={preorderMenuBackRef} type="button" className="venue-preorder-menu-close" aria-label={t("Закрыть предзаказ")} onClick={closePreorder}><X size={23} /></button>}
+          {preorderMenuOpen && <button ref={preorderMenuBackRef} type="button" className="venue-preorder-menu-close" aria-label={t("Назад к бронированию")} onClick={backToBookingDetails}><ArrowLeft size={23} /></button>}
           {menuState.categories.length > 0 && <div className="venue-public-category-sticky-shell"><nav className="venue-section-nav venue-public-category-nav" aria-label={t("Категории меню")}>{menuState.categories.map((category) => <button type="button" key={category.id} className={(activeCategory || menuState.categories[0].id) === category.id ? "active" : ""} aria-current={(activeCategory || menuState.categories[0].id) === category.id ? "location" : undefined} onClick={() => openCategory(category.id)}>{category.name}</button>)}</nav></div>}
           <div ref={preorderMenuScrollRef} className="venue-public-menu-content">{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
           {preorderMenuOpen && <aside className="venue-preorder-cart" aria-label={t("Предзаказ")}>
@@ -344,7 +347,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
               <div className="venue-preorder-cart-quantity"><button type="button" aria-label={`${t("Убрать")} ${item.name}`} onClick={() => changePreorderQuantity(item.id, -1)}><Minus size={16} /></button><b>{preorderQuantities[item.id]}</b><button type="button" aria-label={`${t("Добавить")} ${item.name}`} disabled={preorderQuantities[item.id] >= 30} onClick={() => changePreorderQuantity(item.id, 1)}><Plus size={16} /></button></div>
             </article>)}</div> : <div className="venue-preorder-cart-empty"><ShoppingBag size={46} aria-hidden="true" /><h3>{t("В предзаказе пока пусто")}</h3><p>{t("Добавьте блюда из меню")}</p></div>}
             </div>
-            <div className="venue-preorder-cart-footer">{preorderCount > 0 ? <button type="button" disabled={preorderSelectedItems.length !== Object.keys(preorderQuantities).length} onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.checkout(); }}><span>{t("Далее")}</span><strong>{preorderTotalLabel}</strong></button> : <button type="button" className="venue-preorder-book-without" onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.bookWithoutPreorder(); }}><span>{t("Забронировать без предзаказа")}</span></button>}</div>
+            <div className="venue-preorder-cart-footer">{preorderCount > 0 ? <button type="button" disabled={preorderSelectedItems.length !== Object.keys(preorderQuantities).length} onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.checkout(); }}><span>{t("Продолжить к оплате")}</span><strong>{preorderTotalLabel}</strong></button> : <button type="button" className="venue-preorder-book-without" onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.bookWithoutPreorder(); }}><span>{t("Забронировать без предзаказа")}</span></button>}</div>
           </aside>}
           {preorderMenuOpen && detailItem && <div className="venue-preorder-product-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeItemDetails(); }}><section ref={detailDialogRef} className="venue-preorder-product-dialog" role="dialog" aria-modal="true" aria-label={detailItem.name}>
             <button ref={detailCloseRef} type="button" className="venue-preorder-product-close" aria-label={t("Закрыть")} onClick={closeItemDetails}><X size={23} /></button>
@@ -355,7 +358,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
       </div>
       {venue.category_slug === "restaurants" ? <div ref={bookingOverlayRef} className={`venue-public-booking-shell ${bookingOpen ? "open" : ""}`} role={bookingOpen ? "dialog" : undefined} aria-modal={bookingOpen || undefined} aria-labelledby={bookingOpen ? "venue-booking-title" : undefined}>
         <button ref={bookingCloseRef} type="button" className="venue-mobile-booking-close" aria-label={t("Закрыть")} onClick={() => setBookingOpen(false)}><X size={24} /></button>
-        {mobileBooking ? <BookingPicker key={venue.id} venueID={venue.id} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} /> : <DesktopBookingFlow ref={bookingFlowRef} key={`${venue.id}-${bookingFlowVersion}`} venueID={venue.id} venueName={venue.name} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} user={user} quantities={preorderQuantities} onQuantityChange={changePreorderQuantity} menuModeOpen={preorderMenuOpen} onMenuModeChange={setPreorderMenuOpen} onPreorderStart={setBookingSummary} onMenuUpdated={(categories) => setMenuState({ categories, loading: false, error: false })} />}
+        {mobileBooking ? <BookingPicker key={venue.id} venueID={venue.id} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} /> : <DesktopBookingFlow ref={bookingFlowRef} key={`${venue.id}-${bookingFlowVersion}`} venueID={venue.id} venueName={venue.name} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} user={user} quantities={preorderQuantities} onQuantityChange={changePreorderQuantity} menuModeOpen={preorderMenuOpen} onMenuModeChange={setPreorderMenuOpen} onPreorderStart={setBookingSummary} onMenuUpdated={(categories) => setMenuState({ categories, loading: false, error: false })} onConfirmationClose={finishBooking} />}
       </div> : <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
         <CalendarDays size={25} aria-hidden="true" />
         <h2 id="venue-booking-title">{t("Бронирование")}</h2>

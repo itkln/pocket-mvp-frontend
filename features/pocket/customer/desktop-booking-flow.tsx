@@ -28,7 +28,7 @@ const calendarDays = (month: string) => {
   return Array.from({ length: 42 }, (_, index) => addDays(month, index - offset));
 };
 
-export type DesktopBookingFlowHandle = { checkout: () => void; bookWithoutPreorder: () => void };
+export type DesktopBookingFlowHandle = { checkout: () => void; bookWithoutPreorder: () => void; backToDetails: () => void };
 export type DesktopBookingSummary = { dateLabel: string; time: string; guests: number; name: string; phone: string; email: string; wishes: string[]; comment: string };
 
 export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
@@ -43,7 +43,8 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   onMenuModeChange: (open: boolean) => void;
   onPreorderStart?: (summary: DesktopBookingSummary) => void;
   onMenuUpdated: (categories: PublicMenuCategory[]) => void;
-}>(function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, user, quantities, onQuantityChange, menuModeOpen, onMenuModeChange, onPreorderStart, onMenuUpdated }, ref) {
+  onConfirmationClose: () => void;
+}>(function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, user, quantities, onQuantityChange, menuModeOpen, onMenuModeChange, onPreorderStart, onMenuUpdated, onConfirmationClose }, ref) {
   const { locale, t } = useI18n();
   const [step, setStep] = useState<Step>("schedule");
   const [date, setDate] = useState("");
@@ -101,14 +102,16 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   }, [menuModeOpen]);
 
   useEffect(() => {
-    if (step !== "details") return;
+    if (step !== "details" && step !== "checkout" && !confirmed) return;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    detailsCloseRef.current?.focus();
+    if (step === "details") detailsCloseRef.current?.focus();
+    else detailsDialogRef.current?.querySelector<HTMLButtonElement>(".desktop-booking-header button")?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         if (calendarRef.current?.querySelector(".venue-calendar-popover")) { setCalendarOpen(false); return; }
-        setStep("schedule"); scheduleTriggerRef.current?.focus();
+        if (step === "checkout") { setStep("preorder"); onMenuModeChange(true); }
+        else if (step === "details") { setStep("schedule"); scheduleTriggerRef.current?.focus(); }
       }
       if (event.key !== "Tab") return;
       const focusable = Array.from(detailsDialogRef.current?.querySelectorAll<HTMLElement>("button:not(:disabled), input, textarea") ?? []);
@@ -120,7 +123,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
     };
     document.addEventListener("keydown", onKeyDown);
     return () => { document.body.style.overflow = previousOverflow; document.removeEventListener("keydown", onKeyDown); };
-  }, [step]);
+  }, [step, confirmed, onMenuModeChange]);
 
   const contactName = guestName ?? [user?.first_name, user?.last_name].filter(Boolean).join(" ");
   const contactEmail = guestEmail ?? user?.email ?? "";
@@ -191,10 +194,11 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   useImperativeHandle(ref, () => ({
     checkout: () => { setStep("checkout"); setSubmitError(""); },
     bookWithoutPreorder: () => { void submit(false); },
+    backToDetails: () => { setStep("details"); setSubmitError(""); },
   }));
 
   const goBack = () => {
-    if (step === "checkout") setStep(preorderEnabled ? "preorder" : "details");
+    if (step === "checkout") { setStep(preorderEnabled ? "preorder" : "details"); if (preorderEnabled) onMenuModeChange(true); }
     else if (step === "preorder") setStep("details");
     else if (step === "details") setStep("schedule");
     setSubmitError("");
@@ -205,9 +209,9 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
     <div className="desktop-booking-quantity"><button type="button" aria-label={`${t("Убрать")} ${item?.name ?? id}`} onClick={() => changeQuantity(id, -1)}><Minus size={15} /></button><b>{quantity}</b><button type="button" aria-label={`${t("Добавить")} ${item?.name ?? id}`} disabled={!item} onClick={() => changeQuantity(id, 1)}><Plus size={15} /></button></div>
   </article>)}</div> : <div className="desktop-booking-empty"><ShoppingBag size={30} aria-hidden="true" /><strong>{t("В предзаказе пока пусто")}</strong><p>{t("Добавьте блюда из меню или забронируйте без предзаказа")}</p></div>;
 
-  return <>{step === "details" && <div className="desktop-booking-backdrop" onMouseDown={() => { setStep("schedule"); setCalendarOpen(false); scheduleTriggerRef.current?.focus(); }} />}<aside ref={detailsDialogRef} className={`venue-booking-card venue-public-booking desktop-booking-flow ${step === "details" ? "details-open" : ""}`} aria-labelledby="venue-desktop-booking-title" role={step === "details" ? "dialog" : undefined} aria-modal={step === "details" || undefined}>
+  return <>{step === "details" && <div className="desktop-booking-backdrop" onMouseDown={() => { setStep("schedule"); setCalendarOpen(false); scheduleTriggerRef.current?.focus(); }} />}<aside ref={detailsDialogRef} className={`venue-booking-card venue-public-booking desktop-booking-flow ${step === "details" ? "details-open" : step === "checkout" || confirmed ? "checkout-open" : ""}`} aria-labelledby="venue-desktop-booking-title" role={step === "details" || step === "checkout" || confirmed ? "dialog" : undefined} aria-modal={step === "details" || step === "checkout" || Boolean(confirmed) || undefined}>
     <header className="desktop-booking-header">{step !== "schedule" && step !== "details" && !confirmed && <button type="button" aria-label={t("Назад")} onClick={goBack}><ArrowLeft size={19} /></button>}<h2 id="venue-desktop-booking-title">{confirmed ? t("Бронь подтверждена") : step === "preorder" ? t("Предзаказ") : step === "checkout" ? t("Подтверждение брони") : t("Бронирование")}</h2>{step === "details" && <button ref={detailsCloseRef} type="button" className="desktop-booking-close" aria-label={t("Закрыть")} onClick={() => { setStep("schedule"); setCalendarOpen(false); scheduleTriggerRef.current?.focus(); }}><X size={22} /></button>}</header>
-    {confirmed ? <div className="venue-booking-confirmed" role="status"><strong>{venueName}</strong><p>{t("Номер брони")}: {confirmed.code}</p><p>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "full", timeStyle: "short", timeZone: availability?.timezone ?? "Europe/Bratislava" }).format(new Date(confirmed.starts_at))}</p><p>{t("Гостей: {count}", { count: confirmed.guest_count })}</p>{confirmed.preorder_total_minor > 0 && <p>{t("Предзаказ")}: {formatMoney(confirmed.preorder_total_minor, confirmed.currency)} · {t("Оплата в заведении")}</p>}</div> : <>
+    {confirmed ? <div className="venue-booking-confirmed" role="status"><strong>{venueName}</strong><p>{t("Номер брони")}: {confirmed.code}</p><p>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "full", timeStyle: "short", timeZone: availability?.timezone ?? "Europe/Bratislava" }).format(new Date(confirmed.starts_at))}</p><p>{t("Гостей: {count}", { count: confirmed.guest_count })}</p><p>{contactName.trim()} · {contactPhone.trim()}</p>{selectedItems.length > 0 && <div className="desktop-booking-confirmed-items"><h3>{t("Предзаказ")}</h3>{selectedItems.map(({ id, quantity, item }) => <p key={id}>{item?.name ?? t("Блюдо недоступно")} × {quantity}</p>)}<strong>{formatMoney(confirmed.preorder_total_minor, confirmed.currency)} · {t("Оплата в заведении")}</strong></div>}<button type="button" className="venue-booking-submit" onClick={onConfirmationClose}>{t("Вернуться к заведению")}</button></div> : <>
       {(step === "schedule" || step === "details") && <>
         <div className={step === "details" ? "desktop-booking-details-body" : "desktop-booking-schedule-body"}>
         <div className="venue-booking-toolbar"><div className="venue-date-picker" ref={calendarRef}>
@@ -221,7 +225,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
         <button ref={scheduleTriggerRef} type="button" className="venue-booking-submit desktop-booking-footer" disabled={!selectedSlot || (step === "details" && !validContact) || submitting} onClick={() => { if (step === "schedule") { setStep("details"); setCalendarOpen(false); } else if (preorderEnabled) startPreorder(); else void submit(false); setSubmitError(""); }}>{step === "schedule" || !preorderEnabled ? t("Забронировать") : t("Продолжить")}</button>
       </>}
       {step === "preorder" && <><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div><div className="desktop-booking-preorder-content"><div className="desktop-booking-preorder-heading"><h3>{t("Предзаказ блюд")}</h3><button ref={menuTriggerRef} type="button" onClick={() => onMenuModeChange(true)}><Plus size={17} />{t("Добавить блюда")}</button></div>{selectedList}</div>{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<div className="desktop-booking-actions">{selectedItems.length ? <button type="button" className="venue-booking-submit" disabled={missingItems} onClick={() => { setStep("checkout"); setSubmitError(""); }}>{t("Далее")} {formatMoney(totalMinor)}</button> : <button type="button" className="venue-booking-submit" disabled={submitting} onClick={() => void submit(false)}>{submitting ? t("Сохраняем бронь...") : t("Забронировать без предзаказа")}</button>}</div></>}
-      {step === "checkout" && <div className="desktop-booking-checkout"><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div><h3>{t("Ваш заказ")}</h3>{selectedList}<div className="desktop-booking-total"><span>{t("Итого к оплате")}</span><strong>{formatMoney(totalMinor)}</strong></div><div className="desktop-booking-account"><h3>{t("Контакты")}</h3><strong>{contactName.trim()}</strong><span>{contactPhone.trim()}</span>{contactEmail.trim() && <span>{contactEmail.trim()}</span>}</div>{(wishes.length > 0 || comment.trim()) && <div className="desktop-booking-notes"><h3>{t("Пожелания к брони")}</h3>{wishes.length > 0 && <p>{wishes.map((id) => t(bookingWishes.find((wish) => wish.id === id)?.label ?? "")).join(", ")}</p>}{comment.trim() && <p>{comment.trim()}</p>}</div>}<div className="desktop-booking-payment"><h3>{t("Оплата предзаказа")}</h3><strong>{t("Оплата в заведении")}</strong><p>{t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}</p></div>{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<button type="button" className="venue-booking-submit" disabled={submitting || missingItems || selectedItems.length === 0} onClick={() => void submit(true)}>{submitting ? t("Сохраняем бронь...") : submitError.includes(t("Цена изменилась")) ? t("Подтвердить новую сумму") : t("Подтвердить бронь и предзаказ")}</button></div>}
+      {step === "checkout" && <div className="desktop-booking-checkout"><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div><h3>{t("Ваш заказ")}</h3><div className="desktop-booking-review-items">{selectedItems.map(({ id, quantity, item }) => <div key={id}><span>{item?.name ?? t("Блюдо недоступно")} × {quantity}</span><strong>{item ? formatMoney(item.price_minor * quantity, item.currency) : ""}</strong></div>)}</div><div className="desktop-booking-total"><span>{t("Итого к оплате")}</span><strong>{formatMoney(totalMinor)}</strong></div><div className="desktop-booking-account"><h3>{t("Контакты")}</h3><strong>{contactName.trim()}</strong><span>{contactPhone.trim()}</span>{contactEmail.trim() && <span>{contactEmail.trim()}</span>}</div>{(wishes.length > 0 || comment.trim()) && <div className="desktop-booking-notes"><h3>{t("Пожелания к брони")}</h3>{wishes.length > 0 && <p>{wishes.map((id) => t(bookingWishes.find((wish) => wish.id === id)?.label ?? "")).join(", ")}</p>}{comment.trim() && <p>{comment.trim()}</p>}</div>}<div className="desktop-booking-payment"><h3>{t("Оплата предзаказа")}</h3><strong>{t("Оплата в заведении")}</strong><p>{t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}</p></div>{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<button type="button" className="venue-booking-submit" disabled={submitting || missingItems || selectedItems.length === 0} onClick={() => void submit(true)}>{submitting ? t("Сохраняем бронь...") : submitError.includes(t("Цена изменилась")) ? t("Подтвердить новую сумму") : t("Забронировать")}</button></div>}
     </>}
   </aside></>;
 });
