@@ -279,7 +279,7 @@ describe("Spots guest experience", () => {
     desktop = true;
     nativeReplace(null, "", "/ru/venue/casa");
     vi.mocked(getPublicVenue).mockResolvedValue({ ...publicVenues[1], preorder_enabled: true });
-    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ id: "mains", name: "Основные блюда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR" }] }]);
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ id: "mains", name: "Основные блюда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR", image_url: "https://example.test/pasta.jpg" }] }]);
     render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
     await screen.findByRole("heading", { name: "Паста" });
     fireEvent.click(await screen.findByRole("button", { name: "19:00" }));
@@ -287,7 +287,7 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("dialog", { name: "Бронирование" })).toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), { target: { value: "Anna Guest" } });
     fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Свидание" }));
+    expect(screen.queryByRole("button", { name: "Свидание" })).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "Тихий стол" } });
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
 
@@ -301,7 +301,6 @@ describe("Spots guest experience", () => {
     expect(bookingSummary).toHaveTextContent("Гостей: 2");
     expect(bookingSummary).toHaveTextContent("Anna Guest");
     expect(bookingSummary).toHaveTextContent("+421900123456");
-    expect(bookingSummary).toHaveTextContent("Свидание");
     expect(bookingSummary).toHaveTextContent("Тихий стол");
     expect(within(menu).getByRole("button", { name: "Забронировать без предзаказа" })).toBeInTheDocument();
     fireEvent.click(within(menu).getByRole("button", { name: "Добавить Паста" }));
@@ -322,6 +321,7 @@ describe("Spots guest experience", () => {
     expect(within(review).getByText("Тихий стол")).toBeInTheDocument();
     expect(within(review).getByText("Anna Guest")).toBeInTheDocument();
     expect(within(review).getByText(/Паста × 1/)).toBeInTheDocument();
+    expect(within(review).getByRole("img", { name: "Паста" })).toHaveStyle({ backgroundImage: 'url("https://example.test/pasta.jpg")' });
     expect(createPublicReservation).not.toHaveBeenCalled();
     vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-2", code: "BOOK123", starts_at: "2026-09-27T17:00:00Z", guest_count: 2, preorder_total_minor: 1200, currency: "EUR" });
     fireEvent.click(within(review).getByRole("button", { name: "Забронировать" }));
@@ -334,6 +334,37 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("button", { name: "Забронировать" })).toBeDisabled();
   });
 
+  it("keeps the clicked menu category highlighted after the menu scrolls", async () => {
+    desktop = true;
+    nativeReplace(null, "", "/ru/venue/casa");
+    vi.mocked(getPublicVenue).mockResolvedValue({ ...publicVenues[1], preorder_enabled: true });
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([
+      { id: "breakfast", name: "Завтраки", items: [{ id: "toast", name: "Тост", price_minor: 900, currency: "EUR" }] },
+      { id: "snacks", name: "Закуски", items: [{ id: "salad", name: "Салат", price_minor: 1100, currency: "EUR" }] },
+    ]);
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    fireEvent.click(await screen.findByRole("button", { name: "19:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    const menu = screen.getByRole("dialog", { name: "Меню для предзаказа" });
+    const content = menu.querySelector<HTMLElement>(".venue-public-menu-content")!;
+    const breakfast = within(menu).getByRole("region", { name: "Завтраки" });
+    const snacks = within(menu).getByRole("region", { name: "Закуски" });
+    Object.defineProperties(content, { scrollTop: { value: 100, configurable: true }, clientHeight: { value: 300, configurable: true }, scrollHeight: { value: 900, configurable: true } });
+    vi.spyOn(content, "getBoundingClientRect").mockReturnValue({ top: 0 } as DOMRect);
+    vi.spyOn(breakfast, "getBoundingClientRect").mockReturnValue({ top: -100 } as DOMRect);
+    const snacksRect = vi.spyOn(snacks, "getBoundingClientRect").mockReturnValue({ top: 180 } as DOMRect);
+    const snacksTab = within(menu).getByRole("button", { name: "Закуски" });
+    fireEvent.click(snacksTab);
+    fireEvent.scroll(content);
+    expect(snacksTab).toHaveClass("active");
+    expect(snacksTab).toHaveAttribute("aria-current", "location");
+    snacksRect.mockReturnValue({ top: 20 } as DOMRect);
+    fireEvent.scroll(content);
+    expect(snacksTab).toHaveClass("active");
+  });
+
   it("returns from the menu to the filled booking form and can reopen the menu", async () => {
     desktop = true;
     nativeReplace(null, "", "/ru/venue/casa");
@@ -344,7 +375,7 @@ describe("Spots guest experience", () => {
     fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
     fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), { target: { value: "Other Guest" } });
     fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Свидание" }));
+    expect(screen.queryByRole("button", { name: "Свидание" })).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "Тихий стол" } });
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
     const menu = screen.getByRole("dialog", { name: "Меню для предзаказа" });
@@ -356,7 +387,7 @@ describe("Spots guest experience", () => {
     expect(within(booking).getByRole("button", { name: "19:00" })).toHaveAttribute("aria-pressed", "true");
     expect(within(booking).getByRole("textbox", { name: "Имя" })).toHaveValue("Other Guest");
     expect(within(booking).getByRole("textbox", { name: "Телефон" })).toHaveValue("+421900123456");
-    expect(within(booking).getByRole("button", { name: "Свидание" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(booking).queryByRole("button", { name: "Свидание" })).not.toBeInTheDocument();
     expect(within(booking).getByRole("textbox", { name: "Комментарий к ресторану" })).toHaveValue("Тихий стол");
     fireEvent.click(within(booking).getByRole("button", { name: "Продолжить" }));
     expect(within(screen.getByRole("dialog", { name: "Меню для предзаказа" })).getByRole("complementary", { name: "Предзаказ" })).toHaveTextContent("Паста");

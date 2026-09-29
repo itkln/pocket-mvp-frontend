@@ -39,13 +39,13 @@ describe("DesktopBookingFlow", () => {
     expect(screen.getByRole("textbox", { name: "Эл. почта (необязательно)" })).toHaveValue("guest@example.test");
     fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), { target: { value: "Other Guest" } });
     fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Свидание" }));
+    expect(screen.queryByRole("button", { name: "Свидание" })).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "Тихий столик" } });
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
     expect(onMenuModeChange).toHaveBeenCalledWith(true);
     ref.current?.bookWithoutPreorder();
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
-    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({ items: [], guest_name: "Other Guest", guest_email: "guest@example.test", guest_phone: "+421900123456", notes: "Свидание. Тихий столик" });
+    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({ items: [], guest_name: "Other Guest", guest_email: "guest@example.test", guest_phone: "+421900123456", notes: "Тихий столик" });
     expect(await screen.findByText(/Номер брони: BOOK123/)).toBeInTheDocument();
   });
 

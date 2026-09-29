@@ -65,6 +65,8 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
   const preorderMenuRef = useRef<HTMLDivElement>(null);
   const preorderMenuScrollRef = useRef<HTMLDivElement>(null);
+  const pendingCategoryRef = useRef<string | null>(null);
+  const pendingCategoryTimerRef = useRef<number | null>(null);
   const preorderMenuBackRef = useRef<HTMLButtonElement>(null);
   const detailDialogRef = useRef<HTMLElement>(null);
   const detailCloseRef = useRef<HTMLButtonElement>(null);
@@ -199,11 +201,22 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
     const menuContainer = preorderMenuScrollRef.current;
     const updateScrollState = () => {
       setCompactHeader(window.scrollY > 115);
+      if (preorderMenuOpen && pendingCategoryRef.current) {
+        const pending = pendingCategoryRef.current;
+        const targetTop = categoryRefs.current[pending]?.getBoundingClientRect().top;
+        const contentTop = menuContainer?.getBoundingClientRect().top ?? 0;
+        if (targetTop !== undefined && Math.abs(targetTop - contentTop - 20) <= 16) pendingCategoryRef.current = null;
+        else { setActiveCategory(pending); return; }
+      }
       if (!preorderMenuOpen && window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) {
         setActiveCategory(menuState.categories.at(-1)?.id ?? "");
         return;
       }
-      const offset = preorderMenuOpen ? (menuContainer?.getBoundingClientRect().top ?? 0) + 12 : 164;
+      if (preorderMenuOpen && menuContainer && menuContainer.scrollTop > 0 && menuContainer.scrollTop + menuContainer.clientHeight >= menuContainer.scrollHeight - 2) {
+        setActiveCategory(menuState.categories.at(-1)?.id ?? "");
+        return;
+      }
+      const offset = preorderMenuOpen ? (menuContainer?.getBoundingClientRect().top ?? 0) + 36 : 164;
       let current = menuState.categories[0]?.id ?? "";
       menuState.categories.forEach(({ id }) => {
         if ((categoryRefs.current[id]?.getBoundingClientRect().top ?? Infinity) <= offset) current = id;
@@ -218,6 +231,9 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
 
   const venue = state.venue;
   const openCategory = (id: string) => {
+    pendingCategoryRef.current = preorderMenuOpen ? id : null;
+    if (pendingCategoryTimerRef.current !== null) window.clearTimeout(pendingCategoryTimerRef.current);
+    pendingCategoryTimerRef.current = window.setTimeout(() => { pendingCategoryRef.current = null; }, 800);
     setActiveCategory(id);
     categoryRefs.current[id]?.scrollIntoView?.({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
@@ -338,7 +354,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
               <div><CalendarDays size={17} aria-hidden="true" /><span>{bookingSummary.dateLabel} · {bookingSummary.time}</span></div>
               <div><UsersRound size={17} aria-hidden="true" /><span>{t("Гостей: {count}", { count: bookingSummary.guests })}</span></div>
               <div><UserRound size={17} aria-hidden="true" /><span>{bookingSummary.name}<small>{bookingSummary.phone}{bookingSummary.email && <> · {bookingSummary.email}</>}</small></span></div>
-              {bookingSummary.wishes.length > 0 && <p>{bookingSummary.wishes.join(", ")}</p>}
               {bookingSummary.comment && <p>{bookingSummary.comment}</p>}
             </section>}
             {preorderSelectedItems.length ? <div className="venue-preorder-cart-items">{preorderSelectedItems.map((item) => <article key={item.id}>
