@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import { APIError } from "../../../lib/api-client";
-import { createPublicReservation, getPublicVenueMenu, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
+import { createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
 const day = (value: string) => new Date(`${value}T12:00:00Z`);
@@ -55,6 +55,12 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
   const [submitError, setSubmitError] = useState("");
   const [confirmed, setConfirmed] = useState<CreatedReservation | null>(null);
   const submissionKey = useRef(crypto.randomUUID());
+
+  useEffect(() => {
+    let active = true;
+    void getSavedPublicReservation(venueID).then((saved) => { if (active && saved) setConfirmed(saved); });
+    return () => { active = false; };
+  }, [venueID]);
   const calendarRef = useRef<HTMLDivElement>(null);
   const formatter = new Intl.DateTimeFormat(localeTags[locale], { day: "numeric", month: "short", timeZone: "UTC" });
   const longFormatter = new Intl.DateTimeFormat(localeTags[locale], { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
@@ -135,7 +141,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
     });
     setSubmitError("");
   };
-  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time, guestName, guestPhone, guestEmail, comment, wishes, quantities, updatedMenu]);
+  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time]);
   const submit = async () => {
     if (!selectedSlot || !guestName.trim() || !guestPhone.trim() || missingItems || submitting) return;
     setSubmitting(true);
@@ -154,7 +160,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
           setUpdatedMenu(await getPublicVenueMenu(venueID));
           setSubmitError(caught.code === "price_changed" ? t("Цена изменилась. Проверьте новую сумму и подтвердите ещё раз") : t("Одно из блюд больше недоступно. Уберите его из предзаказа"));
         } catch { setSubmitError(t("Не удалось обновить меню. Попробуйте ещё раз")); }
-      } else if (caught instanceof APIError && caught.code === "slot_unavailable") {
+      } else if (caught instanceof APIError && (caught.code === "slot_unavailable" || caught.code === "hold_expired")) {
         setTime(""); setRevision((value) => value + 1);
         setSubmitError(t("Это время уже занято. Выберите другое"));
       } else {

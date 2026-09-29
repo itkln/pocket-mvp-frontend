@@ -4,7 +4,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import type { AuthUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
-import { createPublicReservation, getPublicVenueMenu, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
+import { clearSavedPublicReservation, createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
 type Step = "schedule" | "details" | "preorder" | "checkout";
@@ -72,6 +72,12 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   const submissionKey = useRef(crypto.randomUUID());
 
   useEffect(() => {
+    let active = true;
+    void getSavedPublicReservation(venueID).then((saved) => { if (active && saved) setConfirmed(saved); });
+    return () => { active = false; };
+  }, [venueID]);
+
+  useEffect(() => {
     const controller = new AbortController();
     getVenueAvailability(venueID, date, guests, controller.signal)
       .then((result) => {
@@ -126,7 +132,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   const contactName = guestName ?? [user?.first_name, user?.last_name].filter(Boolean).join(" ");
   const contactEmail = guestEmail ?? user?.email ?? "";
   const contactPhone = guestPhone ?? user?.phone ?? "";
-  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time, quantities, contactName, contactEmail, contactPhone, comment, menu, user?.id]);
+  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time, user?.id]);
 
   const current = availability?.date === date ? availability : null;
   const daySlots = current?.slots.filter((slot) => slot.time < "18:00") ?? [];
@@ -180,7 +186,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
           setSubmitError(caught.code === "price_changed" ? t("Цена изменилась. Проверьте новую сумму и подтвердите ещё раз") : t("Одно из блюд больше недоступно. Уберите его из предзаказа"));
           if (caught.code === "item_unavailable") setStep("preorder");
         } catch { setSubmitError(t("Не удалось обновить меню. Попробуйте ещё раз")); }
-      } else if (caught instanceof APIError && caught.code === "slot_unavailable") {
+      } else if (caught instanceof APIError && (caught.code === "slot_unavailable" || caught.code === "hold_expired")) {
         setStep("schedule"); setTime(""); setRevision((value) => value + 1);
         setSubmitError(t("Это время уже занято. Выберите другое"));
       } else {
@@ -209,7 +215,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
 
   return <>{step === "details" && <div className="desktop-booking-backdrop" onMouseDown={() => { setStep("schedule"); setCalendarOpen(false); scheduleTriggerRef.current?.focus(); }} />}<aside ref={detailsDialogRef} className={`venue-booking-card venue-public-booking desktop-booking-flow ${step === "details" ? "details-open" : step === "checkout" || confirmed ? "checkout-open" : ""}`} aria-labelledby="venue-desktop-booking-title" role={step === "details" || step === "checkout" || confirmed ? "dialog" : undefined} aria-modal={step === "details" || step === "checkout" || Boolean(confirmed) || undefined}>
     <header className="desktop-booking-header">{step !== "schedule" && step !== "details" && !confirmed && <button type="button" aria-label={t("Назад")} onClick={goBack}><ArrowLeft size={19} /></button>}<h2 id="venue-desktop-booking-title">{confirmed ? t("Бронь подтверждена") : step === "preorder" ? t("Предзаказ") : step === "checkout" ? t("Подтверждение брони") : t("Бронирование")}</h2>{step === "details" && <button ref={detailsCloseRef} type="button" className="desktop-booking-close" aria-label={t("Закрыть")} onClick={() => { setStep("schedule"); setCalendarOpen(false); scheduleTriggerRef.current?.focus(); }}><X size={22} /></button>}</header>
-    {confirmed ? <div className="venue-booking-confirmed" role="status"><strong>{venueName}</strong><p>{t("Номер брони")}: {confirmed.code}</p><p>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "full", timeStyle: "short", timeZone: availability?.timezone ?? "Europe/Bratislava" }).format(new Date(confirmed.starts_at))}</p><p>{t("Гостей: {count}", { count: confirmed.guest_count })}</p><p>{contactName.trim()} · {contactPhone.trim()}</p>{selectedItems.length > 0 && <div className="desktop-booking-confirmed-items"><h3>{t("Предзаказ")}</h3>{selectedItems.map(({ id, quantity, item }) => <p key={id}>{item?.name ?? t("Блюдо недоступно")} × {quantity}</p>)}<strong>{formatMoney(confirmed.preorder_total_minor, confirmed.currency)} · {t("Оплата в заведении")}</strong></div>}<button type="button" className="venue-booking-submit" onClick={onConfirmationClose}>{t("Вернуться к заведению")}</button></div> : <>
+    {confirmed ? <div className="venue-booking-confirmed" role="status"><strong>{venueName}</strong><p>{t("Номер брони")}: {confirmed.code}</p><p>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "full", timeStyle: "short", timeZone: availability?.timezone ?? "Europe/Bratislava" }).format(new Date(confirmed.starts_at))}</p><p>{t("Гостей: {count}", { count: confirmed.guest_count })}</p>{(contactName.trim() || contactPhone.trim()) && <p>{contactName.trim()} · {contactPhone.trim()}</p>}{confirmed.preorder_total_minor > 0 && <div className="desktop-booking-confirmed-items"><h3>{t("Предзаказ")}</h3>{selectedItems.map(({ id, quantity, item }) => <p key={id}>{item?.name ?? t("Блюдо недоступно")} × {quantity}</p>)}<strong>{formatMoney(confirmed.preorder_total_minor, confirmed.currency)} · {t("Оплата в заведении")}</strong></div>}<button type="button" className="venue-booking-submit" onClick={() => { clearSavedPublicReservation(venueID); onConfirmationClose(); }}>{t("Вернуться к заведению")}</button></div> : <>
       {(step === "schedule" || step === "details") && <>
         <div className={step === "details" ? "desktop-booking-details-body" : "desktop-booking-schedule-body"}>
         <div className="venue-booking-toolbar"><div className="venue-date-picker" ref={calendarRef}>

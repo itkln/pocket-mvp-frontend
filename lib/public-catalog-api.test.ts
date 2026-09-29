@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { catalogCityValue, createPublicReservation, getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, listPublicVenues } from "./public-catalog-api";
+import { catalogCityValue, clearSavedPublicReservation, createPublicReservation, getSavedPublicReservation, getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, listPublicVenues } from "./public-catalog-api";
 
 describe("public catalog API", () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
+    window.sessionStorage.clear();
     fetchMock.mockReset();
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ venues: [], page: 2, page_size: 12, total: 0, total_pages: 0, has_next: false }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
@@ -54,13 +55,21 @@ describe("public catalog API", () => {
     expect(fetchMock.mock.calls[0][0]).toBe("/api/v1/public/venues/venue-id/reviews");
   });
 
-  it("posts one reservation contract with its preorder items", async () => {
+  it("holds, confirms and reloads a reservation with the same operation key", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ hold: { id: "booking-1", expires_at: "2026-10-01T15:00:00Z" } }), { status: 201 }));
     fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ reservation: { id: "booking-1", code: "ABC123" } }), { status: 201 }));
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ reservation: { id: "booking-1", code: "ABC123" } }), { status: 200 }));
     const input = { starts_at: "2026-10-01T16:00:00Z", guests: 2, guest_name: "Anna", guest_phone: "+421900123456", guest_email: "", notes: "Window", items: [{ menu_item_id: "dish-1", quantity: 2, expected_price_minor: 1200 }], idempotency_key: "booking-key-123456" };
     await expect(createPublicReservation("venue-id", input)).resolves.toMatchObject({ id: "booking-1" });
     const [path, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(path).toBe("/api/v1/public/venues/venue-id/reservations");
+    expect(path).toBe("/api/v1/public/venues/venue-id/reservations/holds");
     expect(init).toMatchObject({ method: "POST", credentials: "include", cache: "no-store" });
     expect(JSON.parse(init.body as string)).toEqual(input);
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/v1/public/venues/venue-id/reservations/booking-1/confirm");
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body as string)).toEqual(input);
+    await expect(getSavedPublicReservation("venue-id")).resolves.toMatchObject({ id: "booking-1", code: "ABC123" });
+    expect(fetchMock.mock.calls[2][1].headers.get("X-Reservation-Key")).toBe(input.idempotency_key);
+    clearSavedPublicReservation("venue-id");
+    await expect(getSavedPublicReservation("venue-id")).resolves.toBeNull();
   });
 });

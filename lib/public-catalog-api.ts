@@ -1,4 +1,4 @@
-import { apiRequest } from "./api-client";
+import { APIError, apiRequest } from "./api-client";
 
 export type PublicVenue = {
   id: string;
@@ -136,8 +136,45 @@ export async function getVenueAvailability(id: string, date: string, guests: num
 }
 
 export async function createPublicReservation(id: string, input: ReservationInput): Promise<CreatedReservation> {
-  const result = await apiRequest<{ reservation: CreatedReservation }>(`/public/venues/${encodeURIComponent(id)}/reservations`, {
+  const path = `/public/venues/${encodeURIComponent(id)}/reservations`;
+  const hold = await apiRequest<{ hold: { id: string; expires_at: string } }>(`${path}/holds`, {
     method: "POST", body: JSON.stringify(input), cache: "no-store",
   });
+  const result = await apiRequest<{ reservation: CreatedReservation }>(`${path}/${encodeURIComponent(hold.hold.id)}/confirm`, {
+    method: "POST", body: JSON.stringify(input), cache: "no-store",
+  });
+  if (typeof window !== "undefined") {
+    try { window.sessionStorage.setItem(`pocket-reservation:${id}`, JSON.stringify({ id: result.reservation.id, key: input.idempotency_key })); }
+    catch { /* Browser storage may be disabled; the confirmed response remains valid. */ }
+  }
   return result.reservation;
+}
+
+export async function getSavedPublicReservation(id: string): Promise<CreatedReservation | null> {
+  if (typeof window === "undefined") return null;
+  let stored: string | null;
+  try { stored = window.sessionStorage.getItem(`pocket-reservation:${id}`); }
+  catch { return null; }
+  if (!stored) return null;
+  try {
+    const reference = JSON.parse(stored) as { id?: string; key?: string };
+    if (!reference.id || !reference.key) throw new Error("Invalid reservation reference");
+    const result = await apiRequest<{ reservation: CreatedReservation }>(
+      `/public/venues/${encodeURIComponent(id)}/reservations/${encodeURIComponent(reference.id)}`,
+      { headers: { "X-Reservation-Key": reference.key }, cache: "no-store" },
+    );
+    return result.reservation;
+  } catch (error) {
+    if (!(error instanceof APIError) || error.status === 404 || error.status === 422) {
+      clearSavedPublicReservation(id);
+    }
+    return null;
+  }
+}
+
+export function clearSavedPublicReservation(id: string) {
+  if (typeof window !== "undefined") {
+    try { window.sessionStorage.removeItem(`pocket-reservation:${id}`); }
+    catch { /* Browser storage may be disabled. */ }
+  }
 }
