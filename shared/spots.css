@@ -1225,7 +1225,7 @@
     inset: 0;
     box-sizing: border-box;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) min(390px, 30vw);
+    grid-template-columns: 56px minmax(0, 1fr) min(390px, 30vw);
     grid-template-rows: 64px minmax(0, 1fr);
     gap: 0 16px;
     overflow: hidden;
@@ -1237,7 +1237,7 @@
     position: relative;
     z-index: 2;
     top: auto;
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 1;
     display: block;
     margin: 0;
@@ -1246,12 +1246,12 @@
     border-radius: 24px 24px 0 0;
   }
   .pocket-spots .spots-real-venue-detail .venue-preorder-menu-mode .venue-public-category-nav {
-    padding-left: 64px;
+    padding-left: 24px;
     border-radius: 24px 24px 0 0;
   }
   .pocket-spots .venue-preorder-menu-mode .venue-public-menu-content {
     min-height: 0;
-    grid-column: 1;
+    grid-column: 2;
     grid-row: 2;
     overflow-y: auto;
     border-radius: 0 0 24px 24px;
@@ -1260,17 +1260,19 @@
   }
   .pocket-spots .venue-preorder-menu-mode .venue-public-menu-grid { max-width: 920px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pocket-spots .venue-preorder-menu-mode .venue-public-menu-category { scroll-margin-top: 20px; }
-  .pocket-spots .venue-preorder-menu-back {
-    position: absolute;
+  .pocket-spots .venue-preorder-menu-close {
+    grid-column: 1;
+    grid-row: 1;
     z-index: 4;
-    top: 26px;
-    left: 34px;
+    justify-self: center;
+    align-self: start;
     width: 44px;
     height: 44px;
     display: grid;
     place-items: center;
+    margin-top: 10px;
     padding: 0;
-    background: #f2f3f4;
+    background: #fff;
     color: var(--spots-text);
     cursor: pointer;
   }
@@ -1305,7 +1307,7 @@
   .pocket-spots .venue-preorder-cart {
     min-width: 0;
     min-height: 0;
-    grid-column: 2;
+    grid-column: 3;
     grid-row: 1 / 3;
     display: flex;
     flex-direction: column;
@@ -1316,7 +1318,14 @@
   .pocket-spots .venue-preorder-cart header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 24px 16px; }
   .pocket-spots .venue-preorder-cart header h2 { margin: 0; font-size: 24px; }
   .pocket-spots .venue-preorder-cart header button { padding: 6px 0; background: transparent; color: var(--spots-secondary); font: inherit; font-size: 13px; cursor: pointer; }
-  .pocket-spots .venue-preorder-cart-items { min-height: 0; flex: 1; overflow-y: auto; padding: 0 16px; scrollbar-width: thin; }
+  .pocket-spots .venue-preorder-cart-body { min-height: 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: thin; }
+  .pocket-spots .venue-preorder-reservation-summary { display: grid; gap: 8px; margin: 0 16px 12px; padding: 14px; border-radius: 16px; background: #f3f4f4; overflow-wrap: anywhere; }
+  .pocket-spots .venue-preorder-reservation-summary h3 { margin: 0 0 3px; font-size: 15px; }
+  .pocket-spots .venue-preorder-reservation-summary > div { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; line-height: 1.35; }
+  .pocket-spots .venue-preorder-reservation-summary svg { flex: 0 0 auto; color: var(--spots-secondary); }
+  .pocket-spots .venue-preorder-reservation-summary small { display: block; margin-top: 3px; color: var(--spots-secondary); font-size: 12px; }
+  .pocket-spots .venue-preorder-reservation-summary p { margin: 0; color: var(--spots-secondary); font-size: 12px; line-height: 1.4; }
+  .pocket-spots .venue-preorder-cart-items { padding: 0 16px; }
   .pocket-spots .venue-preorder-cart-items article { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 11px 4px; border-bottom: 1px solid #f0f1f2; }
   .pocket-spots .venue-preorder-cart-image { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 13px; background-color: var(--spots-card); background-position: center; background-size: cover; color: var(--spots-muted); }
   .pocket-spots .venue-preorder-cart-copy { min-width: 0; display: grid; gap: 4px; }
@@ -1332,6 +1341,7 @@
   .pocket-spots .venue-preorder-cart-empty p { max-width: 230px; margin: 9px 0 0; color: var(--spots-secondary); font-size: 13px; line-height: 1.4; }
   .pocket-spots .venue-preorder-cart-footer { padding: 16px; border-top: 1px solid #e8ebed; }
   .pocket-spots .venue-preorder-cart-footer button { width: 100%; min-height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: var(--spots-cta); color: #fff; font: inherit; font-weight: 750; cursor: pointer; }
+  .pocket-spots .venue-preorder-cart-footer .venue-preorder-book-without { justify-content: center; text-align: center; }
   .pocket-spots .venue-preorder-cart-footer button:disabled { opacity: .5; cursor: default; }
   .pocket-spots .venue-preorder-product-backdrop { position: fixed; z-index: 200; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(20, 27, 34, .48); }
   .pocket-spots .venue-preorder-product-dialog { position: relative; box-sizing: border-box; width: min(960px, 95vw); max-height: min(780px, 92dvh); overflow-y: auto; padding: 34px; border-radius: 28px; background: #fff; }

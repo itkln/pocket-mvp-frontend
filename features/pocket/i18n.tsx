@@ -77,6 +77,7 @@ const rows: TranslationRow[] = [
   ["Добавить блюда", "Add dishes", "Додати страви", "Pridať jedlá"],
   ["Забронировать без предзаказа", "Book without a pre-order", "Забронювати без передзамовлення", "Rezervovať bez predobjednávky"],
   ["Меню для предзаказа", "Pre-order menu", "Меню передзамовлення", "Menu predobjednávky"],
+  ["Закрыть предзаказ", "Close pre-order", "Закрити передзамовлення", "Zavrieť predobjednávku"],
   ["Подробнее о блюде", "Dish details", "Деталі страви", "Podrobnosti o jedle"],
   ["Очистить", "Clear", "Очистити", "Vymazať"],
   ["Добавьте блюда из меню", "Add dishes from the menu", "Додайте страви з меню", "Pridajte jedlá z menu"],

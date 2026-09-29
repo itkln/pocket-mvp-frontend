@@ -287,16 +287,25 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("dialog", { name: "Бронирование" })).toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), { target: { value: "Anna Guest" } });
     fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Свидание" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "Тихий стол" } });
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
 
     const menu = screen.getByRole("dialog", { name: "Меню для предзаказа" });
     expect(menu).toHaveClass("venue-detail-content", "venue-preorder-menu-mode");
     expect(within(menu).getByRole("navigation", { name: "Категории меню" })).toBeInTheDocument();
     expect(within(menu).getByRole("heading", { name: "Паста" })).toBeInTheDocument();
+    const cart = within(menu).getByRole("complementary", { name: "Предзаказ" });
+    const bookingSummary = within(cart).getByRole("region", { name: "Бронирование" });
+    expect(bookingSummary).toHaveTextContent("19:00");
+    expect(bookingSummary).toHaveTextContent("Гостей: 2");
+    expect(bookingSummary).toHaveTextContent("Anna Guest");
+    expect(bookingSummary).toHaveTextContent("+421900123456");
+    expect(bookingSummary).toHaveTextContent("Свидание");
+    expect(bookingSummary).toHaveTextContent("Тихий стол");
     expect(within(menu).getByRole("button", { name: "Забронировать без предзаказа" })).toBeInTheDocument();
     fireEvent.click(within(menu).getByRole("button", { name: "Добавить Паста" }));
     expect(within(menu).getByLabelText("Паста: 1")).toBeInTheDocument();
-    const cart = within(menu).getByRole("complementary", { name: "Предзаказ" });
     expect(cart).toHaveTextContent("Паста");
     fireEvent.click(within(menu).getByRole("button", { name: "Подробнее о блюде: Паста" }));
     const product = within(menu).getByRole("dialog", { name: "Паста" });
@@ -307,6 +316,36 @@ describe("Spots guest experience", () => {
     fireEvent.click(within(menu).getByRole("button", { name: /Далее.*12/ }));
     expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
     expect(await screen.findByText("Оплата в заведении")).toBeInTheDocument();
+  });
+
+  it("closes desktop preorder with a separate cross and starts a fresh reservation", async () => {
+    desktop = true;
+    nativeReplace(null, "", "/ru/venue/casa");
+    vi.mocked(getPublicVenue).mockResolvedValue({ ...publicVenues[1], preorder_enabled: true });
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ id: "mains", name: "Основные блюда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR" }] }]);
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    fireEvent.click(await screen.findByRole("button", { name: "19:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), { target: { value: "Other Guest" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Свидание" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "Тихий стол" } });
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    const menu = screen.getByRole("dialog", { name: "Меню для предзаказа" });
+    expect(within(menu).getByRole("button", { name: "Закрыть предзаказ" })).toHaveClass("venue-preorder-menu-close");
+    fireEvent.click(within(menu).getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.click(within(menu).getByRole("button", { name: "Закрыть предзаказ" }));
+    expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Предзаказ блюд" })).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "19:00" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Забронировать" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "19:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    expect(screen.getByRole("textbox", { name: "Имя" })).toHaveValue("Anna Guest");
+    expect(screen.getByRole("textbox", { name: "Телефон" })).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Свидание" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("textbox", { name: "Комментарий к ресторану" })).toHaveValue("");
+    expect(createPublicReservation).not.toHaveBeenCalled();
   });
 
   it("books directly from an empty desktop preorder cart with entered contacts", async () => {

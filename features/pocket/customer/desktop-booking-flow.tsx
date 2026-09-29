@@ -29,6 +29,7 @@ const calendarDays = (month: string) => {
 };
 
 export type DesktopBookingFlowHandle = { checkout: () => void; bookWithoutPreorder: () => void };
+export type DesktopBookingSummary = { dateLabel: string; time: string; guests: number; name: string; phone: string; email: string; wishes: string[]; comment: string };
 
 export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   venueID: string;
@@ -40,8 +41,9 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   onQuantityChange: (id: string, delta: number) => void;
   menuModeOpen: boolean;
   onMenuModeChange: (open: boolean) => void;
+  onPreorderStart?: (summary: DesktopBookingSummary) => void;
   onMenuUpdated: (categories: PublicMenuCategory[]) => void;
-}>(function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, user, quantities, onQuantityChange, menuModeOpen, onMenuModeChange, onMenuUpdated }, ref) {
+}>(function DesktopBookingFlow({ venueID, venueName, menu, preorderEnabled, user, quantities, onQuantityChange, menuModeOpen, onMenuModeChange, onPreorderStart, onMenuUpdated }, ref) {
   const { locale, t } = useI18n();
   const [step, setStep] = useState<Step>("schedule");
   const [date, setDate] = useState("");
@@ -153,6 +155,11 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   const changeGuests = (value: number) => {
     setGuests(value); setTime(""); setAvailability(null); setLoading(true);
   };
+  const startPreorder = () => {
+    onPreorderStart?.({ dateLabel, time, guests, name: contactName.trim(), phone: contactPhone.trim(), email: contactEmail.trim(), wishes: wishes.map((id) => t(bookingWishes.find((wish) => wish.id === id)?.label ?? "")), comment: comment.trim() });
+    setStep("preorder");
+    onMenuModeChange(true);
+  };
   const submit = async (withPreorder: boolean) => {
     if (!selectedSlot || submitting || !validContact || (withPreorder && (selectedItems.length === 0 || missingItems))) return;
     setSubmitting(true);
@@ -211,7 +218,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
         {step === "details" && <div className="desktop-booking-details-scroll"><div className="venue-booking-wishes"><h3>{t("Пожелания к брони")}</h3><div className="venue-wish-options">{bookingWishes.map((wish) => <button type="button" key={wish.id} aria-pressed={wishes.includes(wish.id)} className={wishes.includes(wish.id) ? "active" : ""} onClick={() => setWishes((previous) => previous.includes(wish.id) ? previous.filter((id) => id !== wish.id) : [...previous, wish.id])}><span aria-hidden="true">{wish.icon}</span>{t(wish.label)}</button>)}</div><textarea value={comment} maxLength={500} placeholder={t("Комментарий к ресторану")} aria-label={t("Комментарий к ресторану")} onChange={(event) => setComment(event.target.value)} /></div><div className="venue-booking-contact"><h3>{t("Контакты")}</h3><label>{t("Имя")}<input value={contactName} autoComplete="name" maxLength={120} onChange={(event) => setGuestName(event.target.value)} /></label><label>{t("Телефон")}<input value={contactPhone} type="tel" autoComplete="tel" maxLength={40} onChange={(event) => setGuestPhone(event.target.value)} /></label><label>{t("Эл. почта (необязательно)")}<input value={contactEmail} type="email" autoComplete="email" maxLength={254} onChange={(event) => setGuestEmail(event.target.value)} /></label></div></div>}
         {submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}
         </div>
-        <button ref={scheduleTriggerRef} type="button" className="venue-booking-submit desktop-booking-footer" disabled={!selectedSlot || (step === "details" && !validContact) || submitting} onClick={() => { if (step === "schedule") { setStep("details"); setCalendarOpen(false); } else if (preorderEnabled) { setStep("preorder"); onMenuModeChange(true); } else void submit(false); setSubmitError(""); }}>{step === "schedule" || !preorderEnabled ? t("Забронировать") : t("Продолжить")}</button>
+        <button ref={scheduleTriggerRef} type="button" className="venue-booking-submit desktop-booking-footer" disabled={!selectedSlot || (step === "details" && !validContact) || submitting} onClick={() => { if (step === "schedule") { setStep("details"); setCalendarOpen(false); } else if (preorderEnabled) startPreorder(); else void submit(false); setSubmitError(""); }}>{step === "schedule" || !preorderEnabled ? t("Забронировать") : t("Продолжить")}</button>
       </>}
       {step === "preorder" && <><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div><div className="desktop-booking-preorder-content"><div className="desktop-booking-preorder-heading"><h3>{t("Предзаказ блюд")}</h3><button ref={menuTriggerRef} type="button" onClick={() => onMenuModeChange(true)}><Plus size={17} />{t("Добавить блюда")}</button></div>{selectedList}</div>{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<div className="desktop-booking-actions">{selectedItems.length ? <button type="button" className="venue-booking-submit" disabled={missingItems} onClick={() => { setStep("checkout"); setSubmitError(""); }}>{t("Далее")} {formatMoney(totalMinor)}</button> : <button type="button" className="venue-booking-submit" disabled={submitting} onClick={() => void submit(false)}>{submitting ? t("Сохраняем бронь...") : t("Забронировать без предзаказа")}</button>}</div></>}
       {step === "checkout" && <div className="desktop-booking-checkout"><div className="desktop-booking-summary"><strong>{venueName}</strong><span>{dateLabel} · {time} · {t("Гостей: {count}", { count: guests })}</span></div><h3>{t("Ваш заказ")}</h3>{selectedList}<div className="desktop-booking-total"><span>{t("Итого к оплате")}</span><strong>{formatMoney(totalMinor)}</strong></div><div className="desktop-booking-account"><h3>{t("Контакты")}</h3><strong>{contactName.trim()}</strong><span>{contactPhone.trim()}</span>{contactEmail.trim() && <span>{contactEmail.trim()}</span>}</div>{(wishes.length > 0 || comment.trim()) && <div className="desktop-booking-notes"><h3>{t("Пожелания к брони")}</h3>{wishes.length > 0 && <p>{wishes.map((id) => t(bookingWishes.find((wish) => wish.id === id)?.label ?? "")).join(", ")}</p>}{comment.trim() && <p>{comment.trim()}</p>}</div>}<div className="desktop-booking-payment"><h3>{t("Оплата предзаказа")}</h3><strong>{t("Оплата в заведении")}</strong><p>{t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}</p></div>{submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}<button type="button" className="venue-booking-submit" disabled={submitting || missingItems || selectedItems.length === 0} onClick={() => void submit(true)}>{submitting ? t("Сохраняем бронь...") : submitError.includes(t("Цена изменилась")) ? t("Подтвердить новую сумму") : t("Подтвердить бронь и предзаказ")}</button></div>}
