@@ -7,7 +7,7 @@ import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { BookingPicker } from "./booking-picker";
-import { DesktopBookingFlow } from "./desktop-booking-flow";
+import { DesktopBookingFlow, type DesktopBookingFlowHandle } from "./desktop-booking-flow";
 import type { AuthUser } from "../../../lib/auth-api";
 
 const illustrations: Record<string, string> = {
@@ -46,7 +46,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const [bookingOpen, setBookingOpen] = useState(false);
   const [preorderMenuOpen, setPreorderMenuOpen] = useState(false);
   const [preorderQuantities, setPreorderQuantities] = useState<Record<string, number>>({});
-  const [menuCheckoutRequest, setMenuCheckoutRequest] = useState(0);
   const [detailItemID, setDetailItemID] = useState<string | null>(null);
   const [detailQuantity, setDetailQuantity] = useState(1);
   const [menuQuery, setMenuQuery] = useState("");
@@ -54,6 +53,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const infoCloseRef = useRef<HTMLButtonElement>(null);
   const reviewsCloseRef = useRef<HTMLButtonElement>(null);
   const bookingTriggerRef = useRef<HTMLButtonElement>(null);
+  const bookingFlowRef = useRef<DesktopBookingFlowHandle>(null);
   const bookingCloseRef = useRef<HTMLButtonElement>(null);
   const bookingOverlayRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
@@ -325,7 +325,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
               <div className="venue-preorder-cart-copy"><strong>{item.name}</strong><span>{new Intl.NumberFormat(locale, { style: "currency", currency: item.currency }).format(item.price_minor * preorderQuantities[item.id] / 100)}</span></div>
               <div className="venue-preorder-cart-quantity"><button type="button" aria-label={`${t("Убрать")} ${item.name}`} onClick={() => changePreorderQuantity(item.id, -1)}><Minus size={16} /></button><b>{preorderQuantities[item.id]}</b><button type="button" aria-label={`${t("Добавить")} ${item.name}`} disabled={preorderQuantities[item.id] >= 30} onClick={() => changePreorderQuantity(item.id, 1)}><Plus size={16} /></button></div>
             </article>)}</div> : <div className="venue-preorder-cart-empty"><ShoppingBag size={46} aria-hidden="true" /><h3>{t("В предзаказе пока пусто")}</h3><p>{t("Добавьте блюда из меню")}</p></div>}
-            {preorderCount > 0 && <div className="venue-preorder-cart-footer"><button type="button" disabled={preorderSelectedItems.length !== Object.keys(preorderQuantities).length} onClick={() => { setPreorderMenuOpen(false); setMenuCheckoutRequest((value) => value + 1); }}><span>{t("Далее")}</span><strong>{preorderTotalLabel}</strong></button></div>}
+            <div className="venue-preorder-cart-footer">{preorderCount > 0 ? <button type="button" disabled={preorderSelectedItems.length !== Object.keys(preorderQuantities).length} onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.checkout(); }}><span>{t("Далее")}</span><strong>{preorderTotalLabel}</strong></button> : <button type="button" onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.bookWithoutPreorder(); }}><span>{t("Забронировать без предзаказа")}</span></button>}</div>
           </aside>}
           {preorderMenuOpen && detailItem && <div className="venue-preorder-product-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeItemDetails(); }}><section ref={detailDialogRef} className="venue-preorder-product-dialog" role="dialog" aria-modal="true" aria-label={detailItem.name}>
             <button ref={detailCloseRef} type="button" className="venue-preorder-product-close" aria-label={t("Закрыть")} onClick={closeItemDetails}><X size={23} /></button>
@@ -336,7 +336,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
       </div>
       {venue.category_slug === "restaurants" ? <div ref={bookingOverlayRef} className={`venue-public-booking-shell ${bookingOpen ? "open" : ""}`} role={bookingOpen ? "dialog" : undefined} aria-modal={bookingOpen || undefined} aria-labelledby={bookingOpen ? "venue-booking-title" : undefined}>
         <button ref={bookingCloseRef} type="button" className="venue-mobile-booking-close" aria-label={t("Закрыть")} onClick={() => setBookingOpen(false)}><X size={24} /></button>
-        {mobileBooking ? <BookingPicker key={venue.id} venueID={venue.id} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} /> : <DesktopBookingFlow key={venue.id} venueID={venue.id} venueName={venue.name} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} user={user} quantities={preorderQuantities} onQuantityChange={changePreorderQuantity} menuModeOpen={preorderMenuOpen} onMenuModeChange={setPreorderMenuOpen} menuCheckoutRequest={menuCheckoutRequest} onMenuUpdated={(categories) => setMenuState({ categories, loading: false, error: false })} />}
+        {mobileBooking ? <BookingPicker key={venue.id} venueID={venue.id} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} /> : <DesktopBookingFlow ref={bookingFlowRef} key={venue.id} venueID={venue.id} venueName={venue.name} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} user={user} quantities={preorderQuantities} onQuantityChange={changePreorderQuantity} menuModeOpen={preorderMenuOpen} onMenuModeChange={setPreorderMenuOpen} onMenuUpdated={(categories) => setMenuState({ categories, loading: false, error: false })} />}
       </div> : <aside className="venue-booking-card venue-public-booking" aria-labelledby="venue-booking-title">
         <CalendarDays size={25} aria-hidden="true" />
         <h2 id="venue-booking-title">{t("Бронирование")}</h2>

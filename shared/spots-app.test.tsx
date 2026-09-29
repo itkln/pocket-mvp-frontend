@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import SpotsApp from "./spots-app";
 import { AuthAPIError, getCurrentUser, logout, updateProfile } from "../lib/auth-api";
-import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, getVenueAvailability, listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
+import { createPublicReservation, getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, getVenueAvailability, listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
 import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
 
 const router = { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() };
@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   }, () => window.location.search)),
 }));
 vi.mock("../lib/auth-api", async (original) => ({ ...await original<object>(), getCurrentUser: vi.fn(), logout: vi.fn(), updateProfile: vi.fn() }));
-vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn(), getPublicVenueMenu: vi.fn(), getPublicVenueReviews: vi.fn(), getVenueAvailability: vi.fn() }));
+vi.mock("../lib/public-catalog-api", async (original) => ({ ...await original<object>(), createPublicReservation: vi.fn(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn(), getPublicVenueMenu: vi.fn(), getPublicVenueReviews: vi.fn(), getVenueAvailability: vi.fn() }));
 vi.mock("../lib/saved-venues-api", () => ({ listSavedVenueIDs: vi.fn(), addSavedVenue: vi.fn(), removeSavedVenue: vi.fn() }));
 const publicVenues: PublicVenue[] = [
   { id: "north", slug: "north", name: "North & Vine", description: "A small neighborhood bistro.", category_slug: "restaurants", cuisine_type: "Европейская", address: "Dunajská 12", city: "Bratislava", country_code: "SK", rating: 4.8, review_count: 12, tags: ["Стол через 20 мин"], filters: ["Лучшие"], preorder_enabled: false, created_at: "2026-09-19T00:00:00Z" },
@@ -38,6 +38,7 @@ beforeEach(() => {
   });
   router.push.mockImplementation((url: string) => { window.history.pushState(null, "", url); window.dispatchEvent(new PopStateEvent("popstate")); });
   vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer" });
+  vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-1", code: "BOOK123", starts_at: "2026-09-27T17:00:00Z", guest_count: 2, preorder_total_minor: 0, currency: "EUR" });
   vi.mocked(logout).mockResolvedValue();
   vi.mocked(listPublicVenues).mockImplementation(async (search = {}) => {
     const venues = search.ids ? publicVenues.filter((venue) => search.ids!.includes(venue.id)) : publicVenues;
@@ -284,13 +285,15 @@ describe("Spots guest experience", () => {
     fireEvent.click(await screen.findByRole("button", { name: "19:00" }));
     fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
     expect(screen.getByRole("dialog", { name: "Бронирование" })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), { target: { value: "Anna Guest" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
-    fireEvent.click(screen.getByRole("button", { name: "Добавить блюда" }));
 
     const menu = screen.getByRole("dialog", { name: "Меню для предзаказа" });
     expect(menu).toHaveClass("venue-detail-content", "venue-preorder-menu-mode");
     expect(within(menu).getByRole("navigation", { name: "Категории меню" })).toBeInTheDocument();
     expect(within(menu).getByRole("heading", { name: "Паста" })).toBeInTheDocument();
+    expect(within(menu).getByRole("button", { name: "Забронировать без предзаказа" })).toBeInTheDocument();
     fireEvent.click(within(menu).getByRole("button", { name: "Добавить Паста" }));
     expect(within(menu).getByLabelText("Паста: 1")).toBeInTheDocument();
     const cart = within(menu).getByRole("complementary", { name: "Предзаказ" });
@@ -304,6 +307,23 @@ describe("Spots guest experience", () => {
     fireEvent.click(within(menu).getByRole("button", { name: /Далее.*12/ }));
     expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
     expect(await screen.findByText("Оплата в заведении")).toBeInTheDocument();
+  });
+
+  it("books directly from an empty desktop preorder cart with entered contacts", async () => {
+    desktop = true;
+    nativeReplace(null, "", "/ru/venue/casa");
+    vi.mocked(getPublicVenue).mockResolvedValue({ ...publicVenues[1], preorder_enabled: true });
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    fireEvent.click(await screen.findByRole("button", { name: "19:00" }));
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Имя" }), { target: { value: "Other Guest" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Телефон" }), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    const menu = screen.getByRole("dialog", { name: "Меню для предзаказа" });
+    fireEvent.click(within(menu).getByRole("button", { name: "Забронировать без предзаказа" }));
+    await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
+    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({ guest_name: "Other Guest", guest_phone: "+421900123456", items: [] });
+    expect(await screen.findByText(/Номер брони: BOOK123/)).toBeInTheDocument();
   });
 
   it("renders server menu order, prices and photos, then refreshes changed availability on focus", async () => {

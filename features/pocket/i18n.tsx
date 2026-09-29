@@ -69,7 +69,6 @@ const rows: TranslationRow[] = [
   ["Свидание", "Date", "Побачення", "Rande"],
   ["День рождения", "Birthday", "День народження", "Narodeniny"],
   ["С детьми", "With children", "З дітьми", "S deťmi"],
-  ["Доступна моментальная бронь", "Instant booking available", "Доступне миттєве бронювання", "Okamžitá rezervácia je dostupná"],
   ["Комментарий к ресторану", "Comment for the restaurant", "Коментар для ресторану", "Komentár pre reštauráciu"],
   ["Предзаказ блюд", "Pre-order dishes", "Передзамовлення страв", "Predobjednať jedlá"],
   ["Подтверждение брони", "Confirm booking", "Підтвердження бронювання", "Potvrdenie rezervácie"],
