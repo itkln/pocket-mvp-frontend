@@ -5,6 +5,7 @@ import { ArrowUpRight, CalendarDays, RefreshCw, UsersRound, X } from "lucide-rea
 import { listCustomerReservations, type CustomerReservation } from "../../../lib/reservations-api";
 import { localeTags, useI18n } from "../i18n";
 import { Button, PageHeader } from "../ui";
+import { CategoryFilterStrip } from "./filter-strip";
 
 const statusLabels: Record<CustomerReservation["status"], string> = {
   confirmed: "Подтверждена", seated: "Гости в заведении", completed: "Завершена",
@@ -13,6 +14,7 @@ const statusLabels: Record<CustomerReservation["status"], string> = {
 
 export function MyReservationsScreen({ onVenue, onDiscover }: { onVenue: (id: string) => void; onDiscover: () => void }) {
   const { locale, t } = useI18n();
+  const filterDialog = useRef<HTMLDialogElement>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [venueFilter, setVenueFilter] = useState("all");
   const [preorderFilter, setPreorderFilter] = useState("all");
@@ -47,6 +49,19 @@ export function MyReservationsScreen({ onVenue, onDiscover }: { onVenue: (id: st
   );
   const filtersActive = statusFilter !== "all" || venueFilter !== "all" || preorderFilter !== "all";
   const resetFilters = () => { setStatusFilter("all"); setVenueFilter("all"); setPreorderFilter("all"); };
+  const statusOptions = [{ value: "all", label: "Все статусы" }, ...Object.entries(statusLabels).map(([value, label]) => ({ value, label }))];
+  const preorderOptions = [{ value: "all", label: "Все брони" }, { value: "with", label: "С предзаказом" }, { value: "without", label: "Без предзаказа" }];
+  const stripOptions = [
+    { value: "all", label: "Все", active: !filtersActive },
+    ...statusOptions.slice(1).map((option) => ({ ...option, value: `status:${option.value}`, active: statusFilter === option.value })),
+    ...preorderOptions.slice(1).map((option) => ({ ...option, value: `preorder:${option.value}`, active: preorderFilter === option.value })),
+  ];
+  const selectQuickFilter = (value: string) => {
+    if (value === "all") return resetFilters();
+    const [group, choice] = value.split(":");
+    if (group === "status") setStatusFilter(statusFilter === choice ? "all" : choice);
+    else setPreorderFilter(preorderFilter === choice ? "all" : choice);
+  };
   const upcoming = filtered.filter(isUpcoming).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   const past = filtered.filter((reservation) => !isUpcoming(reservation)).sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   const selected = reservations.find((reservation) => reservation.id === selectedID);
@@ -57,14 +72,18 @@ export function MyReservationsScreen({ onVenue, onDiscover }: { onVenue: (id: st
     <div className="my-reservation-schedule"><CalendarDays size={22} aria-hidden="true" /><time dateTime={reservation.starts_at}>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "long", timeStyle: "short", timeZone: reservation.timezone }).format(new Date(reservation.starts_at))}</time><span><UsersRound size={18} aria-hidden="true" />{t("Гостей: {count}", { count: reservation.guest_count })}</span></div>
   </article>;
 
-  return <section className="spots-reservations"><PageHeader title={t("Мои брони")} actions={<Button kind="secondary" icon={RefreshCw} disabled={loading} onClick={refresh}>{t("Обновить")}</Button>} />
+  return <section className="spots-reservations spots-category-catalog"><PageHeader title={t("Мои брони")} actions={<Button kind="secondary" icon={RefreshCw} disabled={loading} onClick={refresh}>{t("Обновить")}</Button>} />
     {!loading && !error && reservations.length > 0 && <>
-      <div className="my-reservations-filters" role="group" aria-label={t("Фильтры броней")}>
-        <label><span>{t("Статус брони")}</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">{t("Все статусы")}</option>{Object.entries(statusLabels).map(([status, label]) => <option key={status} value={status}>{t(label)}</option>)}</select></label>
-        <label><span>{t("Заведение")}</span><select value={venueFilter} onChange={(event) => setVenueFilter(event.target.value)}><option value="all">{t("Все заведения")}</option>{venues.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
-        <label><span>{t("Предзаказ")}</span><select value={preorderFilter} onChange={(event) => setPreorderFilter(event.target.value)}><option value="all">{t("Все брони")}</option><option value="with">{t("С предзаказом")}</option><option value="without">{t("Без предзаказа")}</option></select></label>
-        {filtersActive && <Button kind="quiet" onClick={resetFilters}>{t("Сбросить")}</Button>}
-      </div>
+      <CategoryFilterStrip options={stripOptions} filtersActive={filtersActive} ariaLabel={t("Фильтры броней")} onSelect={selectQuickFilter} onOpenFilters={() => filterDialog.current?.showModal()} />
+      <dialog ref={filterDialog} className="spots-picker-dialog" aria-labelledby="my-reservations-filter-title" onClick={(event) => { if (event.target === event.currentTarget) filterDialog.current?.close(); }}>
+        <div className="spots-picker-content">
+          <div className="spots-picker-heading"><h2 id="my-reservations-filter-title">{t("Фильтры")}</h2><button type="button" className="icon-button" aria-label={t("Закрыть фильтры")} onClick={() => filterDialog.current?.close()}><X size={20} /></button></div>
+          <section className="spots-filter-group" aria-label={t("Статус брони")}><p className="spots-filter-category">{t("Статус брони")}</p><div className="spots-filter-options">{statusOptions.map(({ value, label }) => <button type="button" key={value} aria-pressed={statusFilter === value} onClick={() => setStatusFilter(statusFilter === value ? "all" : value)}>{t(label)}</button>)}</div></section>
+          <section className="spots-filter-group" aria-label={t("Заведение")}><p className="spots-filter-category">{t("Заведение")}</p><div className="spots-filter-options"><button type="button" aria-pressed={venueFilter === "all"} onClick={() => setVenueFilter("all")}>{t("Все заведения")}</button>{venues.map(([id, name]) => <button type="button" key={id} aria-pressed={venueFilter === id} onClick={() => setVenueFilter(venueFilter === id ? "all" : id)}>{name}</button>)}</div></section>
+          <section className="spots-filter-group" aria-label={t("Предзаказ")}><p className="spots-filter-category">{t("Предзаказ")}</p><div className="spots-filter-options">{preorderOptions.map(({ value, label }) => <button type="button" key={value} aria-pressed={preorderFilter === value} onClick={() => setPreorderFilter(preorderFilter === value ? "all" : value)}>{t(label)}</button>)}</div></section>
+          <div className="spots-picker-footer"><button type="button" className="button secondary" onClick={resetFilters}>{t("Сбросить")}</button><button type="button" className="button primary" onClick={() => filterDialog.current?.close()}>{t("Показать")} ({filtered.length})</button></div>
+        </div>
+      </dialog>
       <p className="my-reservations-count" role="status">{t("Найдено броней: {count}", { count: filtered.length })}</p>
     </>}
     {loading ? <div className="spots-catalog-status" role="status">{t("Загружаем брони...")}</div>

@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Heart, RefreshCw, Search, SlidersHorizontal, Star, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, RefreshCw, Search, Star, X } from "lucide-react";
 import Image from "next/image";
 import { listPublicVenues, type PublicVenue, type PublicVenuePage } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { categoryForRoute, spotCategories } from "./categories";
+
+import { CategoryFilterStrip } from "./filter-strip";
 
 const emptyPage: PublicVenuePage = { venues: [], page: 1, page_size: 24, total: 0, total_pages: 0, has_next: false };
 
@@ -126,12 +128,7 @@ function CategorySection({ category, venues, expanded, selected, filters, active
       <Heading>{t(category)}</Heading>
       <div className="spots-section-actions">{!expanded && venues.length > 0 && <button type="button" className="spots-show-category" onClick={onExpand} aria-label={`${t("Все")}: ${t(category)}`}>{t("Все")}</button>}</div>
     </div>}
-    {selected && <section className="cuisine-section spots-category-filters" aria-label={`${t("Фильтры заведений")}: ${t(category)}`}>
-      <div className="cuisine-strip">
-        <button type="button" className={`spots-filter-trigger ${activeFilter !== "Все" ? "active" : ""}`} aria-label={t("Фильтры")} aria-haspopup="dialog" onClick={onOpenFilters}><SlidersHorizontal size={17} /></button>
-        {filters.map((label) => <button type="button" key={label} aria-pressed={activeFilter === label} className={activeFilter === label ? "active" : ""} onClick={() => onFilter(label)}><strong>{t(label)}</strong></button>)}
-      </div>
-    </section>}
+    {selected && <CategoryFilterStrip options={filters.map((label) => ({ value: label, label, active: activeFilter === label }))} filtersActive={activeFilter !== "Все"} ariaLabel={`${t("Фильтры заведений")}: ${t(category)}`} onSelect={onFilter} onOpenFilters={onOpenFilters} />}
     {venues.length ? <div className={`spots-venue-carousel ${expanded ? "expanded" : ""}`}>
       <div ref={list} onScroll={updateScroll} className={expanded ? "venue-grid" : "spots-venue-shelf"}>
         {venues.map((venue) => <VenueCard key={venue.id} venue={venue} saved={savedPlaces?.includes(venue.id)} onToggleSaved={onToggleSaved} onClick={() => onVenue(venue)} />)}

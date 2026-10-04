@@ -1749,13 +1749,6 @@
 }
 @media (prefers-reduced-motion: reduce) { .pocket-spots .my-reservation-panel[open], .pocket-spots .my-reservation-panel::backdrop { animation: none; } }
 
-.pocket-spots .my-reservations-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
-.pocket-spots .my-reservations-filters label { display: grid; gap: 7px; min-width: 170px; max-width: 300px; }
-.pocket-spots .my-reservations-filters label > span { color: var(--spots-secondary); font-size: 13px; padding-left: 14px; }
-.pocket-spots .my-reservations-filters select { height: 44px; width: 100%; padding: 0 36px 0 14px; border: 0; border-radius: 16px; background-color: var(--spots-card); color: var(--spots-text); font: inherit; cursor: pointer; text-overflow: ellipsis; }
-.pocket-spots .my-reservations-filters select:focus-visible { outline: 2px solid var(--spots-brand); outline-offset: 2px; }
-.pocket-spots .my-reservations-count { margin: 16px 0 24px; color: var(--spots-secondary); font-size: 14px; }
-@media (max-width: 600px) {
-  .pocket-spots .my-reservations-filters { flex-wrap: nowrap; overflow-x: auto; padding: 4px 2px; scrollbar-width: none; }
-  .pocket-spots .my-reservations-filters label, .pocket-spots .my-reservations-filters > button { flex: 0 0 auto; }
-}
+.pocket-spots .my-reservations-count { margin: 0 0 24px; color: var(--spots-secondary); font-size: 14px; }
+
+.pocket-spots .spots-picker-content .spots-filter-group + .spots-filter-group { margin-top: 20px; }

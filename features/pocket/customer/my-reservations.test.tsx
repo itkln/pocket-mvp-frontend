@@ -19,6 +19,7 @@ function mount(onVenue = vi.fn()) {
 beforeEach(() => {
   vi.resetAllMocks(); localStorage.clear();
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); this.dispatchEvent(new Event("close")); };
 });
 
 describe("my reservations", () => {
@@ -82,23 +83,34 @@ describe("my reservations", () => {
     mount();
     await screen.findByText("Бронь №BOOK123");
     expect(screen.getAllByRole("article")).toHaveLength(4);
-    fireEvent.change(screen.getByRole("combobox", { name: "Заведение" }), { target: { value: "venue-1" } });
-    fireEvent.change(screen.getByRole("combobox", { name: "Статус брони" }), { target: { value: "confirmed" } });
-    fireEvent.change(screen.getByRole("combobox", { name: "Предзаказ" }), { target: { value: "with" } });
+    const strip = screen.getByRole("region", { name: "Фильтры броней" });
+    expect(strip).toHaveClass("spots-category-filters");
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    fireEvent.click(within(strip).getByRole("button", { name: "Подтверждена" }));
+    fireEvent.click(within(strip).getByRole("button", { name: "С предзаказом" }));
+    expect(within(strip).getByRole("button", { name: "С предзаказом" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(strip).getByRole("button", { name: "Фильтры" }));
+    const filters = screen.getByRole("dialog", { name: "Фильтры" });
+    expect(filters).toHaveClass("spots-picker-dialog");
+    fireEvent.click(within(within(filters).getByRole("region", { name: "Заведение" })).getByRole("button", { name: "Demo Bistro" }));
+    fireEvent.click(within(filters).getByRole("button", { name: "Показать (1)" }));
     expect(screen.getAllByRole("article")).toHaveLength(1);
     expect(screen.getByRole("status")).toHaveTextContent("Найдено броней: 1");
     fireEvent.click(screen.getByRole("button", { name: "Открыть бронь: Demo Bistro · BOOK123" }));
     expect(within(screen.getByRole("dialog")).getByText("Паста × 2")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Закрыть" }));
-    fireEvent.change(screen.getByRole("combobox", { name: "Предзаказ" }), { target: { value: "without" } });
+    fireEvent.click(within(strip).getByRole("button", { name: "Без предзаказа" }));
     expect(screen.getByText("Бронь №PLAIN")).toBeInTheDocument();
     expect(screen.queryByText("Бронь №BOOK123")).not.toBeInTheDocument();
-    fireEvent.change(screen.getByRole("combobox", { name: "Статус брони" }), { target: { value: "cancelled" } });
+    fireEvent.click(within(strip).getByRole("button", { name: "Отменена" }));
     expect(screen.queryByRole("article")).not.toBeInTheDocument();
     expect(screen.getByText("Нет броней по выбранным фильтрам")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Сбросить фильтры" }));
     expect(screen.getAllByRole("article")).toHaveLength(4);
-    expect(screen.getByRole("combobox", { name: "Заведение" })).toHaveValue("all");
+    expect(within(strip).getByRole("button", { name: "Все", exact: true })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(within(strip).getByRole("button", { name: "С предзаказом" }));
+    fireEvent.click(within(strip).getByRole("button", { name: "С предзаказом" }));
+    expect(screen.getAllByRole("article")).toHaveLength(4);
     expect(listCustomerReservations).toHaveBeenCalledTimes(1);
   });
   it("lets a failed request retry and shows the empty state", async () => {
