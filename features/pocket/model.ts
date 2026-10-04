@@ -58,7 +58,7 @@ export const customerNavigation = [
   { id: "discover", label: "Заведения", icon: Search },
   { id: "browse-menu", label: "Меню", icon: Utensils },
   { id: "reservation", label: "Бронь", icon: CalendarDays },
-  { id: "history", label: "Мои заказы", icon: ReceiptText },
+  { id: "history", label: "Мои предзаказы", icon: ReceiptText },
   { id: "profile", label: "Настройки", icon: Settings },
 ];
 

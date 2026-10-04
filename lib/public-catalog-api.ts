@@ -78,6 +78,7 @@ export type CreatedReservation = {
   starts_at: string;
   guest_count: number;
   preorder_total_minor: number;
+  preorder_order_number?: number;
   currency: string;
 };
 

@@ -22,7 +22,7 @@ import { categoryForRoute, spotCategories } from "../features/pocket/customer/ca
 const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.filter((item) => !["browse-menu", "reservation"].includes(item.id)).map((item) => item.id), "saved", "reservations", "settings", "notifications", "venue"];
 const screenForRoute = (screen?: string) => screen && screens.includes(screen) ? screen : "discover";
 const spotsPath = (locale: Locale, screen: string) => `/${locale}/${screen}`;
-const isPublicScreen = (screen: string) => screen === "discover" || screen === "venue" || screen === "history" || Boolean(categoryForRoute(screen));
+const isPublicScreen = (screen: string) => screen === "discover" || screen === "venue" || Boolean(categoryForRoute(screen));
 type AccountDialogSection = "profile" | "security" | "notifications";
 const isAccountDialogSection = (value: string | null): value is AccountDialogSection => value === "profile" || value === "security" || value === "notifications";
 
@@ -270,7 +270,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
         {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
         {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} user={currentUser} />}
         {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("discover")}>{t("Выбрать заведение")}</Button></div></section>}
-        {screen === "history" && <HistoryScreen signedIn={Boolean(currentUser)} />}
+        {screen === "history" && <HistoryScreen />}
         {screen === "profile" && currentUser && <GuestProfile user={currentUser} onEditProfile={editProfile} onNavigate={navigate} onLogout={signOut} />}
         {["settings", "notifications"].includes(screen) && currentUser && <GuestSettings key={screen} notifications={screen === "notifications"} onEditProfile={editProfile} user={currentUser} onNavigate={navigate} notify={shell.notify} onLogout={signOut} onUpdate={setCurrentUser} />}
       </div>

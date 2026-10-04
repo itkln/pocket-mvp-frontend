@@ -64,7 +64,7 @@ describe("DesktopBookingFlow", () => {
   });
 
   it("opens the existing menu for selection, then shows review and payment details", async () => {
-    vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-2", code: "FOOD123", starts_at: `${date}T16:00:00Z`, guest_count: 2, preorder_total_minor: 1200, currency: "EUR" });
+    vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-2", code: "FOOD123", starts_at: `${date}T16:00:00Z`, guest_count: 2, preorder_total_minor: 1200, preorder_order_number: 42, currency: "EUR" });
     const onMenuModeChange = vi.fn();
     const ref = createRef<DesktopBookingFlowHandle>();
     const { rerender } = renderFlow(null, {}, onMenuModeChange, ref);
@@ -87,5 +87,6 @@ describe("DesktopBookingFlow", () => {
     fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
     expect(vi.mocked(createPublicReservation).mock.calls[0][1].items).toEqual([{ menu_item_id: "pasta", quantity: 1, expected_price_minor: 1200 }]);
+    expect(await screen.findByText("Номер предзаказа: 42")).toBeInTheDocument();
   });
 });
