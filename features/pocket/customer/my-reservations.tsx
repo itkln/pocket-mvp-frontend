@@ -13,6 +13,9 @@ const statusLabels: Record<CustomerReservation["status"], string> = {
 
 export function MyReservationsScreen({ onVenue, onDiscover }: { onVenue: (id: string) => void; onDiscover: () => void }) {
   const { locale, t } = useI18n();
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [venueFilter, setVenueFilter] = useState("all");
+  const [preorderFilter, setPreorderFilter] = useState("all");
   const [selectedID, setSelectedID] = useState<string | null>(null);
   const [reservations, setReservations] = useState<CustomerReservation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,8 +39,16 @@ export function MyReservationsScreen({ onVenue, onDiscover }: { onVenue: (id: st
 
   const refresh = () => { setLoading(true); setRetry((value) => value + 1); };
   const isUpcoming = (reservation: CustomerReservation) => ["confirmed", "seated"].includes(reservation.status) && new Date(reservation.ends_at).getTime() > now;
-  const upcoming = reservations.filter(isUpcoming).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-  const past = reservations.filter((reservation) => !isUpcoming(reservation)).sort((a, b) => b.starts_at.localeCompare(a.starts_at));
+  const venues = Array.from(new Map(reservations.map((reservation) => [reservation.venue_id, reservation.venue_name])).entries()).sort((a, b) => a[1].localeCompare(b[1], localeTags[locale]));
+  const filtered = reservations.filter((reservation) =>
+    (statusFilter === "all" || reservation.status === statusFilter) &&
+    (venueFilter === "all" || reservation.venue_id === venueFilter) &&
+    (preorderFilter === "all" || (preorderFilter === "with" ? reservation.preorder_items.length > 0 : reservation.preorder_items.length === 0))
+  );
+  const filtersActive = statusFilter !== "all" || venueFilter !== "all" || preorderFilter !== "all";
+  const resetFilters = () => { setStatusFilter("all"); setVenueFilter("all"); setPreorderFilter("all"); };
+  const upcoming = filtered.filter(isUpcoming).sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  const past = filtered.filter((reservation) => !isUpcoming(reservation)).sort((a, b) => b.starts_at.localeCompare(a.starts_at));
   const selected = reservations.find((reservation) => reservation.id === selectedID);
 
   const card = (reservation: CustomerReservation) => <article className="my-reservation-card" key={reservation.id} aria-label={`${reservation.venue_name} · ${t("Бронь №{code}", { code: reservation.code })}`}>
@@ -47,9 +58,19 @@ export function MyReservationsScreen({ onVenue, onDiscover }: { onVenue: (id: st
   </article>;
 
   return <section className="spots-reservations"><PageHeader title={t("Мои брони")} actions={<Button kind="secondary" icon={RefreshCw} disabled={loading} onClick={refresh}>{t("Обновить")}</Button>} />
+    {!loading && !error && reservations.length > 0 && <>
+      <div className="my-reservations-filters" role="group" aria-label={t("Фильтры броней")}>
+        <label><span>{t("Статус брони")}</span><select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">{t("Все статусы")}</option>{Object.entries(statusLabels).map(([status, label]) => <option key={status} value={status}>{t(label)}</option>)}</select></label>
+        <label><span>{t("Заведение")}</span><select value={venueFilter} onChange={(event) => setVenueFilter(event.target.value)}><option value="all">{t("Все заведения")}</option>{venues.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+        <label><span>{t("Предзаказ")}</span><select value={preorderFilter} onChange={(event) => setPreorderFilter(event.target.value)}><option value="all">{t("Все брони")}</option><option value="with">{t("С предзаказом")}</option><option value="without">{t("Без предзаказа")}</option></select></label>
+        {filtersActive && <Button kind="quiet" onClick={resetFilters}>{t("Сбросить")}</Button>}
+      </div>
+      <p className="my-reservations-count" role="status">{t("Найдено броней: {count}", { count: filtered.length })}</p>
+    </>}
     {loading ? <div className="spots-catalog-status" role="status">{t("Загружаем брони...")}</div>
       : error ? <div className="spots-catalog-status" role="alert"><strong>{t("Не удалось загрузить брони")}</strong><Button kind="secondary" onClick={refresh}>{t("Повторить")}</Button></div>
-        : reservations.length ? <div className="my-reservations-groups">{upcoming.length > 0 && <section aria-label={t("Предстоящие брони")}><h2>{t("Предстоящие брони")}</h2><div className="my-reservations-list">{upcoming.map(card)}</div></section>}{past.length > 0 && <section aria-label={t("История броней")}><h2>{t("История броней")}</h2><div className="my-reservations-list">{past.map(card)}</div></section>}</div>
+        : reservations.length ? filtered.length ? <div className="my-reservations-groups">{upcoming.length > 0 && <section aria-label={t("Предстоящие брони")}><h2>{t("Предстоящие брони")}</h2><div className="my-reservations-list">{upcoming.map(card)}</div></section>}{past.length > 0 && <section aria-label={t("История броней")}><h2>{t("История броней")}</h2><div className="my-reservations-list">{past.map(card)}</div></section>}</div>
+          : <div className="spots-search-empty spots-reservations-empty"><CalendarDays size={32} aria-hidden="true" /><strong>{t("Нет броней по выбранным фильтрам")}</strong><Button kind="secondary" onClick={resetFilters}>{t("Сбросить фильтры")}</Button></div>
           : <div className="spots-search-empty spots-reservations-empty"><CalendarDays size={32} aria-hidden="true" /><strong>{t("У вас пока нет броней")}</strong><p>{t("Выберите заведение и забронируйте удобное время")}</p><Button onClick={onDiscover}>{t("Выбрать заведение")}</Button></div>}
     {selected && <ReservationDetailsPanel reservation={selected} onClose={() => setSelectedID(null)} onVenue={onVenue} />}
   </section>;

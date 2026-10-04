@@ -74,6 +74,33 @@ describe("my reservations", () => {
     expect(within(history).getByText("Завершена")).toBeInTheDocument();
     expect(within(history).getByText("Отменена")).toBeInTheDocument();
   });
+  it("combines venue, status and preorder filters and can clear an empty result", async () => {
+    const plain = { ...booking, id: "plain", code: "PLAIN", preorder_items: [], preorder_total_minor: 0 };
+    const other = { ...booking, id: "other", code: "OTHER", venue_id: "other-venue", venue_name: "Coffee Lab" };
+    const cancelled = { ...booking, id: "cancelled", code: "CANCELLED", status: "cancelled" as const };
+    vi.mocked(listCustomerReservations).mockResolvedValue([booking, plain, other, cancelled]);
+    mount();
+    await screen.findByText("Бронь №BOOK123");
+    expect(screen.getAllByRole("article")).toHaveLength(4);
+    fireEvent.change(screen.getByRole("combobox", { name: "Заведение" }), { target: { value: "venue-1" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Статус брони" }), { target: { value: "confirmed" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "Предзаказ" }), { target: { value: "with" } });
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(screen.getByRole("status")).toHaveTextContent("Найдено броней: 1");
+    fireEvent.click(screen.getByRole("button", { name: "Открыть бронь: Demo Bistro · BOOK123" }));
+    expect(within(screen.getByRole("dialog")).getByText("Паста × 2")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Закрыть" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "Предзаказ" }), { target: { value: "without" } });
+    expect(screen.getByText("Бронь №PLAIN")).toBeInTheDocument();
+    expect(screen.queryByText("Бронь №BOOK123")).not.toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox", { name: "Статус брони" }), { target: { value: "cancelled" } });
+    expect(screen.queryByRole("article")).not.toBeInTheDocument();
+    expect(screen.getByText("Нет броней по выбранным фильтрам")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Сбросить фильтры" }));
+    expect(screen.getAllByRole("article")).toHaveLength(4);
+    expect(screen.getByRole("combobox", { name: "Заведение" })).toHaveValue("all");
+    expect(listCustomerReservations).toHaveBeenCalledTimes(1);
+  });
   it("lets a failed request retry and shows the empty state", async () => {
     vi.mocked(listCustomerReservations).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce([]);
     mount();
