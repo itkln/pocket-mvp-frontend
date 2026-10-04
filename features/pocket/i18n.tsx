@@ -187,6 +187,7 @@ const rows: TranslationRow[] = [
   ["Все брони", "All reservations", "Усі бронювання", "Všetky rezervácie"],
   ["Найдено броней: {count}", "Reservations found: {count}", "Знайдено бронювань: {count}", "Nájdené rezervácie: {count}"],
   ["Нет броней по выбранным фильтрам", "No reservations match these filters", "Немає бронювань за вибраними фільтрами", "Žiadne rezervácie nezodpovedajú filtrom"],
+  ["Сбросить", "Reset", "Скинути", "Obnoviť"],
   ["Сбросить фильтры", "Clear filters", "Скинути фільтри", "Vymazať filtre"],
   ["Открыть бронь", "Open reservation", "Відкрити бронювання", "Otvoriť rezerváciu"],
   ["Информация о брони", "Reservation details", "Інформація про бронювання", "Podrobnosti rezervácie"],
