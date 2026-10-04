@@ -16,7 +16,10 @@ const booking: CustomerReservation = {
 function mount(onVenue = vi.fn()) {
   return render(<I18nProvider initialLocale="ru"><MyReservationsScreen onVenue={onVenue} onDiscover={vi.fn()} /></I18nProvider>);
 }
-beforeEach(() => { vi.resetAllMocks(); localStorage.clear(); });
+beforeEach(() => {
+  vi.resetAllMocks(); localStorage.clear();
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+});
 
 describe("my reservations", () => {
   it("shows saved contacts, comments and preorder snapshots in the venue timezone", async () => {
@@ -24,17 +27,31 @@ describe("my reservations", () => {
     const onVenue = vi.fn();
     const view = mount(onVenue);
     const card = await screen.findByRole("article", { name: "Demo Bistro · Бронь №BOOK123" });
-    expect(within(card).getByText("Other Guest")).toBeInTheDocument();
-    expect(within(card).getByText("other@example.test")).toBeInTheDocument();
-    expect(within(card).getByText("+421900123456")).toBeInTheDocument();
-    expect(within(card).getByText("У окна")).toBeInTheDocument();
-    expect(within(card).getByText("Гостей: 3")).toBeInTheDocument();
-    expect(within(card).getByText("Предзаказ №42")).toBeInTheDocument();
-    expect(within(card).getByText("Паста × 2")).toBeInTheDocument();
-    expect(within(card).getAllByText(/24,00/)).toHaveLength(2);
+    expect(within(card).queryByText("Other Guest")).not.toBeInTheDocument();
+    expect(within(card).queryByText("Паста × 2")).not.toBeInTheDocument();
     expect(card.querySelector("time")?.textContent).toContain("20:00");
-    fireEvent.click(within(card).getByRole("button", { name: "Открыть заведение: Demo Bistro" }));
+    const trigger = within(card).getByRole("button", { name: "Открыть бронь: Demo Bistro · BOOK123" });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const panel = screen.getByRole("dialog", { name: "Информация о брони" });
+    expect(panel).toHaveAttribute("open");
+    expect(document.body.style.overflow).toBe("hidden");
+    expect(within(panel).getByText("Other Guest")).toBeInTheDocument();
+    expect(within(panel).getByText("other@example.test")).toBeInTheDocument();
+    expect(within(panel).getByText("+421900123456")).toBeInTheDocument();
+    expect(within(panel).getByText("У окна")).toBeInTheDocument();
+    expect(within(panel).getByText(/Гостей: 3/)).toBeInTheDocument();
+    expect(within(panel).getByText("Предзаказ №42")).toBeInTheDocument();
+    expect(within(panel).getByText("Паста × 2")).toBeInTheDocument();
+    expect(within(panel).getAllByText(/24,00/)).toHaveLength(2);
+    fireEvent.click(within(panel).getByRole("button", { name: "Закрыть" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(document.body.style.overflow).toBe("");
+    expect(trigger).toHaveFocus();
+    fireEvent.click(trigger);
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Открыть заведение" }));
     expect(onVenue).toHaveBeenCalledWith("venue-1");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     view.unmount();
     mount();
     expect(await screen.findByText("Бронь №BOOK123")).toBeInTheDocument();
@@ -48,7 +65,11 @@ describe("my reservations", () => {
     mount();
     const upcoming = await screen.findByRole("region", { name: "Предстоящие брони" });
     expect(within(upcoming).getAllByRole("article").map((item) => item.getAttribute("aria-label"))).toEqual(["Demo Bistro · Бронь №PLAIN", "Demo Bistro · Бронь №BOOK123"]);
-    expect(within(upcoming).getByText("Без предзаказа")).toBeInTheDocument();
+    expect(within(upcoming).queryByText("Без предзаказа")).not.toBeInTheDocument();
+    fireEvent.click(within(upcoming).getByRole("button", { name: "Открыть бронь: Demo Bistro · PLAIN" }));
+    expect(within(screen.getByRole("dialog")).getByText("Без предзаказа")).toBeInTheDocument();
+    fireEvent(screen.getByRole("dialog"), new Event("cancel", { bubbles: false, cancelable: true }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     const history = screen.getByRole("region", { name: "История броней" });
     expect(within(history).getByText("Завершена")).toBeInTheDocument();
     expect(within(history).getByText("Отменена")).toBeInTheDocument();

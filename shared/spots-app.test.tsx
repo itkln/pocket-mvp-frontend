@@ -72,7 +72,10 @@ describe("Spots guest experience", () => {
     render(<SpotsApp initialScreen="reservations" />);
     expect(await screen.findByText("Бронь №OWN123")).toBeInTheDocument();
     expect(listCustomerReservations).toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Открыть заведение: North & Vine" }));
+    fireEvent.click(screen.getByRole("button", { name: "Открыть бронь: North & Vine · OWN123" }));
+    expect(window.location.pathname).toBe("/ru/reservations");
+    expect(within(screen.getByRole("dialog", { name: "Информация о брони" })).getByText("Other Guest")).toBeInTheDocument();
+    fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Открыть заведение" }));
     await waitFor(() => expect(window.location.pathname).toBe("/ru/venue/north"));
     expect(new URLSearchParams(window.location.search).get("from")).toBe("/ru/reservations");
   });
