@@ -8,6 +8,7 @@ import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicM
 import { useI18n } from "../i18n";
 import { BookingPicker } from "./booking-picker";
 import { DesktopBookingFlow, type DesktopBookingFlowHandle, type DesktopBookingSummary } from "./desktop-booking-flow";
+import { PublicOrderDialog } from "./public-order-dialog";
 import type { AuthUser } from "../../../lib/auth-api";
 
 const illustrations: Record<string, string> = {
@@ -44,6 +45,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [orderOpen, setOrderOpen] = useState(false);
   const [preorderMenuOpen, setPreorderMenuOpen] = useState(false);
   const [preorderQuantities, setPreorderQuantities] = useState<Record<string, number>>({});
   const [bookingSummary, setBookingSummary] = useState<DesktopBookingSummary | null>(null);
@@ -345,7 +347,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
         <div ref={preorderMenuRef} className={`venue-detail-content ${preorderMenuOpen ? "venue-preorder-menu-mode" : ""}`} role={preorderMenuOpen ? "dialog" : undefined} aria-modal={preorderMenuOpen || undefined} aria-label={preorderMenuOpen ? t("Меню для предзаказа") : undefined}>
           {preorderMenuOpen && <button ref={preorderMenuBackRef} type="button" className="venue-preorder-menu-close" aria-label={t("Назад к бронированию")} onClick={backToBookingDetails}><ArrowLeft size={23} /></button>}
           {menuState.categories.length > 0 && <div className="venue-public-category-sticky-shell"><nav className="venue-section-nav venue-public-category-nav" aria-label={t("Категории меню")}>{menuState.categories.map((category) => <button type="button" key={category.id} className={(activeCategory || menuState.categories[0].id) === category.id ? "active" : ""} aria-current={(activeCategory || menuState.categories[0].id) === category.id ? "location" : undefined} onClick={() => openCategory(category.id)}>{category.name}</button>)}</nav></div>}
-          <div ref={preorderMenuScrollRef} className="venue-public-menu-content">{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
+          <div ref={preorderMenuScrollRef} className="venue-public-menu-content">{!preorderMenuOpen && menuState.categories.length > 0 && <button type="button" className="venue-public-order-entry" onClick={() => setOrderOpen(true)}><ShoppingBag size={18} />{t("Заказать блюда")}</button>}{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
           {preorderMenuOpen && <aside className="venue-preorder-cart" aria-label={t("Предзаказ")}>
             <header><h2>{t("Предзаказ")}</h2>{preorderCount > 0 && <button type="button" onClick={() => setPreorderQuantities({})}>{t("Очистить")}</button>}</header>
             <div className="venue-preorder-cart-body">
@@ -371,6 +373,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
           </section></div>}
         </div>
       </div>
+      {orderOpen && <PublicOrderDialog venueID={venue.id} venueName={venue.name} initialMenu={menuState.categories} user={user} locale={locale} onClose={() => setOrderOpen(false)} />}
       {venue.category_slug === "restaurants" ? <div ref={bookingOverlayRef} className={`venue-public-booking-shell ${bookingOpen ? "open" : ""}`} role={bookingOpen ? "dialog" : undefined} aria-modal={bookingOpen || undefined} aria-labelledby={bookingOpen ? "venue-booking-title" : undefined}>
         <button ref={bookingCloseRef} type="button" className="venue-mobile-booking-close" aria-label={t("Закрыть")} onClick={() => setBookingOpen(false)}><X size={24} /></button>
         {mobileBooking ? <BookingPicker key={venue.id} venueID={venue.id} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} /> : <DesktopBookingFlow ref={bookingFlowRef} key={`${venue.id}-${bookingFlowVersion}`} venueID={venue.id} venueName={venue.name} menu={menuState.categories} preorderEnabled={venue.preorder_enabled} user={user} quantities={preorderQuantities} onQuantityChange={changePreorderQuantity} menuModeOpen={preorderMenuOpen} onMenuModeChange={setPreorderMenuOpen} onPreorderStart={setBookingSummary} onMenuUpdated={(categories) => setMenuState({ categories, loading: false, error: false })} onConfirmationClose={finishBooking} />}

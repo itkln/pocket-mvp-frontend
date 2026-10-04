@@ -1685,3 +1685,64 @@
   .pocket-spots .venue-info-overlay,
   .pocket-spots .venue-info-sheet { animation: none; }
 }
+/* Server-backed ordering from a venue's public menu. */
+.pocket-spots .venue-public-order-entry { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 24px; padding: 13px 20px; border: 0; border-radius: 999px; background: #087fbc; color: #fff; font-weight: 700; cursor: pointer; }
+.pocket-spots .public-order-backdrop { position: fixed; z-index: 140; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(22,28,34,.48); }
+.pocket-spots .public-order-dialog { display: flex; flex-direction: column; width: min(1100px, 100%); height: min(790px, calc(100dvh - 36px)); overflow: hidden; border-radius: 24px; background: #fff; color: var(--spots-text); }
+.pocket-spots .public-order-header { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 15px 24px; border-bottom: 1px solid #e7eaed; }
+.pocket-spots .public-order-header > div { flex: 1; }
+.pocket-spots .public-order-header h2 { margin: 0; font-size: 25px; }
+.pocket-spots .public-order-header p { margin: 2px 0 0; color: var(--spots-muted); }
+.pocket-spots .public-order-header button { display: grid; place-items: center; width: 42px; height: 42px; border: 0; border-radius: 50%; background: #eee; cursor: pointer; }
+.pocket-spots .public-order-columns, .pocket-spots .public-order-checkout { display: grid; grid-template-columns: minmax(0, 1fr) 330px; min-height: 0; flex: 1; }
+.pocket-spots .public-order-menu { display: flex; flex-direction: column; min-height: 0; }
+.pocket-spots .public-order-menu nav { display: flex; flex: none; gap: 10px; overflow-x: auto; padding: 16px 24px; border-bottom: 1px solid #e7eaed; scrollbar-width: thin; }
+.pocket-spots .public-order-menu nav button { flex: none; border: 0; background: none; color: var(--spots-text); font-weight: 600; cursor: pointer; }
+.pocket-spots .public-order-menu-list { overflow-y: auto; padding: 20px 24px 36px; }
+.pocket-spots .public-order-menu-list section { scroll-margin-top: 14px; }
+.pocket-spots .public-order-menu-list section + section { margin-top: 30px; }
+.pocket-spots .public-order-menu-list h3, .pocket-spots .public-order-cart h3 { margin: 0 0 14px; font-size: 20px; }
+.pocket-spots .public-order-menu-list section > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pocket-spots .public-order-product { display: grid; grid-template-columns: 84px minmax(0, 1fr); grid-template-rows: 1fr auto; gap: 8px 12px; min-width: 0; padding: 10px; border: 1px solid #e7eaed; border-radius: 16px; }
+.pocket-spots .public-order-photo { grid-row: span 2; width: 84px; height: 84px; display: grid; place-items: center; border-radius: 12px; background: #f2f3f4 center/cover; color: #75808a; }
+.pocket-spots .public-order-product-copy { min-width: 0; }
+.pocket-spots .public-order-product-copy strong, .pocket-spots .public-order-product-copy small, .pocket-spots .public-order-product-copy b { display: block; }
+.pocket-spots .public-order-product-copy small { display: -webkit-box; overflow: hidden; color: var(--spots-muted); -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.pocket-spots .public-order-product-copy b { margin-top: 6px; }
+.pocket-spots .public-order-quantity { grid-column: 2; justify-self: end; display: flex; align-items: center; gap: 8px; }
+.pocket-spots .public-order-quantity button { width: 30px; height: 30px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #eee; cursor: pointer; }
+.pocket-spots .public-order-quantity button:disabled { opacity: .45; cursor: default; }
+.pocket-spots .public-order-cart { display: flex; flex-direction: column; min-height: 0; padding: 22px; border-left: 1px solid #e7eaed; }
+.pocket-spots .public-order-cart > p { color: var(--spots-muted); }
+.pocket-spots .public-order-cart-lines { overflow-y: auto; }
+.pocket-spots .public-order-cart-lines > div, .pocket-spots .public-order-checkout-line { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid #e7eaed; }
+.pocket-spots .public-order-cart-lines strong, .pocket-spots .public-order-checkout-line strong { white-space: nowrap; }
+.pocket-spots .public-order-cart-footer { margin-top: auto; padding-top: 18px; }
+.pocket-spots .public-order-cart-footer > strong { display: block; margin-bottom: 14px; }
+.pocket-spots .public-order-cart-footer [role="alert"] { color: #aa3030; }
+.pocket-spots .public-order-cart-footer button, .pocket-spots .public-order-confirmed button { width: 100%; min-height: 50px; border: 0; border-radius: 15px; background: #087fbc; color: white; font-weight: 700; cursor: pointer; }
+.pocket-spots .public-order-cart-footer button:disabled { opacity: .5; cursor: default; }
+.pocket-spots .public-order-checkout-main { overflow-y: auto; padding: 24px; }
+.pocket-spots .public-order-checkout-main h3 { margin: 6px 0 12px; }
+.pocket-spots .public-order-checkout-main h3:not(:first-child) { margin-top: 28px; }
+.pocket-spots .public-order-checkout-main label { display: block; margin: 12px 0; font-weight: 600; }
+.pocket-spots .public-order-checkout-main input, .pocket-spots .public-order-checkout-main textarea { display: block; box-sizing: border-box; width: 100%; margin-top: 6px; padding: 12px; border: 1px solid #d7dce0; border-radius: 12px; font: inherit; }
+.pocket-spots .public-order-checkout-main textarea { min-height: 85px; resize: vertical; }
+.pocket-spots .public-order-confirmed { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 24px; text-align: center; }
+.pocket-spots .public-order-confirmed h3, .pocket-spots .public-order-confirmed p { margin: 0; }
+.pocket-spots .public-order-confirmed button { width: min(340px, 100%); margin-top: 16px; }
+.pocket-spots .public-history-order { display: grid; gap: 15px; padding: 20px; }
+.pocket-spots .public-history-order-heading { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.pocket-spots .public-history-icon { width: 48px; height: 48px; display: grid; place-items: center; border-radius: 12px; background: #eef5fa; }
+.pocket-spots .public-history-order h3, .pocket-spots .public-history-order p { margin: 3px 0 0; }
+.pocket-spots .public-history-order small, .pocket-spots .public-history-order p { color: var(--spots-muted); }
+.pocket-spots .public-history-items { display: flex; flex-wrap: wrap; gap: 5px 12px; }
+@media (max-width: 760px) {
+  .pocket-spots .public-order-backdrop { padding: 0; }
+  .pocket-spots .public-order-dialog { width: 100%; height: 100dvh; border-radius: 0; }
+  .pocket-spots .public-order-columns, .pocket-spots .public-order-checkout { display: flex; flex-direction: column; overflow-y: auto; }
+  .pocket-spots .public-order-menu { min-height: 220px; flex: 1; }
+  .pocket-spots .public-order-menu-list section > div { grid-template-columns: 1fr; }
+  .pocket-spots .public-order-cart { flex: none; max-height: 42dvh; overflow-y: auto; border-top: 1px solid #e7eaed; border-left: 0; }
+  .pocket-spots .public-order-checkout-main { flex: 1; }
+}

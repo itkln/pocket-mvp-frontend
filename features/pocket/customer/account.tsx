@@ -1,8 +1,42 @@
 "use client";
 
-import { Check, ChevronRight, Coffee, Eye, MessageSquareText, PackageCheck, Share2 } from "lucide-react";
-import { Button, IconButton, StatusPill, PageHeader } from "../ui";
+import { useEffect, useState } from "react";
+import { ShoppingBag } from "lucide-react";
+import { listCustomerOrders, listGuestOrders, type CustomerOrder } from "../../../lib/public-orders-api";
+import { PageHeader, StatusPill } from "../ui";
+import { useI18n } from "../i18n";
 
-export function HistoryScreen({ notify }: { notify: (message: string) => void }) {
-  return <div className="history-screen"><PageHeader title="Мои заказы" subtitle="История визитов, заказов и оплат." /><div className="history-list"><article className="panel active-order"><div className="order-venue"><span className="venue-mini" /><div><small>СЕГОДНЯ · В ЗАЛЕ</small><h3>North & Vine</h3><p>Заказ #1049 · Стол 08</p></div><StatusPill status="Готовится" /></div><div className="progress-track"><i className="done"><Check size={13} /></i><span /><i className="done"><Check size={13} /></i><span /><i className="current"><Coffee size={13} /></i><span /><i><PackageCheck size={13} /></i></div><div className="progress-labels"><span>Принят</span><span>Подтвержден</span><span>Готовится</span><span>Готов</span></div><footer><div><strong>€58.50</strong><span>3 позиции</span></div><Button kind="secondary" icon={Share2} onClick={() => notify("Ссылка на заказ скопирована")}>Поделиться</Button><Button icon={Eye}>Следить за заказом</Button></footer></article>{[["14 июля","North & Vine","€76.50","5 позиций"],["8 июля","Casa Forma","€41.20","3 позиции"],["28 июня","Mizu Table","€64.00","4 позиции"]].map((row,index) => <article className="panel past-order" key={row[0]}><span className={`past-thumb pos-${index}`} /><div><small>{row[0]} · ОПЛАЧЕН</small><h3>{row[1]}</h3><p>{row[3]} · Карта •••• 4242</p></div><strong>{row[2]}</strong><Button kind="quiet" icon={MessageSquareText} onClick={() => notify("Форма отзыва открыта")}>Оставить отзыв</Button><IconButton icon={ChevronRight} label="Подробнее" /></article>)}</div></div>;
+const statusLabels: Record<string, string> = {
+  new: "Новый", accepted: "Принят", preparing: "Готовится", ready: "Готов",
+  served: "Подан", completed: "Завершён", cancelled: "Отменён",
+};
+
+export function HistoryScreen({ signedIn }: { signedIn: boolean }) {
+  const { locale, t } = useI18n();
+  const [orders, setOrders] = useState<CustomerOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
+
+  useEffect(() => {
+    let alive = true;
+    (signedIn ? listCustomerOrders() : listGuestOrders()).then((items) => {
+      if (!alive) return;
+      setOrders(items.sort((a, b) => b.created_at.localeCompare(a.created_at)));
+      setLoading(false);
+      setError(false);
+    }).catch(() => { if (alive) { setLoading(false); setError(true); } });
+    return () => { alive = false; };
+  }, [retry, signedIn]);
+
+  return <div className="history-screen"><PageHeader title="Мои заказы" subtitle="История заказов и предзаказов." />
+    {loading ? <div className="spots-catalog-status" role="status">Загружаем заказы...</div>
+      : error ? <div className="spots-catalog-status" role="alert">Не удалось загрузить заказы. <button type="button" onClick={() => { setLoading(true); setRetry((value) => value + 1); }}>Повторить</button></div>
+        : orders.length ? <div className="history-list">{orders.map((order) => <article className="panel public-history-order" key={order.id}>
+          <div className="public-history-order-heading"><span className="public-history-icon"><ShoppingBag size={23} /></span><div><small>{new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(order.created_at))} · {order.channel === "preorder" ? "Предзаказ" : "Онлайн"}</small><h3>{order.venue_name || "Заведение"}</h3><p>{t("Заказ №{number}", { number: order.number })}{order.reservation_starts_at && <> · {new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(new Date(order.reservation_starts_at))}</>}</p></div><StatusPill status={statusLabels[order.status] ?? order.status} /></div>
+          <div className="public-history-items">{order.items.map((item, index) => <span key={`${item.menu_item_id}-${index}`}>{item.name} × {item.quantity}</span>)}</div>
+          <strong>{new Intl.NumberFormat(locale, { style: "currency", currency: order.currency }).format(order.total_minor / 100)}</strong>
+        </article>)}</div>
+          : <div className="spots-search-empty"><ShoppingBag size={30} /><strong>Заказов пока нет</strong><p>Оформленные заказы появятся здесь.</p></div>}
+  </div>;
 }
