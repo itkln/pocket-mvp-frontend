@@ -1697,3 +1697,31 @@
 .pocket-spots .customer-preorder-items { display: flex; flex-wrap: wrap; gap: 8px; }
 .pocket-spots .customer-preorder-items span { padding: 8px 12px; border-radius: 10px; background: var(--spots-card); }
 .pocket-spots .customer-preorder > strong { font-size: 19px; }
+
+.pocket-spots .my-reservations-groups { display: grid; gap: 32px; }
+.pocket-spots .my-reservations-groups h2 { margin: 0 0 16px; font-size: 22px; }
+.pocket-spots .my-reservations-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 20px; }
+.pocket-spots .my-reservation-card { padding: 24px; border-radius: 24px; background: var(--spots-card); min-width: 0; overflow-wrap: anywhere; }
+.pocket-spots .my-reservation-card header { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.pocket-spots .my-reservation-card h3 { font-size: 22px; margin: 0 0 6px; }
+.pocket-spots .my-reservation-card h4 { font-size: 16px; margin: 0 0 10px; }
+.pocket-spots .my-reservation-card header p { color: var(--spots-secondary); margin: 0; }
+.pocket-spots .my-reservation-venue-link { width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #eeeeee; color: var(--spots-text); cursor: pointer; }
+.pocket-spots .my-reservation-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 20px 0; color: var(--spots-secondary); font-size: 14px; }
+.pocket-spots .my-reservation-status { padding: 6px 12px; border-radius: 18px; background: #eeeeee; color: var(--spots-text); }
+.pocket-spots .my-reservation-status.confirmed, .pocket-spots .my-reservation-status.seated { background: #e0f3fd; color: #007fb7; }
+.pocket-spots .my-reservation-schedule { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding-bottom: 20px; border-bottom: 1px solid #eeeeee; }
+.pocket-spots .my-reservation-schedule span { display: flex; align-items: center; gap: 6px; }
+.pocket-spots .my-reservation-contacts { display: grid; gap: 6px; margin-top: 20px; }
+.pocket-spots .my-reservation-contacts h4 { margin-bottom: 4px; }
+.pocket-spots .my-reservation-contacts span { color: var(--spots-secondary); }
+.pocket-spots .my-reservation-comment { margin-top: 20px; }
+.pocket-spots .my-reservation-comment p { margin: 0; white-space: pre-wrap; }
+.pocket-spots .my-reservation-preorder { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eeeeee; }
+.pocket-spots .my-reservation-preorder ul { display: grid; gap: 12px; list-style: none; margin: 0; padding: 0; }
+.pocket-spots .my-reservation-preorder li, .pocket-spots .my-reservation-preorder > div { display: flex; justify-content: space-between; gap: 16px; }
+.pocket-spots .my-reservation-preorder strong { white-space: nowrap; }
+.pocket-spots .my-reservation-preorder > div { margin-top: 16px; }
+.pocket-spots .my-reservation-without-preorder { margin: 20px 0 0; color: var(--spots-secondary); }
+@media (max-width: 1000px) { .pocket-spots .my-reservations-list { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .pocket-spots .my-reservation-card { padding: 20px; border-radius: 20px; } .pocket-spots .my-reservation-card h3 { font-size: 20px; } }

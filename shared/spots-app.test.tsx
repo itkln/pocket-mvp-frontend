@@ -6,6 +6,9 @@ import { AuthAPIError, getCurrentUser, logout, updateProfile } from "../lib/auth
 import { createPublicReservation, getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, getVenueAvailability, listPublicVenues, type PublicVenue } from "../lib/public-catalog-api";
 import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
 
+import { listCustomerReservations } from "../lib/reservations-api";
+
+vi.mock("../lib/reservations-api", () => ({ listCustomerReservations: vi.fn() }));
 const router = { push: vi.fn(), replace: vi.fn(), refresh: vi.fn() };
 vi.mock("next/navigation", () => ({
   useRouter: () => router,
@@ -60,6 +63,20 @@ beforeEach(() => {
 });
 
 describe("Spots guest experience", () => {
+  it("loads the signed-in account reservations page from its own route", async () => {
+    nativeReplace(null, "", "/ru/reservations");
+    vi.mocked(listCustomerReservations).mockResolvedValue([{
+      id: "own-booking", code: "OWN123", venue_id: "north", venue_name: "North & Vine", venue_address: "Main 1", venue_city: "Bratislava", timezone: "Europe/Bratislava",
+      starts_at: "2099-10-04T17:00:00Z", ends_at: "2099-10-04T19:00:00Z", guest_count: 2, status: "confirmed", guest_name: "Other Guest", currency: "EUR", preorder_total_minor: 0, preorder_items: [],
+    }]);
+    render(<SpotsApp initialScreen="reservations" />);
+    expect(await screen.findByText("Бронь №OWN123")).toBeInTheDocument();
+    expect(listCustomerReservations).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Открыть заведение: North & Vine" }));
+    await waitFor(() => expect(window.location.pathname).toBe("/ru/venue/north"));
+    expect(new URLSearchParams(window.location.search).get("from")).toBe("/ru/reservations");
+  });
+
   it("blocks vertical overscroll on a short discovery page without blocking horizontal carousels", async () => {
     vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
     const { container } = render(<SpotsApp initialScreen="discover" />);

@@ -9,10 +9,10 @@ import { DiscoverScreen, HistoryScreen } from "../features/pocket/customer";
 import { spotsCities, SpotsBottomNavigation, SpotsHeader } from "../features/pocket/customer/navigation";
 import { SavedPlacesScreen } from "../features/pocket/customer/discover";
 import { VenueDetailsScreen } from "../features/pocket/customer/venue-details";
+import { MyReservationsScreen } from "../features/pocket/customer/my-reservations";
 import type { PublicVenue } from "../lib/public-catalog-api";
 import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
-import { CalendarDays } from "lucide-react";
-import { Button, PageHeader, TooltipContext } from "../features/pocket/ui";
+import { TooltipContext } from "../features/pocket/ui";
 import { GuestProfile, GuestSettings, GuestProfileDialog } from "../features/pocket/customer/profile";
 import { useI18n } from "../features/pocket/i18n";
 import { localeFromPathname, type Locale } from "../features/pocket/locales";
@@ -217,8 +217,8 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
   const source = searchParams.get("from");
   const sourceURL = source?.startsWith(`/${locale}/`) ? new URL(source, "http://pocket.local") : null;
   const sourceScreen = sourceURL?.pathname.split("/")[2];
-  const validSource = sourceURL && (sourceScreen === "discover" || sourceScreen === "saved" || categoryForRoute(sourceScreen));
-  const openVenue = (venue: PublicVenue) => {
+  const validSource = sourceURL && (sourceScreen === "discover" || sourceScreen === "saved" || sourceScreen === "reservations" || categoryForRoute(sourceScreen));
+  const openVenue = (venue: Pick<PublicVenue, "id">) => {
     const sourceParams = new URLSearchParams(searchParams.toString());
     if (city) sourceParams.set("city", city);
     const from = `${spotsPath(locale, screen)}${sourceParams.size ? `?${sourceParams}` : ""}`;
@@ -269,7 +269,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
         {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedReady ? savedPlaces : []} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onVenue={openVenue} />}
         {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
         {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} user={currentUser} />}
-        {screen === "reservations" && <section className="spots-reservations"><PageHeader title={t("Мои брони")} /><div className="spots-search-empty spots-reservations-empty"><CalendarDays size={28} /><strong>{t("Список броней пока недоступен")}</strong><Button onClick={() => navigate("discover")}>{t("Выбрать заведение")}</Button></div></section>}
+        {screen === "reservations" && currentUser && <MyReservationsScreen key={currentUser.id} onVenue={(id) => openVenue({ id })} onDiscover={() => navigate("discover")} />}
         {screen === "history" && <HistoryScreen />}
         {screen === "profile" && currentUser && <GuestProfile user={currentUser} onEditProfile={editProfile} onNavigate={navigate} onLogout={signOut} />}
         {["settings", "notifications"].includes(screen) && currentUser && <GuestSettings key={screen} notifications={screen === "notifications"} onEditProfile={editProfile} user={currentUser} onNavigate={navigate} notify={shell.notify} onLogout={signOut} onUpdate={setCurrentUser} />}
