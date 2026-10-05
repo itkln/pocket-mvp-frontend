@@ -1116,6 +1116,9 @@
 .pocket-spots .venue-booking-card > .button:hover { background: var(--spots-cta-hover); }
 .pocket-spots .venue-booking-card > .button:focus-visible { background: var(--spots-cta-pressed); color: #fff; }
 .pocket-spots .venue-booking-card.venue-public-booking { z-index: 20; height: calc(100dvh - 112px); min-height: 0; }
+@media (min-width: 761px) {
+  .pocket-spots .venue-booking-card.venue-public-booking:not(.details-open):not(.checkout-open) { height: auto; min-height: 0; align-self: start; }
+}
 .pocket-spots .venue-booking-scroll { min-height: 0; flex: 1; overflow-x: hidden; overflow-y: auto; padding-right: 2px; scrollbar-width: thin; }
 .pocket-spots .venue-booking-wishes { display: grid; gap: 12px; margin-top: 24px; }
 .pocket-spots .venue-booking-wishes h3 { margin: 0; color: var(--spots-text); font-size: 19px; }
