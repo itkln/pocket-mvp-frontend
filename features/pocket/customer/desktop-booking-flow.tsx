@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import type { AuthUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
+import { createReservationKey } from "../../../lib/reservation-key";
 import { clearSavedPublicReservation, createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
@@ -69,7 +70,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   const scheduleTriggerRef = useRef<HTMLButtonElement>(null);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const wasMenuOpen = useRef(false);
-  const submissionKey = useRef(crypto.randomUUID());
+  const submissionKey = useRef("");
 
   useEffect(() => {
     let active = true;
@@ -132,7 +133,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
   const contactName = guestName ?? [user?.first_name, user?.last_name].filter(Boolean).join(" ");
   const contactEmail = guestEmail ?? user?.email ?? "";
   const contactPhone = guestPhone ?? user?.phone ?? "";
-  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time, user?.id]);
+  useEffect(() => { submissionKey.current = createReservationKey(); }, [date, guests, time, user?.id]);
 
   const current = availability?.date === date ? availability : null;
   const daySlots = current?.slots.filter((slot) => slot.time < "18:00") ?? [];

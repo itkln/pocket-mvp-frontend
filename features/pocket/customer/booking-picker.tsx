@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, Utensils, X } from "lucide-react";
 import { PublicMenuCards } from "./public-menu-cards";
 import { APIError } from "../../../lib/api-client";
+import { createReservationKey } from "../../../lib/reservation-key";
 import { createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
@@ -78,7 +79,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
     if (step !== "details") headingRef.current?.focus();
   }, [step]);
   const [confirmed, setConfirmed] = useState<CreatedReservation | null>(null);
-  const submissionKey = useRef(crypto.randomUUID());
+  const submissionKey = useRef("");
 
   useEffect(() => {
     let active = true;
@@ -166,7 +167,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
     });
     setSubmitError("");
   };
-  useEffect(() => { submissionKey.current = crypto.randomUUID(); }, [date, guests, time]);
+  useEffect(() => { submissionKey.current = createReservationKey(); }, [date, guests, time]);
   const submit = async () => {
     if (!selectedSlot || !guestName.trim() || !guestPhone.trim() || missingItems || submitting) return;
     setSubmitting(true);

@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createRef } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AuthUser } from "../../../lib/auth-api";
 import { createPublicReservation, getPublicVenueMenu, getVenueAvailability, type PublicMenuCategory } from "../../../lib/public-catalog-api";
 import { I18nProvider } from "../i18n";
@@ -11,6 +11,8 @@ vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await origi
 const date = (() => { const value = new Date(); value.setUTCDate(value.getUTCDate() + 2); return value.toISOString().slice(0, 10); })();
 const menu: PublicMenuCategory[] = [{ id: "mains", name: "Основные блюда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR" }] }];
 const account: AuthUser = { id: "user-1", email: "guest@example.test", first_name: "Anna", last_name: "Guest", role: "customer", capabilities: ["customer"] };
+
+afterEach(() => vi.unstubAllGlobals());
 
 beforeEach(() => {
   vi.mocked(createPublicReservation).mockReset();
@@ -49,7 +51,8 @@ describe("DesktopBookingFlow", () => {
     expect(await screen.findByText(/Номер брони: BOOK123/)).toBeInTheDocument();
   });
 
-  it("collects a guest name and phone before booking without dishes", async () => {
+  it("opens and books with guest contacts on HTTP without crypto.randomUUID", async () => {
+    vi.stubGlobal("crypto", { getRandomValues: crypto.getRandomValues.bind(crypto) });
     const ref = createRef<DesktopBookingFlowHandle>();
     renderFlow(null, {}, vi.fn(), ref);
     await chooseTime();
@@ -60,7 +63,7 @@ describe("DesktopBookingFlow", () => {
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
     ref.current?.bookWithoutPreorder();
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
-    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({ guest_name: "Guest Name", guest_email: "", guest_phone: "+421900123456", items: [] });
+    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({ guest_name: "Guest Name", guest_email: "", guest_phone: "+421900123456", items: [], idempotency_key: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/) });
   });
 
   it("opens the existing menu for selection, then shows review and payment details", async () => {

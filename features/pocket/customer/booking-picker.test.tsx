@@ -115,7 +115,8 @@ describe("BookingPicker", () => {
     expect(screen.getByText("Номер брони: ABC123")).toBeInTheDocument();
   });
 
-  it("can skip preorder after validating booking details", async () => {
+  it("opens and books without preorder on HTTP without crypto.randomUUID", async () => {
+    vi.stubGlobal("crypto", { getRandomValues: crypto.getRandomValues.bind(crypto) });
     vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-empty", code: "EMPTY", starts_at: `${bookingDate}T16:00:00Z`, guest_count: 2, preorder_total_minor: 0, currency: "EUR" });
     render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" menu={menu} preorderEnabled /></I18nProvider>);
     fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
@@ -125,7 +126,7 @@ describe("BookingPicker", () => {
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
     expect(createPublicReservation).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Забронировать без предзаказа" }));
-    await waitFor(() => expect(createPublicReservation).toHaveBeenCalledWith("venue-a", expect.objectContaining({ items: [] })));
+    await waitFor(() => expect(createPublicReservation).toHaveBeenCalledWith("venue-a", expect.objectContaining({ items: [], idempotency_key: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/) })));
     expect(await screen.findByText("Номер брони: EMPTY")).toBeInTheDocument();
   });
 
