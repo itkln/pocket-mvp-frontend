@@ -75,7 +75,7 @@ describe("DesktopBookingFlow", () => {
     expect(onMenuModeChange).toHaveBeenCalledWith(true);
     expect(screen.queryByRole("dialog", { name: "Меню для предзаказа" })).not.toBeInTheDocument();
     rerender(<I18nProvider initialLocale="ru"><DesktopBookingFlow ref={ref} venueID="venue-1" venueName="Demo Bistro" menu={menu} preorderEnabled user={null} quantities={{ pasta: 1 }} onQuantityChange={vi.fn()} menuModeOpen={false} onMenuModeChange={onMenuModeChange} onMenuUpdated={vi.fn()} onConfirmationClose={vi.fn()} /></I18nProvider>);
-    act(() => ref.current?.checkout());
+    fireEvent.click(screen.getByRole("button", { name: /^Продолжить к оплате/ }));
     expect(screen.getByRole("dialog", { name: "Подтверждение брони" })).toHaveClass("checkout-open");
     expect(screen.getByText("Оплата в заведении")).toBeInTheDocument();
     expect(createPublicReservation).not.toHaveBeenCalled();

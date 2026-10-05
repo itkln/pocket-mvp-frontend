@@ -103,6 +103,9 @@ describe("BookingPicker", () => {
     expect(screen.getByLabelText("Имя")).toHaveValue("Анна Гость");
     expect(screen.getByRole("textbox", { name: "Комментарий к ресторану" })).toHaveValue("У окна");
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Продолжить к оплате/ }));
+    expect(createPublicReservation).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "Подтверждение брони" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledWith("venue-a", expect.objectContaining({
       starts_at: `${bookingDate}T16:00:00Z`, guests: 2, guest_name: "Анна Гость", guest_phone: "+421900123456", notes: "У окна",
@@ -148,7 +151,7 @@ describe("BookingPicker", () => {
     fireEvent.click(screen.getByRole("button", { name: "Добавить Чизкейк" }));
     expect(screen.getByLabelText("Паста: 1")).toBeInTheDocument();
     expect(screen.getByLabelText("Чизкейк: 1")).toBeInTheDocument();
-    expect(document.querySelector(".mobile-preorder-total")).toHaveTextContent("19,00");
+    expect(screen.getByRole("button", { name: /^Продолжить к оплате/ })).toHaveTextContent("19,00");
     fireEvent.click(screen.getByRole("button", { name: "Убрать Паста" }));
     expect(screen.queryByLabelText("Паста: 1")).not.toBeInTheDocument();
   });
@@ -163,6 +166,9 @@ describe("BookingPicker", () => {
     fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
     fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Продолжить к оплате/ }));
+    expect(createPublicReservation).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "Подтверждение брони" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Цена изменилась");
     expect(createPublicReservation).toHaveBeenCalledTimes(1);
