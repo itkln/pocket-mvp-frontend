@@ -892,7 +892,7 @@
 }
 .pocket-spots .venue-facts > span:first-child { color: #906617; }
 .pocket-spots .venue-facts small { color: var(--spots-secondary); font-size: 13px; font-weight: 500; }
-.pocket-spots .venue-detail-page button { border: 0; border-radius: 999px !important; }
+.pocket-spots .venue-detail-page button { border: 0; border-radius: var(--control-radius); }
 .pocket-spots .venue-detail-page button:focus-visible { outline: 0; background: #dcefff; color: var(--spots-cta); }
 
 .pocket-spots .venue-section-nav {
@@ -1112,7 +1112,7 @@
 .pocket-spots .venue-time-grid button { min-height: 40px; border: 0; border-radius: 999px; background: #f3f4f4; color: #46535d; font-size: 14px; cursor: pointer; }
 .pocket-spots .venue-time-grid button:hover { background: #e9edef; color: var(--spots-text); }
 .pocket-spots .venue-time-grid button.active { background: var(--spots-active); color: var(--spots-cta); font-weight: 750; }
-.pocket-spots .venue-booking-card > .button { min-height: 46px; margin-top: 18px; border-radius: 14px !important; background: var(--spots-cta); }
+.pocket-spots .venue-booking-card > .button { min-height: 46px; margin-top: 18px; border-radius: var(--control-radius); background: var(--spots-cta); }
 .pocket-spots .venue-booking-card > .button:hover { background: var(--spots-cta-hover); }
 .pocket-spots .venue-booking-card > .button:focus-visible { background: var(--spots-cta-pressed); color: #fff; }
 .pocket-spots .venue-booking-card.venue-public-booking { z-index: 20; height: calc(100dvh - 112px); min-height: 0; }
@@ -1124,7 +1124,7 @@
 .pocket-spots .venue-booking-wishes h3 { margin: 0; color: var(--spots-text); font-size: 19px; }
 .pocket-spots .venue-wish-options { min-width: 0; display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; touch-action: pan-x; }
 .pocket-spots .venue-wish-options::-webkit-scrollbar { display: none; }
-.pocket-spots .venue-detail-page .venue-wish-options button { min-height: 38px; display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #dce1e3; border-radius: 999px !important; background: #fff; color: var(--spots-text); font-size: 13px; white-space: nowrap; cursor: pointer; }
+.pocket-spots .venue-detail-page .venue-wish-options button { min-height: 38px; display: inline-flex; flex: 0 0 auto; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid #dce1e3; border-radius: var(--control-radius); background: #fff; color: var(--spots-text); font-size: 13px; white-space: nowrap; cursor: pointer; }
 .pocket-spots .venue-detail-page .venue-wish-options button.active { border-color: var(--spots-cta); background: var(--spots-active); color: var(--spots-cta); }
 .pocket-spots .venue-detail-page .venue-wish-options button:not(.active):focus-visible { outline: 2px solid var(--spots-cta); outline-offset: 2px; background: #fff; color: var(--spots-text); }
 .pocket-spots .venue-booking-wishes textarea { box-sizing: border-box; width: 100%; min-height: 108px; padding: 15px 16px; border: 1px solid transparent; border-radius: 16px; outline: none; resize: vertical; background: #f3f4f4; color: var(--spots-text); font: inherit; font-size: 14px; line-height: 1.5; }
@@ -1405,7 +1405,7 @@
 .pocket-spots .venue-preorder-empty { min-height: 0; display: grid; place-items: center; padding: 24px; color: var(--spots-text); text-align: center; }
 .pocket-spots .venue-preorder-empty h3 { margin: 0; font-size: 17px; line-height: 1.25; }
 .pocket-spots .venue-preorder-empty p { max-width: 250px; margin: 8px auto 0; color: var(--spots-secondary); font-size: 13px; line-height: 1.4; }
-.pocket-spots .venue-detail-page .venue-booking-next { min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-radius: 14px !important; background: var(--spots-cta); color: #fff; font-size: 14px; font-weight: 750; cursor: pointer; }
+.pocket-spots .venue-detail-page .venue-booking-next { min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 18px; border-radius: var(--control-radius); background: var(--spots-cta); color: #fff; font-size: 14px; font-weight: 750; cursor: pointer; }
 .pocket-spots .venue-booking-next:hover { background: var(--spots-cta-hover); }
 .pocket-spots .venue-booking-next strong { font-size: 15px; }
 .pocket-spots .venue-booking-next span:only-child { margin: 0 auto; }
@@ -1783,3 +1783,45 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .pocket-spots::-webkit-scrollb
 
 .pocket-spots .venue-public-menu-image-label { position: absolute; inset: 0; pointer-events: none; }
 .pocket-spots .venue-preorder-product-open { border: 0; border-radius: inherit; }
+
+/* Shared blue action buttons; navigation and selection controls keep their states. */
+.pocket-spots .button { border-radius: var(--control-radius); }
+.pocket-spots :is(.button, .venue-booking-submit, .mobile-booking-back, .venue-mobile-booking-close, .venue-preorder-menu-close),
+.pocket-spots .venue-preorder-card-control button,
+.pocket-spots .venue-preorder-cart-quantity button,
+.pocket-spots .venue-guests button,
+.pocket-spots .desktop-booking-quantity button,
+.pocket-spots .desktop-booking-header > button,
+.pocket-spots .venue-preorder-cart-footer button,
+.pocket-spots .venue-preorder-product-action > button,
+.pocket-spots .venue-booking-menu-item button,
+.pocket-spots .desktop-booking-preorder-heading button,
+.pocket-spots .venue-reservation-summary > button,
+.pocket-spots .venue-preorder-quantity button {
+  border: 0;
+  border-radius: var(--control-radius);
+  background: var(--spots-cta);
+  color: #fff;
+  transition: background-color 160ms ease;
+}
+.pocket-spots :is(.button, .venue-booking-submit, .mobile-booking-back, .venue-mobile-booking-close, .venue-preorder-menu-close):hover:not(:disabled),
+.pocket-spots .venue-preorder-card-control button:hover:not(:disabled),
+.pocket-spots .venue-preorder-cart-quantity button:hover:not(:disabled),
+.pocket-spots .venue-guests button:hover:not(:disabled),
+.pocket-spots .desktop-booking-quantity button:hover:not(:disabled),
+.pocket-spots .desktop-booking-header > button:hover:not(:disabled),
+.pocket-spots .venue-preorder-cart-footer button:hover:not(:disabled),
+.pocket-spots .venue-preorder-product-action > button:hover:not(:disabled),
+.pocket-spots .venue-booking-menu-item button:hover:not(:disabled),
+.pocket-spots .desktop-booking-preorder-heading button:hover:not(:disabled),
+.pocket-spots .venue-reservation-summary > button:hover:not(:disabled),
+.pocket-spots .venue-preorder-quantity button:hover:not(:disabled) { background: var(--spots-cta-hover); color: #fff; }
+.pocket-spots :is(.button, .venue-booking-submit, .mobile-booking-back, .venue-mobile-booking-close, .venue-preorder-menu-close):disabled { background: var(--spots-card); color: var(--spots-disabled); cursor: default; }
+.pocket-spots .desktop-booking-flow.checkout-open .desktop-booking-header > button { background: var(--spots-cta); color: #fff; border-radius: var(--control-radius); }
+.pocket-spots .venue-mobile-booking-cta :is(.venue-mobile-booking-primary, .venue-mobile-booking-info) { background: var(--spots-cta); color: #fff; border-radius: var(--control-radius); }
+.pocket-spots .venue-mobile-booking-cta :is(.venue-mobile-booking-primary, .venue-mobile-booking-info):hover { background: var(--spots-cta-hover); }
+.pocket-spots .venue-mobile-booking-cta :is(.venue-mobile-booking-primary, .venue-mobile-booking-info):active { background: var(--spots-cta-pressed); }
+.pocket-spots .venue-preorder-card-control { border-radius: 14px; }
+.pocket-spots .venue-preorder-card-control button { border-radius: 10px; }
+.pocket-spots .mobile-preorder-top { position: sticky; top: 0; z-index: 2; flex-shrink: 0; display: grid; gap: 8px; margin: 16px 0; background: #fff; }
+.pocket-spots .mobile-preorder-top .mobile-preorder-categories { margin-bottom: 0; }
