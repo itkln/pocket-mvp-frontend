@@ -69,7 +69,10 @@ export function MyReservationsScreen({ onVenue, onDiscover }: { onVenue: (id: st
   const card = (reservation: CustomerReservation) => <article className="my-reservation-card" key={reservation.id} aria-label={`${reservation.venue_name} · ${t("Бронь №{code}", { code: reservation.code })}`}>
     <header><div><h3>{reservation.venue_name}</h3><p>{[reservation.venue_address, reservation.venue_city].filter(Boolean).join(" · ")}</p></div><button type="button" className="my-reservation-details-link" aria-label={`${t("Открыть бронь")}: ${reservation.venue_name} · ${reservation.code}`} aria-haspopup="dialog" onClick={() => setSelectedID(reservation.id)}><ArrowUpRight size={20} /></button></header>
     <div className="my-reservation-meta"><span>{t("Бронь №{code}", { code: reservation.code })}</span><span className={`my-reservation-status ${reservation.status}`}>{t(statusLabels[reservation.status])}</span></div>
-    <div className="my-reservation-schedule"><CalendarDays size={22} aria-hidden="true" /><time dateTime={reservation.starts_at}>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "long", timeStyle: "short", timeZone: reservation.timezone }).format(new Date(reservation.starts_at))}</time><span><UsersRound size={18} aria-hidden="true" />{t("Гостей: {count}", { count: reservation.guest_count })}</span></div>
+    <div className="my-reservation-schedule">
+      <div className="my-reservation-when"><CalendarDays size={22} aria-hidden="true" /><time dateTime={reservation.starts_at}><span>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "long", timeZone: reservation.timezone }).format(new Date(reservation.starts_at))}</span><strong>{new Intl.DateTimeFormat(localeTags[locale], { timeStyle: "short", timeZone: reservation.timezone }).format(new Date(reservation.starts_at))}</strong></time></div>
+      <span className="my-reservation-guests"><UsersRound size={20} aria-hidden="true" />{t("Гостей: {count}", { count: reservation.guest_count })}</span>
+    </div>
   </article>;
 
   return <section className="spots-reservations spots-category-catalog"><PageHeader title={t("Мои брони")} actions={<Button kind="secondary" icon={RefreshCw} disabled={loading} onClick={refresh}>{t("Обновить")}</Button>} />

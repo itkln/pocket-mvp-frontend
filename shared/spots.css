@@ -1714,9 +1714,13 @@
 .pocket-spots .my-reservation-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 20px 0 12px; color: var(--spots-secondary); font-size: 14px; }
 .pocket-spots .my-reservation-status { padding: 6px 12px; border-radius: 18px; background: #eeeeee; color: var(--spots-text); }
 .pocket-spots .my-reservation-status.confirmed, .pocket-spots .my-reservation-status.seated { background: #e0f3fd; color: #007fb7; }
-.pocket-spots .my-reservation-schedule { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: auto; }
-.pocket-spots .my-reservation-schedule > svg { flex: 0 0 auto; }
-.pocket-spots .my-reservation-schedule span { display: flex; align-items: center; gap: 6px; }
+.pocket-spots .my-reservation-schedule { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto; font-size: 14px; }
+.pocket-spots .my-reservation-when { min-width: 0; display: flex; align-items: center; gap: 10px; }
+.pocket-spots .my-reservation-when > svg, .pocket-spots .my-reservation-guests > svg { flex: 0 0 auto; }
+.pocket-spots .my-reservation-when time { min-width: 0; display: grid; gap: 4px; line-height: 1.35; }
+.pocket-spots .my-reservation-when time span { color: var(--spots-secondary); }
+.pocket-spots .my-reservation-when time strong { font-size: 16px; font-weight: 600; }
+.pocket-spots .my-reservation-guests { flex-shrink: 0; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .pocket-spots .my-reservation-panel { position: fixed; inset: 16px 16px 16px auto; width: min(440px, calc(100vw - 32px)); height: calc(100dvh - 32px); max-width: none; max-height: none; box-sizing: border-box; margin: 0; padding: 0; border: 0; border-radius: 26px; background: #fff; color: var(--spots-text); box-shadow: none; overflow: hidden; }
 .pocket-spots .my-reservation-panel[open] { display: flex; flex-direction: column; animation: desktop-booking-slide 220ms ease-out both; }
 .pocket-spots .my-reservation-panel::backdrop { background: rgba(22, 28, 34, .45); animation: desktop-booking-fade 180ms ease-out both; }
