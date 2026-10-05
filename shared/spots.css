@@ -1805,3 +1805,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, .pocket-spots::-webkit-scrollb
 .pocket-spots .venue-booking-card > .button:disabled { background: var(--spots-card); color: var(--spots-disabled); cursor: default; }
 .pocket-spots .mobile-preorder-top { position: sticky; top: 0; z-index: 2; flex-shrink: 0; display: grid; gap: 8px; margin: 16px 0; background: #fff; }
 .pocket-spots .mobile-preorder-top .mobile-preorder-categories { margin-bottom: 0; }
+
+.pocket-spots .venue-public-booking-shell:has(.mobile-booking-flow.preorder-step) > .venue-mobile-booking-close { display: none; }
+.pocket-spots .mobile-booking-flow.preorder-step .venue-booking-heading { padding-right: 0; }
+.pocket-spots .mobile-booking-flow.preorder-step .venue-booking-heading h2 { flex: 1; min-width: 0; }
+.pocket-spots .mobile-booking-inline-close { width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; color: var(--spots-text); cursor: pointer; }
+.pocket-spots .mobile-booking-inline-close:hover { background: #eeeeee; }
