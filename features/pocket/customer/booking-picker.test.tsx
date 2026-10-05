@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BookingPicker } from "./booking-picker";
 import { I18nProvider } from "../i18n";
 import { APIError } from "../../../lib/api-client";
@@ -10,6 +10,8 @@ vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await origi
 const menu: PublicMenuCategory[] = [{ id: "food", name: "Еда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR", image_url: "/pasta.jpg" }] }];
 
 const bookingDate = (() => { const value = new Date(); value.setUTCDate(value.getUTCDate() + 2); return value.toISOString().slice(0, 10); })();
+
+afterEach(() => vi.unstubAllGlobals());
 
 beforeEach(() => {
   vi.mocked(createPublicReservation).mockReset();
@@ -93,7 +95,7 @@ describe("BookingPicker", () => {
     fireEvent.change(screen.getByRole("textbox", { name: "Комментарий к ресторану" }), { target: { value: "У окна" } });
     expect(screen.queryByRole("button", { name: "Добавить Паста" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
-    expect(screen.getByRole("img", { name: "Паста" })).toHaveStyle({ backgroundImage: 'url("/pasta.jpg")' });
+    expect(screen.getByRole("img", { name: "Паста" }).parentElement).toHaveStyle({ backgroundImage: 'url("/pasta.jpg")' });
     expect(screen.queryByLabelText("Имя")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
     fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
@@ -122,6 +124,33 @@ describe("BookingPicker", () => {
     fireEvent.click(screen.getByRole("button", { name: "Забронировать без предзаказа" }));
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledWith("venue-a", expect.objectContaining({ items: [] })));
     expect(await screen.findByText("Номер брони: EMPTY")).toBeInTheDocument();
+  });
+
+  it("uses the venue menu grid and switches categories while keeping selected dishes", async () => {
+    vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: false })));
+    const scrollTo = vi.fn();
+    const categories = [...menu, { id: "desserts", name: "Десерты", items: [{ id: "cake", name: "Чизкейк", price_minor: 700, currency: "EUR", image_url: "/cake.jpg" }] }];
+    render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" menu={categories} preorderEnabled /></I18nProvider>);
+    fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Анна Гость" } });
+    fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    const container = document.querySelector(".venue-booking-scroll")!;
+    Object.defineProperty(container, "scrollTo", { value: scrollTo });
+    const desserts = screen.getByRole("button", { name: "Десерты" });
+    expect(screen.getByRole("navigation", { name: "Категории меню" })).toBeInTheDocument();
+    expect(document.querySelectorAll(".mobile-preorder-menu .venue-public-menu-grid")).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: "Убрать Паста" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.click(desserts);
+    expect(desserts).toHaveAttribute("aria-current", "location");
+    expect(scrollTo).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Добавить Чизкейк" }));
+    expect(screen.getByLabelText("Паста: 1")).toBeInTheDocument();
+    expect(screen.getByLabelText("Чизкейк: 1")).toBeInTheDocument();
+    expect(document.querySelector(".mobile-preorder-total")).toHaveTextContent("19,00");
+    fireEvent.click(screen.getByRole("button", { name: "Убрать Паста" }));
+    expect(screen.queryByLabelText("Паста: 1")).not.toBeInTheDocument();
   });
 
   it("requires a second confirmation after the server reports a new price", async () => {

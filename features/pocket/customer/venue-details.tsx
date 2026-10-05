@@ -6,6 +6,7 @@ import { ArrowLeft, CalendarDays, Check, Heart, Info, MapPin, Minus, Plus, Refre
 import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
+import { PublicMenuCards } from "./public-menu-cards";
 import { BookingPicker } from "./booking-picker";
 import { DesktopBookingFlow, type DesktopBookingFlowHandle, type DesktopBookingSummary } from "./desktop-booking-flow";
 import type { AuthUser } from "../../../lib/auth-api";
@@ -285,13 +286,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
     return next;
   });
   const closeItemDetails = () => { setDetailItemID(null); detailTriggerRef.current?.focus(); };
-  const menuCards = (items: PublicMenuItem[]) => <div className="venue-public-menu-grid">{items.map((item) => <article className="venue-public-menu-card" key={item.id}>
-    <div className="venue-public-menu-photo" style={item.image_url ? { backgroundImage: `url(${JSON.stringify(item.image_url)})` } : undefined} role={item.image_url && !preorderMenuOpen ? "img" : undefined} aria-label={item.image_url && !preorderMenuOpen ? item.name : undefined}>
-      {!item.image_url && <Utensils size={34} aria-hidden="true" />}
-      {preorderMenuOpen && <><button type="button" className="venue-preorder-product-open" aria-label={`${t("Подробнее о блюде")}: ${item.name}`} onClick={(event) => { detailTriggerRef.current = event.currentTarget; setDetailQuantity(1); setDetailItemID(item.id); }} /><div className={`venue-preorder-card-control ${preorderQuantities[item.id] ? "has-items" : ""}`}>{preorderQuantities[item.id] ? <><button type="button" aria-label={`${t("Убрать")} ${item.name}`} onClick={() => changePreorderQuantity(item.id, -1)}><Minus size={18} /></button><b aria-label={`${item.name}: ${preorderQuantities[item.id]}`}>{preorderQuantities[item.id]}</b><button type="button" aria-label={`${t("Добавить")} ${item.name}`} disabled={preorderQuantities[item.id] >= 30} onClick={() => changePreorderQuantity(item.id, 1)}><Plus size={18} /></button></> : <button type="button" aria-label={`${t("Добавить")} ${item.name}`} onClick={() => changePreorderQuantity(item.id, 1)}><Plus size={20} /></button>}</div></>}
-    </div>
-    <div className="venue-public-menu-copy"><strong>{formatPrice(item)}</strong><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div>
-  </article>)}</div>;
+  const menuCards = (items: PublicMenuItem[]) => <PublicMenuCards items={items} quantities={preorderMenuOpen ? preorderQuantities : undefined} onQuantityChange={preorderMenuOpen ? changePreorderQuantity : undefined} onOpenDetails={preorderMenuOpen ? (item, trigger) => { detailTriggerRef.current = trigger; setDetailQuantity(1); setDetailItemID(item.id); } : undefined} />;
 
   return <section className={`spots-venue-detail spots-real-venue-detail ${searchOpen ? "venue-search-active" : ""}`}>
     <header className={`venue-mobile-toolbar ${compactHeader ? "compact" : ""}`}>

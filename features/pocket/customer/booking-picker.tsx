@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, Utensils } from "lucide-react";
+import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
+import { PublicMenuCards } from "./public-menu-cards";
 import { APIError } from "../../../lib/api-client";
 import { createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
@@ -55,9 +56,24 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
   const [submitError, setSubmitError] = useState("");
   const [step, setStep] = useState<"details" | "preorder">("details");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeCategory, setActiveCategory] = useState("");
+  const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
+  const categoryNavRef = useRef<HTMLElement>(null);
+  const pendingCategory = useRef<string | null>(null);
+  const pendingCategoryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (pendingCategoryTimer.current) clearTimeout(pendingCategoryTimer.current); }, []);
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
+    const nav = categoryNavRef.current;
+    const tab = nav?.querySelector<HTMLButtonElement>('button[aria-current="location"]');
+    if (nav && tab) {
+      if (tab.offsetLeft < nav.scrollLeft) nav.scrollLeft = tab.offsetLeft;
+      else if (tab.offsetLeft + tab.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = tab.offsetLeft + tab.offsetWidth - nav.clientWidth;
+    }
+  }, [activeCategory, step]);
+  useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
+    pendingCategory.current = null;
     if (step === "preorder") headingRef.current?.focus();
   }, [step]);
   const [confirmed, setConfirmed] = useState<CreatedReservation | null>(null);
@@ -133,7 +149,8 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
     return `${get("year")}-${get("month")}-${get("day")}`;
   })() : date;
   const latest = today ? addDays(today, 30) : date;
-  const catalog = (updatedMenu ?? menu).flatMap((category) => category.items);
+  const categories = updatedMenu ?? menu;
+  const catalog = categories.flatMap((category) => category.items);
   const selectedItems = Object.entries(quantities).filter(([, quantity]) => quantity > 0).map(([id, quantity]) => ({ item: catalog.find((item) => item.id === id), id, quantity }));
   const missingItems = selectedItems.some(({ item }) => !item);
   const preorderTotal = selectedItems.reduce((sum, { item, quantity }) => sum + (item?.price_minor ?? 0) * quantity, 0);
@@ -176,6 +193,26 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
     } finally { setSubmitting(false); }
   };
 
+  const openCategory = (id: string) => {
+    const container = scrollRef.current;
+    const section = categoryRefs.current[id];
+    if (!container || !section) return;
+    setActiveCategory(id);
+    pendingCategory.current = id;
+    if (pendingCategoryTimer.current) clearTimeout(pendingCategoryTimer.current);
+    pendingCategoryTimer.current = setTimeout(() => { pendingCategory.current = null; }, 800);
+    container.scrollTo({ top: container.scrollTop + section.getBoundingClientRect().top - container.getBoundingClientRect().top, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
+  const updateCategory = () => {
+    const container = scrollRef.current;
+    if (step !== "preorder" || !container || pendingCategory.current) return;
+    let current = categories[0]?.id ?? "";
+    if (container.scrollTop > 0 && container.scrollTop + container.clientHeight >= container.scrollHeight - 2) current = categories.at(-1)?.id ?? current;
+    else categories.forEach(({ id }) => { if ((categoryRefs.current[id]?.getBoundingClientRect().top ?? Infinity) <= container.getBoundingClientRect().top + 24) current = id; });
+    setActiveCategory(current);
+
+  };
+
   return <aside className={`venue-booking-card venue-public-booking mobile-booking-flow ${step === "preorder" ? "preorder-step" : ""}`} aria-labelledby="venue-booking-title">
     <div className="venue-booking-heading">{step === "preorder" && !confirmed && <button type="button" className="mobile-booking-back" aria-label={t("Назад")} disabled={submitting} onClick={() => setStep("details")}><ArrowLeft size={22} /></button>}<h2 ref={headingRef} tabIndex={-1} id="venue-booking-title">{t(step === "preorder" && !confirmed ? "Предзаказ блюд" : "Бронирование")}</h2></div>
     {confirmed ? <div className="venue-booking-confirmed" role="status"><strong>{t("Бронь подтверждена")}</strong><p>{t("Номер брони")}: {confirmed.code}</p>{confirmed.preorder_order_number ? <p>{t("Номер предзаказа")}: {confirmed.preorder_order_number}</p> : null}<p>{new Intl.DateTimeFormat(localeTags[locale], { dateStyle: "full", timeStyle: "short", timeZone: availability?.timezone ?? "Europe/Bratislava" }).format(new Date(confirmed.starts_at))}</p>{confirmed.preorder_total_minor > 0 && <p>{t("Предзаказ")}: {formatMoney(confirmed.preorder_total_minor, confirmed.currency)}</p>}</div> : <>
@@ -191,7 +228,8 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
       <div className="venue-guests"><button type="button" aria-label={t("Уменьшить количество гостей")} disabled={guests === 1} onClick={() => changeGuests(guests - 1)}><Minus size={16} /></button><strong>{t("Гостей: {count}", { count: guests })}</strong><button type="button" aria-label={t("Увеличить количество гостей")} disabled={guests === 20} onClick={() => changeGuests(guests + 1)}><Plus size={16} /></button></div>
     </div>
     }
-    <div className="venue-booking-scroll" ref={scrollRef}>
+    {step === "preorder" && categories.length > 0 && <nav ref={categoryNavRef} className="venue-section-nav venue-public-category-nav mobile-preorder-categories" aria-label={t("Категории меню")}>{categories.map((category) => <button type="button" key={category.id} className={(activeCategory || categories[0].id) === category.id ? "active" : ""} aria-current={(activeCategory || categories[0].id) === category.id ? "location" : undefined} onClick={() => openCategory(category.id)}>{category.name}</button>)}</nav>}
+    <div className="venue-booking-scroll" ref={scrollRef} onScroll={updateCategory} onTouchStart={() => { pendingCategory.current = null; }} onWheel={() => { pendingCategory.current = null; }}>
     {step === "details" ? <>
     {loading ? <p role="status">{t("Ищем свободные столы...")}</p> : error ? <div role="alert"><p>{t("Не удалось проверить свободные столы")}</p><button type="button" onClick={() => { setLoading(true); setError(false); setRevision((value) => value + 1); }}>{t("Повторить")}</button></div> : current?.slots.length ? <>
       <div className="venue-time-periods" role="group" aria-label={t("Свободное время")}>
@@ -204,11 +242,14 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false }: {
       <div className="venue-booking-contact"><h3>{t("Контакты")}</h3><label>{t("Имя")}<input value={guestName} maxLength={120} autoComplete="name" onChange={(event) => setGuestName(event.target.value)} /></label><label>{t("Телефон")}<input value={guestPhone} maxLength={40} type="tel" autoComplete="tel" onChange={(event) => setGuestPhone(event.target.value)} /></label><label>{t("Эл. почта (необязательно)")}<input value={guestEmail} maxLength={254} type="email" autoComplete="email" onChange={(event) => setGuestEmail(event.target.value)} /></label></div>
     </> : <><p className="venue-booking-label">{t("Свободное время")}</p><p role="status">{t("На эту дату свободных столов нет")}</p></>}
     </> : <><div className="mobile-preorder-summary"><strong>{date ? formatter.format(day(date)) : ""} · {time}</strong><span>{t("Гостей: {count}", { count: guests })}</span></div>
-      <div className="venue-booking-menu">{catalog.length ? <div className="venue-booking-menu-items">{catalog.map((item) => <div key={item.id} className="venue-booking-menu-item"><div className="mobile-preorder-photo" role={item.image_url ? "img" : undefined} aria-label={item.image_url ? item.name : undefined} style={item.image_url ? { backgroundImage: `url(${JSON.stringify(item.image_url)})` } : undefined}>{!item.image_url && <Utensils size={24} aria-hidden="true" />}</div><span className="mobile-preorder-copy"><strong>{item.name}</strong><small>{formatMoney(item.price_minor, item.currency)}</small></span><div className="mobile-preorder-quantity"><button type="button" aria-label={`${t("Убрать")} ${item.name}`} disabled={!quantities[item.id]} onClick={() => changeQuantity(item.id, -1)}><Minus size={15} /></button><b>{quantities[item.id] ?? 0}</b><button type="button" aria-label={`${t("Добавить")} ${item.name}`} onClick={() => changeQuantity(item.id, 1)}><Plus size={15} /></button></div></div>)}{selectedItems.filter(({ item }) => !item).map(({ id, quantity }) => <div key={id} className="venue-booking-menu-item unavailable"><span>{t("Блюдо недоступно")} · {quantity}</span><button type="button" onClick={() => changeQuantity(id, -quantity)}>{t("Убрать")}</button></div>)}</div> : <p>{t("Меню пока недоступно")}</p>}{selectedItems.length > 0 && <strong className="venue-booking-preorder-total">{t("Предзаказ")}: {formatMoney(preorderTotal)}</strong>}</div>
+      <div className="mobile-preorder-menu">{categories.length ? categories.map((category) => <section key={category.id} ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" aria-label={category.name}><h2>{category.name}</h2><PublicMenuCards items={category.items} quantities={quantities} onQuantityChange={changeQuantity} /></section>) : <p>{t("Меню пока недоступно")}</p>}
+        {selectedItems.filter(({ item }) => !item).map(({ id, quantity }) => <div key={id} className="venue-booking-menu-item unavailable"><span>{t("Блюдо недоступно")} · {quantity}</span><button type="button" onClick={() => changeQuantity(id, -quantity)}>{t("Убрать")}</button></div>)}
+      </div>
     </>}</div>
     <div className="mobile-booking-footer">
+      {step === "preorder" && selectedItems.length > 0 && <strong className="mobile-preorder-total">{t("Предзаказ")}: {formatMoney(preorderTotal)}</strong>}
       {submitError && <p className="venue-booking-submit-error" role="alert">{submitError}</p>}
-      <button type="button" className="venue-booking-submit" disabled={!selectedSlot || submitting || guestName.trim().length < 2 || guestPhone.trim().length < 5 || (step === "preorder" && missingItems)} onClick={() => { if (step === "details" && preorderEnabled) { setCalendarOpen(false); setStep("preorder"); } else void submit(); }}>{submitting ? t("Сохраняем бронь...") : step === "details" && preorderEnabled ? t("Продолжить") : submitError.includes(t("Цена изменилась")) ? t("Подтвердить новую сумму") : step === "preorder" && !selectedItems.length ? t("Забронировать без предзаказа") : t("Забронировать")}</button>
+      <button type="button" className="venue-booking-submit" disabled={!selectedSlot || submitting || guestName.trim().length < 2 || guestPhone.trim().length < 5 || (step === "preorder" && missingItems)} onClick={() => { if (step === "details" && preorderEnabled) { setCalendarOpen(false); setActiveCategory(""); setStep("preorder"); } else void submit(); }}>{submitting ? t("Сохраняем бронь...") : step === "details" && preorderEnabled ? t("Продолжить") : submitError.includes(t("Цена изменилась")) ? t("Подтвердить новую сумму") : step === "preorder" && !selectedItems.length ? t("Забронировать без предзаказа") : t("Забронировать")}</button>
     </div>
     </>}
   </aside>;
