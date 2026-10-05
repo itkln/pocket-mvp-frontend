@@ -1119,7 +1119,7 @@
 @media (min-width: 761px) {
   .pocket-spots .venue-booking-card.venue-public-booking:not(.details-open):not(.checkout-open) { height: auto; min-height: 0; align-self: start; }
 }
-.pocket-spots .venue-booking-scroll { min-height: 0; flex: 1; overflow-x: hidden; overflow-y: auto; padding-right: 2px; scrollbar-width: thin; }
+.pocket-spots .venue-booking-scroll { min-height: 0; flex: 1; overflow-x: hidden; overflow-y: auto; padding-right: 2px; scrollbar-width: none; }
 .pocket-spots .venue-booking-wishes { display: grid; gap: 12px; margin-top: 24px; }
 .pocket-spots .venue-booking-wishes h3 { margin: 0; color: var(--spots-text); font-size: 19px; }
 .pocket-spots .venue-wish-options { min-width: 0; display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; touch-action: pan-x; }
@@ -1162,7 +1162,7 @@
 .pocket-spots .desktop-booking-backdrop { position: fixed; z-index: 109; inset: 0; background: rgba(22, 28, 34, .45); animation: desktop-booking-fade 180ms ease-out both; }
 .pocket-spots .venue-booking-card.venue-public-booking.desktop-booking-flow.details-open { position: fixed; z-index: 110; top: 16px; right: 16px; bottom: 16px; box-sizing: border-box; width: min(440px, calc(100vw - 32px)); height: auto; min-height: 0; overflow: hidden; padding: 26px; border-radius: 26px; animation: desktop-booking-slide 220ms ease-out both; }
 .pocket-spots .desktop-booking-schedule-body { min-height: 0; flex: 1; display: flex; flex-direction: column; }
-.pocket-spots .desktop-booking-details-body { min-height: 0; flex: 1; overflow-x: hidden; overflow-y: auto; scrollbar-width: thin; }
+.pocket-spots .desktop-booking-details-body { min-height: 0; flex: 1; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
 .pocket-spots .desktop-booking-flow.details-open .desktop-booking-header { justify-content: space-between; }
 .pocket-spots .desktop-booking-flow.details-open .desktop-booking-header h2 { font-size: 26px; }
 .pocket-spots .desktop-booking-flow.details-open .desktop-booking-close { width: 38px; height: 38px; background: transparent; }
@@ -1188,7 +1188,7 @@
 .pocket-spots .desktop-booking-preorder-heading h3,
 .pocket-spots .desktop-booking-checkout h3 { margin: 0; font-size: 17px; }
 .pocket-spots .desktop-booking-preorder-heading button { min-height: 34px; display: flex; align-items: center; gap: 4px; padding: 0 10px; border: 0; border-radius: 999px; background: var(--spots-active); color: var(--spots-cta); font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer; }
-.pocket-spots .desktop-booking-selected-list { min-height: 0; display: grid; align-content: start; gap: 5px; overflow-y: auto; margin-top: 14px; scrollbar-width: thin; }
+.pocket-spots .desktop-booking-selected-list { min-height: 0; display: grid; align-content: start; gap: 5px; overflow-y: auto; margin-top: 14px; scrollbar-width: none; }
 .pocket-spots .desktop-booking-selected-list article { min-width: 0; display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px solid #eef0f1; }
 .pocket-spots .desktop-booking-selected-list article > div:nth-child(2) { min-width: 0; }
 .pocket-spots .desktop-booking-selected-list strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
@@ -1204,7 +1204,7 @@
 .pocket-spots .desktop-booking-empty strong { font-size: 16px; }
 .pocket-spots .desktop-booking-empty p { max-width: 240px; margin: 7px 0 0; color: var(--spots-secondary); font-size: 13px; line-height: 1.45; }
 .pocket-spots .desktop-booking-actions { margin-top: auto; }
-.pocket-spots .desktop-booking-checkout { min-height: 0; flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; scrollbar-width: thin; }
+.pocket-spots .desktop-booking-checkout { min-height: 0; flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; scrollbar-width: none; }
 .pocket-spots .desktop-booking-checkout .desktop-booking-summary { flex: 0 0 auto; }
 .pocket-spots .desktop-booking-checkout .desktop-booking-selected-list { max-height: 210px; margin-top: -8px; flex: 0 0 auto; }
 .pocket-spots .desktop-booking-checkout .venue-booking-contact { margin-top: 0; }
@@ -1363,7 +1363,7 @@
   .pocket-spots .venue-preorder-cart header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 24px 16px; }
   .pocket-spots .venue-preorder-cart header h2 { margin: 0; font-size: 24px; }
   .pocket-spots .venue-preorder-cart header button { padding: 6px 0; background: transparent; color: var(--spots-secondary); font: inherit; font-size: 13px; cursor: pointer; }
-  .pocket-spots .venue-preorder-cart-body { min-height: 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: thin; }
+  .pocket-spots .venue-preorder-cart-body { min-height: 0; flex: 1; display: flex; flex-direction: column; overflow-y: auto; scrollbar-width: none; }
   .pocket-spots .venue-preorder-reservation-summary { display: grid; gap: 8px; margin: 0 16px 12px; padding: 14px; border-radius: 16px; background: #f3f4f4; overflow-wrap: anywhere; }
   .pocket-spots .venue-preorder-reservation-summary h3 { margin: 0 0 3px; font-size: 15px; }
   .pocket-spots .venue-preorder-reservation-summary > div { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; line-height: 1.35; }
@@ -1723,7 +1723,7 @@
 .pocket-spots .my-reservation-panel-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px 12px; }
 .pocket-spots .my-reservation-panel-header h2 { margin: 0; font-size: 20px; }
 .pocket-spots .my-reservation-panel-header button { display: grid; place-items: center; width: 38px; height: 38px; flex: 0 0 38px; padding: 0; border: 0; border-radius: 50%; background: #fff; color: var(--spots-text); cursor: pointer; }
-.pocket-spots .my-reservation-panel-scroll { min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 8px 24px 28px; }
+.pocket-spots .my-reservation-panel-scroll { min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 8px 24px 28px; }
 .pocket-spots .my-reservation-panel-summary { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 8px 0 28px; text-align: center; }
 .pocket-spots .my-reservation-date { display: flex; flex-direction: column; min-width: 68px; overflow: hidden; border-radius: 15px; background: #f5f4f2; }
 .pocket-spots .my-reservation-date span { padding: 4px 8px; background: var(--spots-cta); color: #fff; font-size: 13px; }
@@ -1755,3 +1755,7 @@
 .pocket-spots .my-reservations-count { margin: 0 0 24px; color: var(--spots-secondary); font-size: 14px; }
 
 .pocket-spots .spots-picker-content .spots-filter-group + .spots-filter-group { margin-top: 20px; }
+
+/* Hide scrollbars without disabling page, panel, or horizontal content scrolling. */
+html, body, .pocket-spots, .pocket-spots * { scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar, .pocket-spots::-webkit-scrollbar, .pocket-spots *::-webkit-scrollbar { display: none; }
