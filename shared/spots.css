@@ -1251,13 +1251,11 @@
   background: #fff;
 }
 .pocket-spots .desktop-booking-flow.checkout-open .desktop-booking-summary { margin-top: 0; }
-.pocket-spots .desktop-booking-review-items { display: grid; gap: 0; }
-.pocket-spots .desktop-booking-review-items article { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eceeef; font-size: 14px; }
+.pocket-spots .desktop-booking-review-items { display: grid; gap: 6px; }
+.pocket-spots .desktop-booking-review-items article { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px 0; font-size: 14px; }
 .pocket-spots .desktop-booking-review-items .desktop-booking-item-image { width: 56px; height: 56px; }
 .pocket-spots .desktop-booking-review-items strong { white-space: nowrap; }
-.pocket-spots .desktop-booking-flow.checkout-open .desktop-booking-total { padding: 6px 0 16px; border-bottom: 1px solid #eceeef; }
-.pocket-spots .desktop-booking-flow.checkout-open .desktop-booking-account,
-.pocket-spots .desktop-booking-flow.checkout-open .desktop-booking-notes { padding-bottom: 16px; border-bottom: 1px solid #eceeef; }
+.pocket-spots .desktop-booking-checkout .desktop-booking-total { padding: 16px 0 4px; border-top: 1px solid #eceeef; }
 .pocket-spots .desktop-booking-flow.checkout-open .venue-booking-confirmed { align-content: start; flex: 0 1 auto; overflow: visible; background: #eef8f1; }
 .pocket-spots .desktop-booking-confirmed-items { display: grid; gap: 5px; margin-top: 8px; padding-top: 14px; border-top: 1px solid #d5e8dc; }
 .pocket-spots .desktop-booking-confirmed-items h3 { margin: 0 0 4px; font-size: 16px; }
