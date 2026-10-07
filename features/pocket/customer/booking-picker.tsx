@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, Utensils, X } from "lucide-react";
 import { PublicMenuCards } from "./public-menu-cards";
+import { PublicMenuItemDialog } from "./public-menu-item-dialog";
 import { APIError } from "../../../lib/api-client";
 import { createReservationKey } from "../../../lib/reservation-key";
 import { createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
@@ -56,6 +57,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [step, setStep] = useState<"details" | "preorder" | "checkout">("details");
+  const [detailItemID, setDetailItemID] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState("");
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -87,7 +89,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
     return () => { active = false; };
   }, [venueID]);
   const calendarRef = useRef<HTMLDivElement>(null);
-  const formatter = new Intl.DateTimeFormat(localeTags[locale], { day: "numeric", month: "short", timeZone: "UTC" });
+  const formatter = new Intl.DateTimeFormat(localeTags[locale], { day: "numeric", month: locale === "sk" ? "long" : "short", timeZone: "UTC" });
   const longFormatter = new Intl.DateTimeFormat(localeTags[locale], { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
   const monthFormatter = new Intl.DateTimeFormat(localeTags[locale], { month: "long", year: "numeric", timeZone: "UTC" });
 
@@ -153,6 +155,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
   const latest = today ? addDays(today, 30) : date;
   const categories = updatedMenu ?? menu;
   const catalog = categories.flatMap((category) => category.items);
+  const detailItem = catalog.find((item) => item.id === detailItemID);
   const selectedItems = Object.entries(quantities).filter(([, quantity]) => quantity > 0).map(([id, quantity]) => ({ item: catalog.find((item) => item.id === id), id, quantity }));
   const missingItems = selectedItems.some(({ item }) => !item);
   const preorderTotal = selectedItems.reduce((sum, { item, quantity }) => sum + (item?.price_minor ?? 0) * quantity, 0);
@@ -249,7 +252,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
       <div className="venue-booking-contact"><h3>{t("Контакты")}</h3><label>{t("Имя")}<input value={guestName} maxLength={120} autoComplete="name" onChange={(event) => setGuestName(event.target.value)} /></label><label>{t("Телефон")}<input value={guestPhone} maxLength={40} type="tel" autoComplete="tel" onChange={(event) => setGuestPhone(event.target.value)} /></label><label>{t("Эл. почта (необязательно)")}<input value={guestEmail} maxLength={254} type="email" autoComplete="email" onChange={(event) => setGuestEmail(event.target.value)} /></label></div>
     </> : <><p className="venue-booking-label">{t("Свободное время")}</p><p role="status">{t("На эту дату свободных столов нет")}</p></>}
     </> : step === "preorder" ? <>
-      <div className="mobile-preorder-menu">{categories.length ? categories.map((category) => <section key={category.id} ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" aria-label={category.name}><h2>{category.name}</h2><PublicMenuCards items={category.items} quantities={quantities} onQuantityChange={changeQuantity} /></section>) : <p>{t("Меню пока недоступно")}</p>}
+      <div className="mobile-preorder-menu">{categories.length ? categories.map((category) => <section key={category.id} ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" aria-label={category.name}><h2>{category.name}</h2><PublicMenuCards items={category.items} quantities={quantities} onQuantityChange={changeQuantity} onOpenDetails={(item) => setDetailItemID(item.id)} /></section>) : <p>{t("Меню пока недоступно")}</p>}
         {selectedItems.filter(({ item }) => !item).map(({ id, quantity }) => <div key={id} className="venue-booking-menu-item unavailable"><span>{t("Блюдо недоступно")} · {quantity}</span><button type="button" onClick={() => changeQuantity(id, -quantity)}>{t("Убрать")}</button></div>)}
       </div>
     </> : <div className="mobile-booking-review desktop-booking-checkout">
@@ -271,6 +274,7 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
         {step === "preorder" && selectedItems.length > 0 && <strong>{formatMoney(preorderTotal)}</strong>}
       </button>
     </div>
+    {step === "preorder" && detailItem && <PublicMenuItemDialog key={detailItem.id} item={detailItem} onClose={() => setDetailItemID(null)} onAddToPreorder={(quantity) => changeQuantity(detailItem.id, quantity)} />}
     </>}
   </aside>;
 }

@@ -7,6 +7,7 @@ import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { PublicMenuCards } from "./public-menu-cards";
+import { PublicMenuItemDialog } from "./public-menu-item-dialog";
 import { BookingPicker } from "./booking-picker";
 import { DesktopBookingFlow, type DesktopBookingFlowHandle, type DesktopBookingSummary } from "./desktop-booking-flow";
 import type { AuthUser } from "../../../lib/auth-api";
@@ -50,7 +51,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const [bookingSummary, setBookingSummary] = useState<DesktopBookingSummary | null>(null);
   const [bookingFlowVersion, setBookingFlowVersion] = useState(0);
   const [detailItemID, setDetailItemID] = useState<string | null>(null);
-  const [detailQuantity, setDetailQuantity] = useState(1);
   const [menuQuery, setMenuQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const infoCloseRef = useRef<HTMLButtonElement>(null);
@@ -69,8 +69,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const pendingCategoryRef = useRef<string | null>(null);
   const pendingCategoryTimerRef = useRef<number | null>(null);
   const preorderMenuBackRef = useRef<HTMLButtonElement>(null);
-  const detailDialogRef = useRef<HTMLElement>(null);
-  const detailCloseRef = useRef<HTMLButtonElement>(null);
   const detailTriggerRef = useRef<HTMLButtonElement | null>(null);
   const detailWasOpenRef = useRef(false);
   const backToBookingDetails = useCallback(() => {
@@ -142,17 +140,14 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   }, [preorderMenuOpen]);
   useEffect(() => {
     if (!preorderMenuOpen) return;
-    if (detailItemID) detailCloseRef.current?.focus();
-    else if (detailWasOpenRef.current) detailTriggerRef.current?.focus();
+    if (detailItemID) { detailWasOpenRef.current = true; return; }
+    if (detailWasOpenRef.current) detailTriggerRef.current?.focus();
     else preorderMenuBackRef.current?.focus();
-    detailWasOpenRef.current = Boolean(detailItemID);
+    detailWasOpenRef.current = false;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        if (detailItemID) { setDetailItemID(null); detailTriggerRef.current?.focus(); }
-        else backToBookingDetails();
-      }
+      if (event.key === "Escape") backToBookingDetails();
       if (event.key !== "Tab") return;
-      const focusable = Array.from((detailItemID ? detailDialogRef.current : preorderMenuRef.current)?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
+      const focusable = Array.from(preorderMenuRef.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []);
       const first = focusable[0];
       const last = focusable.at(-1);
       if (!first || !last) return;
@@ -185,6 +180,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
     const trigger = bookingTriggerRef.current;
     bookingCloseRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
+      if (bookingOverlayRef.current?.querySelector(".venue-preorder-product-dialog[open]")) return;
       if (event.key === "Escape" && !bookingOverlayRef.current?.querySelector(".venue-calendar-popover")) setBookingOpen(false);
       if (event.key !== "Tab") return;
       const focusable = Array.from(bookingOverlayRef.current?.querySelectorAll<HTMLElement>("button:not(:disabled), textarea") ?? []);
@@ -271,7 +267,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const searchResults = normalizedQuery ? menuState.categories.flatMap((category) => category.items.filter((item) =>
     [item.name, item.description ?? "", category.name].some((value) => value.toLocaleLowerCase(locale).includes(normalizedQuery)),
   )) : [];
-  const formatPrice = (item: PublicMenuItem) => new Intl.NumberFormat(locale, { style: "currency", currency: item.currency }).format(item.price_minor / 100);
   const preorderItems = menuState.categories.flatMap((category) => category.items);
   const preorderCount = Object.values(preorderQuantities).reduce((total, quantity) => total + quantity, 0);
   const preorderTotal = preorderItems.reduce((total, item) => total + item.price_minor * (preorderQuantities[item.id] ?? 0), 0);
@@ -286,7 +281,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
     return next;
   });
   const closeItemDetails = () => { setDetailItemID(null); detailTriggerRef.current?.focus(); };
-  const menuCards = (items: PublicMenuItem[]) => <PublicMenuCards items={items} quantities={preorderMenuOpen ? preorderQuantities : undefined} onQuantityChange={preorderMenuOpen ? changePreorderQuantity : undefined} onOpenDetails={preorderMenuOpen ? (item, trigger) => { detailTriggerRef.current = trigger; setDetailQuantity(1); setDetailItemID(item.id); } : undefined} />;
+  const menuCards = (items: PublicMenuItem[]) => <PublicMenuCards items={items} quantities={preorderMenuOpen ? preorderQuantities : undefined} onQuantityChange={preorderMenuOpen ? changePreorderQuantity : undefined} onOpenDetails={(item, trigger) => { detailTriggerRef.current = trigger; setDetailItemID(item.id); }} />;
 
   return <section className={`spots-venue-detail spots-real-venue-detail ${searchOpen ? "venue-search-active" : ""}`}>
     <header className={`venue-mobile-toolbar ${compactHeader ? "compact" : ""}`}>
@@ -359,11 +354,6 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
             </div>
             <div className="venue-preorder-cart-footer">{preorderCount > 0 ? <button type="button" disabled={preorderSelectedItems.length !== Object.keys(preorderQuantities).length} onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.checkout(); }}><span>{t("Продолжить к оплате")}</span><strong>{preorderTotalLabel}</strong></button> : <button type="button" className="venue-preorder-book-without" onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.bookWithoutPreorder(); }}><span>{t("Забронировать без предзаказа")}</span></button>}</div>
           </aside>}
-          {preorderMenuOpen && detailItem && <div className="venue-preorder-product-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) closeItemDetails(); }}><section ref={detailDialogRef} className="venue-preorder-product-dialog" role="dialog" aria-modal="true" aria-label={detailItem.name}>
-            <button ref={detailCloseRef} type="button" className="venue-preorder-product-close" aria-label={t("Закрыть")} onClick={closeItemDetails}><X size={23} /></button>
-            <div className="venue-preorder-product-main"><div className="venue-preorder-product-image" style={detailItem.image_url ? { backgroundImage: `url(${JSON.stringify(detailItem.image_url)})` } : undefined}>{!detailItem.image_url && <Utensils size={50} aria-hidden="true" />}</div><div className="venue-preorder-product-info"><h2>{detailItem.name}</h2><strong>{formatPrice(detailItem)}</strong><div className="venue-preorder-product-action"><div className="venue-preorder-cart-quantity"><button type="button" aria-label={t("Уменьшить количество")} disabled={detailQuantity <= 1} onClick={() => setDetailQuantity((value) => value - 1)}><Minus size={18} /></button><b>{detailQuantity}</b><button type="button" aria-label={t("Увеличить количество")} disabled={detailQuantity >= 30} onClick={() => setDetailQuantity((value) => value + 1)}><Plus size={18} /></button></div><button type="button" onClick={() => { changePreorderQuantity(detailItem.id, detailQuantity); closeItemDetails(); }}>{t("Добавить")}</button></div></div></div>
-            {detailItem.description && <p>{detailItem.description}</p>}
-          </section></div>}
         </div>
       </div>
       {venue.category_slug === "restaurants" ? <div ref={bookingOverlayRef} className={`venue-public-booking-shell ${bookingOpen ? "open" : ""}`} role={bookingOpen ? "dialog" : undefined} aria-modal={bookingOpen || undefined} aria-labelledby={bookingOpen ? "venue-booking-title" : undefined}>
@@ -376,6 +366,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
         <button type="button" className="button" disabled>{t("Забронировать")}</button>
       </aside>}
       {venue.category_slug !== "restaurants" && <div className="venue-mobile-booking-status" role="status"><span><CalendarDays size={16} />{t("Бронирование пока недоступно")}</span></div>}
+      {detailItem && <PublicMenuItemDialog key={detailItem.id} item={detailItem} onClose={closeItemDetails} onAddToPreorder={preorderMenuOpen ? (quantity) => changePreorderQuantity(detailItem.id, quantity) : undefined} />}
       {reviewsOpen && <div className="venue-reviews-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setReviewsOpen(false); }}>
         <section className="venue-reviews-dialog" role="dialog" aria-modal="true" aria-labelledby="venue-reviews-dialog-title">
           <header><h2 id="venue-reviews-dialog-title">{t("Рейтинг и отзывы")}</h2><button ref={reviewsCloseRef} type="button" aria-label={t("Закрыть")} onClick={() => setReviewsOpen(false)}><X size={21} /></button></header>

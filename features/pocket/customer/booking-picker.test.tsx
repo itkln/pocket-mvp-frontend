@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BookingPicker } from "./booking-picker";
 import { I18nProvider } from "../i18n";
@@ -7,13 +7,15 @@ import { createPublicReservation, getPublicVenueMenu, getVenueAvailability, type
 
 vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), getVenueAvailability: vi.fn(), getPublicVenueMenu: vi.fn(), createPublicReservation: vi.fn() }));
 
-const menu: PublicMenuCategory[] = [{ id: "food", name: "Еда", items: [{ id: "pasta", name: "Паста", price_minor: 1200, currency: "EUR", image_url: "/pasta.jpg" }] }];
+const menu: PublicMenuCategory[] = [{ id: "food", name: "Еда", items: [{ id: "pasta", name: "Паста", description: "Паста с грибами и пармезаном", price_minor: 1200, currency: "EUR", image_url: "/pasta.jpg" }] }];
 
 const bookingDate = (() => { const value = new Date(); value.setUTCDate(value.getUTCDate() + 2); return value.toISOString().slice(0, 10); })();
 
 afterEach(() => vi.unstubAllGlobals());
 
 beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
   vi.mocked(createPublicReservation).mockReset();
   vi.mocked(getPublicVenueMenu).mockReset();
   vi.mocked(getVenueAvailability).mockImplementation(async (venueID, date, guests) => ({
@@ -25,6 +27,31 @@ beforeEach(() => {
 });
 
 describe("BookingPicker", () => {
+  it("opens dish details in mobile preorder and adds the chosen quantity without booking", async () => {
+    render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" menu={menu} preorderEnabled /></I18nProvider>);
+    fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Анна Гость" } });
+    fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    const detailsButton = screen.getByRole("button", { name: "Подробнее о блюде: Паста" });
+    fireEvent.click(detailsButton);
+    const dialog = screen.getByRole("dialog", { name: "Паста" });
+    expect(within(dialog).getByRole("img", { name: "Паста" })).toBeInTheDocument();
+    expect(within(dialog).getByText("Паста с грибами и пармезаном")).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Увеличить количество" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Добавить", exact: true }));
+    expect(screen.queryByRole("dialog", { name: "Паста" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Паста: 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Продолжить к оплате/ })).toHaveTextContent("24,00");
+    expect(createPublicReservation).not.toHaveBeenCalled();
+  });
+
+  it("shows a written month for Slovak booking dates", async () => {
+    vi.mocked(getVenueAvailability).mockResolvedValue({ venue_id: "venue-a", date: "2026-10-09", timezone: "Europe/Bratislava", guests: 2, duration_minutes: 120, slots: [] });
+    render(<I18nProvider initialLocale="sk"><BookingPicker venueID="venue-a" /></I18nProvider>);
+    expect(await screen.findByText("9. októbra")).toBeInTheDocument();
+  });
+
   it("separates day and evening slots at 18:00", async () => {
     vi.mocked(getVenueAvailability).mockImplementation(async (venueID, date, guests) => ({
       venue_id: venueID, date: date || bookingDate, timezone: "Europe/Bratislava", guests, duration_minutes: 120,

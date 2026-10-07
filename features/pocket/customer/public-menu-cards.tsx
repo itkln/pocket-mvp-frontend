@@ -17,13 +17,13 @@ export function PublicMenuCards({ items, quantities, onQuantityChange, onOpenDet
       <div className="venue-public-menu-photo" style={item.image_url ? { backgroundImage: `url(${JSON.stringify(item.image_url)})` } : undefined} role={item.image_url && !onQuantityChange ? "img" : undefined} aria-label={item.image_url && !onQuantityChange ? item.name : undefined}>
         {item.image_url && onQuantityChange && <span className="venue-public-menu-image-label" role="img" aria-label={item.name} />}
         {!item.image_url && <Utensils size={34} aria-hidden="true" />}
-        {onOpenDetails && <button type="button" className="venue-preorder-product-open" aria-label={`${t("Подробнее о блюде")}: ${item.name}`} onClick={(event) => onOpenDetails(item, event.currentTarget)} />}
         {onQuantityChange && <div className={`venue-preorder-card-control ${quantity ? "has-items" : ""}`}>
           {quantity > 0 && <><button type="button" aria-label={`${t("Убрать")} ${item.name}`} onClick={() => onQuantityChange(item.id, -1)}><Minus size={18} /></button><b aria-label={`${item.name}: ${quantity}`}>{quantity}</b></>}
           <button type="button" aria-label={`${t("Добавить")} ${item.name}`} disabled={quantity >= 30} onClick={() => onQuantityChange(item.id, 1)}><Plus size={quantity ? 18 : 20} /></button>
         </div>}
       </div>
       <div className="venue-public-menu-copy"><strong>{new Intl.NumberFormat(locale, { style: "currency", currency: item.currency }).format(item.price_minor / 100)}</strong><h3>{item.name}</h3>{item.description && <p>{item.description}</p>}</div>
+      {onOpenDetails && <button type="button" className="venue-preorder-product-open" aria-label={`${t("Подробнее о блюде")}: ${item.name}`} onClick={(event) => onOpenDetails(item, event.currentTarget)} />}
     </article>;
   })}</div>;
 }
