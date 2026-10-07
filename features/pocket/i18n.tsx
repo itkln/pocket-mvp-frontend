@@ -15,6 +15,22 @@ export const localeOptions: { value: Locale; short: string; label: string }[] = 
 ];
 
 const rows: TranslationRow[] = [
+  ["Вес и пищевая ценность", "Weight and nutrition", "Вага та поживна цінність", "Hmotnosť a výživové hodnoty"],
+  ["КБЖУ на 100 г. Необязательные поля.", "Nutrition per 100 g. Optional fields.", "КБЖВ на 100 г. Необовʼязкові поля.", "Výživové hodnoty na 100 g. Nepovinné polia."],
+  ["Вес порции, г", "Portion weight, g", "Вага порції, г", "Hmotnosť porcie, g"],
+  ["Калории, ккал", "Calories, kcal", "Калорії, ккал", "Energia, kcal"],
+  ["Белки, г", "Protein, g", "Білки, г", "Bielkoviny, g"],
+  ["Жиры, г", "Fat, g", "Жири, г", "Tuky, g"],
+  ["Углеводы, г", "Carbs, g", "Вуглеводи, г", "Sacharidy, g"],
+  ["На 100 г", "Per 100 g", "На 100 г", "Na 100 g"],
+  ["ккал", "kcal", "ккал", "kcal"],
+  ["белки", "protein", "білки", "bielkoviny"],
+  ["жиры", "fat", "жири", "tuky"],
+  ["углеводы", "carbs", "вуглеводи", "sacharidy"],
+  ["г", "g", "г", "g"],
+  ["Заведение пока не указало КБЖУ", "Nutrition has not been provided yet", "Заклад поки не вказав КБЖВ", "Prevádzka zatiaľ neuviedla výživové hodnoty"],
+  ["Пищевая ценность", "Nutrition", "Поживна цінність", "Výživové hodnoty"],
+  ["Потяните вниз, чтобы закрыть", "Drag down to close", "Потягніть вниз, щоб закрити", "Potiahnutím nadol zatvoríte"],
   ["Загружаем заведения...", "Loading places...", "Завантажуємо заклади...", "Načítavajú sa prevádzky..."],
   ["Не удалось загрузить заведения", "Places could not be loaded", "Не вдалося завантажити заклади", "Prevádzky sa nepodarilo načítať"],
   ["Загружаем избранное...", "Loading saved places...", "Завантажуємо збережені місця...", "Načítavajú sa uložené miesta..."],

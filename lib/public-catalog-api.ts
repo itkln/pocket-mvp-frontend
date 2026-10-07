@@ -1,3 +1,4 @@
+import type { MenuNutrition } from "./menu-nutrition";
 import { APIError, apiRequest } from "./api-client";
 
 export type PublicVenue = {
@@ -28,7 +29,7 @@ export type PublicVenuePage = {
   has_next: boolean;
 };
 
-export type PublicMenuItem = {
+export type PublicMenuItem = MenuNutrition & {
   id: string;
   name: string;
   description?: string;

@@ -5,6 +5,8 @@ import { Clock3, Plus, ShieldCheck, Store, Table2, X } from "lucide-react";
 import { type VenueInput } from "../../lib/owner-api";
 import { useOwnerWorkspace } from "./owner/context";
 import { MenuImageField } from "./menu-image-field";
+import { MenuNutritionFields } from "./menu-nutrition-fields";
+import { readMenuNutrition } from "../../lib/menu-nutrition";
 import { Button, IconButton, StatusPill, Field, money } from "./ui";
 import { localeTags, useI18n } from "./i18n";
 
@@ -42,6 +44,7 @@ export function Modal({ type, onClose, notify, currency = "EUR" }: { type: "item
     const name = String(data.get("name") ?? "").trim();
     if (!name) { setFormError(t("Заполните обязательные поля")); return; }
     if (type === "item") {
+      if (!event.currentTarget.reportValidity()) return;
       const category = String(data.get("category") ?? "");
       const rawPrice = String(data.get("price") ?? "");
       if (!category || rawPrice === "") { setFormError(t("Заполните обязательные поля")); return; }
@@ -63,6 +66,7 @@ export function Modal({ type, onClose, notify, currency = "EUR" }: { type: "item
           image_url: itemImage,
           currency,
           is_available: true,
+          ...readMenuNutrition(data),
         });
         notify("Позиция добавлена в меню");
       } else if (type === "invite") {
@@ -80,7 +84,7 @@ export function Modal({ type, onClose, notify, currency = "EUR" }: { type: "item
   const title = type === "item" ? "Новая позиция" : type === "invite" ? "Пригласить сотрудника" : order ? `Заказ #${order.number}` : "Заказ";
   return <div className="modal-backdrop" onMouseDown={onClose}><section className={`modal ${type === "order" ? "order-modal" : ""}`} onMouseDown={(event) => event.stopPropagation()}><header><div><h2>{title}</h2></div><IconButton icon={X} label="Закрыть" onClick={onClose} /></header>
     {type !== "order" ? <form noValidate onSubmit={submit}>
-      {type === "item" && <div className="modal-body"><div className="form-grid"><div className="field wide"><span>Фото</span><MenuImageField value={itemImage} name="Новая позиция" onChange={setItemImage} /></div><Field label="Название" wide><input name="name" autoFocus placeholder="Название блюда" required /></Field><Field label="Категория"><select name="category" required defaultValue=""><option value="" disabled>Выберите категорию</option>{workspace.categories.map((category)=><option key={category.id} value={category.id}>{category.name}</option>)}</select></Field><Field label="Цена"><input name="price" type="number" min="0" step="0.01" placeholder="0.00" required /></Field><Field label="Описание" wide><textarea name="description" placeholder="Ингредиенты и короткое описание" /></Field></div></div>}
+      {type === "item" && <div className="modal-body"><div className="form-grid"><div className="field wide"><span>Фото</span><MenuImageField value={itemImage} name="Новая позиция" onChange={setItemImage} /></div><Field label="Название" wide><input name="name" autoFocus placeholder="Название блюда" required /></Field><Field label="Категория"><select name="category" required defaultValue=""><option value="" disabled>Выберите категорию</option>{workspace.categories.map((category)=><option key={category.id} value={category.id}>{category.name}</option>)}</select></Field><Field label="Цена"><input name="price" type="number" min="0" step="0.01" placeholder="0.00" required /></Field><Field label="Описание" wide><textarea name="description" placeholder="Ингредиенты и короткое описание" /></Field><MenuNutritionFields /></div></div>}
       {type === "invite" && <div className="modal-body"><div className="form-grid"><Field label="Имя"><input name="name" autoFocus placeholder="Имя сотрудника" required /></Field><Field label="E-mail"><input name="email" type="email" placeholder="name@example.com" required /></Field><Field label="Роль" wide><select name="role" defaultValue="waiter"><option value="waiter">Официант</option><option value="manager">Менеджер</option><option value="kitchen">Кухня</option><option value="viewer">Только просмотр</option></select></Field></div><div className="permission-note"><ShieldCheck size={20} /><p><strong>Доступ по роли</strong><span>Сотрудник увидит только разрешенные разделы этого заведения.</span></p></div></div>}
       {formError && <p className="modal-form-error" role="alert">{formError}</p>}<footer><Button kind="secondary" onClick={onClose}>Отмена</Button><Button type="submit" disabled={submitting || (type === "item" && workspace.categories.length === 0)}>{submitting ? "Сохраняем..." : type === "item" ? "Добавить в меню" : "Отправить приглашение"}</Button></footer>
     </form> : <><div className="modal-body order-detail">{order ? <><div className="order-detail-top"><StatusPill status={order.status} /><span><Clock3 size={15} />{new Date(order.created_at).toLocaleString(localeTags[locale])}</span></div><div className="order-source"><span><Table2 size={20} /></span><div><strong>{order.source}</strong><p>{order.guest_name || "Гость"}</p></div></div><dl className="order-total"><div><dt>Итого</dt><dd>{money(order.total_minor / 100, order.currency)}</dd></div></dl></> : <p>Заказов пока нет.</p>}</div><footer><Button kind="secondary" onClick={onClose}>Закрыть</Button>{order && order.status === "new" && <Button onClick={async()=>{await workspace.setOrderStatus(order.id,"accepted");notify("Заказ принят");onClose();}}>Принять заказ</Button>}</footer></>}

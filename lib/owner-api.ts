@@ -1,3 +1,4 @@
+import type { MenuNutrition } from "./menu-nutrition";
 import { apiRequest } from "./api-client";
 
 export type OwnerVenue = {
@@ -47,8 +48,8 @@ export type OwnerDashboard = {
 
 export type OwnerCategory = { id: string; name: string; sort_order: number; is_active: boolean; item_count: number };
 export type CategoryInput = { name: string; sort_order?: number; is_active?: boolean };
-export type OwnerMenuItem = { id: string; category_id: string; category: string; name: string; description?: string; price_minor: number; currency: string; is_available: boolean; is_popular: boolean; sort_order: number; image_url?: string };
-export type MenuItemInput = { category_id: string; name: string; description?: string; price_minor: number; currency?: string; is_available?: boolean; is_popular?: boolean; sort_order?: number; image_url?: string };
+export type OwnerMenuItem = MenuNutrition & { id: string; category_id: string; category: string; name: string; description?: string; price_minor: number; currency: string; is_available: boolean; is_popular: boolean; sort_order: number; image_url?: string };
+export type MenuItemInput = MenuNutrition & { category_id: string; name: string; description?: string; price_minor: number; currency?: string; is_available?: boolean; is_popular?: boolean; sort_order?: number; image_url?: string };
 export type OwnerStaffMember = { id: string; display_name: string; email: string; role: "manager" | "waiter" | "kitchen" | "viewer"; status: "invited" | "active" | "inactive"; invited_at: string; accepted_at?: string };
 export type StaffInput = { display_name?: string; email?: string; role: OwnerStaffMember["role"]; status?: OwnerStaffMember["status"] };
 export type OwnerOrder = { id: string; number: number; channel: string; source: string; guest_name?: string; total_minor: number; currency: string; status: "new" | "accepted" | "preparing" | "ready" | "served" | "completed" | "cancelled"; notes?: string; created_at: string; reservation_code?: string; reservation_starts_at?: string; guest_phone?: string; guest_count?: number; items?: { name: string; quantity: number; unit_price_minor: number }[] };
