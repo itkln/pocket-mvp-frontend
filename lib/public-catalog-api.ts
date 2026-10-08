@@ -41,8 +41,12 @@ export type PublicMenuItem = MenuNutrition & {
 export type PublicMenuCategory = {
   id: string;
   name: string;
+  preorder_enabled?: boolean;
   items: PublicMenuItem[];
 };
+
+// Missing flags support menus loaded before category settings were introduced.
+export const getPreorderCategories = (categories: PublicMenuCategory[]) => categories.filter((category) => category.preorder_enabled !== false && category.items.length > 0);
 
 export type PublicReview = {
   id: string;

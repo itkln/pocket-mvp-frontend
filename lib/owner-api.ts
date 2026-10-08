@@ -46,8 +46,8 @@ export type OwnerDashboard = {
   average_rating: number;
 };
 
-export type OwnerCategory = { id: string; name: string; sort_order: number; is_active: boolean; item_count: number };
-export type CategoryInput = { name: string; sort_order?: number; is_active?: boolean };
+export type OwnerCategory = { id: string; name: string; sort_order: number; is_active: boolean; preorder_enabled: boolean; item_count: number };
+export type CategoryInput = { name: string; sort_order?: number; is_active?: boolean; preorder_enabled?: boolean };
 export type OwnerMenuItem = MenuNutrition & { id: string; category_id: string; category: string; name: string; description?: string; price_minor: number; currency: string; is_available: boolean; is_popular: boolean; sort_order: number; image_url?: string };
 export type MenuItemInput = MenuNutrition & { category_id: string; name: string; description?: string; price_minor: number; currency?: string; is_available?: boolean; is_popular?: boolean; sort_order?: number; image_url?: string };
 export type OwnerStaffMember = { id: string; display_name: string; email: string; role: "manager" | "waiter" | "kitchen" | "viewer"; status: "invited" | "active" | "inactive"; invited_at: string; accepted_at?: string };

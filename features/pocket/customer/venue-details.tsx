@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type CSSProperties, type TouchEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties, type TouchEvent } from "react";
 import Image from "next/image";
 import { ArrowLeft, CalendarDays, Check, Heart, Info, MapPin, Minus, Plus, RefreshCw, Search, ShoppingBag, Star, UserRound, UsersRound, Utensils, X } from "lucide-react";
 import { APIError } from "../../../lib/api-client";
-import { getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
+import { getPreorderCategories, getPublicVenue, getPublicVenueMenu, getPublicVenueReviews, type PublicMenuCategory, type PublicMenuItem, type PublicReview, type PublicVenue } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { PublicMenuCards } from "./public-menu-cards";
 import { PublicMenuItemDialog } from "./public-menu-item-dialog";
@@ -47,6 +47,8 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const [searchOpen, setSearchOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [preorderMenuOpen, setPreorderMenuOpen] = useState(false);
+  const preorderCategories = useMemo(() => getPreorderCategories(menuState.categories), [menuState.categories]);
+  const visibleCategories = preorderMenuOpen ? preorderCategories : menuState.categories;
   const [preorderQuantities, setPreorderQuantities] = useState<Record<string, number>>({});
   const [bookingSummary, setBookingSummary] = useState<DesktopBookingSummary | null>(null);
   const [bookingFlowVersion, setBookingFlowVersion] = useState(0);
@@ -206,16 +208,16 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
         else { setActiveCategory(pending); return; }
       }
       if (!preorderMenuOpen && window.scrollY > 0 && window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) {
-        setActiveCategory(menuState.categories.at(-1)?.id ?? "");
+        setActiveCategory(visibleCategories.at(-1)?.id ?? "");
         return;
       }
       if (preorderMenuOpen && menuContainer && menuContainer.scrollTop > 0 && menuContainer.scrollTop + menuContainer.clientHeight >= menuContainer.scrollHeight - 2) {
-        setActiveCategory(menuState.categories.at(-1)?.id ?? "");
+        setActiveCategory(visibleCategories.at(-1)?.id ?? "");
         return;
       }
       const offset = preorderMenuOpen ? (menuContainer?.getBoundingClientRect().top ?? 0) + 36 : 164;
-      let current = menuState.categories[0]?.id ?? "";
-      menuState.categories.forEach(({ id }) => {
+      let current = visibleCategories[0]?.id ?? "";
+      visibleCategories.forEach(({ id }) => {
         if ((categoryRefs.current[id]?.getBoundingClientRect().top ?? Infinity) <= offset) current = id;
       });
       setActiveCategory(current);
@@ -224,7 +226,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
     window.addEventListener("scroll", updateScrollState, { passive: true });
     if (preorderMenuOpen) menuContainer?.addEventListener("scroll", updateScrollState, { passive: true });
     return () => { window.removeEventListener("scroll", updateScrollState); menuContainer?.removeEventListener("scroll", updateScrollState); };
-  }, [menuState.categories, preorderMenuOpen]);
+  }, [visibleCategories, preorderMenuOpen]);
 
   const venue = state.venue;
   const openCategory = (id: string) => {
@@ -264,16 +266,18 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
   const illustration = venue ? illustrations[venue.category_slug] ?? venue.category_slug : "restaurants";
   const details = venue ? [venue.cuisine_type ? t(venue.cuisine_type) : "", venue.address, venue.city].filter(Boolean).join(" · ") : "";
   const normalizedQuery = menuQuery.trim().toLocaleLowerCase(locale);
-  const searchResults = normalizedQuery ? menuState.categories.flatMap((category) => category.items.filter((item) =>
+  const searchResults = normalizedQuery ? visibleCategories.flatMap((category) => category.items.filter((item) =>
     [item.name, item.description ?? "", category.name].some((value) => value.toLocaleLowerCase(locale).includes(normalizedQuery)),
   )) : [];
-  const preorderItems = menuState.categories.flatMap((category) => category.items);
+  const allMenuItems = menuState.categories.flatMap((category) => category.items);
+  const preorderItems = preorderCategories.flatMap((category) => category.items);
   const preorderCount = Object.values(preorderQuantities).reduce((total, quantity) => total + quantity, 0);
   const preorderTotal = preorderItems.reduce((total, item) => total + item.price_minor * (preorderQuantities[item.id] ?? 0), 0);
   const preorderCurrency = preorderItems.find((item) => preorderQuantities[item.id])?.currency ?? "EUR";
   const preorderTotalLabel = new Intl.NumberFormat(locale, { style: "currency", currency: preorderCurrency }).format(preorderTotal / 100);
   const preorderSelectedItems = preorderItems.filter((item) => preorderQuantities[item.id] > 0);
-  const detailItem = preorderItems.find((item) => item.id === detailItemID);
+  const unavailablePreorderItems = Object.entries(preorderQuantities).filter(([id, quantity]) => quantity > 0 && !preorderItems.some((item) => item.id === id));
+  const detailItem = allMenuItems.find((item) => item.id === detailItemID);
   const changePreorderQuantity = (id: string, delta: number) => setPreorderQuantities((previous) => {
     const next = { ...previous };
     const count = Math.max(0, Math.min(30, (next[id] ?? 0) + delta));
@@ -334,8 +338,8 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
 
         <div ref={preorderMenuRef} className={`venue-detail-content ${preorderMenuOpen ? "venue-preorder-menu-mode" : ""}`} role={preorderMenuOpen ? "dialog" : undefined} aria-modal={preorderMenuOpen || undefined} aria-label={preorderMenuOpen ? t("Меню для предзаказа") : undefined}>
           {preorderMenuOpen && <button ref={preorderMenuBackRef} type="button" className="venue-preorder-menu-close" aria-label={t("Назад к бронированию")} onClick={backToBookingDetails}><ArrowLeft size={23} /></button>}
-          {menuState.categories.length > 0 && <div className="venue-public-category-sticky-shell"><nav className="venue-section-nav venue-public-category-nav" aria-label={t("Категории меню")}>{menuState.categories.map((category) => <button type="button" key={category.id} className={(activeCategory || menuState.categories[0].id) === category.id ? "active" : ""} aria-current={(activeCategory || menuState.categories[0].id) === category.id ? "location" : undefined} onClick={() => openCategory(category.id)}>{category.name}</button>)}</nav></div>}
-          <div ref={preorderMenuScrollRef} className="venue-public-menu-content">{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : menuState.categories.length ? menuState.categories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
+          {visibleCategories.length > 0 && <div className="venue-public-category-sticky-shell"><nav className="venue-section-nav venue-public-category-nav" aria-label={t("Категории меню")}>{visibleCategories.map((category) => <button type="button" key={category.id} className={(activeCategory || visibleCategories[0].id) === category.id ? "active" : ""} aria-current={(activeCategory || visibleCategories[0].id) === category.id ? "location" : undefined} onClick={() => openCategory(category.id)}>{category.name}</button>)}</nav></div>}
+          <div ref={preorderMenuScrollRef} className="venue-public-menu-content">{menuState.loading ? <div className="venue-public-empty" role="status">{t("Загружаем меню...")}</div> : menuState.error ? <div className="venue-public-empty" role="alert">{t("Не удалось загрузить меню")}</div> : visibleCategories.length ? visibleCategories.map((category) => <section ref={(node) => { categoryRefs.current[category.id] = node; }} className="venue-public-menu-category" key={category.id} id={`venue-menu-${category.id}`} aria-label={category.name}><h2>{category.name}</h2>{menuCards(category.items)}</section>) : <div className="venue-public-empty"><Utensils size={24} /><p>{t("Меню этого заведения пока недоступно")}</p></div>}</div>
           {preorderMenuOpen && <aside className="venue-preorder-cart" aria-label={t("Предзаказ")}>
             <header><h2>{t("Предзаказ")}</h2>{preorderCount > 0 && <button type="button" onClick={() => setPreorderQuantities({})}>{t("Очистить")}</button>}</header>
             <div className="venue-preorder-cart-body">
@@ -346,10 +350,14 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
               <div><UserRound size={17} aria-hidden="true" /><span>{bookingSummary.name}<small>{bookingSummary.phone}{bookingSummary.email && <> · {bookingSummary.email}</>}</small></span></div>
               {bookingSummary.comment && <p>{bookingSummary.comment}</p>}
             </section>}
-            {preorderSelectedItems.length ? <div className="venue-preorder-cart-items">{preorderSelectedItems.map((item) => <article key={item.id}>
+            {preorderCount > 0 ? <div className="venue-preorder-cart-items">{preorderSelectedItems.map((item) => <article key={item.id}>
               <div className="venue-preorder-cart-image" style={item.image_url ? { backgroundImage: `url(${JSON.stringify(item.image_url)})` } : undefined}>{!item.image_url && <Utensils size={20} aria-hidden="true" />}</div>
               <div className="venue-preorder-cart-copy"><strong>{item.name}</strong><span>{new Intl.NumberFormat(locale, { style: "currency", currency: item.currency }).format(item.price_minor * preorderQuantities[item.id] / 100)}</span></div>
               <div className="venue-preorder-cart-quantity"><button type="button" aria-label={`${t("Убрать")} ${item.name}`} onClick={() => changePreorderQuantity(item.id, -1)}><Minus size={16} /></button><b>{preorderQuantities[item.id]}</b><button type="button" aria-label={`${t("Добавить")} ${item.name}`} disabled={preorderQuantities[item.id] >= 30} onClick={() => changePreorderQuantity(item.id, 1)}><Plus size={16} /></button></div>
+            </article>)}{unavailablePreorderItems.map(([id, quantity]) => <article key={id}>
+              <div className="venue-preorder-cart-image"><Utensils size={20} aria-hidden="true" /></div>
+              <div className="venue-preorder-cart-copy"><strong>{allMenuItems.find((item) => item.id === id)?.name ?? t("Блюдо недоступно")}</strong><span>{t("Блюдо недоступно")} · {quantity}</span></div>
+              <button type="button" onClick={() => changePreorderQuantity(id, -quantity)}>{t("Убрать")}</button>
             </article>)}</div> : <div className="venue-preorder-cart-empty"><ShoppingBag size={46} aria-hidden="true" /><h3>{t("В предзаказе пока пусто")}</h3><p>{t("Добавьте блюда из меню")}</p></div>}
             </div>
             <div className="venue-preorder-cart-footer">{preorderCount > 0 ? <button type="button" disabled={preorderSelectedItems.length !== Object.keys(preorderQuantities).length} onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.checkout(); }}><span>{t("Продолжить к оплате")}</span><strong>{preorderTotalLabel}</strong></button> : <button type="button" className="venue-preorder-book-without" onClick={() => { setPreorderMenuOpen(false); bookingFlowRef.current?.bookWithoutPreorder(); }}><span>{t("Забронировать без предзаказа")}</span></button>}</div>
@@ -366,7 +374,7 @@ export function VenueDetailsScreen({ venueID, onBack, saved, onToggleSaved, user
         <button type="button" className="button" disabled>{t("Забронировать")}</button>
       </aside>}
       {venue.category_slug !== "restaurants" && <div className="venue-mobile-booking-status" role="status"><span><CalendarDays size={16} />{t("Бронирование пока недоступно")}</span></div>}
-      {detailItem && <PublicMenuItemDialog key={detailItem.id} item={detailItem} onClose={closeItemDetails} onAddToPreorder={preorderMenuOpen ? (quantity) => changePreorderQuantity(detailItem.id, quantity) : undefined} />}
+      {detailItem && <PublicMenuItemDialog key={detailItem.id} item={detailItem} onClose={closeItemDetails} onAddToPreorder={preorderMenuOpen && preorderItems.some((item) => item.id === detailItem.id) ? (quantity) => changePreorderQuantity(detailItem.id, quantity) : undefined} />}
       {reviewsOpen && <div className="venue-reviews-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setReviewsOpen(false); }}>
         <section className="venue-reviews-dialog" role="dialog" aria-modal="true" aria-labelledby="venue-reviews-dialog-title">
           <header><h2 id="venue-reviews-dialog-title">{t("Рейтинг и отзывы")}</h2><button ref={reviewsCloseRef} type="button" aria-label={t("Закрыть")} onClick={() => setReviewsOpen(false)}><X size={21} /></button></header>

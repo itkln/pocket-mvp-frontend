@@ -6,7 +6,7 @@ import type { OwnerMenuItem } from "../../../lib/owner-api";
 const nutritionItem: OwnerMenuItem = { id: "dish", category_id: "category-1", category: "Напитки", name: "Чай", price_minor: 300, currency: "EUR", is_available: true, is_popular: false, sort_order: 2, portion_weight_g: 200, energy_kcal: 10, protein_g: 0, fat_g: 0, carbs_g: 2.5 };
 
 const workspace = {
-  categories: [{ id: "category-1", name: "Напитки", sort_order: 0, is_active: true, item_count: 0 }],
+  categories: [{ id: "category-1", name: "Напитки", sort_order: 0, is_active: true, preorder_enabled: true, item_count: 0 }],
   items: [] as OwnerMenuItem[],
   reorderCategories: vi.fn(),
   reorderItems: vi.fn(),

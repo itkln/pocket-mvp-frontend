@@ -92,9 +92,9 @@ export function MenuManager({ venueName, onAdd, notify }: { venueName: string; o
     if (window.matchMedia("(max-width: 760px)").matches) setEditing(item);
   };
 
-  const saveCategories = async (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean }[]) => {
+  const saveCategories = async (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean; preorder_enabled: boolean }[]) => {
     await Promise.all([
-      ...categories.map((item) => workspace.editCategory(item.id, { name: item.name, sort_order: item.sort_order, is_active: item.is_active })),
+      ...categories.map((item) => workspace.editCategory(item.id, { name: item.name, sort_order: item.sort_order, is_active: item.is_active, preorder_enabled: item.preorder_enabled })),
       ...newCategories.map((item) => workspace.addCategory(item)),
     ]);
     setCategoriesMode(null);
@@ -180,7 +180,7 @@ const itemInput = (item: OwnerMenuItem, patch: Partial<MenuItemInput> = {}): Men
 
 type CategoryDraft = OwnerCategory & { isNew?: boolean };
 
-const newCategoryDraft = (sortOrder: number): CategoryDraft => ({ id: `new-category-${Date.now()}-${sortOrder}`, name: "", sort_order: sortOrder, is_active: true, item_count: 0, isNew: true });
+const newCategoryDraft = (sortOrder: number): CategoryDraft => ({ id: `new-category-${Date.now()}-${sortOrder}`, name: "", sort_order: sortOrder, is_active: true, preorder_enabled: true, item_count: 0, isNew: true });
 
 type CategoryEditorProps = {
   categories: OwnerCategory[];
@@ -189,7 +189,7 @@ type CategoryEditorProps = {
   inline?: boolean;
   onClose: () => void;
   onRemove: (category: OwnerCategory) => Promise<boolean>;
-  onSave: (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean }[]) => Promise<void>;
+  onSave: (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean; preorder_enabled: boolean }[]) => Promise<void>;
 };
 
 export function CategoryManagerDialog(props: CategoryEditorProps) {
@@ -208,7 +208,7 @@ function CategoryEditor({ categories, initialCreate, createRequest = 0, inline =
   const originals = new Map(categories.map((category) => [category.id, category]));
   const changed = drafts.filter((category) => {
     const original = originals.get(category.id);
-    return original && (category.name.trim() !== original.name || category.is_active !== original.is_active || category.sort_order !== original.sort_order);
+    return original && (category.name.trim() !== original.name || category.is_active !== original.is_active || category.sort_order !== original.sort_order || category.preorder_enabled !== original.preorder_enabled);
   });
   const created = drafts.filter((category) => category.isNew && category.name.trim());
   const invalid = drafts.some((category) => !category.name.trim());
@@ -220,7 +220,7 @@ function CategoryEditor({ categories, initialCreate, createRequest = 0, inline =
     if (!hasChanges || invalid) return;
     setSaving(true);
     try {
-      await onSave(changed.map((category) => ({ ...category, name: category.name.trim() })), created.map((category) => ({ name: category.name.trim(), sort_order: category.sort_order, is_active: category.is_active })));
+      await onSave(changed.map((category) => ({ ...category, name: category.name.trim() })), created.map((category) => ({ name: category.name.trim(), sort_order: category.sort_order, is_active: category.is_active, preorder_enabled: category.preorder_enabled })));
     } finally {
       setSaving(false);
     }
@@ -230,7 +230,7 @@ function CategoryEditor({ categories, initialCreate, createRequest = 0, inline =
 }
 
 function CategoryDraftRow({ category, autoFocus, positionLabel, onChange, onDelete }: { category: CategoryDraft; autoFocus: boolean; positionLabel: string; onChange: (patch: Partial<CategoryDraft>) => void; onDelete: () => void }) {
-  return <div className={`category-manager-row ${category.isNew ? "new" : ""}`}><div className="category-manager-copy"><input aria-label={category.isNew ? "Название новой категории" : `Название категории ${category.name}`} autoFocus={autoFocus} value={category.name} onChange={(event) => onChange({ name: event.target.value })} placeholder={category.isNew ? "Название новой категории" : undefined} /><small>{positionLabel}</small></div><label className="category-visibility" title={category.is_active ? "Скрыть категорию" : "Показывать категорию"}><span className="switch"><input type="checkbox" aria-label={`${category.is_active ? "Скрыть" : "Опубликовать"} категорию ${category.name || "новую"}`} checked={category.is_active} onChange={(event) => onChange({ is_active: event.target.checked })} /><span /></span></label><button type="button" className="category-delete" disabled={!category.isNew && category.item_count > 0} aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`} title={!category.isNew && category.item_count > 0 ? "Сначала удалите или перенесите позиции" : "Удалить категорию"} onClick={onDelete}><Trash2 size={17} /></button></div>;
+  return <div className={`category-manager-row ${category.isNew ? "new" : ""}`}><div className="category-manager-copy"><input aria-label={category.isNew ? "Название новой категории" : `Название категории ${category.name}`} autoFocus={autoFocus} value={category.name} onChange={(event) => onChange({ name: event.target.value })} placeholder={category.isNew ? "Название новой категории" : undefined} /><small>{positionLabel}</small></div><label className="category-visibility" title={category.is_active ? "Скрыть категорию" : "Показывать категорию"}><span className="switch"><input type="checkbox" aria-label={`${category.is_active ? "Скрыть" : "Опубликовать"} категорию ${category.name || "новую"}`} checked={category.is_active} onChange={(event) => onChange({ is_active: event.target.checked })} /><span /></span></label><button type="button" className="category-delete" disabled={!category.isNew && category.item_count > 0} aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`} title={!category.isNew && category.item_count > 0 ? "Сначала удалите или перенесите позиции" : "Удалить категорию"} onClick={onDelete}><Trash2 size={17} /></button><label className="category-preorder"><span>Предзаказ</span><span className="switch"><input type="checkbox" aria-label={`Предзаказ категории ${category.name || "новую"}`} checked={category.preorder_enabled} onChange={(event) => onChange({ preorder_enabled: event.target.checked })} /><span /></span></label></div>;
 }
 
 function ItemEditDialog({ item, onClose, onSave }: { item: OwnerMenuItem; onClose: () => void; onSave: (input: MenuItemInput) => Promise<void> }) {

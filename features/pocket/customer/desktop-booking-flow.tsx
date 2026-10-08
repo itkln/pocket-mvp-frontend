@@ -5,7 +5,7 @@ import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus,
 import type { AuthUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
 import { createReservationKey } from "../../../lib/reservation-key";
-import { clearSavedPublicReservation, createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
+import { clearSavedPublicReservation, createPublicReservation, getPreorderCategories, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
 type Step = "schedule" | "details" | "preorder" | "checkout";
@@ -146,7 +146,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
     return `${get("year")}-${get("month")}-${get("day")}`;
   })() : date;
   const latest = today ? addDays(today, 30) : date;
-  const catalog = menu.flatMap((category) => category.items);
+  const catalog = getPreorderCategories(menu).flatMap((category) => category.items);
   const selectedItems = Object.entries(quantities).filter(([, quantity]) => quantity > 0).map(([id, quantity]) => ({ id, quantity, item: catalog.find((candidate) => candidate.id === id) }));
   const missingItems = selectedItems.some(({ item }) => !item);
   const totalMinor = selectedItems.reduce((sum, { item, quantity }) => sum + (item?.price_minor ?? 0) * quantity, 0);
@@ -185,7 +185,7 @@ export const DesktopBookingFlow = forwardRef<DesktopBookingFlowHandle, {
         try {
           onMenuUpdated(await getPublicVenueMenu(venueID));
           setSubmitError(caught.code === "price_changed" ? t("Цена изменилась. Проверьте новую сумму и подтвердите ещё раз") : t("Одно из блюд больше недоступно. Уберите его из предзаказа"));
-          if (caught.code === "item_unavailable") setStep("preorder");
+          if (caught.code === "item_unavailable") { setStep("preorder"); onMenuModeChange(false); }
         } catch { setSubmitError(t("Не удалось обновить меню. Попробуйте ещё раз")); }
       } else if (caught instanceof APIError && (caught.code === "slot_unavailable" || caught.code === "hold_expired")) {
         setStep("schedule"); setTime(""); setRevision((value) => value + 1);

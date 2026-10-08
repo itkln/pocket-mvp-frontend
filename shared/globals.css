@@ -2097,6 +2097,7 @@ thead th {
 .category-manager-row.new { box-shadow: inset 3px 0 var(--blue); }
 .category-manager-row.new input::placeholder { color: #7b858c; font-weight: 500; }
 .category-visibility { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; }
+.category-manager-row > .category-preorder { grid-column: 1 / -1; grid-row: 2; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 12px; }
 .category-delete { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 0; background: transparent; color: #b44d44; cursor: pointer; }
 .category-delete:hover:not(:disabled) { background: #faecea; }
 .category-delete:disabled { color: #b8bdc1; cursor: not-allowed; }

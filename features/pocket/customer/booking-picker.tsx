@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Minus, Plus, Utensils, X } from "lucide-react";
 import { PublicMenuCards } from "./public-menu-cards";
 import { PublicMenuItemDialog } from "./public-menu-item-dialog";
 import { APIError } from "../../../lib/api-client";
 import { createReservationKey } from "../../../lib/reservation-key";
-import { createPublicReservation, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
+import { createPublicReservation, getPreorderCategories, getPublicVenueMenu, getSavedPublicReservation, getVenueAvailability, type CreatedReservation, type PublicMenuCategory, type VenueAvailability } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 
 const day = (value: string) => new Date(`${value}T12:00:00Z`);
@@ -153,7 +153,10 @@ export function BookingPicker({ venueID, menu = [], preorderEnabled = false, onC
     return `${get("year")}-${get("month")}-${get("day")}`;
   })() : date;
   const latest = today ? addDays(today, 30) : date;
-  const categories = updatedMenu ?? menu;
+  const categories = useMemo(() => getPreorderCategories(updatedMenu ?? menu), [menu, updatedMenu]);
+  useEffect(() => {
+    if (!categories.some((category) => category.id === activeCategory)) setActiveCategory(categories[0]?.id ?? "");
+  }, [categories, activeCategory]);
   const catalog = categories.flatMap((category) => category.items);
   const detailItem = catalog.find((item) => item.id === detailItemID);
   const selectedItems = Object.entries(quantities).filter(([, quantity]) => quantity > 0).map(([id, quantity]) => ({ item: catalog.find((item) => item.id === id), id, quantity }));
