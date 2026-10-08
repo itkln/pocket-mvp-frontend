@@ -1371,7 +1371,7 @@
 .pocket-spots .venue-preorder-product-dialog::backdrop { background: rgba(20, 27, 34, .48); }
 .pocket-spots .venue-preorder-product-scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .pocket-spots .venue-preorder-product-close { position: absolute; z-index: 2; top: 16px; right: 16px; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; color: var(--spots-text); cursor: pointer; }
-.pocket-spots .venue-preorder-product-main { display: grid; grid-template-columns: minmax(0, 43%) minmax(0, 1fr); align-items: center; gap: 28px; padding: 28px; }
+.pocket-spots .venue-preorder-product-main { display: grid; grid-template-columns: minmax(0, 43%) minmax(0, 1fr); align-items: start; gap: 28px; padding: 28px; }
 .pocket-spots .venue-preorder-product-image { aspect-ratio: 1; display: grid; place-items: center; border-radius: 20px; background: #f3f4f4 center/cover no-repeat; color: var(--spots-secondary); }
 .pocket-spots .venue-preorder-product-info > p { margin: 0 0 24px; font-size: 17px; line-height: 1.5; }
 .pocket-spots .venue-product-nutrition > p { margin: 0 0 12px; color: var(--spots-secondary); font-size: 14px; }
@@ -1382,11 +1382,11 @@
 .pocket-spots .venue-product-nutrition > small { display: block; margin-top: 16px; color: var(--spots-secondary); line-height: 1.4; }
 .pocket-spots .venue-preorder-product-handle { display: none; }
 .pocket-spots .venue-preorder-product-footer { flex: 0 0 auto; padding: 20px 28px 28px; background: #fff; }
-.pocket-spots .venue-preorder-product-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; }
+.pocket-spots .venue-preorder-product-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 22px; padding-right: 44px; }
 .pocket-spots .venue-preorder-product-heading h2 { flex: 1; min-width: 0; margin: 0; font-size: 23px; line-height: 1.25; }
 .pocket-spots .venue-preorder-product-heading > span { color: var(--spots-secondary); white-space: nowrap; }
 .pocket-spots .venue-preorder-product-heading > strong { margin-left: auto; font-size: 22px; white-space: nowrap; }
-.pocket-spots .venue-preorder-product-action { display: flex; align-items: stretch; gap: 12px; margin-top: 18px; }
+.pocket-spots .venue-preorder-product-action { display: flex; align-items: stretch; gap: 12px; }
 .pocket-spots .venue-preorder-product-action .venue-preorder-cart-quantity { flex: 0 0 auto; min-height: 52px; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 16px; background: #f3f4f4; }
 .pocket-spots .venue-preorder-product-action .venue-preorder-cart-quantity button { width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--spots-text); cursor: pointer; }
 .pocket-spots .venue-preorder-product-action .venue-preorder-cart-quantity button:disabled { opacity: .35; cursor: default; }
@@ -1401,11 +1401,11 @@
   .pocket-spots .venue-preorder-product-handle { position: absolute; z-index: 2; top: 0; left: 50%; width: 100px; height: 32px; transform: translateX(-50%); display: grid; place-items: center; touch-action: none; cursor: grab; }
   .pocket-spots .venue-preorder-product-handle > span { width: 36px; height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .65); }
   .pocket-spots .venue-preorder-product-footer { padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
-  .pocket-spots .venue-preorder-product-heading { gap: 6px 8px; }
-  .pocket-spots .venue-preorder-product-heading h2 { font-size: 17px; }
+  .pocket-spots .venue-preorder-product-heading { gap: 6px 8px; margin-bottom: 18px; padding-right: 0; }
+  .pocket-spots .venue-preorder-product-heading h2 { font-size: 20px; }
   .pocket-spots .venue-preorder-product-heading > span { font-size: 14px; }
   .pocket-spots .venue-preorder-product-heading > strong { font-size: 19px; }
-  .pocket-spots .venue-preorder-product-action { gap: 10px; margin-top: 14px; }
+  .pocket-spots .venue-preorder-product-action { gap: 10px; }
   .pocket-spots .venue-preorder-product-action > button { font-size: 17px; }
 }
 @keyframes venue-product-sheet-in { from { transform: translateY(100%); } to { transform: translateY(0); } }

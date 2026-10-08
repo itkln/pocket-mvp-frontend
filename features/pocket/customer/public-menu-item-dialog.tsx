@@ -48,6 +48,7 @@ export function PublicMenuItemDialog({ item, onClose, onAddToPreorder }: {
       <div className="venue-preorder-product-main">
         <div className="venue-preorder-product-image" role={item.image_url ? "img" : undefined} aria-label={item.image_url ? item.name : undefined} style={item.image_url ? { backgroundImage: `url(${JSON.stringify(item.image_url)})` } : undefined}>{!item.image_url && <Utensils size={50} aria-hidden="true" />}</div>
         <div className="venue-preorder-product-info">
+          <div className="venue-preorder-product-heading"><h2>{item.name}</h2>{item.portion_weight_g != null && <span>{number.format(item.portion_weight_g)} {t("г")}</span>}<strong>{new Intl.NumberFormat(localeTags[locale], { style: "currency", currency: item.currency }).format(item.price_minor / 100)}</strong></div>
           {item.description && <p>{item.description}</p>}
           <section className="venue-product-nutrition" aria-label={t("Пищевая ценность")}>
             <p>{t("На 100 г")}</p>
@@ -62,12 +63,11 @@ export function PublicMenuItemDialog({ item, onClose, onAddToPreorder }: {
       onPointerMove={(event) => { if (dragStart.current !== null) setDragOffset(Math.max(0, event.clientY - dragStart.current)); }}
       onPointerUp={endDrag} onPointerCancel={() => { dragStart.current = null; setDragOffset(0); }}><span /></div>
     <button type="button" autoFocus className="venue-preorder-product-close" aria-label={t("Закрыть")} onClick={onClose}><X size={25} /></button>
-    <footer className="venue-preorder-product-footer">
-      <div className="venue-preorder-product-heading"><h2>{item.name}</h2>{item.portion_weight_g != null && <span>{number.format(item.portion_weight_g)} {t("г")}</span>}<strong>{new Intl.NumberFormat(localeTags[locale], { style: "currency", currency: item.currency }).format(item.price_minor / 100)}</strong></div>
-      {onAddToPreorder && <div className="venue-preorder-product-action">
+    {onAddToPreorder && <footer className="venue-preorder-product-footer">
+      <div className="venue-preorder-product-action">
         <div className="venue-preorder-cart-quantity"><button type="button" aria-label={t("Уменьшить количество")} disabled={quantity <= 1} onClick={() => setQuantity((value) => value - 1)}><Minus size={20} /></button><b>{quantity}</b><button type="button" aria-label={t("Увеличить количество")} disabled={quantity >= 30} onClick={() => setQuantity((value) => value + 1)}><Plus size={20} /></button></div>
         <button type="button" onClick={() => { onAddToPreorder(quantity); onClose(); }}>{t("Добавить")}</button>
-      </div>}
-    </footer>
+      </div>
+    </footer>}
   </dialog>;
 }
