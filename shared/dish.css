@@ -38,13 +38,6 @@
   white-space: nowrap;
   font-size: 18px !important;
 }
-.pocket-dish .dish-header .dish-language {
-  min-width: 76px;
-  height: 44px;
-  margin-left: auto;
-  border-radius: 999px;
-  font-weight: 700;
-}
 .pocket-dish .dish-menu-search {
   display: flex;
   align-items: center;
@@ -70,27 +63,6 @@
 }
 .pocket-dish .venue-standalone {
   padding-left: 0;
-}
-.pocket-dish .dish-welcome {
-  max-width: 520px;
-  margin: 72px auto;
-  padding: 32px;
-  text-align: center;
-}
-.pocket-dish .dish-welcome > svg {
-  color: var(--spots-cta);
-}
-.pocket-dish .dish-welcome p {
-  color: var(--spots-secondary);
-  line-height: 1.6;
-  margin-bottom: 28px;
-}
-.pocket-dish .dish-welcome .button {
-  width: 100%;
-  min-height: 56px;
-  margin: 8px 0;
-  border-radius: 999px;
-  justify-content: center;
 }
 @media (min-width: 761px) {
   .pocket-dish .dish-header {
@@ -131,10 +103,6 @@
   }
   .pocket-dish .dish-header-venue {
     display: none;
-  }
-  .pocket-dish .dish-welcome {
-    margin: 40px auto;
-    padding: 24px;
   }
   .pocket-dish .spots-real-venue-detail .venue-mobile-toolbar .venue-mobile-toolbar-title {
     left: 64px;
@@ -234,16 +202,6 @@
 }
 
 /* Restaurant front page: cover, identity and large entry cards. */
-.pocket-dish.dish-home-active > .dish-header {
-  display: none;
-}
-.pocket-dish.dish-home-active .spots-main {
-  background: #f4f4f5;
-}
-.pocket-dish.dish-home-active .spots-page {
-  width: 100%;
-  padding: 0;
-}
 .pocket-dish .dish-venue-home {
   width: min(1080px, 100%);
   margin: 0 auto;

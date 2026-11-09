@@ -507,16 +507,7 @@
   margin-top: 12px;
   font-weight: 600;
 }
-.orders-waiting-time {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-}
 .orders-ticket.waiting-alert .orders-ticket-source,
-.orders-ticket.waiting-alert .orders-ticket-count,
-.orders-ticket.waiting-alert .orders-ticket-bottom,
-.orders-ticket.waiting-alert .orders-ticket-bottom > span,
 .orders-ticket.waiting-alert .orders-ticket-visit {
   color: inherit;
 }
