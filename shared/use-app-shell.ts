@@ -33,23 +33,37 @@ export function useAppShell(scope?: string) {
 
   const notify = useCallback((message: string) => {
     setToast(message);
-    setNotifications((current) => [{ id: Date.now(), message, createdAt: Date.now(), read: false }, ...current].slice(0, 20));
+    setNotifications((current) =>
+      [{ id: Date.now(), message, createdAt: Date.now(), read: false }, ...current].slice(0, 20),
+    );
     window.setTimeout(() => setToast(""), 2400);
   }, []);
 
-  const notifyOrders = useCallback((orders: OwnerOrder[]) => {
-    const entries = orders.map(order => ({
-      id: `${scope}:${order.id}`, scope, message: "Новый заказ", orderNumber: order.number, orderID: order.id, source: order.source,
-      createdAt: Date.now(), read: false, bannerPending: true,
-    }));
-    setNotifications(current => [...entries, ...current].slice(0, 20));
-  }, [scope]);
+  const notifyOrders = useCallback(
+    (orders: OwnerOrder[]) => {
+      const entries = orders.map((order) => ({
+        id: `${scope}:${order.id}`,
+        scope,
+        message: "Новый заказ",
+        orderNumber: order.number,
+        orderID: order.id,
+        source: order.source,
+        createdAt: Date.now(),
+        read: false,
+        bannerPending: true,
+      }));
+      setNotifications((current) => [...entries, ...current].slice(0, 20));
+    },
+    [scope],
+  );
 
   const dismissOrderBanner = useCallback((id: AppNotification["id"]) => {
-    setNotifications(current => current.map(item => item.id === id ? { ...item, bannerPending: false } : item));
+    setNotifications((current) =>
+      current.map((item) => (item.id === id ? { ...item, bannerPending: false } : item)),
+    );
   }, []);
-  const notificationsInScope = notifications.filter(item => !item.scope || item.scope === scope);
-  const orderBanner = notificationsInScope.find(item => item.bannerPending);
+  const notificationsInScope = notifications.filter((item) => !item.scope || item.scope === scope);
+  const orderBanner = notificationsInScope.find((item) => item.bannerPending);
   const bannerID = orderBanner?.id;
   useEffect(() => {
     if (bannerID === undefined) return;
@@ -57,7 +71,12 @@ export function useAppShell(scope?: string) {
     return () => window.clearTimeout(timer);
   }, [bannerID, dismissOrderBanner]);
 
-  const markNotificationsRead = () => setNotifications((current) => current.map((item) => (item.scope && item.scope !== scope ? item : { ...item, read: true, bannerPending: false })));
+  const markNotificationsRead = () =>
+    setNotifications((current) =>
+      current.map((item) =>
+        item.scope && item.scope !== scope ? item : { ...item, read: true, bannerPending: false },
+      ),
+    );
   const clearNotifications = () => setNotifications([]);
 
   return {

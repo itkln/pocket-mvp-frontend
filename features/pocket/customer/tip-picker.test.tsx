@@ -6,13 +6,38 @@ import { I18nProvider } from "../i18n";
 import { TipPicker } from "./tip-picker";
 
 beforeEach(() => {
-  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
-  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
 });
 
-function Picker({ onChange = vi.fn(), initial = { mode: "none" } as TipDraft, disabled = false }: { onChange?: (value: TipDraft) => void; initial?: TipDraft; disabled?: boolean }) {
+function Picker({
+  onChange = vi.fn(),
+  initial = { mode: "none" } as TipDraft,
+  disabled = false,
+}: {
+  onChange?: (value: TipDraft) => void;
+  initial?: TipDraft;
+  disabled?: boolean;
+}) {
   const [value, setValue] = useState(initial);
-  return <I18nProvider initialLocale="ru"><TipPicker value={value} subtotal={1090} currency="EUR" disabled={disabled} onChange={(next) => { setValue(next); onChange(next); }} /></I18nProvider>;
+  return (
+    <I18nProvider initialLocale="ru">
+      <TipPicker
+        value={value}
+        subtotal={1090}
+        currency="EUR"
+        disabled={disabled}
+        onChange={(next) => {
+          setValue(next);
+          onChange(next);
+        }}
+      />
+    </I18nProvider>
+  );
 }
 
 const openCustom = () => fireEvent.click(screen.getByRole("button", { name: "Другая сумма" }));
@@ -64,7 +89,11 @@ describe("inline table tips", () => {
   it("opens only the custom amount editor, validates cents and saves with Enter without submitting the order", () => {
     const onChange = vi.fn();
     const onSubmit = vi.fn();
-    render(<form onSubmit={onSubmit}><Picker onChange={onChange} /></form>);
+    render(
+      <form onSubmit={onSubmit}>
+        <Picker onChange={onChange} />
+      </form>,
+    );
     openCustom();
     const dialog = within(screen.getByRole("dialog", { name: "Сумма чаевых" }));
     expect(dialog.queryByRole("button", { name: "Назад" })).not.toBeInTheDocument();
@@ -81,7 +110,10 @@ describe("inline table tips", () => {
     expect(onChange).toHaveBeenCalledExactlyOnceWith({ mode: "custom", value: "1,23" });
     expect(onSubmit).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Другая сумма" })).toHaveTextContent("1,23");
-    expect(screen.getByRole("button", { name: "Другая сумма" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Другая сумма" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     openCustom();
     expect(screen.getByRole("textbox")).toHaveValue("1,23");
   });

@@ -5,15 +5,29 @@ import { I18nProvider } from "./i18n";
 
 function ConfirmHarness() {
   const { confirm } = useConfirm();
-  return <>
-    <button type="button" onClick={async () => {
-      const result = await confirm({ description: "Удалить стол 12 с плана?" });
-      document.body.dataset.confirmResult = String(result);
-    }}>Удалить стол</button>
-  </>;
+  return (
+    <>
+      <button
+        type="button"
+        onClick={async () => {
+          const result = await confirm({ description: "Удалить стол 12 с плана?" });
+          document.body.dataset.confirmResult = String(result);
+        }}
+      >
+        Удалить стол
+      </button>
+    </>
+  );
 }
 
-const renderDialog = () => render(<I18nProvider><ConfirmProvider><ConfirmHarness /></ConfirmProvider></I18nProvider>);
+const renderDialog = () =>
+  render(
+    <I18nProvider>
+      <ConfirmProvider>
+        <ConfirmHarness />
+      </ConfirmProvider>
+    </I18nProvider>,
+  );
 
 describe("ConfirmProvider", () => {
   beforeEach(() => {

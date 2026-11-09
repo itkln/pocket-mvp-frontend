@@ -18,7 +18,10 @@ export async function proxyAPIRequest(request: Request, context: APIProxyContext
   const upstream = await fetch(targetURL, {
     method: request.method,
     headers,
-    body: request.method === "GET" || request.method === "HEAD" ? undefined : await request.arrayBuffer(),
+    body:
+      request.method === "GET" || request.method === "HEAD"
+        ? undefined
+        : await request.arrayBuffer(),
     redirect: "manual",
   });
 

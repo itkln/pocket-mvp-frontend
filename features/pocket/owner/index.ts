@@ -7,5 +7,4 @@ export { VenueScreen } from "./venue";
 export { SubscriptionScreen } from "./subscription";
 export { AccountScreen, PaymentsScreen } from "./account";
 
-
 export { OrdersScreen } from "./orders";

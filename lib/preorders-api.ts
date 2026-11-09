@@ -15,5 +15,10 @@ export type CustomerPreorder = {
 };
 
 export async function listCustomerPreorders(signal?: AbortSignal): Promise<CustomerPreorder[]> {
-  return (await apiRequest<{ preorders: CustomerPreorder[] }>("/spots/me/preorders", { signal, cache: "no-store" })).preorders;
+  return (
+    await apiRequest<{ preorders: CustomerPreorder[] }>("/spots/me/preorders", {
+      signal,
+      cache: "no-store",
+    })
+  ).preorders;
 }

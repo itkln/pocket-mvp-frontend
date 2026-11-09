@@ -5,16 +5,47 @@ import { DiscoverScreen, SavedPlacesScreen } from "./discover";
 import { SpotsHeader } from "./navigation";
 import { I18nProvider } from "../i18n";
 import { spotCategories } from "./categories";
-import { getPublicVenue, listPublicVenues, type PublicVenue, type PublicVenueSearch } from "../../../lib/public-catalog-api";
+import {
+  getPublicVenue,
+  listPublicVenues,
+  type PublicVenue,
+  type PublicVenueSearch,
+} from "../../../lib/public-catalog-api";
 
 const replace = vi.fn();
-vi.mock("next/navigation", () => ({ usePathname: () => "/ru/discover", useRouter: () => ({ replace }) }));
-vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), listPublicVenues: vi.fn(), getPublicVenue: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/ru/discover",
+  useRouter: () => ({ replace }),
+}));
+vi.mock("../../../lib/public-catalog-api", async (original) => ({
+  ...(await original<object>()),
+  listPublicVenues: vi.fn(),
+  getPublicVenue: vi.fn(),
+}));
 
-const venue = (id: string, name: string, category: string, cuisine: string, filters: string[] = [], image = ""): PublicVenue => ({
-  id, slug: id, name, category_slug: category, cuisine_type: cuisine, address: "Dunajská 12", city: "Bratislava", country_code: "SK",
-  image_url: image, rating: 4.8, review_count: 12, tags: [name === "North & Vine" ? "Стол через 20 мин" : "Открыто сейчас"], filters,
-  preorder_enabled: filters.includes("С предзаказом"), created_at: "2026-09-19T00:00:00Z",
+const venue = (
+  id: string,
+  name: string,
+  category: string,
+  cuisine: string,
+  filters: string[] = [],
+  image = "",
+): PublicVenue => ({
+  id,
+  slug: id,
+  name,
+  category_slug: category,
+  cuisine_type: cuisine,
+  address: "Dunajská 12",
+  city: "Bratislava",
+  country_code: "SK",
+  image_url: image,
+  rating: 4.8,
+  review_count: 12,
+  tags: [name === "North & Vine" ? "Стол через 20 мин" : "Открыто сейчас"],
+  filters,
+  preorder_enabled: filters.includes("С предзаказом"),
+  created_at: "2026-09-19T00:00:00Z",
 });
 const catalogVenues = [
   venue("north", "North & Vine", "restaurants", "Европейская", ["Лучшие", "Открыто"]),
@@ -38,25 +69,58 @@ const catalogResponse = (search: PublicVenueSearch = {}) => {
   if (search.category) items = items.filter((item) => item.category_slug === search.category);
   if (search.query) {
     const query = search.query.toLocaleLowerCase();
-    items = items.filter((item) => `${item.name} ${item.cuisine_type}`.toLocaleLowerCase().includes(query.includes("итальян") ? "итальян" : query));
+    items = items.filter((item) =>
+      `${item.name} ${item.cuisine_type}`
+        .toLocaleLowerCase()
+        .includes(query.includes("итальян") ? "итальян" : query),
+    );
   }
-  if (search.filter && search.filter !== "Все") items = items.filter((item) => item.filters.includes(search.filter!));
-  return Promise.resolve({ venues: items, page: search.page ?? 1, page_size: 24, total: items.length, total_pages: items.length ? 1 : 0, has_next: false });
+  if (search.filter && search.filter !== "Все")
+    items = items.filter((item) => item.filters.includes(search.filter!));
+  return Promise.resolve({
+    venues: items,
+    page: search.page ?? 1,
+    page_size: 24,
+    total: items.length,
+    total_pages: items.length ? 1 : 0,
+    has_next: false,
+  });
 };
 
 beforeAll(() => {
-  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
-  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
 });
 beforeEach(() => {
-  window.matchMedia = vi.fn().mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+  window.matchMedia = vi
+    .fn()
+    .mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
   vi.mocked(listPublicVenues).mockImplementation(catalogResponse);
-  vi.mocked(getPublicVenue).mockImplementation(async (id) => catalogVenues.find((item) => item.id === id)!);
+  vi.mocked(getPublicVenue).mockImplementation(
+    async (id) => catalogVenues.find((item) => item.id === id)!,
+  );
 });
-const defaults = { query: "", onVenue: vi.fn(), onReservation: vi.fn(), onCategoryChange: vi.fn(), onFilterChange: vi.fn() };
+const defaults = {
+  query: "",
+  onVenue: vi.fn(),
+  onReservation: vi.fn(),
+  onCategoryChange: vi.fn(),
+  onFilterChange: vi.fn(),
+};
 function FilterHarness() {
   const [filter, setFilter] = useState("Все");
-  return <DiscoverScreen {...defaults} categorySlug="restaurants" filter={filter} onFilterChange={setFilter} />;
+  return (
+    <DiscoverScreen
+      {...defaults}
+      categorySlug="restaurants"
+      filter={filter}
+      onFilterChange={setFilter}
+    />
+  );
 }
 
 describe("Pocket Spots discovery", () => {
@@ -73,23 +137,32 @@ describe("Pocket Spots discovery", () => {
     expect(await screen.findByRole("button", { name: "Открыть North & Vine" })).toBeInTheDocument();
   });
 
-  it.each(spotCategories)("limits $slug to its own data and filters", async ({ slug, label, filters }) => {
-    render(<DiscoverScreen {...defaults} categorySlug={slug} />);
-    const category = await screen.findByRole("region", { name: label });
-    expect(category).toBeInTheDocument();
-    expect(within(category).queryByRole("heading", { name: label })).not.toBeInTheDocument();
-    for (const other of spotCategories.filter((item) => item.slug !== slug)) {
-      expect(screen.queryByRole("region", { name: other.label })).not.toBeInTheDocument();
-    }
-    const controls = screen.getByRole("region", { name: `Фильтры заведений: ${label}` });
-    expect(within(controls).getAllByRole("button")).toHaveLength(filters.length + 1);
-    for (const filter of filters) expect(within(controls).getByRole("button", { name: filter })).toBeInTheDocument();
-  });
+  it.each(spotCategories)(
+    "limits $slug to its own data and filters",
+    async ({ slug, label, filters }) => {
+      render(<DiscoverScreen {...defaults} categorySlug={slug} />);
+      const category = await screen.findByRole("region", { name: label });
+      expect(category).toBeInTheDocument();
+      expect(within(category).queryByRole("heading", { name: label })).not.toBeInTheDocument();
+      for (const other of spotCategories.filter((item) => item.slug !== slug)) {
+        expect(screen.queryByRole("region", { name: other.label })).not.toBeInTheDocument();
+      }
+      const controls = screen.getByRole("region", { name: `Фильтры заведений: ${label}` });
+      expect(within(controls).getAllByRole("button")).toHaveLength(filters.length + 1);
+      for (const filter of filters)
+        expect(within(controls).getByRole("button", { name: filter })).toBeInTheDocument();
+    },
+  );
 
   it("passes search and category to the public API and never renders another category", async () => {
-    const view = render(<DiscoverScreen {...defaults} categorySlug="restaurants" query="Итальянский ресторан" />);
+    const view = render(
+      <DiscoverScreen {...defaults} categorySlug="restaurants" query="Итальянский ресторан" />,
+    );
     expect(await screen.findByRole("button", { name: "Открыть Casa Forma" })).toBeInTheDocument();
-    expect(listPublicVenues).toHaveBeenCalledWith(expect.objectContaining({ category: "restaurants", query: "Итальянский ресторан" }), expect.any(AbortSignal));
+    expect(listPublicVenues).toHaveBeenCalledWith(
+      expect.objectContaining({ category: "restaurants", query: "Итальянский ресторан" }),
+      expect.any(AbortSignal),
+    );
     expect(screen.queryByRole("button", { name: "Открыть North & Vine" })).not.toBeInTheDocument();
     view.rerender(<DiscoverScreen {...defaults} categorySlug="sports" query="Casa Forma" />);
     expect(await screen.findByText("В этой категории пока нет мест")).toBeInTheDocument();
@@ -102,8 +175,15 @@ describe("Pocket Spots discovery", () => {
     render(<FilterHarness />);
     await screen.findByRole("button", { name: "Открыть North & Vine" });
     fireEvent.click(screen.getByRole("button", { name: "Итальянская" }));
-    await waitFor(() => expect(screen.queryByRole("button", { name: "Открыть North & Vine" })).not.toBeInTheDocument());
-    expect(listPublicVenues).toHaveBeenLastCalledWith(expect.objectContaining({ filter: "Итальянская" }), expect.any(AbortSignal));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: "Открыть North & Vine" }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(listPublicVenues).toHaveBeenLastCalledWith(
+      expect.objectContaining({ filter: "Итальянская" }),
+      expect.any(AbortSignal),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Итальянская" }));
     expect(await screen.findByRole("button", { name: "Открыть North & Vine" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Итальянская" }));
@@ -118,7 +198,10 @@ describe("Pocket Spots discovery", () => {
   it("uses the selected city for server filtering", async () => {
     render(<DiscoverScreen {...defaults} city="Кошице" />);
     expect(await screen.findByText("В этом городе пока нет заведений")).toBeInTheDocument();
-    expect(listPublicVenues).toHaveBeenCalledWith(expect.objectContaining({ city: "Кошице" }), expect.any(AbortSignal));
+    expect(listPublicVenues).toHaveBeenCalledWith(
+      expect.objectContaining({ city: "Кошице" }),
+      expect.any(AbortSignal),
+    );
     expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
   });
 
@@ -133,15 +216,24 @@ describe("Pocket Spots discovery", () => {
   });
 
   it("requests the next server page from pagination controls", async () => {
-    vi.mocked(listPublicVenues).mockImplementation((search = {}) => Promise.resolve({
-      venues: [search.page === 2 ? catalogVenues[1] : catalogVenues[0]], page: search.page ?? 1, page_size: 1,
-      total: 2, total_pages: 2, has_next: (search.page ?? 1) === 1,
-    }));
+    vi.mocked(listPublicVenues).mockImplementation((search = {}) =>
+      Promise.resolve({
+        venues: [search.page === 2 ? catalogVenues[1] : catalogVenues[0]],
+        page: search.page ?? 1,
+        page_size: 1,
+        total: 2,
+        total_pages: 2,
+        has_next: (search.page ?? 1) === 1,
+      }),
+    );
     render(<DiscoverScreen {...defaults} categorySlug="restaurants" />);
     await screen.findByRole("button", { name: "Открыть North & Vine" });
     fireEvent.click(screen.getByRole("button", { name: "Далее" }));
     expect(await screen.findByRole("button", { name: "Открыть Casa Forma" })).toBeInTheDocument();
-    expect(listPublicVenues).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }), expect.any(AbortSignal));
+    expect(listPublicVenues).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 2 }),
+      expect.any(AbortSignal),
+    );
   });
 
   it("opens photos but does not navigate when toggling favorites", async () => {
@@ -157,22 +249,32 @@ describe("Pocket Spots discovery", () => {
 
   it("keeps availability labels below venue images", async () => {
     render(<DiscoverScreen {...defaults} />);
-    const card = (await screen.findByRole("button", { name: "Открыть North & Vine" })).closest(".venue-card");
+    const card = (await screen.findByRole("button", { name: "Открыть North & Vine" })).closest(
+      ".venue-card",
+    );
     expect(card?.querySelector(".venue-card-image > span")).not.toBeInTheDocument();
-    expect(card?.querySelector(".venue-card-copy .venue-card-tag")).toHaveTextContent("Стол через 20 мин");
+    expect(card?.querySelector(".venue-card-copy .venue-card-tag")).toHaveTextContent(
+      "Стол через 20 мин",
+    );
   });
 
   it("uses the entertainment illustration for entertainment venues", async () => {
     render(<DiscoverScreen {...defaults} categorySlug="entertainment" />);
-    const card = (await screen.findByRole("button", { name: "Открыть Cinema Lumière" })).closest(".venue-card");
+    const card = (await screen.findByRole("button", { name: "Открыть Cinema Lumière" })).closest(
+      ".venue-card",
+    );
     const image = card?.querySelector<HTMLElement>(".illustrated-venue-image");
     expect(image).toBeInTheDocument();
-    expect(image?.style.getPropertyValue("--venue-illustration")).toContain("/assets/categories/entertainment.png");
+    expect(image?.style.getPropertyValue("--venue-illustration")).toContain(
+      "/assets/categories/entertainment.png",
+    );
   });
 
   it("shows only saved venues from the API and allows removing them", async () => {
     const onToggleSaved = vi.fn();
-    render(<SavedPlacesScreen savedPlaces={["casa"]} onToggleSaved={onToggleSaved} onVenue={vi.fn()} />);
+    render(
+      <SavedPlacesScreen savedPlaces={["casa"]} onToggleSaved={onToggleSaved} onVenue={vi.fn()} />,
+    );
     expect(await screen.findByText("Casa Forma")).toBeInTheDocument();
     expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Убрать из избранного" }));
@@ -182,8 +284,12 @@ describe("Pocket Spots discovery", () => {
   it("resolves saved venue IDs to current names and opens the selected venue", async () => {
     const renamed = { ...catalogVenues[1], name: "Casa Nuova" };
     vi.mocked(listPublicVenues).mockImplementation(async (search = {}) => ({
-      venues: search.ids?.includes("casa") ? [renamed] : [], page: 1, page_size: 50,
-      total: 1, total_pages: 1, has_next: false,
+      venues: search.ids?.includes("casa") ? [renamed] : [],
+      page: 1,
+      page_size: 50,
+      total: 1,
+      total_pages: 1,
+      has_next: false,
     }));
     const onVenue = vi.fn();
     render(<SavedPlacesScreen savedPlaces={["casa"]} onVenue={onVenue} />);
@@ -194,11 +300,32 @@ describe("Pocket Spots discovery", () => {
 
   it("searches and selects a city, with no cart button in the header", () => {
     const onCityChange = vi.fn();
-    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={onCityChange} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} />);
+    render(
+      <SpotsHeader
+        user={{
+          id: "test",
+          email: "test@example.com",
+          first_name: "Test",
+          last_name: "User",
+          role: "customer",
+          capabilities: ["customer"],
+        }}
+        screen="discover"
+        city="Братислава"
+        onCityChange={onCityChange}
+        searchQuery=""
+        onSearch={vi.fn()}
+        onNavigate={vi.fn()}
+        onLogin={vi.fn()}
+        onLogout={vi.fn()}
+      />,
+    );
     expect(screen.queryByRole("button", { name: /Корзина/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Pocket Spots, главная" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Выбрать город: Братислава" }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Найти город" }), { target: { value: "кош" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "Найти город" }), {
+      target: { value: "кош" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Кошице" }));
     expect(onCityChange).toHaveBeenCalledWith("Кошице");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -207,9 +334,34 @@ describe("Pocket Spots discovery", () => {
   it("opens account destinations, closes on Escape and outside click, and signs out", () => {
     const onNavigate = vi.fn();
     const onLogout = vi.fn();
-    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={onNavigate} onLogin={vi.fn()} onLogout={onLogout} />);
+    render(
+      <SpotsHeader
+        user={{
+          id: "test",
+          email: "test@example.com",
+          first_name: "Test",
+          last_name: "User",
+          role: "customer",
+          capabilities: ["customer"],
+        }}
+        screen="discover"
+        city="Братислава"
+        onCityChange={vi.fn()}
+        searchQuery=""
+        onSearch={vi.fn()}
+        onNavigate={onNavigate}
+        onLogin={vi.fn()}
+        onLogout={onLogout}
+      />,
+    );
     const trigger = screen.getByRole("button", { name: "Меню аккаунта" });
-    for (const [label, route] of [["Личные данные", "profile"], ["Мои брони", "reservations"], ["Сохранённые места", "saved"], ["Уведомления", "notifications"], ["Безопасность", "settings"]]) {
+    for (const [label, route] of [
+      ["Личные данные", "profile"],
+      ["Мои брони", "reservations"],
+      ["Сохранённые места", "saved"],
+      ["Уведомления", "notifications"],
+      ["Безопасность", "settings"],
+    ]) {
       fireEvent.click(trigger);
       fireEvent.click(screen.getByRole("menuitem", { name: label }));
       expect(onNavigate).toHaveBeenLastCalledWith(route);
@@ -227,9 +379,29 @@ describe("Pocket Spots discovery", () => {
     expect(onLogout).toHaveBeenCalledOnce();
   });
 
-
   it("switches the language and preserves the current route", () => {
-    render(<I18nProvider initialLocale="ru"><SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} /></I18nProvider>);
+    render(
+      <I18nProvider initialLocale="ru">
+        <SpotsHeader
+          user={{
+            id: "test",
+            email: "test@example.com",
+            first_name: "Test",
+            last_name: "User",
+            role: "customer",
+            capabilities: ["customer"],
+          }}
+          screen="discover"
+          city="Братислава"
+          onCityChange={vi.fn()}
+          searchQuery=""
+          onSearch={vi.fn()}
+          onNavigate={vi.fn()}
+          onLogin={vi.fn()}
+          onLogout={vi.fn()}
+        />
+      </I18nProvider>,
+    );
     fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "English" }));
     expect(replace).toHaveBeenCalledWith("/en/discover");
@@ -239,8 +411,31 @@ describe("Pocket Spots discovery", () => {
   });
 
   it("keeps the previous language modal for authenticated mobile users", () => {
-    window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
-    render(<I18nProvider initialLocale="ru"><SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} /></I18nProvider>);
+    window.matchMedia = vi
+      .fn()
+      .mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
+    render(
+      <I18nProvider initialLocale="ru">
+        <SpotsHeader
+          user={{
+            id: "test",
+            email: "test@example.com",
+            first_name: "Test",
+            last_name: "User",
+            role: "customer",
+            capabilities: ["customer"],
+          }}
+          screen="discover"
+          city="Братислава"
+          onCityChange={vi.fn()}
+          searchQuery=""
+          onSearch={vi.fn()}
+          onNavigate={vi.fn()}
+          onLogin={vi.fn()}
+          onLogout={vi.fn()}
+        />
+      </I18nProvider>,
+    );
     expect(screen.queryByRole("button", { name: "Открыть меню" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса" }));
     const dialog = screen.getByRole("dialog", { name: "Язык интерфейса" });
@@ -251,7 +446,26 @@ describe("Pocket Spots discovery", () => {
   });
 
   it("adds a header shadow only after scrolling", () => {
-    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} />);
+    render(
+      <SpotsHeader
+        user={{
+          id: "test",
+          email: "test@example.com",
+          first_name: "Test",
+          last_name: "User",
+          role: "customer",
+          capabilities: ["customer"],
+        }}
+        screen="discover"
+        city="Братислава"
+        onCityChange={vi.fn()}
+        searchQuery=""
+        onSearch={vi.fn()}
+        onNavigate={vi.fn()}
+        onLogin={vi.fn()}
+        onLogout={vi.fn()}
+      />,
+    );
     const header = screen.getByRole("banner");
     expect(header).not.toHaveClass("scrolled");
     Object.defineProperty(window, "scrollY", { configurable: true, value: 20 });

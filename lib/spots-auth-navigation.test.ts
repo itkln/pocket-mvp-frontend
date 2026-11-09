@@ -12,10 +12,21 @@ describe("Spots authentication return paths", () => {
   });
 
   it.each([
-    "https://example.com/ru/discover", "//example.com/ru/discover", "javascript:alert(1)",
-    "/ru\\example.com", "/ru\n/discover", "/en/discover", "/ru/login", "/ru/register",
-    "/ru/forgot-password", "/ru/api/auth/me", "/ru/venue", "/ru/venue/id/extra", "/ru/unknown",
-    "/ru/../api/auth/me", "/ru/venue/%2f%2fexample.com",
+    "https://example.com/ru/discover",
+    "//example.com/ru/discover",
+    "javascript:alert(1)",
+    "/ru\\example.com",
+    "/ru\n/discover",
+    "/en/discover",
+    "/ru/login",
+    "/ru/register",
+    "/ru/forgot-password",
+    "/ru/api/auth/me",
+    "/ru/venue",
+    "/ru/venue/id/extra",
+    "/ru/unknown",
+    "/ru/../api/auth/me",
+    "/ru/venue/%2f%2fexample.com",
   ])("rejects unsafe or unsupported destination %s", (target) => {
     expect(spotsReturnTo(target, "ru")).toBe("/ru");
   });

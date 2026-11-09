@@ -48,7 +48,8 @@ export type PublicMenuCategory = {
 };
 
 // Missing flags support menus loaded before category settings were introduced.
-export const getPreorderCategories = (categories: PublicMenuCategory[]) => categories.filter((category) => category.preorder_enabled !== false && category.items.length > 0);
+export const getPreorderCategories = (categories: PublicMenuCategory[]) =>
+  categories.filter((category) => category.preorder_enabled !== false && category.items.length > 0);
 
 export type PublicReview = {
   id: string;
@@ -59,7 +60,12 @@ export type PublicReview = {
 };
 
 export type AvailableTable = { id: string; identifier: string; seats: number };
-export type AvailabilitySlot = { time: string; starts_at: string; ends_at: string; tables: AvailableTable[] };
+export type AvailabilitySlot = {
+  time: string;
+  starts_at: string;
+  ends_at: string;
+  tables: AvailableTable[];
+};
 export type VenueAvailability = {
   venue_id: string;
   date: string;
@@ -104,14 +110,14 @@ export type PublicVenueSearch = {
 };
 
 const cityAPIValues: Record<string, string> = {
-  "Братислава": "Bratislava",
-  "Кошице": "Košice",
-  "Трнава": "Trnava",
-  "Нитра": "Nitra",
-  "Жилина": "Žilina",
+  Братислава: "Bratislava",
+  Кошице: "Košice",
+  Трнава: "Trnava",
+  Нитра: "Nitra",
+  Жилина: "Žilina",
 };
 
-export const catalogCityValue = (city?: string) => city ? cityAPIValues[city] ?? city : "";
+export const catalogCityValue = (city?: string) => (city ? (cityAPIValues[city] ?? city) : "");
 
 export async function listPublicVenues(search: PublicVenueSearch = {}, signal?: AbortSignal) {
   const params = new URLSearchParams();
@@ -127,37 +133,76 @@ export async function listPublicVenues(search: PublicVenueSearch = {}, signal?: 
 }
 
 export async function getPublicVenue(id: string, signal?: AbortSignal): Promise<PublicVenue> {
-  const result = await apiRequest<{ venue: PublicVenue }>(`/public/venues/${encodeURIComponent(id)}`, { signal });
+  const result = await apiRequest<{ venue: PublicVenue }>(
+    `/public/venues/${encodeURIComponent(id)}`,
+    { signal },
+  );
   return result.venue;
 }
 
-export async function getPublicVenueMenu(id: string, signal?: AbortSignal): Promise<PublicMenuCategory[]> {
-  const result = await apiRequest<{ categories: PublicMenuCategory[] }>(`/public/venues/${encodeURIComponent(id)}/menu`, { signal, cache: "no-store" });
+export async function getPublicVenueMenu(
+  id: string,
+  signal?: AbortSignal,
+): Promise<PublicMenuCategory[]> {
+  const result = await apiRequest<{ categories: PublicMenuCategory[] }>(
+    `/public/venues/${encodeURIComponent(id)}/menu`,
+    { signal, cache: "no-store" },
+  );
   return result.categories;
 }
 
-export async function getPublicVenueReviews(id: string, signal?: AbortSignal): Promise<PublicReview[]> {
-  const result = await apiRequest<{ reviews: PublicReview[] }>(`/public/venues/${encodeURIComponent(id)}/reviews`, { signal });
+export async function getPublicVenueReviews(
+  id: string,
+  signal?: AbortSignal,
+): Promise<PublicReview[]> {
+  const result = await apiRequest<{ reviews: PublicReview[] }>(
+    `/public/venues/${encodeURIComponent(id)}/reviews`,
+    { signal },
+  );
   return result.reviews;
 }
 
-export async function getVenueAvailability(id: string, date: string, guests: number, signal?: AbortSignal): Promise<VenueAvailability> {
+export async function getVenueAvailability(
+  id: string,
+  date: string,
+  guests: number,
+  signal?: AbortSignal,
+): Promise<VenueAvailability> {
   const params = new URLSearchParams({ guests: String(guests) });
   if (date) params.set("date", date);
-  return apiRequest<VenueAvailability>(`/public/venues/${encodeURIComponent(id)}/availability?${params}`, { signal, cache: "no-store" });
+  return apiRequest<VenueAvailability>(
+    `/public/venues/${encodeURIComponent(id)}/availability?${params}`,
+    { signal, cache: "no-store" },
+  );
 }
 
-export async function createPublicReservation(id: string, input: ReservationInput): Promise<CreatedReservation> {
+export async function createPublicReservation(
+  id: string,
+  input: ReservationInput,
+): Promise<CreatedReservation> {
   const path = `/public/venues/${encodeURIComponent(id)}/reservations`;
   const hold = await apiRequest<{ hold: { id: string; expires_at: string } }>(`${path}/holds`, {
-    method: "POST", body: JSON.stringify(input), cache: "no-store",
+    method: "POST",
+    body: JSON.stringify(input),
+    cache: "no-store",
   });
-  const result = await apiRequest<{ reservation: CreatedReservation }>(`${path}/${encodeURIComponent(hold.hold.id)}/confirm`, {
-    method: "POST", body: JSON.stringify(input), cache: "no-store",
-  });
+  const result = await apiRequest<{ reservation: CreatedReservation }>(
+    `${path}/${encodeURIComponent(hold.hold.id)}/confirm`,
+    {
+      method: "POST",
+      body: JSON.stringify(input),
+      cache: "no-store",
+    },
+  );
   if (typeof window !== "undefined") {
-    try { window.sessionStorage.setItem(`pocket-reservation:${id}`, JSON.stringify({ id: result.reservation.id, key: input.idempotency_key })); }
-    catch { /* Browser storage may be disabled; the confirmed response remains valid. */ }
+    try {
+      window.sessionStorage.setItem(
+        `pocket-reservation:${id}`,
+        JSON.stringify({ id: result.reservation.id, key: input.idempotency_key }),
+      );
+    } catch {
+      /* Browser storage may be disabled; the confirmed response remains valid. */
+    }
   }
   return result.reservation;
 }
@@ -165,8 +210,11 @@ export async function createPublicReservation(id: string, input: ReservationInpu
 export async function getSavedPublicReservation(id: string): Promise<CreatedReservation | null> {
   if (typeof window === "undefined") return null;
   let stored: string | null;
-  try { stored = window.sessionStorage.getItem(`pocket-reservation:${id}`); }
-  catch { return null; }
+  try {
+    stored = window.sessionStorage.getItem(`pocket-reservation:${id}`);
+  } catch {
+    return null;
+  }
   if (!stored) return null;
   try {
     const reference = JSON.parse(stored) as { id?: string; key?: string };
@@ -186,7 +234,10 @@ export async function getSavedPublicReservation(id: string): Promise<CreatedRese
 
 export function clearSavedPublicReservation(id: string) {
   if (typeof window !== "undefined") {
-    try { window.sessionStorage.removeItem(`pocket-reservation:${id}`); }
-    catch { /* Browser storage may be disabled. */ }
+    try {
+      window.sessionStorage.removeItem(`pocket-reservation:${id}`);
+    } catch {
+      /* Browser storage may be disabled. */
+    }
   }
 }

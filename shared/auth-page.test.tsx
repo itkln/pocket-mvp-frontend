@@ -9,11 +9,26 @@ const replace = vi.fn();
 const refresh = vi.fn();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, refresh }) }));
-vi.mock("next/image", () => ({ default: ({ priority, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }) => {
-  void priority;
-  return <span role="img" aria-label={props.alt ?? ""} />;
-} }));
-vi.mock("next/link", () => ({ default: ({ children, href, ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => <a href={href} {...props}>{children}</a> }));
+vi.mock("next/image", () => ({
+  default: ({
+    priority,
+    ...props
+  }: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }) => {
+    void priority;
+    return <span role="img" aria-label={props.alt ?? ""} />;
+  },
+}));
+vi.mock("next/link", () => ({
+  default: ({
+    children,
+    href,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
 vi.mock("../lib/auth-api", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../lib/auth-api")>();
   return { ...actual, login: vi.fn(), register: vi.fn() };
@@ -27,7 +42,14 @@ beforeEach(() => {
 describe("AuthPage", () => {
   it("returns a Spots guest to the selected venue after sign in and carries context through auth links", async () => {
     const returnTo = `/ru/venue/casa?${new URLSearchParams({ from: "/ru/restaurants?q=pasta&filter=Итальянская" })}`;
-    vi.mocked(login).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer", capabilities: ["customer"] });
+    vi.mocked(login).mockResolvedValue({
+      id: "1",
+      email: "user@example.com",
+      first_name: "Denis",
+      last_name: "Itkin",
+      role: "customer",
+      capabilities: ["customer"],
+    });
     render(<AuthPage mode="login" product="spots" returnTo={returnTo} />);
     for (const name of ["Зарегистрироваться", "Забыли пароль?"]) {
       const href = screen.getByRole("link", { name }).getAttribute("href")!;
@@ -41,20 +63,36 @@ describe("AuthPage", () => {
 
   it("returns a newly registered Spots user to the selected category and filters", async () => {
     const returnTo = "/ru/restaurants?q=pasta&filter=Open";
-    vi.mocked(register).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer", capabilities: ["customer"] });
+    vi.mocked(register).mockResolvedValue({
+      id: "1",
+      email: "user@example.com",
+      first_name: "Denis",
+      last_name: "Itkin",
+      role: "customer",
+      capabilities: ["customer"],
+    });
     render(<AuthPage mode="register" product="spots" returnTo={returnTo} />);
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Denis" } });
     fireEvent.change(screen.getByLabelText("Фамилия"), { target: { value: "Itkin" } });
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
     fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
-    fireEvent.change(screen.getByLabelText("Повторите пароль"), { target: { value: "a secure password" } });
+    fireEvent.change(screen.getByLabelText("Повторите пароль"), {
+      target: { value: "a secure password" },
+    });
     fireEvent.click(screen.getByLabelText(/Я принимаю/));
     fireEvent.click(screen.getByRole("button", { name: "Зарегистрироваться" }));
     await waitFor(() => expect(replace).toHaveBeenCalledWith(returnTo));
   });
 
   it("keeps Vendor authentication on its own home screen", async () => {
-    vi.mocked(login).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer", capabilities: ["customer"] });
+    vi.mocked(login).mockResolvedValue({
+      id: "1",
+      email: "user@example.com",
+      first_name: "Denis",
+      last_name: "Itkin",
+      role: "customer",
+      capabilities: ["customer"],
+    });
     render(<AuthPage mode="login" product="vendor" returnTo="/ru/venue/casa" />);
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
     fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
@@ -68,7 +106,9 @@ describe("AuthPage", () => {
     fireEvent.change(screen.getByLabelText("Фамилия"), { target: { value: "Itkin" } });
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
     fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
-    fireEvent.change(screen.getByLabelText("Повторите пароль"), { target: { value: "a different password" } });
+    fireEvent.change(screen.getByLabelText("Повторите пароль"), {
+      target: { value: "a different password" },
+    });
     fireEvent.click(screen.getByLabelText(/Я принимаю/));
     fireEvent.click(screen.getByRole("button", { name: "Зарегистрироваться" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Пароли не совпадают");
@@ -76,42 +116,72 @@ describe("AuthPage", () => {
   });
 
   it("registers one neutral account without an account role", async () => {
-    vi.mocked(register).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer", capabilities: ["customer"] });
+    vi.mocked(register).mockResolvedValue({
+      id: "1",
+      email: "user@example.com",
+      first_name: "Denis",
+      last_name: "Itkin",
+      role: "customer",
+      capabilities: ["customer"],
+    });
     render(<AuthPage mode="register" />);
     expect(screen.queryByText("Выберите роль")).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Denis" } });
     fireEvent.change(screen.getByLabelText("Фамилия"), { target: { value: "Itkin" } });
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
     fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
-    fireEvent.change(screen.getByLabelText("Повторите пароль"), { target: { value: "a secure password" } });
+    fireEvent.change(screen.getByLabelText("Повторите пароль"), {
+      target: { value: "a secure password" },
+    });
     fireEvent.click(screen.getByLabelText(/Я принимаю/));
     fireEvent.click(screen.getByRole("button", { name: "Зарегистрироваться" }));
-    await waitFor(() => expect(register).toHaveBeenCalledWith({
-      first_name: "Denis",
-      last_name: "Itkin",
-      email: "user@example.com",
-      password: "a secure password",
-    }));
+    await waitFor(() =>
+      expect(register).toHaveBeenCalledWith({
+        first_name: "Denis",
+        last_name: "Itkin",
+        email: "user@example.com",
+        password: "a secure password",
+      }),
+    );
     expect(replace).toHaveBeenCalledWith("/ru");
   });
 
   it("logs in and redirects after success", async () => {
-    vi.mocked(login).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer", capabilities: ["customer"] });
+    vi.mocked(login).mockResolvedValue({
+      id: "1",
+      email: "user@example.com",
+      first_name: "Denis",
+      last_name: "Itkin",
+      role: "customer",
+      capabilities: ["customer"],
+    });
     render(<AuthPage mode="login" />);
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
     fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
     fireEvent.click(screen.getByRole("button", { name: "Войти" }));
-    await waitFor(() => expect(login).toHaveBeenCalledWith("user@example.com", "a secure password"));
+    await waitFor(() =>
+      expect(login).toHaveBeenCalledWith("user@example.com", "a secure password"),
+    );
     expect(replace).toHaveBeenCalledWith("/ru");
     expect(refresh).toHaveBeenCalled();
   });
 
   it("shows backend errors in the language selected in the URL", async () => {
-    vi.mocked(login).mockRejectedValue(new APIError("invalid_credentials", "Неверный e-mail или пароль", 401));
-    render(<I18nProvider initialLocale="en"><AuthPage mode="login" /></I18nProvider>);
+    vi.mocked(login).mockRejectedValue(
+      new APIError("invalid_credentials", "Неверный e-mail или пароль", 401),
+    );
+    render(
+      <I18nProvider initialLocale="en">
+        <AuthPage mode="login" />
+      </I18nProvider>,
+    );
 
-    fireEvent.change(await screen.findByLabelText("E-mail"), { target: { value: "user@example.com" } });
-    fireEvent.change(await screen.findByLabelText("Password"), { target: { value: "wrong password" } });
+    fireEvent.change(await screen.findByLabelText("E-mail"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(await screen.findByLabelText("Password"), {
+      target: { value: "wrong password" },
+    });
     fireEvent.click(await screen.findByRole("button", { name: "Sign in" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Incorrect e-mail or password");
@@ -119,7 +189,14 @@ describe("AuthPage", () => {
   });
 
   it("links the login form to password recovery in the active locale", () => {
-    render(<I18nProvider initialLocale="sk"><AuthPage mode="login" /></I18nProvider>);
-    expect(screen.getByRole("link", { name: "Zabudli ste heslo?" })).toHaveAttribute("href", "/sk/forgot-password");
+    render(
+      <I18nProvider initialLocale="sk">
+        <AuthPage mode="login" />
+      </I18nProvider>,
+    );
+    expect(screen.getByRole("link", { name: "Zabudli ste heslo?" })).toHaveAttribute(
+      "href",
+      "/sk/forgot-password",
+    );
   });
 });

@@ -1,38 +1,126 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { APIError } from "../../../lib/api-client";
-import { getPublicVenue, getPublicVenueMenu, type PublicMenuCategory, type PublicVenue } from "../../../lib/public-catalog-api";
-import { createTableOrder, getVenueOrderHistory, lookupTableOrder, resolveTableQR, type TableOrder } from "../../../lib/table-orders-api";
+import {
+  getPublicVenue,
+  getPublicVenueMenu,
+  type PublicMenuCategory,
+  type PublicVenue,
+} from "../../../lib/public-catalog-api";
+import {
+  createTableOrder,
+  getVenueOrderHistory,
+  lookupTableOrder,
+  resolveTableQR,
+  type TableOrder,
+} from "../../../lib/table-orders-api";
 import { I18nProvider } from "../i18n";
 import { TableVenueScreen } from "./table-venue";
 
 const { replace, push } = vi.hoisted(() => ({ replace: vi.fn(), push: vi.fn() }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, push }), usePathname: () => "/ru/qr/table-token" }));
-vi.mock("../../../lib/table-orders-api", () => ({ createTableOrder: vi.fn(), getVenueOrderHistory: vi.fn(), lookupTableOrder: vi.fn(), resolveTableQR: vi.fn() }));
-vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), getPublicVenue: vi.fn(), getPublicVenueMenu: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace, push }),
+  usePathname: () => "/ru/qr/table-token",
+}));
+vi.mock("../../../lib/table-orders-api", () => ({
+  createTableOrder: vi.fn(),
+  getVenueOrderHistory: vi.fn(),
+  lookupTableOrder: vi.fn(),
+  resolveTableQR: vi.fn(),
+}));
+vi.mock("../../../lib/public-catalog-api", async (original) => ({
+  ...(await original<object>()),
+  getPublicVenue: vi.fn(),
+  getPublicVenueMenu: vi.fn(),
+}));
 const dishID = "50000000-0000-4000-8000-000000000001";
 const token = "table-token";
-const menu: PublicMenuCategory[] = [{ id: "food", name: "Еда", preorder_enabled: false, items: [{ id: dishID, name: "Паста", price_minor: 1200, currency: "EUR", image_url: "/pasta.jpg", description: "Сыр и томаты" }] }];
-const receipt: TableOrder = { id: "order-a", number: 42, status: "new", table_identifier: "07", total_minor: 1200, currency: "EUR", notes: "", created_at: "2026-10-09T12:00:00Z", items: [{ menu_item_id: dishID, name: "Паста", quantity: 1, unit_price_minor: 1200 }] };
-const show = (qr = token, notify = vi.fn()) => render(<I18nProvider initialLocale="ru"><TableVenueScreen token={qr} onBack={vi.fn()} notify={notify} /></I18nProvider>);
+const menu: PublicMenuCategory[] = [
+  {
+    id: "food",
+    name: "Еда",
+    preorder_enabled: false,
+    items: [
+      {
+        id: dishID,
+        name: "Паста",
+        price_minor: 1200,
+        currency: "EUR",
+        image_url: "/pasta.jpg",
+        description: "Сыр и томаты",
+      },
+    ],
+  },
+];
+const receipt: TableOrder = {
+  id: "order-a",
+  number: 42,
+  status: "new",
+  table_identifier: "07",
+  total_minor: 1200,
+  currency: "EUR",
+  notes: "",
+  created_at: "2026-10-09T12:00:00Z",
+  items: [{ menu_item_id: dishID, name: "Паста", quantity: 1, unit_price_minor: 1200 }],
+};
+const show = (qr = token, notify = vi.fn()) =>
+  render(
+    <I18nProvider initialLocale="ru">
+      <TableVenueScreen token={qr} onBack={vi.fn()} notify={notify} />
+    </I18nProvider>,
+  );
 const cart = () => within(screen.getByRole("complementary", { name: "Ваш заказ" }));
 beforeEach(() => {
-  vi.clearAllMocks(); sessionStorage.clear(); localStorage.clear();
-  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
-  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
-  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
-  vi.mocked(resolveTableQR).mockResolvedValue({ venue_id: "venue-a", table_id: "table-a", table_identifier: "07", version: 1, currency: "EUR", ordering_enabled: true });
-  vi.mocked(getPublicVenue).mockResolvedValue({ id: "venue-a", name: "QR Bistro", category_slug: "restaurants", address: "Main 1", city: "Bratislava", rating: 4.3, review_count: 4, tags: [], filters: [], preorder_enabled: true } as unknown as PublicVenue);
+  vi.clearAllMocks();
+  sessionStorage.clear();
+  localStorage.clear();
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+  );
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+  vi.mocked(resolveTableQR).mockResolvedValue({
+    venue_id: "venue-a",
+    table_id: "table-a",
+    table_identifier: "07",
+    version: 1,
+    currency: "EUR",
+    ordering_enabled: true,
+  });
+  vi.mocked(getPublicVenue).mockResolvedValue({
+    id: "venue-a",
+    name: "QR Bistro",
+    category_slug: "restaurants",
+    address: "Main 1",
+    city: "Bratislava",
+    rating: 4.3,
+    review_count: 4,
+    tags: [],
+    filters: [],
+    preorder_enabled: true,
+  } as unknown as PublicVenue);
   vi.mocked(getPublicVenueMenu).mockResolvedValue(menu);
   vi.mocked(lookupTableOrder).mockRejectedValue(new APIError("not_found", "missing", 404));
   vi.mocked(createTableOrder).mockResolvedValue(receipt);
-  vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [], scope: "device", scope_key: "device-a" });
+  vi.mocked(getVenueOrderHistory).mockResolvedValue({
+    orders: [],
+    scope: "device",
+    scope_key: "device-a",
+  });
 });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("QR table ordering on the venue page", () => {
   it("restores the mobile menu as a saved list without losing quantities or dish details", async () => {
-    vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })),
+    );
     localStorage.setItem("pocket:menu-view", "list");
     const rendered = show();
     fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
@@ -41,22 +129,39 @@ describe("QR table ordering on the venue page", () => {
     expect(screen.getByLabelText("Паста: 1")).toBeInTheDocument();
     fireEvent.click(detail);
     expect(screen.getByRole("dialog", { name: "Паста" })).toHaveTextContent("Сыр и томаты");
-    fireEvent.click(within(screen.getByRole("dialog", { name: "Паста" })).getByRole("button", { name: "Закрыть" }));
+    fireEvent.click(
+      within(screen.getByRole("dialog", { name: "Паста" })).getByRole("button", {
+        name: "Закрыть",
+      }),
+    );
     rendered.unmount();
     show();
-    expect((await screen.findByRole("button", { name: "Подробнее о блюде: Паста" })).closest(".venue-public-menu-grid")).toHaveClass("venue-public-menu-list");
+    expect(
+      (await screen.findByRole("button", { name: "Подробнее о блюде: Паста" })).closest(
+        ".venue-public-menu-grid",
+      ),
+    ).toHaveClass("venue-public-menu-list");
   });
   it("recalculates percentage tips with quantities, rejects invalid custom amounts and preserves the confirmed payload on retry", async () => {
     vi.mocked(createTableOrder).mockRejectedValueOnce(new Error("network"));
-    vi.mocked(createTableOrder).mockResolvedValueOnce({ ...receipt, tip_minor: 123, subtotal_minor: 2400, total_minor: 2523 });
+    vi.mocked(createTableOrder).mockResolvedValueOnce({
+      ...receipt,
+      tip_minor: 123,
+      subtotal_minor: 2400,
+      total_minor: 2523,
+    });
     show();
     fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
     expect(cart().getByRole("button", { name: "Нет" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(cart().getByRole("button", { name: "10%" }));
     expect(cart().queryByRole("dialog")).not.toBeInTheDocument();
-    expect(cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("13,20");
+    expect(
+      cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+    ).toHaveTextContent("13,20");
     fireEvent.click(cart().getByRole("button", { name: "Добавить Паста" }));
-    expect(cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("26,40");
+    expect(
+      cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+    ).toHaveTextContent("26,40");
     fireEvent.click(cart().getByRole("button", { name: "Другая сумма" }));
     const custom = cart().getByRole("textbox", { name: "Сумма чаевых · EUR" });
     fireEvent.change(custom, { target: { value: "-1" } });
@@ -64,11 +169,16 @@ describe("QR table ordering on the venue page", () => {
     expect(createTableOrder).not.toHaveBeenCalled();
     fireEvent.change(custom, { target: { value: "1,23" } });
     fireEvent.click(cart().getByRole("button", { name: "Сохранить" }));
-    expect(cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("25,23");
+    expect(
+      cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+    ).toHaveTextContent("25,23");
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     await cart().findByRole("alert");
     const first = vi.mocked(createTableOrder).mock.calls[0][0];
-    expect(first).toMatchObject({ tip: { mode: "custom", amount_minor: 123 }, expected_total_minor: 2523 });
+    expect(first).toMatchObject({
+      tip: { mode: "custom", amount_minor: 123 },
+      expected_total_minor: 2523,
+    });
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     await cart().findByText("Заказ отправлен №42");
     expect(vi.mocked(createTableOrder).mock.calls[1][0]).toEqual(first);
@@ -90,35 +200,65 @@ describe("QR table ordering on the venue page", () => {
     fireEvent.click(within(info).getByRole("button", { name: "Закрыть" }));
     expect(screen.queryByRole("button", { name: "Настройки меню" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
-    expect(await within(screen.getByRole("dialog", { name: "История заказов в заведении" })).findByText("Вы ещё не отправили заказ")).toBeInTheDocument();
-    fireEvent.click(within(screen.getByRole("dialog", { name: "История заказов в заведении" })).getByRole("button", { name: "Закрыть" }));
+    expect(
+      await within(screen.getByRole("dialog", { name: "История заказов в заведении" })).findByText(
+        "Вы ещё не отправили заказ",
+      ),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      within(screen.getByRole("dialog", { name: "История заказов в заведении" })).getByRole(
+        "button",
+        { name: "Закрыть" },
+      ),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Подробнее о блюде: Паста" }));
     expect(screen.getByRole("dialog", { name: "Паста" })).toBeInTheDocument();
-    fireEvent.click(within(screen.getByRole("dialog", { name: "Паста" })).getByRole("button", { name: "Закрыть" }));
+    fireEvent.click(
+      within(screen.getByRole("dialog", { name: "Паста" })).getByRole("button", {
+        name: "Закрыть",
+      }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
     expect(cart().getByLabelText("Комментарий к заказу")).toBeInTheDocument();
     expect(cart().getAllByText(/12,00/)).toHaveLength(2);
   });
   it("submits once while pending on local HTTP, keeps the same key on retry, and restores only this guest's receipt", async () => {
-    vi.stubGlobal("crypto", { getRandomValues: (bytes: Uint8Array) => { bytes.fill(8); return bytes; } });
+    vi.stubGlobal("crypto", {
+      getRandomValues: (bytes: Uint8Array) => {
+        bytes.fill(8);
+        return bytes;
+      },
+    });
     let reject!: (reason: Error) => void;
-    vi.mocked(createTableOrder).mockReturnValueOnce(new Promise((_resolve, fail) => { reject = fail; }));
+    vi.mocked(createTableOrder).mockReturnValueOnce(
+      new Promise((_resolve, fail) => {
+        reject = fail;
+      }),
+    );
     const notify = vi.fn();
     const view = show(token, notify);
     fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
-    fireEvent.change(cart().getByLabelText("Комментарий к заказу"), { target: { value: "Без лука" } });
+    fireEvent.change(cart().getByLabelText("Комментарий к заказу"), {
+      target: { value: "Без лука" },
+    });
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     expect(cart().getByRole("button", { name: /^Отправляем заказ/ })).toBeDisabled();
     expect(createTableOrder).toHaveBeenCalledTimes(1);
     const input = vi.mocked(createTableOrder).mock.calls[0][0];
-    expect(input).toMatchObject({ token, notes: "Без лука", items: [{ menu_item_id: dishID, quantity: 1, expected_price_minor: 1200 }] });
+    expect(input).toMatchObject({
+      token,
+      notes: "Без лука",
+      items: [{ menu_item_id: dishID, quantity: 1, expected_price_minor: 1200 }],
+    });
     expect(input.idempotency_key.length).toBeGreaterThan(16);
     await act(async () => reject(new Error("network")));
     expect(notify).not.toHaveBeenCalled();
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     await waitFor(() => expect(cart().getByText("Заказ отправлен №42")).toBeInTheDocument());
     expect(notify).toHaveBeenCalledExactlyOnceWith("Ваш заказ отправлен в обработку");
-    expect(cart().getByRole("region", { name: "Чек заказа" })).toHaveTextContent("Ваш заказ отправлен в обработку");
+    expect(cart().getByRole("region", { name: "Чек заказа" })).toHaveTextContent(
+      "Ваш заказ отправлен в обработку",
+    );
     expect(cart().getByRole("region", { name: "Чек заказа" })).toHaveTextContent("Паста");
     expect(vi.mocked(createTableOrder).mock.calls[1][0]).toEqual(input);
     expect(cart().queryByRole("button", { name: /^Отправить заказ/ })).not.toBeInTheDocument();
@@ -127,17 +267,25 @@ describe("QR table ordering on the venue page", () => {
     show();
     await waitFor(() => expect(cart().getByText("Готовится №42")).toBeInTheDocument());
     expect(cart().queryByText("Ваш заказ отправлен в обработку")).not.toBeInTheDocument();
-    expect(lookupTableOrder).toHaveBeenLastCalledWith(token, input.idempotency_key, expect.any(AbortSignal));
+    expect(lookupTableOrder).toHaveBeenLastCalledWith(
+      token,
+      input.idempotency_key,
+      expect.any(AbortSignal),
+    );
   });
   it("keeps an uncertain submission immutable across reload and retries its exact payload", async () => {
     vi.mocked(createTableOrder).mockRejectedValueOnce(new Error("response lost"));
     const first = show();
     fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
-    fireEvent.change(cart().getByLabelText("Комментарий к заказу"), { target: { value: "Без лука" } });
+    fireEvent.change(cart().getByLabelText("Комментарий к заказу"), {
+      target: { value: "Без лука" },
+    });
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     const input = vi.mocked(createTableOrder).mock.calls[0][0];
     // Storage is written before the request completes, not only by a React effect.
-    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).submission).toEqual(input);
+    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).submission).toEqual(
+      input,
+    );
     await cart().findByRole("alert");
     expect(cart().getByLabelText("Комментарий к заказу")).toBeDisabled();
     expect(cart().getByRole("button", { name: "Убрать Паста" })).toBeDisabled();
@@ -152,18 +300,35 @@ describe("QR table ordering on the venue page", () => {
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     await cart().findByText("Заказ отправлен №42");
     expect(vi.mocked(createTableOrder).mock.calls[1][0]).toEqual(input);
-    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual({});
+    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual(
+      {},
+    );
     fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
     expect(cart().getByLabelText("Комментарий к заказу")).toBeEnabled();
   });
   it("restores a confirmed order after a lost response without resending it", async () => {
-    const input = { token, idempotency_key: "lost-response-confirmed-key", notes: "Без лука", items: [{ menu_item_id: dishID, quantity: 1, expected_price_minor: 1200 }] };
-    sessionStorage.setItem(`pocket:table-cart:${token}`, JSON.stringify({ quantities: { [dishID]: 1 }, notes: input.notes, tip: { mode: "none" }, submission: input }));
+    const input = {
+      token,
+      idempotency_key: "lost-response-confirmed-key",
+      notes: "Без лука",
+      items: [{ menu_item_id: dishID, quantity: 1, expected_price_minor: 1200 }],
+    };
+    sessionStorage.setItem(
+      `pocket:table-cart:${token}`,
+      JSON.stringify({
+        quantities: { [dishID]: 1 },
+        notes: input.notes,
+        tip: { mode: "none" },
+        submission: input,
+      }),
+    );
     vi.mocked(lookupTableOrder).mockResolvedValue(receipt);
     show();
     await waitFor(() => expect(cart().getByText("Заказ отправлен №42")).toBeInTheDocument());
     expect(createTableOrder).not.toHaveBeenCalled();
-    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual({});
+    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual(
+      {},
+    );
   });
   it("unlocks the cart on a definitive bill rejection without losing its dishes", async () => {
     vi.mocked(createTableOrder).mockRejectedValueOnce(new APIError("bill_locked", "locked", 409));
@@ -173,13 +338,19 @@ describe("QR table ordering on the venue page", () => {
     await cart().findByRole("alert");
     expect(cart().getByLabelText("Комментарий к заказу")).toBeEnabled();
     expect(cart().getByRole("button", { name: "Убрать Паста" })).toBeEnabled();
-    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual({ [dishID]: 1 });
+    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual({
+      [dishID]: 1,
+    });
   });
   it("refreshes changed prices and asks the guest to confirm the new total", async () => {
-    vi.mocked(createTableOrder).mockRejectedValueOnce(new APIError("price_changed", "changed", 409));
+    vi.mocked(createTableOrder).mockRejectedValueOnce(
+      new APIError("price_changed", "changed", 409),
+    );
     show();
     fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
-    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ ...menu[0], items: [{ ...menu[0].items[0], price_minor: 1500 }] }]);
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([
+      { ...menu[0], items: [{ ...menu[0].items[0], price_minor: 1500 }] },
+    ]);
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     expect(await cart().findByRole("alert")).toHaveTextContent("Цена изменилась");
     await waitFor(() => expect(cart().getAllByText(/15,00/)).toHaveLength(2));
@@ -198,9 +369,13 @@ describe("QR table ordering on the venue page", () => {
     show();
     fireEvent.click(await screen.findByRole("button", { name: /^Ваш заказ · 1/ }));
     const dialog = screen.getByRole("dialog", { name: "Ваш заказ" });
-    expect(within(dialog).getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("12,00");
+    expect(
+      within(dialog).getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+    ).toHaveTextContent("12,00");
     expect(within(dialog).getByText("Стол 07")).toBeInTheDocument();
-    expect(within(dialog).queryByRole("button", { name: "Вернуться в меню" })).not.toBeInTheDocument();
+    expect(
+      within(dialog).queryByRole("button", { name: "Вернуться в меню" }),
+    ).not.toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Закрыть" }));
     expect(screen.queryByRole("dialog", { name: "Ваш заказ" })).not.toBeInTheDocument();
     expect(document.body.style.overflow).toBe("");
@@ -208,7 +383,11 @@ describe("QR table ordering on the venue page", () => {
     expect(screen.queryByRole("button", { name: /^Ваш заказ/ })).not.toBeInTheDocument();
   });
   it("clears cached private history when the account session expires", async () => {
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [receipt], scope: "account", scope_key: "account-a" });
+    vi.mocked(getVenueOrderHistory).mockResolvedValue({
+      orders: [receipt],
+      scope: "account",
+      scope_key: "account-a",
+    });
     show();
     fireEvent.click(await screen.findByRole("button", { name: "История заказов в заведении" }));
     let history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));
@@ -223,8 +402,22 @@ describe("QR table ordering on the venue page", () => {
   });
   it("keeps the pagination position when history refreshes after reopening", async () => {
     vi.mocked(getVenueOrderHistory).mockImplementation(async (_venue, options) => ({
-      orders: [{ ...receipt, id: options?.cursor === "second" ? "page-three" : options?.cursor === "first" ? "page-two" : "page-one", number: options?.cursor === "second" ? 3 : options?.cursor === "first" ? 2 : 1 }],
-      scope: "device", scope_key: "device-a", next_cursor: options?.cursor === "second" ? undefined : options?.cursor === "first" ? "second" : "first",
+      orders: [
+        {
+          ...receipt,
+          id:
+            options?.cursor === "second"
+              ? "page-three"
+              : options?.cursor === "first"
+                ? "page-two"
+                : "page-one",
+          number: options?.cursor === "second" ? 3 : options?.cursor === "first" ? 2 : 1,
+        },
+      ],
+      scope: "device",
+      scope_key: "device-a",
+      next_cursor:
+        options?.cursor === "second" ? undefined : options?.cursor === "first" ? "second" : "first",
     }));
     show();
     fireEvent.click(await screen.findByRole("button", { name: "История заказов в заведении" }));
@@ -234,20 +427,30 @@ describe("QR table ordering on the venue page", () => {
     fireEvent.click(history.getByRole("button", { name: "Закрыть" }));
     fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
     history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));
-    await waitFor(() => expect(history.getByRole("button", { name: "Показать ещё" })).toBeEnabled());
+    await waitFor(() =>
+      expect(history.getByRole("button", { name: "Показать ещё" })).toBeEnabled(),
+    );
     fireEvent.click(history.getByRole("button", { name: "Показать ещё" }));
     await history.findByText("Заказ №3");
     expect(history.queryByRole("button", { name: "Показать ещё" })).not.toBeInTheDocument();
     expect(createTableOrder).not.toHaveBeenCalled();
   });
   it("does not reopen a cancelled repeat when a delayed menu response arrives", async () => {
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [receipt], scope: "device", scope_key: "device-a" });
+    vi.mocked(getVenueOrderHistory).mockResolvedValue({
+      orders: [receipt],
+      scope: "device",
+      scope_key: "device-a",
+    });
     show();
     fireEvent.click(await screen.findByRole("button", { name: "История заказов в заведении" }));
     const history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));
     fireEvent.click(await history.findByText("Заказ №42"));
     let finish!: (value: PublicMenuCategory[]) => void;
-    vi.mocked(getPublicVenueMenu).mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    vi.mocked(getPublicVenueMenu).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
     fireEvent.click(history.getByRole("button", { name: "Повторить заказ" }));
     fireEvent.click(history.getByRole("button", { name: "Назад к истории заказов" }));
     await act(async () => finish(menu));
@@ -259,7 +462,14 @@ describe("QR table ordering on the venue page", () => {
     const savedOrders = new Map<string, TableOrder>();
     vi.mocked(createTableOrder).mockImplementation(async (input) => {
       const number = savedOrders.size + 42;
-      const result = { ...receipt, id: `order-${number}`, number, total_minor: 1200 * input.items[0].quantity, items: [{ ...receipt.items[0], quantity: input.items[0].quantity }], created_at: `2026-10-09T12:0${savedOrders.size}:00Z` };
+      const result = {
+        ...receipt,
+        id: `order-${number}`,
+        number,
+        total_minor: 1200 * input.items[0].quantity,
+        items: [{ ...receipt.items[0], quantity: input.items[0].quantity }],
+        created_at: `2026-10-09T12:0${savedOrders.size}:00Z`,
+      };
       savedOrders.set(input.idempotency_key, result);
       return result;
     });
@@ -268,7 +478,11 @@ describe("QR table ordering on the venue page", () => {
       if (!result) throw new APIError("not_found", "missing", 404);
       return { ...result, status: "preparing" };
     });
-    vi.mocked(getVenueOrderHistory).mockImplementation(async () => ({ orders: [...savedOrders.values()].map((entry) => ({ ...entry, status: "preparing" })), scope: "device", scope_key: "device-a" }));
+    vi.mocked(getVenueOrderHistory).mockImplementation(async () => ({
+      orders: [...savedOrders.values()].map((entry) => ({ ...entry, status: "preparing" })),
+      scope: "device",
+      scope_key: "device-a",
+    }));
     const first = show();
     fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
@@ -278,15 +492,21 @@ describe("QR table ordering on the venue page", () => {
     expect(cart().queryByRole("region", { name: "Чек заказа" })).not.toBeInTheDocument();
     fireEvent.click(cart().getByRole("button", { name: /^Отправить заказ/ }));
     await cart().findByText(/№43/);
-    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).orderKeys).toHaveLength(2);
+    expect(
+      JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).orderKeys,
+    ).toHaveLength(2);
     first.unmount();
     show();
     await waitFor(() => expect(cart().getByText("Готовится №43")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
-    fireEvent.change(cart().getByLabelText("Комментарий к заказу"), { target: { value: "Новая порция" } });
+    fireEvent.change(cart().getByLabelText("Комментарий к заказу"), {
+      target: { value: "Новая порция" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
     const history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));
-    expect(await history.findByRole("button", { name: /Заказ №43.*Готовится/ })).toHaveTextContent("24,00");
+    expect(await history.findByRole("button", { name: /Заказ №43.*Готовится/ })).toHaveTextContent(
+      "24,00",
+    );
     fireEvent.click(history.getByRole("button", { name: /Заказ №42.*Готовится/ }));
     expect(history.getByRole("region", { name: "Чек заказа" })).toHaveTextContent("12,00");
     expect(history.getByRole("region", { name: "Чек заказа" })).toHaveTextContent("Паста");
@@ -294,12 +514,38 @@ describe("QR table ordering on the venue page", () => {
     expect(history.getByRole("button", { name: /Заказ №43/ })).toBeInTheDocument();
     fireEvent.click(history.getByRole("button", { name: "Закрыть" }));
     expect(cart().getByLabelText("Комментарий к заказу")).toHaveValue("Новая порция");
-    expect(cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("12,00");
+    expect(
+      cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+    ).toHaveTextContent("12,00");
   });
   it("restores venue history at another table, reviews changed prices and sends only after cart confirmation", async () => {
-    const old = { ...receipt, table_identifier: "1", notes: "Без лука", items: [...receipt.items, { menu_item_id: "50000000-0000-4000-8000-000000000099", name: "Суп", quantity: 1, unit_price_minor: 500 }] };
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [old], scope: "device", scope_key: "device-a" });
-    vi.mocked(resolveTableQR).mockResolvedValue({ venue_id: "venue-a", table_id: "table-five", table_identifier: "5", version: 2, currency: "EUR", ordering_enabled: true });
+    const old = {
+      ...receipt,
+      table_identifier: "1",
+      notes: "Без лука",
+      items: [
+        ...receipt.items,
+        {
+          menu_item_id: "50000000-0000-4000-8000-000000000099",
+          name: "Суп",
+          quantity: 1,
+          unit_price_minor: 500,
+        },
+      ],
+    };
+    vi.mocked(getVenueOrderHistory).mockResolvedValue({
+      orders: [old],
+      scope: "device",
+      scope_key: "device-a",
+    });
+    vi.mocked(resolveTableQR).mockResolvedValue({
+      venue_id: "venue-a",
+      table_id: "table-five",
+      table_identifier: "5",
+      version: 2,
+      currency: "EUR",
+      ordering_enabled: true,
+    });
     show("new-visit-table-five");
     await screen.findByRole("button", { name: "Добавить Паста" });
     fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
@@ -307,13 +553,17 @@ describe("QR table ordering on the venue page", () => {
     fireEvent.click(await history.findByRole("button", { name: /Заказ №42/ }));
     expect(history.getByRole("region", { name: "Чек заказа" })).toHaveTextContent("Стол 1");
     expect(history.getByRole("region", { name: "Чек заказа" })).toHaveTextContent("12,00");
-    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ ...menu[0], items: [{ ...menu[0].items[0], price_minor: 1500 }] }]);
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([
+      { ...menu[0], items: [{ ...menu[0].items[0], price_minor: 1500 }] },
+    ]);
     fireEvent.click(history.getByRole("button", { name: "Повторить заказ" }));
     expect(await history.findByText(/Цена изменилась: 12,00.*15,00/)).toBeInTheDocument();
     expect(history.getByText("Суп — Блюдо недоступно")).toBeInTheDocument();
     expect(createTableOrder).not.toHaveBeenCalled();
     fireEvent.click(history.getByRole("button", { name: /^В корзину/ }));
-    expect(screen.queryByRole("dialog", { name: "История заказов в заведении" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "История заказов в заведении" }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole("dialog", { name: "Ваш заказ" })).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "QR Bistro" })).toBeInTheDocument();
     const cartButton = screen.getByRole("button", { name: /^Ваш заказ · 1/ });
@@ -323,47 +573,82 @@ describe("QR table ordering on the venue page", () => {
     const repeatedCart = within(screen.getByRole("dialog", { name: "Ваш заказ" }));
     expect(repeatedCart.getByText("Стол 5")).toBeInTheDocument();
     expect(repeatedCart.getByLabelText("Комментарий к заказу")).toHaveValue("Без лука");
-    expect(repeatedCart.getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("15,00");
+    expect(
+      repeatedCart.getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+    ).toHaveTextContent("15,00");
     expect(createTableOrder).not.toHaveBeenCalled();
     fireEvent.click(repeatedCart.getByRole("button", { name: /^Отправить заказ/ }));
-    await waitFor(() => expect(createTableOrder).toHaveBeenCalledWith(expect.objectContaining({ token: "new-visit-table-five", items: [{ menu_item_id: dishID, quantity: 1, expected_price_minor: 1500 }] })));
+    await waitFor(() =>
+      expect(createTableOrder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          token: "new-visit-table-five",
+          items: [{ menu_item_id: dishID, quantity: 1, expected_price_minor: 1500 }],
+        }),
+      ),
+    );
     expect(old.items[0].unit_price_minor).toBe(1200);
   });
 
-  it.each([["Объединить с корзиной", 4], ["Заменить корзину", 3]])("applies edited repeat quantities with %s without sending an order", async (action, quantity) => {
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [{ ...receipt, items: [{ ...receipt.items[0], quantity: 2 }] }], scope: "account", scope_key: "account-a" });
-    show();
-    fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
-    fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
-    const history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));
-    fireEvent.click(await history.findByRole("button", { name: /Заказ №42/ }));
-    fireEvent.click(history.getByRole("button", { name: "Повторить заказ" }));
-    const increase = await history.findByRole("button", { name: "Добавить Паста" });
-    expect(history.getByRole("img", { name: "Паста" })).toHaveStyle({ backgroundImage: 'url("/pasta.jpg")' });
-    fireEvent.click(increase);
-    expect(history.getByLabelText("Паста: 3")).toBeInTheDocument();
-    expect(history.getByRole("button", { name: /^Заменить корзину/ })).toHaveTextContent("36,00");
-    expect(cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("12,00");
-    fireEvent.click(history.getByRole("button", { name: "Убрать Паста" }));
-    expect(history.getByLabelText("Паста: 2")).toBeInTheDocument();
-    expect(history.getByRole("button", { name: /^Заменить корзину/ })).toHaveTextContent("24,00");
-    fireEvent.click(increase);
-    fireEvent.click(await history.findByRole("button", { name: new RegExp(`^${action}`) }));
-    expect(screen.queryByRole("dialog", { name: "История заказов в заведении" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("dialog", { name: "Ваш заказ" })).not.toBeInTheDocument();
-    const cartButton = screen.getByRole("button", { name: new RegExp(`^Ваш заказ · ${quantity}`) });
-    expect(cartButton).toHaveTextContent(quantity === 4 ? "48,00" : "36,00");
-    expect(createTableOrder).not.toHaveBeenCalled();
-    fireEvent.click(cartButton);
-    const repeatedCart = within(screen.getByRole("dialog", { name: "Ваш заказ" }));
-    expect(repeatedCart.getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent(quantity === 4 ? "48,00" : "36,00");
-    expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual({ [dishID]: quantity });
-    expect(createTableOrder).not.toHaveBeenCalled();
-  });
+  it.each([
+    ["Объединить с корзиной", 4],
+    ["Заменить корзину", 3],
+  ])(
+    "applies edited repeat quantities with %s without sending an order",
+    async (action, quantity) => {
+      vi.mocked(getVenueOrderHistory).mockResolvedValue({
+        orders: [{ ...receipt, items: [{ ...receipt.items[0], quantity: 2 }] }],
+        scope: "account",
+        scope_key: "account-a",
+      });
+      show();
+      fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
+      fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
+      const history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));
+      fireEvent.click(await history.findByRole("button", { name: /Заказ №42/ }));
+      fireEvent.click(history.getByRole("button", { name: "Повторить заказ" }));
+      const increase = await history.findByRole("button", { name: "Добавить Паста" });
+      expect(history.getByRole("img", { name: "Паста" })).toHaveStyle({
+        backgroundImage: 'url("/pasta.jpg")',
+      });
+      fireEvent.click(increase);
+      expect(history.getByLabelText("Паста: 3")).toBeInTheDocument();
+      expect(history.getByRole("button", { name: /^Заменить корзину/ })).toHaveTextContent("36,00");
+      expect(
+        cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+      ).toHaveTextContent("12,00");
+      fireEvent.click(history.getByRole("button", { name: "Убрать Паста" }));
+      expect(history.getByLabelText("Паста: 2")).toBeInTheDocument();
+      expect(history.getByRole("button", { name: /^Заменить корзину/ })).toHaveTextContent("24,00");
+      fireEvent.click(increase);
+      fireEvent.click(await history.findByRole("button", { name: new RegExp(`^${action}`) }));
+      expect(
+        screen.queryByRole("dialog", { name: "История заказов в заведении" }),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog", { name: "Ваш заказ" })).not.toBeInTheDocument();
+      const cartButton = screen.getByRole("button", {
+        name: new RegExp(`^Ваш заказ · ${quantity}`),
+      });
+      expect(cartButton).toHaveTextContent(quantity === 4 ? "48,00" : "36,00");
+      expect(createTableOrder).not.toHaveBeenCalled();
+      fireEvent.click(cartButton);
+      const repeatedCart = within(screen.getByRole("dialog", { name: "Ваш заказ" }));
+      expect(
+        repeatedCart.getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+      ).toHaveTextContent(quantity === 4 ? "48,00" : "36,00");
+      expect(JSON.parse(sessionStorage.getItem(`pocket:table-cart:${token}`)!).quantities).toEqual({
+        [dishID]: quantity,
+      });
+      expect(createTableOrder).not.toHaveBeenCalled();
+    },
+  );
 
   it("limits the repeat quantity to 30, keeps focus on the counter and leaves history unchanged", async () => {
     const old = { ...receipt, items: [{ ...receipt.items[0], quantity: 29 }] };
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [old], scope: "device", scope_key: "device-a" });
+    vi.mocked(getVenueOrderHistory).mockResolvedValue({
+      orders: [old],
+      scope: "device",
+      scope_key: "device-a",
+    });
     show();
     fireEvent.click(await screen.findByRole("button", { name: "История заказов в заведении" }));
     const history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));
@@ -375,17 +660,25 @@ describe("QR table ordering on the venue page", () => {
     expect(history.getByLabelText("Паста: 30")).toBeInTheDocument();
     expect(increase).toBeDisabled();
     expect(history.getByRole("heading", { name: "Повторить заказ" })).not.toHaveFocus();
-    expect(history.getByRole("button", { name: /^В корзину/ }).parentElement).toHaveTextContent("360,00");
+    expect(history.getByRole("button", { name: /^В корзину/ }).parentElement).toHaveTextContent(
+      "360,00",
+    );
     fireEvent.click(history.getByRole("button", { name: "Убрать Паста" }));
     expect(increase).toBeEnabled();
     expect(history.getByLabelText("Паста: 29")).toBeInTheDocument();
-    expect(history.getByRole("button", { name: /^В корзину/ }).parentElement).toHaveTextContent("348,00");
+    expect(history.getByRole("button", { name: /^В корзину/ }).parentElement).toHaveTextContent(
+      "348,00",
+    );
     expect(old.items[0].quantity).toBe(29);
     expect(createTableOrder).not.toHaveBeenCalled();
   });
 
   it("removes a repeat item at zero and disables both cart actions without changing the existing cart", async () => {
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [receipt], scope: "device", scope_key: "device-a" });
+    vi.mocked(getVenueOrderHistory).mockResolvedValue({
+      orders: [receipt],
+      scope: "device",
+      scope_key: "device-a",
+    });
     show();
     fireEvent.click(await screen.findByRole("button", { name: "Добавить Паста" }));
     fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
@@ -398,28 +691,58 @@ describe("QR table ordering on the venue page", () => {
     expect(history.getByRole("button", { name: /^Объединить с корзиной/ })).toBeDisabled();
     expect(history.getByRole("button", { name: /^Заменить корзину/ })).toBeDisabled();
     fireEvent.click(history.getByRole("button", { name: "Закрыть" }));
-    expect(cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement).toHaveTextContent("12,00");
+    expect(
+      cart().getByRole("button", { name: /^Отправить заказ/ }).parentElement,
+    ).toHaveTextContent("12,00");
     expect(createTableOrder).not.toHaveBeenCalled();
   });
 
   it("imports secret legacy keys from old or revoked QR carts and restores server history after a new session", async () => {
     const legacyKey = "legacy-own-secret-order-key";
-    sessionStorage.setItem("pocket:table-cart:revoked-old-qr", JSON.stringify({ quantities: {}, notes: "", lastKey: legacyKey, orderKeys: [legacyKey] }));
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [receipt], scope: "device", scope_key: "device-a" });
+    sessionStorage.setItem(
+      "pocket:table-cart:revoked-old-qr",
+      JSON.stringify({ quantities: {}, notes: "", lastKey: legacyKey, orderKeys: [legacyKey] }),
+    );
+    vi.mocked(getVenueOrderHistory).mockResolvedValue({
+      orders: [receipt],
+      scope: "device",
+      scope_key: "device-a",
+    });
     const first = show("new-table-qr");
     await screen.findByRole("button", { name: "Добавить Паста" });
-    await waitFor(() => expect(getVenueOrderHistory).toHaveBeenCalledWith("venue-a", expect.objectContaining({ legacyKeys: [legacyKey] })));
+    await waitFor(() =>
+      expect(getVenueOrderHistory).toHaveBeenCalledWith(
+        "venue-a",
+        expect.objectContaining({ legacyKeys: [legacyKey] }),
+      ),
+    );
     expect(resolveTableQR).not.toHaveBeenCalledWith("revoked-old-qr", expect.anything());
-    first.unmount(); sessionStorage.clear(); vi.mocked(getVenueOrderHistory).mockClear();
+    first.unmount();
+    sessionStorage.clear();
+    vi.mocked(getVenueOrderHistory).mockClear();
     show("next-visit-another-table");
     fireEvent.click(await screen.findByRole("button", { name: "История заказов в заведении" }));
-    expect(await within(screen.getByRole("dialog", { name: "История заказов в заведении" })).findByRole("button", { name: /Заказ №42/ })).toBeInTheDocument();
-    expect(getVenueOrderHistory).toHaveBeenCalledWith("venue-a", expect.objectContaining({ legacyKeys: [] }));
+    expect(
+      await within(screen.getByRole("dialog", { name: "История заказов в заведении" })).findByRole(
+        "button",
+        { name: /Заказ №42/ },
+      ),
+    ).toBeInTheDocument();
+    expect(getVenueOrderHistory).toHaveBeenCalledWith(
+      "venue-a",
+      expect.objectContaining({ legacyKeys: [] }),
+    );
     expect(createTableOrder).not.toHaveBeenCalled();
   });
 
   it("does not add or send an order when all its dishes or options are unavailable", async () => {
-    vi.mocked(getVenueOrderHistory).mockResolvedValue({ orders: [{ ...receipt, items: [{ ...receipt.items[0], modifiers: [{ name: "Extra cheese" }] }] }], scope: "device", scope_key: "device-a" });
+    vi.mocked(getVenueOrderHistory).mockResolvedValue({
+      orders: [
+        { ...receipt, items: [{ ...receipt.items[0], modifiers: [{ name: "Extra cheese" }] }] },
+      ],
+      scope: "device",
+      scope_key: "device-a",
+    });
     show();
     fireEvent.click(await screen.findByRole("button", { name: "История заказов в заведении" }));
     const history = within(screen.getByRole("dialog", { name: "История заказов в заведении" }));

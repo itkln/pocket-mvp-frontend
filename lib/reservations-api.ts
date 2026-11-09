@@ -25,12 +25,25 @@ export type CustomerReservation = {
   preorder_items: { name: string; quantity: number; unit_price_minor: number }[];
 };
 
-export async function listCustomerReservations(signal?: AbortSignal): Promise<CustomerReservation[]> {
-  return (await apiRequest<{ reservations: CustomerReservation[] }>("/spots/me/reservations", { signal, cache: "no-store" })).reservations;
+export async function listCustomerReservations(
+  signal?: AbortSignal,
+): Promise<CustomerReservation[]> {
+  return (
+    await apiRequest<{ reservations: CustomerReservation[] }>("/spots/me/reservations", {
+      signal,
+      cache: "no-store",
+    })
+  ).reservations;
 }
 
 export async function cancelCustomerReservation(id: string): Promise<CustomerReservation> {
-  return (await apiRequest<{ reservation: CustomerReservation }>(`/spots/me/reservations/${encodeURIComponent(id)}/cancel`, {
-    method: "POST", cache: "no-store",
-  })).reservation;
+  return (
+    await apiRequest<{ reservation: CustomerReservation }>(
+      `/spots/me/reservations/${encodeURIComponent(id)}/cancel`,
+      {
+        method: "POST",
+        cache: "no-store",
+      },
+    )
+  ).reservation;
 }

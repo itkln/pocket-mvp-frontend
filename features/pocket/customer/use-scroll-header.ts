@@ -8,10 +8,16 @@ export function useScrollHeader(container?: RefObject<HTMLElement | null>, reset
   useEffect(() => {
     const element = container?.current;
     const target = element ?? window;
-    const position = () => Math.max(0, Math.min(
-      element ? element.scrollTop : window.scrollY,
-      element ? element.scrollHeight - element.clientHeight : document.documentElement.scrollHeight - window.innerHeight,
-    ));
+    const position = () =>
+      Math.max(
+        0,
+        Math.min(
+          element ? element.scrollTop : window.scrollY,
+          element
+            ? element.scrollHeight - element.clientHeight
+            : document.documentElement.scrollHeight - window.innerHeight,
+        ),
+      );
     let anchor = position();
     const update = () => {
       const current = position();

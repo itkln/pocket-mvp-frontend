@@ -42,7 +42,9 @@ export async function getCurrentUser(): Promise<AuthUser> {
   return normalizeUser(response.user);
 }
 
-export async function updateProfile(payload: Pick<AuthUser, "first_name" | "last_name"> & { phone?: string }): Promise<AuthUser> {
+export async function updateProfile(
+  payload: Pick<AuthUser, "first_name" | "last_name"> & { phone?: string },
+): Promise<AuthUser> {
   const response = await apiRequest<{ user: AuthUser }>("/auth/me", {
     method: "PATCH",
     body: JSON.stringify(payload),
@@ -54,7 +56,11 @@ export async function logout(): Promise<void> {
   await apiRequest<void>("/auth/logout", { method: "POST" });
 }
 
-export async function requestPasswordReset(email: string, locale: string, product: "vendor" | "spots" | "dish" = "vendor"): Promise<void> {
+export async function requestPasswordReset(
+  email: string,
+  locale: string,
+  product: "vendor" | "spots" | "dish" = "vendor",
+): Promise<void> {
   await apiRequest<{ status: string }>("/auth/password-reset/request", {
     method: "POST",
     body: JSON.stringify({ email, locale, product }),

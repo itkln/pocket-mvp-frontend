@@ -19,7 +19,13 @@ export function readMenuNutrition(data: FormData): MenuNutrition {
   for (const field of nutritionFields) {
     const raw = String(data.get(field.name) ?? "").trim();
     const value = raw === "" ? null : Number(raw);
-    if (value !== null && (!Number.isFinite(value) || value < field.min || value > field.max || (field.step === 1 && !Number.isInteger(value)))) {
+    if (
+      value !== null &&
+      (!Number.isFinite(value) ||
+        value < field.min ||
+        value > field.max ||
+        (field.step === 1 && !Number.isInteger(value)))
+    ) {
       throw new RangeError(`Invalid ${field.name}`);
     }
     result[field.name] = value;

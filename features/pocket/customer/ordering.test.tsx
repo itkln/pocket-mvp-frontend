@@ -17,7 +17,9 @@ describe("CustomerMenu venue page", () => {
   it("renders the focused venue sections without overloading the navigation", () => {
     renderVenue();
     expect(screen.getByRole("heading", { name: "North & Vine" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Разделы заведения" })).toHaveTextContent("МенюОтзывыО местеКонтакты");
+    expect(screen.getByRole("navigation", { name: "Разделы заведения" })).toHaveTextContent(
+      "МенюОтзывыО местеКонтакты",
+    );
     expect(screen.getByRole("heading", { name: "Забронировать" })).toBeInTheDocument();
   });
 
@@ -33,7 +35,9 @@ describe("CustomerMenu venue page", () => {
   it("continues immediately when the guest skips preorder", () => {
     const { onReserve } = renderVenue();
     expect(screen.getByRole("heading", { name: "В предзаказе пока пусто" })).toBeInTheDocument();
-    const continueWithoutPreorder = screen.getByRole("button", { name: "Продолжить без предзаказа" });
+    const continueWithoutPreorder = screen.getByRole("button", {
+      name: "Продолжить без предзаказа",
+    });
     fireEvent.click(continueWithoutPreorder);
     expect(onReserve).toHaveBeenCalledOnce();
   });
@@ -43,7 +47,12 @@ describe("CustomerMenu venue page", () => {
     const dateTrigger = screen.getByRole("button", { name: /Выбрать дату:/ });
     fireEvent.click(dateTrigger);
     expect(screen.getByRole("dialog", { name: "Выбор даты" })).toBeInTheDocument();
-    const availableDates = screen.getAllByRole("button", { name: /\d{4}/ }).filter((button) => !button.hasAttribute("disabled") && button.getAttribute("aria-pressed") === "false");
+    const availableDates = screen
+      .getAllByRole("button", { name: /\d{4}/ })
+      .filter(
+        (button) =>
+          !button.hasAttribute("disabled") && button.getAttribute("aria-pressed") === "false",
+      );
     fireEvent.click(availableDates[1]);
     expect(screen.queryByRole("dialog", { name: "Выбор даты" })).not.toBeInTheDocument();
     expect(dateTrigger).not.toHaveTextContent("Сегодня");

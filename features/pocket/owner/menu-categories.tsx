@@ -9,7 +9,15 @@ import { Button, IconButton, money } from "../ui";
 
 type CategoryDraft = OwnerCategory & { isNew?: boolean };
 
-const newCategoryDraft = (sortOrder: number): CategoryDraft => ({ id: `new-category-${Date.now()}-${sortOrder}`, name: "", sort_order: sortOrder, is_active: true, preorder_enabled: true, item_count: 0, isNew: true });
+const newCategoryDraft = (sortOrder: number): CategoryDraft => ({
+  id: `new-category-${Date.now()}-${sortOrder}`,
+  name: "",
+  sort_order: sortOrder,
+  is_active: true,
+  preorder_enabled: true,
+  item_count: 0,
+  isNew: true,
+});
 
 type CategoryEditorProps = {
   categories: OwnerCategory[];
@@ -19,15 +27,47 @@ type CategoryEditorProps = {
   inline?: boolean;
   onClose: () => void;
   onRemove: (category: OwnerCategory) => Promise<boolean>;
-  onSave: (categories: OwnerCategory[], newCategories: { name: string; sort_order: number; is_active: boolean; preorder_enabled: boolean }[]) => Promise<void>;
+  onSave: (
+    categories: OwnerCategory[],
+    newCategories: {
+      name: string;
+      sort_order: number;
+      is_active: boolean;
+      preorder_enabled: boolean;
+    }[],
+  ) => Promise<void>;
 };
 
 export function CategoryManagerDialog(props: CategoryEditorProps) {
-  return <div className="modal-backdrop" onMouseDown={props.onClose}><section className="modal category-manager-dialog" onMouseDown={(event) => event.stopPropagation()}><header><h2>Управление категориями</h2><IconButton icon={X} label="Закрыть" onClick={props.onClose} /></header><CategoryEditor {...props} /></section></div>;
+  return (
+    <div className="modal-backdrop" onMouseDown={props.onClose}>
+      <section
+        className="modal category-manager-dialog"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <header>
+          <h2>Управление категориями</h2>
+          <IconButton icon={X} label="Закрыть" onClick={props.onClose} />
+        </header>
+        <CategoryEditor {...props} />
+      </section>
+    </div>
+  );
 }
 
-export function CategoryEditor({ categories, initialCreate, createRequest = 0, newCategorySortOrder = categories.length, inline = false, onRemove, onSave }: CategoryEditorProps) {
-  const [drafts, setDrafts] = useState<CategoryDraft[]>(() => [...categories.map((category) => ({ ...category })), ...(initialCreate ? [newCategoryDraft(newCategorySortOrder)] : [])]);
+export function CategoryEditor({
+  categories,
+  initialCreate,
+  createRequest = 0,
+  newCategorySortOrder = categories.length,
+  inline = false,
+  onRemove,
+  onSave,
+}: CategoryEditorProps) {
+  const [drafts, setDrafts] = useState<CategoryDraft[]>(() => [
+    ...categories.map((category) => ({ ...category })),
+    ...(initialCreate ? [newCategoryDraft(newCategorySortOrder)] : []),
+  ]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const errorMessage = useLocalizedError();
@@ -35,17 +75,27 @@ export function CategoryEditor({ categories, initialCreate, createRequest = 0, n
   useEffect(() => {
     if (handledCreateRequest.current === createRequest) return;
     handledCreateRequest.current = createRequest;
-    setDrafts((current) => [...current, newCategoryDraft(newCategorySortOrder + current.filter((category) => category.isNew).length)]);
+    setDrafts((current) => [
+      ...current,
+      newCategoryDraft(newCategorySortOrder + current.filter((category) => category.isNew).length),
+    ]);
   }, [createRequest, newCategorySortOrder]);
   const originals = new Map(categories.map((category) => [category.id, category]));
   const changed = drafts.filter((category) => {
     const original = originals.get(category.id);
-    return original && (category.name.trim() !== original.name || category.is_active !== original.is_active || category.sort_order !== original.sort_order || category.preorder_enabled !== original.preorder_enabled);
+    return (
+      original &&
+      (category.name.trim() !== original.name ||
+        category.is_active !== original.is_active ||
+        category.sort_order !== original.sort_order ||
+        category.preorder_enabled !== original.preorder_enabled)
+    );
   });
   const created = drafts.filter((category) => category.isNew && category.name.trim());
   const invalid = drafts.some((category) => !category.name.trim());
   const hasChanges = changed.length > 0 || created.length > 0;
-  const positionCount = (count: number) => count === 1 ? "1 позиция" : count >= 2 && count <= 4 ? `${count} позиции` : `${count} позиций`;
+  const positionCount = (count: number) =>
+    count === 1 ? "1 позиция" : count >= 2 && count <= 4 ? `${count} позиции` : `${count} позиций`;
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -53,7 +103,15 @@ export function CategoryEditor({ categories, initialCreate, createRequest = 0, n
     setSaving(true);
     setError("");
     try {
-      await onSave(changed.map((category) => ({ ...category, name: category.name.trim() })), created.map((category) => ({ name: category.name.trim(), sort_order: category.sort_order, is_active: category.is_active, preorder_enabled: category.preorder_enabled })));
+      await onSave(
+        changed.map((category) => ({ ...category, name: category.name.trim() })),
+        created.map((category) => ({
+          name: category.name.trim(),
+          sort_order: category.sort_order,
+          is_active: category.is_active,
+          preorder_enabled: category.preorder_enabled,
+        })),
+      );
     } catch (caught) {
       setError(errorMessage(caught, "Не удалось сохранить изменения"));
     } finally {
@@ -61,14 +119,186 @@ export function CategoryEditor({ categories, initialCreate, createRequest = 0, n
     }
   };
 
-  return <form className={inline ? "category-editor category-inline-editor" : "category-editor"} onSubmit={submit}><div className={inline ? "category-inline-body" : "modal-body"}>{drafts.length ? <div className="category-manager-list">{drafts.map((category, index) => <CategoryDraftRow key={category.id} category={category} autoFocus={Boolean(category.isNew && index === drafts.length - 1)} positionLabel={category.isNew ? "Новая категория" : positionCount(category.item_count)} onChange={(patch) => setDrafts((current) => current.map((item) => item.id === category.id ? { ...item, ...patch } : item))} onDelete={() => { if (category.isNew) { setDrafts((current) => current.filter((item) => item.id !== category.id)); return; } void onRemove(category).then((removed) => { if (removed) setDrafts((current) => current.filter((item) => item.id !== category.id)); }).catch((caught) => setError(errorMessage(caught))); }} />)}</div> : <div className="category-manager-empty">Категорий пока нет</div>}</div>{error && <p role="alert" className="form-error">{error}</p>}<footer><Button type="submit" disabled={!hasChanges || invalid || saving}>{saving ? "Сохраняем..." : "Сохранить"}</Button></footer></form>;
+  return (
+    <form
+      className={inline ? "category-editor category-inline-editor" : "category-editor"}
+      onSubmit={submit}
+    >
+      <div className={inline ? "category-inline-body" : "modal-body"}>
+        {drafts.length ? (
+          <div className="category-manager-list">
+            {drafts.map((category, index) => (
+              <CategoryDraftRow
+                key={category.id}
+                category={category}
+                autoFocus={Boolean(category.isNew && index === drafts.length - 1)}
+                positionLabel={
+                  category.isNew ? "Новая категория" : positionCount(category.item_count)
+                }
+                onChange={(patch) =>
+                  setDrafts((current) =>
+                    current.map((item) => (item.id === category.id ? { ...item, ...patch } : item)),
+                  )
+                }
+                onDelete={() => {
+                  if (category.isNew) {
+                    setDrafts((current) => current.filter((item) => item.id !== category.id));
+                    return;
+                  }
+                  void onRemove(category)
+                    .then((removed) => {
+                      if (removed)
+                        setDrafts((current) => current.filter((item) => item.id !== category.id));
+                    })
+                    .catch((caught) => setError(errorMessage(caught)));
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="category-manager-empty">Категорий пока нет</div>
+        )}
+      </div>
+      {error && (
+        <p role="alert" className="form-error">
+          {error}
+        </p>
+      )}
+      <footer>
+        <Button type="submit" disabled={!hasChanges || invalid || saving}>
+          {saving ? "Сохраняем..." : "Сохранить"}
+        </Button>
+      </footer>
+    </form>
+  );
 }
 
-function CategoryDraftRow({ category, autoFocus, positionLabel, onChange, onDelete }: { category: CategoryDraft; autoFocus: boolean; positionLabel: string; onChange: (patch: Partial<CategoryDraft>) => void; onDelete: () => void }) {
+function CategoryDraftRow({
+  category,
+  autoFocus,
+  positionLabel,
+  onChange,
+  onDelete,
+}: {
+  category: CategoryDraft;
+  autoFocus: boolean;
+  positionLabel: string;
+  onChange: (patch: Partial<CategoryDraft>) => void;
+  onDelete: () => void;
+}) {
   const { t } = useI18n();
-  return <div className={`category-manager-row ${category.isNew ? "new" : ""}`}><div className="category-manager-copy"><input aria-label={category.isNew ? "Название новой категории" : `Название категории ${category.name}`} autoFocus={autoFocus} value={category.name} onChange={(event) => onChange({ name: event.target.value })} placeholder={category.isNew ? "Название новой категории" : undefined} /><small>{positionLabel}</small></div><label className="category-visibility" title={category.is_active ? "Скрыть категорию" : "Показывать категорию"}><span>{t("Показывать в меню")}</span><span className="switch"><input type="checkbox" aria-label={`${category.is_active ? "Скрыть" : "Опубликовать"} категорию ${category.name || "новую"}`} checked={category.is_active} onChange={(event) => onChange({ is_active: event.target.checked })} /><span /></span></label><button type="button" className="category-delete" disabled={!category.isNew && category.item_count > 0} aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`} title={!category.isNew && category.item_count > 0 ? "Сначала удалите или перенесите позиции" : "Удалить категорию"} onClick={onDelete}><Trash2 size={17} /></button><label className="category-preorder"><span>Предзаказ</span><span className="switch"><input type="checkbox" aria-label={`Предзаказ категории ${category.name || "новую"}`} checked={category.preorder_enabled} onChange={(event) => onChange({ preorder_enabled: event.target.checked })} /><span /></span></label></div>;
+  return (
+    <div className={`category-manager-row ${category.isNew ? "new" : ""}`}>
+      <div className="category-manager-copy">
+        <input
+          aria-label={
+            category.isNew ? "Название новой категории" : `Название категории ${category.name}`
+          }
+          autoFocus={autoFocus}
+          value={category.name}
+          onChange={(event) => onChange({ name: event.target.value })}
+          placeholder={category.isNew ? "Название новой категории" : undefined}
+        />
+        <small>{positionLabel}</small>
+      </div>
+      <label
+        className="category-visibility"
+        title={category.is_active ? "Скрыть категорию" : "Показывать категорию"}
+      >
+        <span>{t("Показывать в меню")}</span>
+        <span className="switch">
+          <input
+            type="checkbox"
+            aria-label={`${category.is_active ? "Скрыть" : "Опубликовать"} категорию ${category.name || "новую"}`}
+            checked={category.is_active}
+            onChange={(event) => onChange({ is_active: event.target.checked })}
+          />
+          <span />
+        </span>
+      </label>
+      <button
+        type="button"
+        className="category-delete"
+        disabled={!category.isNew && category.item_count > 0}
+        aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`}
+        title={
+          !category.isNew && category.item_count > 0
+            ? "Сначала удалите или перенесите позиции"
+            : "Удалить категорию"
+        }
+        onClick={onDelete}
+      >
+        <Trash2 size={17} />
+      </button>
+      <label className="category-preorder">
+        <span>Предзаказ</span>
+        <span className="switch">
+          <input
+            type="checkbox"
+            aria-label={`Предзаказ категории ${category.name || "новую"}`}
+            checked={category.preorder_enabled}
+            onChange={(event) => onChange({ preorder_enabled: event.target.checked })}
+          />
+          <span />
+        </span>
+      </label>
+    </div>
+  );
 }
 
-export function MenuPreview({ venueName, items, onClose }: { venueName: string; items: OwnerMenuItem[]; onClose: () => void }) {
-  return <div className="preview-backdrop" onMouseDown={onClose}><section className="menu-preview-modal" onMouseDown={(event) => event.stopPropagation()}><header><div><p className="eyebrow">ПУБЛИЧНОЕ МЕНЮ</p><h2>{venueName}</h2></div><IconButton icon={X} label="Закрыть предпросмотр" onClick={onClose} /></header><div className="preview-stage"><div className="preview-device desktop"><div className="preview-venue"><span>Меню заведения</span><h3>{venueName}</h3></div><div className="preview-menu-grid">{items.map((item) => <article key={item.id}>{item.image_url && <div className="food-image" style={{ backgroundImage: 'url("' + item.image_url + '")' }} />}<div><small>{item.category}</small><strong>{item.name}</strong><b>{money(item.price_minor / 100, item.currency)}</b></div></article>)}</div></div></div><footer><p>{items.length ? `Доступных позиций: ${items.length}` : "Нет опубликованных позиций"}</p><Button kind="secondary" onClick={onClose}>Закрыть</Button></footer></section></div>;
+export function MenuPreview({
+  venueName,
+  items,
+  onClose,
+}: {
+  venueName: string;
+  items: OwnerMenuItem[];
+  onClose: () => void;
+}) {
+  return (
+    <div className="preview-backdrop" onMouseDown={onClose}>
+      <section className="menu-preview-modal" onMouseDown={(event) => event.stopPropagation()}>
+        <header>
+          <div>
+            <p className="eyebrow">ПУБЛИЧНОЕ МЕНЮ</p>
+            <h2>{venueName}</h2>
+          </div>
+          <IconButton icon={X} label="Закрыть предпросмотр" onClick={onClose} />
+        </header>
+        <div className="preview-stage">
+          <div className="preview-device desktop">
+            <div className="preview-venue">
+              <span>Меню заведения</span>
+              <h3>{venueName}</h3>
+            </div>
+            <div className="preview-menu-grid">
+              {items.map((item) => (
+                <article key={item.id}>
+                  {item.image_url && (
+                    <div
+                      className="food-image"
+                      style={{ backgroundImage: 'url("' + item.image_url + '")' }}
+                    />
+                  )}
+                  <div>
+                    <small>{item.category}</small>
+                    <strong>{item.name}</strong>
+                    <b>{money(item.price_minor / 100, item.currency)}</b>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+        <footer>
+          <p>
+            {items.length ? `Доступных позиций: ${items.length}` : "Нет опубликованных позиций"}
+          </p>
+          <Button kind="secondary" onClick={onClose}>
+            Закрыть
+          </Button>
+        </footer>
+      </section>
+    </div>
+  );
 }

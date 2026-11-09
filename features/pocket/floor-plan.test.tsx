@@ -13,16 +13,29 @@ beforeEach(() => {
 });
 
 describe("FloorPlan", () => {
-  it.each([[0, "0 столов"], [1, "1 стол"], [2, "2 стола"], [5, "5 столов"], [11, "11 столов"], [21, "21 стол"]])("formats the table count %i", (count, label) => {
+  it.each([
+    [0, "0 столов"],
+    [1, "1 стол"],
+    [2, "2 стола"],
+    [5, "5 столов"],
+    [11, "11 столов"],
+    [21, "21 стол"],
+  ])("formats the table count %i", (count, label) => {
     expect(tableCountLabel(count)).toBe(label);
   });
 
   it("loads the saved layout before allowing a table to be added and persists it", async () => {
     let finishLoading: (floors: VenueFloor[]) => void = () => undefined;
-    vi.mocked(getFloorPlan).mockReturnValue(new Promise((resolve) => { finishLoading = resolve; }));
+    vi.mocked(getFloorPlan).mockReturnValue(
+      new Promise((resolve) => {
+        finishLoading = resolve;
+      }),
+    );
     vi.mocked(saveFloorPlan).mockImplementation(async (_venueID, floorPlan) => floorPlan);
 
-    render(<FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />);
+    render(
+      <FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />,
+    );
 
     expect(screen.getByRole("button", { name: "Добавить" })).toBeDisabled();
     finishLoading([{ id: "floor-1", name: "1 этаж", tables: [], fixtures: [] }]);
@@ -36,7 +49,11 @@ describe("FloorPlan", () => {
     expect(screen.getByRole("button", { name: /01\s*6 мест/ })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Сохранить план" }));
-    await waitFor(() => expect(saveFloorPlan).toHaveBeenCalledWith("venue-1", [expect.objectContaining({ tables: [expect.objectContaining({ id: "01", seats: 6 })] })]));
+    await waitFor(() =>
+      expect(saveFloorPlan).toHaveBeenCalledWith("venue-1", [
+        expect.objectContaining({ tables: [expect.objectContaining({ id: "01", seats: 6 })] }),
+      ]),
+    );
   });
 
   it("deletes the active floor and keeps the remaining floor selected", async () => {
@@ -45,25 +62,35 @@ describe("FloorPlan", () => {
       { id: "floor-2", name: "2 этаж", tables: [], fixtures: [] },
     ]);
     vi.mocked(saveFloorPlan).mockImplementation(async (_venueID, floorPlan) => floorPlan);
-    render(<FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />);
+    render(
+      <FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />,
+    );
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Удалить 1 этаж" })).toBeEnabled());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Удалить 1 этаж" })).toBeEnabled(),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Удалить 1 этаж" }));
 
-    await waitFor(() => expect(screen.queryByRole("tab", { name: /1 этаж/ })).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByRole("tab", { name: /1 этаж/ })).not.toBeInTheDocument(),
+    );
     expect(screen.getByRole("tab", { name: /2 этаж/ })).toHaveAttribute("aria-selected", "true");
   });
 
   it("keeps a long floor list available through the mobile selector", async () => {
-    vi.mocked(getFloorPlan).mockResolvedValue(Array.from({ length: 12 }, (_, index) => ({
-      id: `floor-${index + 1}`,
-      name: `${index + 1} этаж`,
-      tables: [],
-      fixtures: [],
-    })));
+    vi.mocked(getFloorPlan).mockResolvedValue(
+      Array.from({ length: 12 }, (_, index) => ({
+        id: `floor-${index + 1}`,
+        name: `${index + 1} этаж`,
+        tables: [],
+        fixtures: [],
+      })),
+    );
     vi.mocked(saveFloorPlan).mockImplementation(async (_venueID, floorPlan) => floorPlan);
 
-    render(<FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />);
+    render(
+      <FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />,
+    );
 
     const lastFloor = await screen.findByRole("tab", { name: /12 этаж/ });
     const floorSelector = screen.getByRole("combobox", { name: "Выбрать этаж" });

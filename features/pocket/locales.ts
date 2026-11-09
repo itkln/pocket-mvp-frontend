@@ -1,6 +1,7 @@
 export type Locale = "ru" | "en" | "ua" | "sk";
 
-export const isLocale = (value: string | undefined): value is Locale => value === "ru" || value === "en" || value === "ua" || value === "sk";
+export const isLocale = (value: string | undefined): value is Locale =>
+  value === "ru" || value === "en" || value === "ua" || value === "sk";
 
 export const localeFromPathname = (pathname: string) => {
   const segment = pathname.split("/").filter(Boolean)[0];

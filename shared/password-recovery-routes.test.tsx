@@ -5,9 +5,15 @@ import VendorPage from "../apps/vendor/app/[locale]/[[...route]]/page";
 import PasswordRecoveryPage from "./password-recovery-page";
 
 describe("product-specific password recovery routes", () => {
-  for (const [product, Page] of [["spots", SpotsPage], ["vendor", VendorPage]] as const) {
+  for (const [product, Page] of [
+    ["spots", SpotsPage],
+    ["vendor", VendorPage],
+  ] as const) {
     it(`passes ${product} from its actual request and confirmation routes`, async () => {
-      for (const [route, mode] of [["forgot-password", "request"], ["reset-password", "reset"]] as const) {
+      for (const [route, mode] of [
+        ["forgot-password", "request"],
+        ["reset-password", "reset"],
+      ] as const) {
         const page = await Page({
           params: Promise.resolve({ locale: "sk", route: [route] }),
           searchParams: Promise.resolve({ token: "single-use-token" }),

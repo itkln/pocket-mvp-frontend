@@ -1,5 +1,9 @@
 export class APIError extends Error {
-  constructor(public code: string, public serverMessage: string, public status: number) {
+  constructor(
+    public code: string,
+    public serverMessage: string,
+    public status: number,
+  ) {
     super(`API request failed: ${code}`);
     this.name = "APIError";
   }
@@ -25,7 +29,9 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   });
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => null) as { error?: { code?: string; message?: string } } | null;
+    const payload = (await response.json().catch(() => null)) as {
+      error?: { code?: string; message?: string };
+    } | null;
     throw new APIError(
       payload?.error?.code ?? "request_failed",
       payload?.error?.message ?? "API request failed",

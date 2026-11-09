@@ -7,5 +7,9 @@ import { localeFromPathname } from "../features/pocket/locales";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  return <I18nProvider initialLocale={localeFromPathname(pathname)}><ConfirmProvider>{children}</ConfirmProvider></I18nProvider>;
+  return (
+    <I18nProvider initialLocale={localeFromPathname(pathname)}>
+      <ConfirmProvider>{children}</ConfirmProvider>
+    </I18nProvider>
+  );
 }

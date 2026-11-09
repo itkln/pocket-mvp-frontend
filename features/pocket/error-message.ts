@@ -22,12 +22,19 @@ const errorSourceByCode: Record<string, string> = {
   request_failed: "Сервер временно недоступен. Попробуйте еще раз",
 };
 
-export function localizedErrorMessage(error: unknown, locale: Locale, fallback = "Не удалось выполнить действие") {
-  const source = error instanceof APIError ? errorSourceByCode[error.code] ?? fallback : fallback;
+export function localizedErrorMessage(
+  error: unknown,
+  locale: Locale,
+  fallback = "Не удалось выполнить действие",
+) {
+  const source = error instanceof APIError ? (errorSourceByCode[error.code] ?? fallback) : fallback;
   return translate(source, locale);
 }
 
 export function useLocalizedError() {
   const { locale } = useI18n();
-  return useCallback((error: unknown, fallback?: string) => localizedErrorMessage(error, locale, fallback), [locale]);
+  return useCallback(
+    (error: unknown, fallback?: string) => localizedErrorMessage(error, locale, fallback),
+    [locale],
+  );
 }
