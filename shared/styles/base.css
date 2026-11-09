@@ -1215,13 +1215,16 @@ td {
   }
 }
 
-/* Shared control shape, aligned with the softer pocket-ui treatment. */
-
-button:not(.mobile-create-trigger):not(.heart-float):not(.floor-table) {
+/*
+ * Shared control shape, aligned with the softer pocket-ui treatment.
+ * :where() keeps these defaults at element specificity, so any component
+ * class can set its own radius without !important.
+ */
+button:where(:not(.mobile-create-trigger):not(.heart-float):not(.floor-table)) {
   border-radius: var(--control-radius);
 }
 
-input:not([type="checkbox"]):not([type="radio"]),
+input:where(:not([type="checkbox"]):not([type="radio"])),
 select,
 textarea,
 .auth-password {
