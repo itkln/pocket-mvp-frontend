@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "../../../shared/providers";
-import "../../../shared/globals.css";
+import "../../../shared/styles/base.css";
+import "../../../shared/styles/dish-shell.css";
 import "../../../shared/spots.css";
 import "../../../shared/dish.css";
 

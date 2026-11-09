@@ -1,0 +1,1268 @@
+/* Dish-only shell and screen styles moved out of the former globals.css. Loaded after base.css. */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 640px) {
+  .toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+/* Pocket Spots: a dedicated consumer storefront. */
+
+.pocket-spots {
+  min-height: 100dvh;
+  background: #f4f6f8;
+  color: var(--ink);
+}
+
+.spots-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 76px;
+  border-bottom: 1px solid #e7ebee;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(18px);
+}
+
+.spots-header-inner {
+  width: min(1360px, 100%);
+  height: 100%;
+  display: grid;
+  grid-template-columns: auto auto minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.spots-brand,
+.spots-location,
+.spots-global-search,
+.spots-header-actions > button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.spots-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+}
+
+.spots-brand strong {
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.spots-location {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  text-align: left;
+}
+
+.spots-location:hover {
+  background: #f2f5f7;
+}
+
+.spots-location svg {
+  flex: none;
+  color: var(--blue);
+}
+
+.spots-location span,
+.spots-location b,
+.spots-location small {
+  display: block;
+}
+
+.spots-location b {
+  font-size: 14px;
+}
+
+.spots-location small {
+  color: #7b8790;
+  font-size: 12px;
+}
+
+.spots-global-search {
+  min-width: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border-radius: 8px;
+  background: #eef2f4;
+  color: #7b8790;
+  text-align: left;
+}
+
+.spots-global-search span {
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spots-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spots-header-actions > button {
+  min-width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+}
+
+.spots-header-actions > button:hover {
+  background: #eef2f4;
+}
+
+.spots-account-trigger i {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--blue-soft) center / cover no-repeat;
+  color: var(--blue);
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.spots-account-trigger.active {
+  opacity: 0.72;
+}
+
+.spots-main {
+  min-height: calc(100dvh - 76px);
+}
+
+.spots-page {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+  padding: 28px 28px 72px;
+}
+
+.spots-bottom-nav {
+  display: none;
+}
+
+.cuisine-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.cuisine-section {
+  margin: 4px 0 24px;
+}
+
+.cuisine-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cuisine-strip button {
+  min-width: 0;
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cuisine-strip button:hover,
+.cuisine-strip button.active {
+  border-color: #b9e2f5;
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.cuisine-strip button > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  border-radius: 8px;
+  background: #f2f5f7;
+  color: #677681;
+}
+
+.cuisine-strip button.active > span {
+  background: #fff;
+  color: var(--blue);
+}
+
+.cuisine-strip strong {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+}
+
+.spots-search-empty {
+  min-height: 180px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  background: #fff;
+  color: #73808a;
+  text-align: center;
+}
+
+.spots-search-empty strong {
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.spots-search-empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.pocket-spots .panel {
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(23, 33, 43, 0.06);
+}
+
+.pocket-spots .back-link {
+  color: var(--blue);
+}
+
+@media (max-width: 1050px) {
+  .spots-header-inner {
+    grid-template-columns: auto auto minmax(180px, 1fr) auto;
+    padding: 0 20px;
+  }
+  .spots-location small {
+    display: none;
+  }
+  .cuisine-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .pocket-spots {
+    background: #f4f6f8;
+  }
+  .spots-header {
+    height: 64px;
+  }
+  .spots-header-inner {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .spots-brand strong,
+  .spots-global-search span {
+    display: none;
+  }
+  .spots-brand {
+    width: 42px;
+    height: 42px;
+    justify-content: center;
+  }
+  .spots-location {
+    display: none;
+  }
+  .spots-global-search {
+    height: 42px;
+    justify-content: flex-start;
+    padding: 0 14px;
+  }
+  .spots-header-actions {
+    gap: 2px;
+  }
+  .spots-header-actions > button {
+    min-width: 42px;
+    height: 42px;
+    padding: 0;
+  }
+  .spots-account-trigger {
+    display: none !important;
+  }
+  .spots-main {
+    min-height: calc(100dvh - 64px);
+  }
+  .spots-page {
+    padding: 14px 12px calc(94px + env(safe-area-inset-bottom));
+  }
+  .spots-bottom-nav {
+    position: fixed;
+    z-index: 52;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    min-height: 68px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
+    border-top: 1px solid #e5e9ec;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 -5px 20px rgba(23, 33, 43, 0.08);
+    backdrop-filter: blur(18px);
+  }
+  .spots-bottom-nav button {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 3px 1px;
+    border: 0;
+    background: transparent;
+    color: #74818b;
+    cursor: pointer;
+  }
+  .spots-bottom-nav button span {
+    overflow: hidden;
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .spots-bottom-nav button.active {
+    color: var(--blue);
+  }
+  .cuisine-section {
+    margin-right: -12px;
+    margin-left: -12px;
+  }
+  .cuisine-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 12px;
+    scrollbar-width: none;
+  }
+  .cuisine-strip button {
+    min-width: 150px;
+    min-height: 66px;
+    padding: 10px;
+  }
+  .cuisine-strip button > span {
+    width: 38px;
+    height: 38px;
+  }
+  .cuisine-strip strong {
+    overflow: visible;
+    line-height: 1.25;
+    text-overflow: clip;
+  }
+}
+
+/* Pocket Spots discover page: one search and a flat Dineout-style filter row. */
+
+.pocket-spots .spots-header {
+  border-bottom: 0;
+  box-shadow: 0 1px 8px rgba(23, 33, 43, 0.05);
+}
+
+.pocket-spots .spots-header-inner {
+  grid-template-columns: auto minmax(260px, 1fr) auto auto;
+}
+
+.pocket-spots .spots-global-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.pocket-spots .spots-global-search input::placeholder {
+  color: #7b8790;
+}
+
+.pocket-spots .cuisine-section {
+  margin: 10px 0 28px;
+}
+
+.pocket-spots .cuisine-section h1 {
+  margin: 0 0 16px;
+  font-size: 29px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.pocket-spots .cuisine-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 3px;
+  scrollbar-width: none;
+}
+
+.pocket-spots .cuisine-strip button {
+  min-width: max-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 22px;
+  background: #e9edef;
+  color: #34424d;
+}
+
+.pocket-spots .cuisine-strip button:hover {
+  background: #dfe5e8;
+}
+
+.pocket-spots .cuisine-strip button.active {
+  border: 0;
+  background: var(--blue);
+  color: #fff;
+}
+
+.pocket-spots .cuisine-strip strong {
+  overflow: visible;
+  font-size: 14px;
+  line-height: 1;
+  text-overflow: clip;
+}
+
+@media (max-width: 760px) {
+  .pocket-spots .spots-header-inner {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+  }
+  .pocket-spots .spots-location {
+    min-width: 42px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+  }
+  .pocket-spots .spots-location span {
+    display: none;
+  }
+  .pocket-spots .cuisine-section {
+    margin: 8px -12px 24px;
+  }
+  .pocket-spots .cuisine-section h1 {
+    margin: 0 12px 14px;
+    font-size: 24px;
+  }
+  .pocket-spots .cuisine-strip {
+    gap: 7px;
+    padding: 0 12px 3px;
+  }
+  .pocket-spots .cuisine-strip button {
+    min-width: max-content;
+    min-height: 42px;
+    padding: 0 15px;
+  }
+}
+
+/* Pocket Spots: wide white storefront and denser restaurant discovery. */
+
+.pocket-spots,
+.pocket-spots .spots-main {
+  background: #fff;
+}
+
+.pocket-spots .spots-header {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 8px 24px rgba(23, 33, 43, 0.07);
+}
+
+.pocket-spots .spots-header-inner {
+  width: 100%;
+  max-width: none;
+  grid-template-columns: auto minmax(280px, 1fr) auto auto;
+  padding-right: 32px;
+  padding-left: 32px;
+}
+
+.pocket-spots .spots-location {
+  min-width: 160px;
+  min-height: 48px;
+  padding: 6px 15px;
+  background: var(--blue-soft);
+  color: var(--ink);
+}
+
+.pocket-spots .spots-location:hover {
+  background: #d8eef9;
+}
+
+.pocket-spots .spots-location b {
+  font-size: 15px;
+}
+
+.pocket-spots .spots-location small {
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pocket-spots .spots-page {
+  width: min(1440px, 100%);
+}
+
+@media (max-width: 1200px) {
+  .pocket-spots .spots-header-inner {
+    padding-right: 20px;
+    padding-left: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .pocket-spots .spots-location {
+    min-width: 48px;
+    padding: 0 12px;
+  }
+  .pocket-spots .spots-location span {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .pocket-spots .spots-header-inner {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+  .pocket-spots .spots-location {
+    min-width: 42px;
+    min-height: 42px;
+    padding: 0;
+  }
+}
+
+/* Pocket Spots uses flat surfaces and fully rounded header controls. */
+
+.pocket-spots .spots-header,
+.pocket-spots .panel {
+  box-shadow: none;
+}
+
+.pocket-spots .spots-header {
+  border-bottom: 0;
+  box-shadow: 0 7px 22px rgba(23, 33, 43, 0.08);
+}
+
+.pocket-spots .spots-global-search,
+.pocket-spots .spots-location,
+.pocket-spots .spots-header-actions > button {
+  border-radius: 999px;
+}
+
+.pocket-spots .spots-location {
+  min-width: auto;
+  padding-right: 18px;
+  padding-left: 18px;
+  border: 0;
+  background: #f0f2f4;
+}
+
+.pocket-spots .spots-location:hover {
+  background: #e6eaed;
+}
+
+.pocket-spots .spots-location svg {
+  color: #34424d;
+}
+
+.pocket-spots header.spots-header button.spots-location {
+  border-radius: 999px !important;
+}
+
+@media (max-width: 900px) {
+  .pocket-spots .spots-location {
+    min-width: 48px;
+    padding: 0 12px;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 900px) {
+  .pocket-spots .spots-location {
+    min-width: auto;
+    padding: 0 16px;
+  }
+  .pocket-spots .spots-location span {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .pocket-spots .spots-location {
+    min-width: 42px;
+    padding: 0;
+  }
+}
+
+/* Pocket Spots: one fully rounded shape for interactive controls. */
+
+.pocket-spots .button,
+.pocket-spots .icon-button,
+.pocket-spots .spots-header-actions > button,
+.pocket-spots .spots-location,
+.pocket-spots .cuisine-strip button,
+.pocket-spots .back-link,
+.pocket-spots .spots-bottom-nav button {
+  border-radius: 999px !important;
+}
+
+/* Compact discovery controls and motion shared across the storefront. */
+
+.pocket-spots button {
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    border-color 220ms ease,
+    opacity 220ms ease;
+}
+
+.pocket-spots button:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
+}
+
+.pocket-spots .cuisine-strip {
+  gap: 8px;
+}
+
+.pocket-spots .cuisine-strip button {
+  height: 36px;
+  min-height: 36px;
+  padding: 0 13px;
+  flex: 0 0 auto;
+  background: #f0f1f2;
+}
+
+.pocket-spots .cuisine-strip strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pocket-spots .cuisine-strip button.spots-filter-trigger {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  justify-content: center;
+}
+
+.pocket-spots .cuisine-strip button.active {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.pocket-spots .spots-picker-dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.pocket-spots .spots-picker-dialog::backdrop {
+  background: rgba(23, 33, 43, 0.28);
+}
+
+.spots-picker-content {
+  padding: 24px;
+}
+
+.spots-picker-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.spots-picker-heading h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.spots-picker-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: #f0f2f4;
+  color: #73808a;
+}
+
+.spots-picker-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.spots-picker-search:focus-within {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.spots-city-options {
+  display: grid;
+  gap: 4px;
+  margin-top: 16px;
+}
+
+.spots-city-options button {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.spots-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.spots-filter-options button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 0;
+  background: #f0f2f4;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.pocket-spots .spots-city-options button,
+.pocket-spots .spots-filter-options button {
+  border-radius: 999px !important;
+}
+
+.spots-city-options button[aria-pressed="true"],
+.spots-filter-options button[aria-pressed="true"] {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.spots-picker-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media (hover: hover) {
+  .pocket-spots .cuisine-strip button:hover,
+  .pocket-spots .spots-city-options button:hover,
+  .pocket-spots .spots-filter-options button:hover {
+    background: #e6eaed;
+  }
+  .pocket-spots .cuisine-strip button.active:hover {
+    background: #d8eef9;
+  }
+}
+
+@media (max-width: 760px) {
+  .pocket-spots .spots-header-inner {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+  }
+  .pocket-spots .spots-header-actions {
+    display: none;
+  }
+  .pocket-spots .spots-location {
+    width: auto;
+    min-width: 0;
+    max-width: 142px;
+    gap: 5px;
+    padding: 0 10px;
+  }
+  .pocket-spots .spots-location span {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pocket-spots .spots-location b {
+    font-size: 13px;
+  }
+  .spots-picker-content {
+    padding: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pocket-spots button {
+    transition: none;
+  }
+}
+
+.pocket-spots .spots-header {
+  height: 80px;
+}
+
+.pocket-spots .spots-header-inner {
+  position: relative;
+}
+
+.pocket-spots .spots-header-inner > .spots-brand,
+.pocket-spots .spots-header-inner > .spots-location,
+.pocket-spots .spots-global-search,
+.pocket-spots .spots-header-actions > .spots-account-trigger {
+  height: 52px;
+  min-height: 52px;
+}
+
+.pocket-spots .spots-header-actions {
+  position: relative;
+}
+
+.pocket-spots .spots-header-actions > .spots-account-trigger {
+  width: 52px;
+  min-width: 52px;
+  padding: 0;
+}
+
+.pocket-spots .spots-account-trigger i {
+  width: 44px;
+  height: 44px;
+}
+
+.pocket-spots .spots-main {
+  min-height: calc(100dvh - 80px);
+}
+
+.pocket-spots .spots-account-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(310px, calc(100vw - 24px));
+  max-height: calc(100dvh - 100px);
+  overflow-y: auto;
+  padding: 16px 10px 10px;
+  border: 0;
+  border-radius: 24px;
+  background: #fff;
+  color: var(--ink);
+}
+
+.spots-account-menu-heading {
+  padding: 4px 14px 14px;
+  font-size: 22px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.pocket-spots .spots-account-menu > button {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 14px !important;
+  background: transparent;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.spots-account-menu > button svg {
+  flex-shrink: 0;
+  color: #818b92;
+}
+
+.pocket-spots .spots-account-menu > button:hover,
+.pocket-spots .spots-account-menu > button:focus-visible {
+  background: #f0f2f4;
+}
+
+.pocket-spots .spots-account-menu > .spots-account-logout {
+  margin-top: 6px;
+  color: #c84439;
+}
+
+.spots-account-menu > .spots-account-logout svg {
+  color: inherit;
+}
+
+@media (max-width: 760px) {
+  .pocket-spots .spots-header {
+    height: 128px;
+  }
+  .pocket-spots .spots-header-inner {
+    grid-template-columns: 52px minmax(0, 1fr) 52px;
+    grid-template-rows: 52px 52px;
+    gap: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .pocket-spots .spots-brand {
+    width: 52px;
+  }
+  .pocket-spots .spots-global-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .pocket-spots .spots-location {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    max-width: 100%;
+    padding: 0 16px;
+  }
+  .pocket-spots .spots-location b {
+    font-size: 15px;
+  }
+  .pocket-spots .spots-header-actions {
+    display: flex;
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .pocket-spots .spots-header-actions > .spots-account-trigger {
+    display: inline-flex;
+  }
+  .pocket-spots .spots-account-menu {
+    max-height: calc(100dvh - 90px);
+  }
+  .pocket-spots .spots-main {
+    min-height: calc(100dvh - 128px);
+  }
+}
+
+/* A shared canvas with a distinct, responsive city catalog. */
+
+.pocket-spots,
+.pocket-spots .spots-main {
+  background: #fff;
+}
+
+.pocket-spots .spots-header {
+  border-bottom: 0;
+  background: #f5f4f2;
+  box-shadow: none;
+  backdrop-filter: none;
+  transition: box-shadow 180ms ease;
+}
+
+.pocket-spots .spots-header.scrolled {
+  box-shadow: 0 5px 18px rgba(23, 33, 43, 0.1);
+}
+
+.pocket-spots .spots-header-inner {
+  grid-template-columns: auto minmax(260px, 1fr) auto auto;
+  gap: 20px;
+}
+
+.pocket-spots .spots-brand {
+  margin-right: 24px;
+}
+
+.pocket-spots .spots-global-search {
+  width: 100%;
+  max-width: none;
+  gap: 16px;
+  padding: 0 20px;
+  background: #fff;
+}
+
+.pocket-spots .spots-global-search > svg {
+  flex-shrink: 0;
+}
+
+.pocket-spots .spots-location {
+  grid-column: 3;
+  background: #fff;
+  color: #20272c;
+}
+
+.pocket-spots .spots-header-actions {
+  grid-column: 4;
+  gap: 8px;
+}
+
+.pocket-spots .spots-language-trigger,
+.pocket-spots .spots-header-actions > .spots-account-trigger {
+  width: 52px;
+  min-width: 52px;
+  height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 50% !important;
+  background: transparent;
+  color: #20272c;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.pocket-spots .spots-language-trigger:hover,
+.pocket-spots .spots-language-trigger.active,
+.pocket-spots .spots-header-actions > .spots-account-trigger:hover {
+  background: #fff;
+}
+
+.pocket-spots .spots-page {
+  width: min(1920px, 100%);
+  padding: 24px 32px 64px;
+}
+
+@media (max-width: 1199px) {
+  .pocket-spots .spots-header-inner {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    gap: 16px;
+  }
+  .pocket-spots .spots-brand {
+    margin-right: 12px;
+  }
+  .pocket-spots .spots-location {
+    grid-column: 3;
+  }
+  .pocket-spots .spots-header-actions {
+    grid-column: 4;
+  }
+}
+
+@media (max-width: 899px) {
+  .pocket-spots .spots-page {
+    padding: 16px 16px 96px;
+  }
+}
+
+@media (max-width: 760px) {
+  .pocket-spots .spots-header-inner {
+    grid-template-columns: 52px minmax(0, 1fr) 112px;
+    gap: 8px;
+  }
+  .pocket-spots .spots-brand {
+    margin: 0;
+  }
+  .pocket-spots .spots-location {
+    grid-column: 2;
+    padding: 0 12px;
+  }
+  .pocket-spots .spots-header-actions {
+    grid-column: 3;
+  }
+  .pocket-spots .spots-bottom-nav {
+    background: #fff;
+    box-shadow: 0 -4px 16px rgba(23, 33, 43, 0.06);
+  }
+}
+
+.pocket-spots .spots-category-catalog .cuisine-section {
+  margin-bottom: 28px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: #f4f4f5;
+}
+
+.pocket-spots .spots-category-catalog .cuisine-strip {
+  align-items: center;
+  padding: 0;
+}
+
+.pocket-spots .spots-category-catalog .cuisine-strip button {
+  background: transparent;
+  color: #3d464d;
+}
+
+.pocket-spots .spots-category-catalog .cuisine-strip button.active {
+  background: #fff;
+  color: var(--blue);
+}
+
+.pocket-spots .spots-category-catalog .cuisine-strip button.spots-filter-trigger {
+  margin-left: auto;
+  background: #fff;
+  color: var(--ink);
+}
+
+.pocket-spots .spots-category-catalog .spots-category-filters {
+  margin: -4px 0 20px;
+}
+
+.spots-language-control {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.pocket-spots .spots-language-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.pocket-spots .spots-language-trigger svg {
+  display: block;
+}
+
+.pocket-spots .spots-language-menu {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  padding: 8px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 14px 36px rgba(23, 33, 43, 0.14);
+}
+
+.pocket-spots .spots-language-menu > button {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 12px !important;
+  background: transparent;
+  color: #20272c;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pocket-spots .spots-language-menu > button:hover,
+.pocket-spots .spots-language-menu > button:focus-visible {
+  background: #f5f4f2;
+}
+
+.pocket-spots .spots-language-menu svg {
+  color: var(--blue);
+}
+
+.spots-filter-category {
+  margin: -12px 0 18px;
+  color: #73808a;
+  font-size: 15px;
+}
+
+.pocket-spots .spots-account-menu {
+  border: 0;
+  box-shadow: 0 14px 34px rgba(23, 33, 43, 0.12);
+}
+
+.pocket-spots [data-tooltip][aria-expanded="true"]::after {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .pocket-spots .spots-category-catalog .cuisine-section {
+    margin: 0 0 24px;
+    padding: 8px 10px;
+    overflow: hidden;
+  }
+  .pocket-spots .spots-category-catalog .cuisine-strip {
+    width: 100%;
+    overflow-x: auto;
+    padding: 0;
+  }
+  .pocket-spots .spots-category-catalog .cuisine-strip button.spots-filter-trigger {
+    position: sticky;
+    right: 0;
+    box-shadow: -10px 0 12px #f4f4f5;
+  }
+}
+
+/* Short, consistent hints for icon-only controls. */
+
+.pocket-spots [data-tooltip] {
+  position: relative;
+}
+
+.pocket-spots [data-tooltip]::after {
+  position: absolute;
+  z-index: 100;
+  right: 50%;
+  bottom: calc(100% + 9px);
+  max-width: 190px;
+  padding: 7px 9px;
+  transform: translate(50%, 4px);
+  border-radius: 8px;
+  background: #20272c;
+  color: #fff;
+  content: attr(data-tooltip);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  white-space: nowrap;
+}
+
+.pocket-spots [data-tooltip-placement="bottom"]::after {
+  top: calc(100% + 9px);
+  bottom: auto;
+  transform: translate(50%, -4px);
+}
+
+@media (hover: hover) {
+  .pocket-spots [data-tooltip]:hover::after,
+  .pocket-spots [data-tooltip]:focus-visible::after {
+    transform: translate(50%, 0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pocket-spots [data-tooltip]::after {
+    transition: none;
+  }
+}
