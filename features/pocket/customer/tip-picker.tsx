@@ -27,15 +27,15 @@ export function TipPicker({
   const money = new Intl.NumberFormat(localeTags[locale], { style: "currency", currency });
 
   return (
-    <fieldset className="spots-tip-picker" disabled={disabled} aria-label={t("Чаевые")}>
-      <legend className="spots-tip-input-label">{t("Чаевые")}</legend>
-      <div className="spots-tip-heading">
+    <fieldset className="dish-tip-picker" disabled={disabled} aria-label={t("Чаевые")}>
+      <legend className="dish-tip-input-label">{t("Чаевые")}</legend>
+      <div className="dish-tip-heading">
         <div>
           <h3>{t("Оставить чаевые официанту?")}</h3>
           <p>{t("По желанию. Сумма добавится к заказу.")}</p>
         </div>
       </div>
-      <div className="spots-tip-options">
+      <div className="dish-tip-options">
         {percentages.map((percent) => (
           <button
             key={percent}
@@ -61,7 +61,7 @@ export function TipPicker({
         <button
           ref={triggerRef}
           type="button"
-          className="spots-tip-other"
+          className="dish-tip-other"
           aria-label={t("Другая сумма")}
           aria-pressed={value.mode === "custom"}
           aria-haspopup="dialog"
@@ -138,7 +138,7 @@ function TipForm({
   return (
     <dialog
       ref={dialogRef}
-      className="spots-tip-dialog"
+      className="dish-tip-dialog"
       aria-labelledby={`${id}-title`}
       onKeyDown={(event) => {
         event.stopPropagation();
@@ -161,19 +161,19 @@ function TipForm({
           onClose();
       }}
     >
-      <div className="spots-tip-form-heading">
+      <div className="dish-tip-form-heading">
         <h2 id={`${id}-title`}>{t("Сумма чаевых")}</h2>
         <button
           type="button"
-          className="spots-tip-close"
+          className="dish-tip-close"
           aria-label={t("Закрыть")}
           onClick={onClose}
         >
           <X size={20} aria-hidden="true" />
         </button>
       </div>
-      <label className="spots-tip-custom" htmlFor={id}>
-        <span className="spots-tip-input-label">
+      <label className="dish-tip-custom" htmlFor={id}>
+        <span className="dish-tip-input-label">
           {t("Сумма чаевых")} · {currency}
         </span>
         <span aria-hidden="true">{symbol}</span>
@@ -200,13 +200,13 @@ function TipForm({
         />
       </label>
       {showError && (
-        <p className="spots-tip-error" id={`${id}-error`} role="alert">
+        <p className="dish-tip-error" id={`${id}-error`} role="alert">
           {t("Введите корректную сумму чаевых, не более двух знаков после запятой")}
         </p>
       )}
       <button
         type="button"
-        className="button primary spots-tip-save"
+        className="button primary dish-tip-save"
         disabled={invalid}
         onClick={save}
       >
@@ -230,7 +230,7 @@ export function TipBreakdown({
     new Intl.NumberFormat(localeTags[locale], { style: "currency", currency }).format(minor / 100);
   if (!tip) return null;
   return (
-    <div className="spots-tip-breakdown">
+    <div className="dish-tip-breakdown">
       <div>
         <span>{t("Блюда")}</span>
         <strong>{money(subtotal)}</strong>

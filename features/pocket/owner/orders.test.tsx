@@ -111,7 +111,7 @@ describe("order desk", () => {
       .mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
     mount();
     const action = screen.getByRole("button", { name: "Принять заказ" });
-    expect(action).toHaveClass("spots-slide-confirm");
+    expect(action).toHaveClass("slide-confirm");
     fireEvent.click(action, { detail: 1 });
     expect(workspace.setOrderStatus).not.toHaveBeenCalled();
     const cancel = screen.getByRole("button", { name: "Отменить заказ" });

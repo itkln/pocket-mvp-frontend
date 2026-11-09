@@ -72,18 +72,18 @@ export function VenueMenuSettings({
   return (
     <dialog
       ref={dialogRef}
-      className="spots-mobile-menu-dialog venue-menu-settings"
+      className="dish-mobile-menu-dialog venue-menu-settings"
       aria-label={t("Настройки меню")}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
       }}
     >
-      <div className="spots-mobile-menu-shell">
-        <div className="spots-mobile-menu-heading">
+      <div className="dish-mobile-menu-shell">
+        <div className="dish-mobile-menu-heading">
           <button
             type="button"
-            className="spots-back-button"
+            className="dish-back-button"
             aria-label={t("Назад")}
             onClick={() => (page === "menu" ? onClose() : setPage("menu"))}
           >
@@ -91,7 +91,7 @@ export function VenueMenuSettings({
           </button>
           <h2>
             {page === "menu" ? (
-              <span className="spots-menu-brand">
+              <span className="dish-menu-brand">
                 <Image src="/logo.svg" alt="" width={30} height={30} />
                 Pocket Dish
               </span>
@@ -119,12 +119,12 @@ export function VenueMenuSettings({
             onOpenView={tableMenu ? () => setPage("view") : undefined}
           />
         ) : (
-          <div className="spots-mobile-menu-content spots-mobile-menu-subpage">
+          <div className="dish-mobile-menu-content dish-mobile-menu-subpage">
             <section
-              className="spots-mobile-menu-card spots-mobile-selection-card"
+              className="dish-mobile-menu-card dish-mobile-selection-card"
               aria-label={t(page === "language" ? "Язык интерфейса" : "Вид меню")}
             >
-              <div className="spots-mobile-selection-options">
+              <div className="dish-mobile-selection-options">
                 {page === "language"
                   ? localeOptions.map((option) => (
                       <button

@@ -228,7 +228,7 @@ it("replaces the old settings landing and bottom navigation with the account car
   await screen.findByRole("button", { name: "Редактировать профиль" });
   const account = within(screen.getByRole("region", { name: "Профиль" }));
   expect(account.getByRole("button", { name: "Безопасность" })).toBeInTheDocument();
-  expect(result.container.querySelector(".spots-settings-identity")).toBeNull();
+  expect(result.container.querySelector(".dish-settings-identity")).toBeNull();
   expect(screen.queryByRole("navigation", { name: "Навигация" })).not.toBeInTheDocument();
   fireEvent.click(account.getByRole("button", { name: "Безопасность" }));
   expect(push).toHaveBeenLastCalledWith("/ru/r/venue-id/settings?section=security");

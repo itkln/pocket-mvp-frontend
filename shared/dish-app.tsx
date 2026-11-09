@@ -104,7 +104,7 @@ export default function DishApp({
   return (
     <DishNavigationContext.Provider value={{ basePath, onLogout: signOut }}>
       <div
-        className={`pocket-spots pocket-dish ${user ? "signed-in" : "guest"} ${tableEntry ? "dish-table-entry-active" : ""} ${venueScreen ? "venue-detail-active" : "dish-account-active"}`}
+        className={`pocket-dish pocket-dish ${user ? "signed-in" : "guest"} ${tableEntry ? "dish-table-entry-active" : ""} ${venueScreen ? "venue-detail-active" : "dish-account-active"}`}
       >
         {!tableEntry && (
           <SpotsHeader
@@ -176,8 +176,8 @@ export default function DishApp({
           />
         )}
         <TooltipContext.Provider value={false}>
-          <main className="spots-main">
-            <div className="spots-page">
+          <main className="dish-main">
+            <div className="dish-page">
               {(initialScreen === "menu" || initialScreen === "reservation") && venueID && (
                 <VenueDetailsScreen
                   standalone
@@ -215,10 +215,10 @@ export default function DishApp({
               )}
               {initialScreen === "reservations" && user && (
                 <section className="dish-reservations-page">
-                  <div className="spots-account-heading">
+                  <div className="dish-account-heading">
                     <button
                       type="button"
-                      className="spots-back-button"
+                      className="dish-back-button"
                       aria-label={t("Назад")}
                       onClick={() => navigate("profile")}
                     >
@@ -238,17 +238,17 @@ export default function DishApp({
                 (initialScreen === "settings" && !settingsSection)) &&
                 user && (
                   <section className="dish-account-page" aria-label={t("Профиль")}>
-                    <div className="spots-mobile-menu-heading">
+                    <div className="dish-mobile-menu-heading">
                       <button
                         type="button"
-                        className="spots-back-button"
+                        className="dish-back-button"
                         aria-label={t("Назад")}
                         onClick={() => navigate("")}
                       >
                         <ArrowLeft size={26} />
                       </button>
                       <h2>
-                        <span className="spots-menu-brand">
+                        <span className="dish-menu-brand">
                           <Image src="/logo.svg" width={30} height={30} alt="" />
                           Pocket Dish
                         </span>

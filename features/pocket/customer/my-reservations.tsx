@@ -182,7 +182,7 @@ export function MyReservationsScreen({
   );
 
   return (
-    <section className="spots-reservations spots-category-catalog" aria-label={t("Мои брони")}>
+    <section className="dish-reservations dish-category-catalog" aria-label={t("Мои брони")}>
       {!loading && !error && reservations.length > 0 && (
         <>
           <CategoryFilterStrip
@@ -194,14 +194,14 @@ export function MyReservationsScreen({
           />
           <dialog
             ref={filterDialog}
-            className="spots-picker-dialog"
+            className="dish-picker-dialog"
             aria-labelledby="my-reservations-filter-title"
             onClick={(event) => {
               if (event.target === event.currentTarget) filterDialog.current?.close();
             }}
           >
-            <div className="spots-picker-content">
-              <div className="spots-picker-heading">
+            <div className="dish-picker-content">
+              <div className="dish-picker-heading">
                 <h2 id="my-reservations-filter-title">{t("Фильтры")}</h2>
                 <button
                   type="button"
@@ -212,9 +212,9 @@ export function MyReservationsScreen({
                   <X size={20} />
                 </button>
               </div>
-              <section className="spots-filter-group" aria-label={t("Статус брони")}>
-                <p className="spots-filter-category">{t("Статус брони")}</p>
-                <div className="spots-filter-options">
+              <section className="dish-filter-group" aria-label={t("Статус брони")}>
+                <p className="dish-filter-category">{t("Статус брони")}</p>
+                <div className="dish-filter-options">
                   {statusOptions.map(({ value, label }) => (
                     <button
                       type="button"
@@ -227,9 +227,9 @@ export function MyReservationsScreen({
                   ))}
                 </div>
               </section>
-              <section className="spots-filter-group" aria-label={t("Заведение")}>
-                <p className="spots-filter-category">{t("Заведение")}</p>
-                <div className="spots-filter-options">
+              <section className="dish-filter-group" aria-label={t("Заведение")}>
+                <p className="dish-filter-category">{t("Заведение")}</p>
+                <div className="dish-filter-options">
                   <button
                     type="button"
                     aria-pressed={venueFilter === "all"}
@@ -249,9 +249,9 @@ export function MyReservationsScreen({
                   ))}
                 </div>
               </section>
-              <section className="spots-filter-group" aria-label={t("Предзаказ")}>
-                <p className="spots-filter-category">{t("Предзаказ")}</p>
-                <div className="spots-filter-options">
+              <section className="dish-filter-group" aria-label={t("Предзаказ")}>
+                <p className="dish-filter-category">{t("Предзаказ")}</p>
+                <div className="dish-filter-options">
                   {preorderOptions.map(({ value, label }) => (
                     <button
                       type="button"
@@ -264,7 +264,7 @@ export function MyReservationsScreen({
                   ))}
                 </div>
               </section>
-              <div className="spots-picker-footer">
+              <div className="dish-picker-footer">
                 <button type="button" className="button secondary" onClick={resetFilters}>
                   {t("Сбросить")}
                 </button>
@@ -284,11 +284,11 @@ export function MyReservationsScreen({
         </>
       )}
       {loading ? (
-        <div className="spots-catalog-status" role="status">
+        <div className="dish-catalog-status" role="status">
           {t("Загружаем брони...")}
         </div>
       ) : error ? (
-        <div className="spots-catalog-status" role="alert">
+        <div className="dish-catalog-status" role="alert">
           <strong>{t("Не удалось загрузить брони")}</strong>
           <Button kind="secondary" onClick={refresh}>
             {t("Повторить")}
@@ -311,7 +311,7 @@ export function MyReservationsScreen({
             )}
           </div>
         ) : (
-          <div className="spots-search-empty spots-reservations-empty">
+          <div className="dish-search-empty dish-reservations-empty">
             <CalendarDays size={32} aria-hidden="true" />
             <strong>{t("Нет броней по выбранным фильтрам")}</strong>
             <Button kind="secondary" onClick={resetFilters}>
@@ -320,7 +320,7 @@ export function MyReservationsScreen({
           </div>
         )
       ) : (
-        <div className="spots-search-empty spots-reservations-empty">
+        <div className="dish-search-empty dish-reservations-empty">
           <CalendarDays size={32} aria-hidden="true" />
           <strong>{t("У вас пока нет броней")}</strong>
           <p>

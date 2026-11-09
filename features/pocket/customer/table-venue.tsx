@@ -664,7 +664,7 @@ export function TableVenueScreen({
 
   if (loadError)
     return (
-      <div className="spots-catalog-status" role="alert">
+      <div className="dish-catalog-status" role="alert">
         <h2>{t("Не удалось открыть стол")}</h2>
         <p>{t(loadError)}</p>
         <button
@@ -678,7 +678,7 @@ export function TableVenueScreen({
     );
   if (!table)
     return (
-      <div className="spots-catalog-status" role="status">
+      <div className="dish-catalog-status" role="status">
         {t("Открываем меню вашего стола...")}
       </div>
     );

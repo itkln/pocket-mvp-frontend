@@ -16,13 +16,13 @@
 
 /* Pocket Spots: a dedicated consumer storefront. */
 
-.pocket-spots {
+.pocket-dish {
   min-height: 100dvh;
   background: #f4f6f8;
   color: var(--ink);
 }
 
-.spots-header {
+.dish-catalog-header {
   position: sticky;
   top: 0;
   z-index: 50;
@@ -32,7 +32,7 @@
   backdrop-filter: blur(18px);
 }
 
-.spots-header-inner {
+.dish-header-inner {
   width: min(1360px, 100%);
   height: 100%;
   display: grid;
@@ -43,28 +43,28 @@
   padding: 0 28px;
 }
 
-.spots-brand,
-.spots-location,
-.spots-global-search,
-.spots-header-actions > button {
+.dish-catalog-brand,
+.dish-location,
+.dish-global-search,
+.dish-header-actions > button {
   border: 0;
   background: transparent;
   cursor: pointer;
 }
 
-.spots-brand {
+.dish-catalog-brand {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0;
 }
 
-.spots-brand strong {
+.dish-catalog-brand strong {
   font-size: 20px;
   font-weight: 750;
 }
 
-.spots-location {
+.dish-location {
   min-width: 0;
   display: flex;
   align-items: center;
@@ -74,31 +74,31 @@
   text-align: left;
 }
 
-.spots-location:hover {
+.dish-location:hover {
   background: #f2f5f7;
 }
 
-.spots-location svg {
+.dish-location svg {
   flex: none;
   color: var(--accent);
 }
 
-.spots-location span,
-.spots-location b,
-.spots-location small {
+.dish-location span,
+.dish-location b,
+.dish-location small {
   display: block;
 }
 
-.spots-location b {
+.dish-location b {
   font-size: 14px;
 }
 
-.spots-location small {
+.dish-location small {
   color: #7b8790;
   font-size: 12px;
 }
 
-.spots-global-search {
+.dish-global-search {
   min-width: 0;
   height: 48px;
   display: flex;
@@ -111,20 +111,20 @@
   text-align: left;
 }
 
-.spots-global-search span {
+.dish-global-search span {
   overflow: hidden;
   font-size: 15px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.spots-header-actions {
+.dish-header-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.spots-header-actions > button {
+.dish-header-actions > button {
   min-width: 44px;
   height: 44px;
   display: inline-flex;
@@ -134,11 +134,11 @@
   border-radius: 8px;
 }
 
-.spots-header-actions > button:hover {
+.dish-header-actions > button:hover {
   background: #eef2f4;
 }
 
-.spots-account-trigger i {
+.dish-account-trigger i {
   width: 34px;
   height: 34px;
   display: grid;
@@ -151,21 +151,21 @@
   font-weight: 700;
 }
 
-.spots-account-trigger.active {
+.dish-account-trigger.active {
   opacity: 0.72;
 }
 
-.spots-main {
+.dish-main {
   min-height: calc(100dvh - 76px);
 }
 
-.spots-page {
+.dish-page {
   width: min(1280px, 100%);
   margin: 0 auto;
   padding: 28px 28px 72px;
 }
 
-.spots-bottom-nav {
+.dish-bottom-nav {
   display: none;
 }
 
@@ -226,7 +226,7 @@
   text-overflow: ellipsis;
 }
 
-.spots-search-empty {
+.dish-search-empty {
   min-height: 180px;
   display: grid;
   place-items: center;
@@ -238,32 +238,32 @@
   text-align: center;
 }
 
-.spots-search-empty strong {
+.dish-search-empty strong {
   color: var(--ink);
   font-size: 18px;
 }
 
-.spots-search-empty p {
+.dish-search-empty p {
   margin: 0;
   font-size: 14px;
 }
 
-.pocket-spots .panel {
+.pocket-dish .panel {
   border: 0;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(23, 33, 43, 0.06);
 }
 
-.pocket-spots .back-link {
+.pocket-dish .back-link {
   color: var(--accent);
 }
 
 @media (max-width: 1050px) {
-  .spots-header-inner {
+  .dish-header-inner {
     grid-template-columns: auto auto minmax(180px, 1fr) auto;
     padding: 0 20px;
   }
-  .spots-location small {
+  .dish-location small {
     display: none;
   }
   .cuisine-strip {
@@ -272,52 +272,52 @@
 }
 
 @media (max-width: 760px) {
-  .pocket-spots {
+  .pocket-dish {
     background: #f4f6f8;
   }
-  .spots-header {
+  .dish-catalog-header {
     height: 64px;
   }
-  .spots-header-inner {
+  .dish-header-inner {
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: 8px;
     padding: 0 12px;
   }
-  .spots-brand strong,
-  .spots-global-search span {
+  .dish-catalog-brand strong,
+  .dish-global-search span {
     display: none;
   }
-  .spots-brand {
+  .dish-catalog-brand {
     width: 42px;
     height: 42px;
     justify-content: center;
   }
-  .spots-location {
+  .dish-location {
     display: none;
   }
-  .spots-global-search {
+  .dish-global-search {
     height: 42px;
     justify-content: flex-start;
     padding: 0 14px;
   }
-  .spots-header-actions {
+  .dish-header-actions {
     gap: 2px;
   }
-  .spots-header-actions > button {
+  .dish-header-actions > button {
     min-width: 42px;
     height: 42px;
     padding: 0;
   }
-  .spots-account-trigger {
+  .dish-account-trigger {
     display: none !important;
   }
-  .spots-main {
+  .dish-main {
     min-height: calc(100dvh - 64px);
   }
-  .spots-page {
+  .dish-page {
     padding: 14px 12px calc(94px + env(safe-area-inset-bottom));
   }
-  .spots-bottom-nav {
+  .dish-bottom-nav {
     position: fixed;
     z-index: 52;
     right: 0;
@@ -332,7 +332,7 @@
     box-shadow: 0 -5px 20px rgba(23, 33, 43, 0.08);
     backdrop-filter: blur(18px);
   }
-  .spots-bottom-nav button {
+  .dish-bottom-nav button {
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -345,13 +345,13 @@
     color: #74818b;
     cursor: pointer;
   }
-  .spots-bottom-nav button span {
+  .dish-bottom-nav button span {
     overflow: hidden;
     font-size: 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .spots-bottom-nav button.active {
+  .dish-bottom-nav button.active {
     color: var(--accent);
   }
   .cuisine-section {
@@ -383,16 +383,16 @@
 
 /* Pocket Spots discover page: one search and a flat Dineout-style filter row. */
 
-.pocket-spots .spots-header {
+.pocket-dish .dish-catalog-header {
   border-bottom: 0;
   box-shadow: 0 1px 8px rgba(23, 33, 43, 0.05);
 }
 
-.pocket-spots .spots-header-inner {
+.pocket-dish .dish-header-inner {
   grid-template-columns: auto minmax(260px, 1fr) auto auto;
 }
 
-.pocket-spots .spots-global-search input {
+.pocket-dish .dish-global-search input {
   min-width: 0;
   width: 100%;
   border: 0;
@@ -402,22 +402,22 @@
   font-size: 15px;
 }
 
-.pocket-spots .spots-global-search input::placeholder {
+.pocket-dish .dish-global-search input::placeholder {
   color: #7b8790;
 }
 
-.pocket-spots .cuisine-section {
+.pocket-dish .cuisine-section {
   margin: 10px 0 28px;
 }
 
-.pocket-spots .cuisine-section h1 {
+.pocket-dish .cuisine-section h1 {
   margin: 0 0 16px;
   font-size: 29px;
   line-height: 1.2;
   letter-spacing: 0;
 }
 
-.pocket-spots .cuisine-strip {
+.pocket-dish .cuisine-strip {
   display: flex;
   gap: 8px;
   overflow-x: auto;
@@ -425,7 +425,7 @@
   scrollbar-width: none;
 }
 
-.pocket-spots .cuisine-strip button {
+.pocket-dish .cuisine-strip button {
   min-width: max-content;
   min-height: 44px;
   display: inline-flex;
@@ -438,17 +438,17 @@
   color: #34424d;
 }
 
-.pocket-spots .cuisine-strip button:hover {
+.pocket-dish .cuisine-strip button:hover {
   background: #dfe5e8;
 }
 
-.pocket-spots .cuisine-strip button.active {
+.pocket-dish .cuisine-strip button.active {
   border: 0;
   background: var(--accent);
   color: #fff;
 }
 
-.pocket-spots .cuisine-strip strong {
+.pocket-dish .cuisine-strip strong {
   overflow: visible;
   font-size: 14px;
   line-height: 1;
@@ -456,10 +456,10 @@
 }
 
 @media (max-width: 760px) {
-  .pocket-spots .spots-header-inner {
+  .pocket-dish .dish-header-inner {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
   }
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     min-width: 42px;
     width: 42px;
     height: 42px;
@@ -467,21 +467,21 @@
     justify-content: center;
     padding: 0;
   }
-  .pocket-spots .spots-location span {
+  .pocket-dish .dish-location span {
     display: none;
   }
-  .pocket-spots .cuisine-section {
+  .pocket-dish .cuisine-section {
     margin: 8px -12px 24px;
   }
-  .pocket-spots .cuisine-section h1 {
+  .pocket-dish .cuisine-section h1 {
     margin: 0 12px 14px;
     font-size: 24px;
   }
-  .pocket-spots .cuisine-strip {
+  .pocket-dish .cuisine-strip {
     gap: 7px;
     padding: 0 12px 3px;
   }
-  .pocket-spots .cuisine-strip button {
+  .pocket-dish .cuisine-strip button {
     min-width: max-content;
     min-height: 42px;
     padding: 0 15px;
@@ -490,17 +490,17 @@
 
 /* Pocket Spots: wide white storefront and denser restaurant discovery. */
 
-.pocket-spots,
-.pocket-spots .spots-main {
+.pocket-dish,
+.pocket-dish .dish-main {
   background: #fff;
 }
 
-.pocket-spots .spots-header {
+.pocket-dish .dish-catalog-header {
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 8px 24px rgba(23, 33, 43, 0.07);
 }
 
-.pocket-spots .spots-header-inner {
+.pocket-dish .dish-header-inner {
   width: 100%;
   max-width: none;
   grid-template-columns: auto minmax(280px, 1fr) auto auto;
@@ -508,7 +508,7 @@
   padding-left: 32px;
 }
 
-.pocket-spots .spots-location {
+.pocket-dish .dish-location {
   min-width: 160px;
   min-height: 48px;
   padding: 6px 15px;
@@ -516,48 +516,48 @@
   color: var(--ink);
 }
 
-.pocket-spots .spots-location:hover {
+.pocket-dish .dish-location:hover {
   background: #d8eef9;
 }
 
-.pocket-spots .spots-location b {
+.pocket-dish .dish-location b {
   font-size: 15px;
 }
 
-.pocket-spots .spots-location small {
+.pocket-dish .dish-location small {
   color: var(--accent);
   font-size: 12px;
   font-weight: 600;
 }
 
-.pocket-spots .spots-page {
+.pocket-dish .dish-page {
   width: min(1440px, 100%);
 }
 
 @media (max-width: 1200px) {
-  .pocket-spots .spots-header-inner {
+  .pocket-dish .dish-header-inner {
     padding-right: 20px;
     padding-left: 20px;
   }
 }
 
 @media (max-width: 900px) {
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     min-width: 48px;
     padding: 0 12px;
   }
-  .pocket-spots .spots-location span {
+  .pocket-dish .dish-location span {
     display: none;
   }
 }
 
 @media (max-width: 760px) {
-  .pocket-spots .spots-header-inner {
+  .pocket-dish .dish-header-inner {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     padding-right: 12px;
     padding-left: 12px;
   }
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     min-width: 42px;
     min-height: 42px;
     padding: 0;
@@ -566,23 +566,23 @@
 
 /* Pocket Spots uses flat surfaces and fully rounded header controls. */
 
-.pocket-spots .spots-header,
-.pocket-spots .panel {
+.pocket-dish .dish-catalog-header,
+.pocket-dish .panel {
   box-shadow: none;
 }
 
-.pocket-spots .spots-header {
+.pocket-dish .dish-catalog-header {
   border-bottom: 0;
   box-shadow: 0 7px 22px rgba(23, 33, 43, 0.08);
 }
 
-.pocket-spots .spots-global-search,
-.pocket-spots .spots-location,
-.pocket-spots .spots-header-actions > button {
+.pocket-dish .dish-global-search,
+.pocket-dish .dish-location,
+.pocket-dish .dish-header-actions > button {
   border-radius: 999px;
 }
 
-.pocket-spots .spots-location {
+.pocket-dish .dish-location {
   min-width: auto;
   padding-right: 18px;
   padding-left: 18px;
@@ -590,37 +590,37 @@
   background: #f0f2f4;
 }
 
-.pocket-spots .spots-location:hover {
+.pocket-dish .dish-location:hover {
   background: #e6eaed;
 }
 
-.pocket-spots .spots-location svg {
+.pocket-dish .dish-location svg {
   color: #34424d;
 }
 
-.pocket-spots header.spots-header button.spots-location {
+.pocket-dish header.dish-catalog-header button.dish-location {
   border-radius: 999px !important;
 }
 
 @media (max-width: 900px) {
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     min-width: 48px;
     padding: 0 12px;
   }
 }
 
 @media (min-width: 761px) and (max-width: 900px) {
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     min-width: auto;
     padding: 0 16px;
   }
-  .pocket-spots .spots-location span {
+  .pocket-dish .dish-location span {
     display: block;
   }
 }
 
 @media (max-width: 760px) {
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     min-width: 42px;
     padding: 0;
   }
@@ -628,19 +628,19 @@
 
 /* Pocket Spots: one fully rounded shape for interactive controls. */
 
-.pocket-spots .button,
-.pocket-spots .icon-button,
-.pocket-spots .spots-header-actions > button,
-.pocket-spots .spots-location,
-.pocket-spots .cuisine-strip button,
-.pocket-spots .back-link,
-.pocket-spots .spots-bottom-nav button {
+.pocket-dish .button,
+.pocket-dish .icon-button,
+.pocket-dish .dish-header-actions > button,
+.pocket-dish .dish-location,
+.pocket-dish .cuisine-strip button,
+.pocket-dish .back-link,
+.pocket-dish .dish-bottom-nav button {
   border-radius: 999px !important;
 }
 
 /* Compact discovery controls and motion shared across the storefront. */
 
-.pocket-spots button {
+.pocket-dish button {
   transition:
     background-color 220ms ease,
     color 220ms ease,
@@ -648,16 +648,16 @@
     opacity 220ms ease;
 }
 
-.pocket-spots button:focus-visible {
+.pocket-dish button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
-.pocket-spots .cuisine-strip {
+.pocket-dish .cuisine-strip {
   gap: 8px;
 }
 
-.pocket-spots .cuisine-strip button {
+.pocket-dish .cuisine-strip button {
   height: 36px;
   min-height: 36px;
   padding: 0 13px;
@@ -665,24 +665,24 @@
   background: #f0f1f2;
 }
 
-.pocket-spots .cuisine-strip strong {
+.pocket-dish .cuisine-strip strong {
   font-size: 13px;
   font-weight: 600;
 }
 
-.pocket-spots .cuisine-strip button.spots-filter-trigger {
+.pocket-dish .cuisine-strip button.dish-filter-trigger {
   width: 36px;
   min-width: 36px;
   padding: 0;
   justify-content: center;
 }
 
-.pocket-spots .cuisine-strip button.active {
+.pocket-dish .cuisine-strip button.active {
   background: var(--accent-soft);
   color: var(--accent);
 }
 
-.pocket-spots .spots-picker-dialog {
+.pocket-dish .dish-picker-dialog {
   width: min(440px, calc(100vw - 32px));
   max-height: calc(100dvh - 40px);
   margin: auto;
@@ -693,15 +693,15 @@
   color: var(--ink);
 }
 
-.pocket-spots .spots-picker-dialog::backdrop {
+.pocket-dish .dish-picker-dialog::backdrop {
   background: rgba(23, 33, 43, 0.28);
 }
 
-.spots-picker-content {
+.dish-picker-content {
   padding: 24px;
 }
 
-.spots-picker-heading {
+.dish-picker-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -709,12 +709,12 @@
   margin-bottom: 20px;
 }
 
-.spots-picker-heading h2 {
+.dish-picker-heading h2 {
   margin: 0;
   font-size: 24px;
 }
 
-.spots-picker-search {
+.dish-picker-search {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -725,7 +725,7 @@
   color: #73808a;
 }
 
-.spots-picker-search input {
+.dish-picker-search input {
   width: 100%;
   min-width: 0;
   border: 0;
@@ -735,18 +735,18 @@
   color: var(--ink);
 }
 
-.spots-picker-search:focus-within {
+.dish-picker-search:focus-within {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.spots-city-options {
+.dish-city-options {
   display: grid;
   gap: 4px;
   margin-top: 16px;
 }
 
-.spots-city-options button {
+.dish-city-options button {
   min-height: 46px;
   display: flex;
   align-items: center;
@@ -760,13 +760,13 @@
   cursor: pointer;
 }
 
-.spots-filter-options {
+.dish-filter-options {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.spots-filter-options button {
+.dish-filter-options button {
   min-height: 38px;
   padding: 8px 14px;
   border: 0;
@@ -775,18 +775,18 @@
   cursor: pointer;
 }
 
-.pocket-spots .spots-city-options button,
-.pocket-spots .spots-filter-options button {
+.pocket-dish .dish-city-options button,
+.pocket-dish .dish-filter-options button {
   border-radius: 999px !important;
 }
 
-.spots-city-options button[aria-pressed="true"],
-.spots-filter-options button[aria-pressed="true"] {
+.dish-city-options button[aria-pressed="true"],
+.dish-filter-options button[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--accent);
 }
 
-.spots-picker-footer {
+.dish-picker-footer {
   display: flex;
   justify-content: space-between;
   gap: 12px;
@@ -794,87 +794,87 @@
 }
 
 @media (hover: hover) {
-  .pocket-spots .cuisine-strip button:hover,
-  .pocket-spots .spots-city-options button:hover,
-  .pocket-spots .spots-filter-options button:hover {
+  .pocket-dish .cuisine-strip button:hover,
+  .pocket-dish .dish-city-options button:hover,
+  .pocket-dish .dish-filter-options button:hover {
     background: #e6eaed;
   }
-  .pocket-spots .cuisine-strip button.active:hover {
+  .pocket-dish .cuisine-strip button.active:hover {
     background: #d8eef9;
   }
 }
 
 @media (max-width: 760px) {
-  .pocket-spots .spots-header-inner {
+  .pocket-dish .dish-header-inner {
     grid-template-columns: 42px minmax(0, 1fr) auto;
   }
-  .pocket-spots .spots-header-actions {
+  .pocket-dish .dish-header-actions {
     display: none;
   }
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     width: auto;
     min-width: 0;
     max-width: 142px;
     gap: 5px;
     padding: 0 10px;
   }
-  .pocket-spots .spots-location span {
+  .pocket-dish .dish-location span {
     display: block;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .pocket-spots .spots-location b {
+  .pocket-dish .dish-location b {
     font-size: 13px;
   }
-  .spots-picker-content {
+  .dish-picker-content {
     padding: 20px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pocket-spots button {
+  .pocket-dish button {
     transition: none;
   }
 }
 
-.pocket-spots .spots-header {
+.pocket-dish .dish-catalog-header {
   height: 80px;
 }
 
-.pocket-spots .spots-header-inner {
+.pocket-dish .dish-header-inner {
   position: relative;
 }
 
-.pocket-spots .spots-header-inner > .spots-brand,
-.pocket-spots .spots-header-inner > .spots-location,
-.pocket-spots .spots-global-search,
-.pocket-spots .spots-header-actions > .spots-account-trigger {
+.pocket-dish .dish-header-inner > .dish-catalog-brand,
+.pocket-dish .dish-header-inner > .dish-location,
+.pocket-dish .dish-global-search,
+.pocket-dish .dish-header-actions > .dish-account-trigger {
   height: 52px;
   min-height: 52px;
 }
 
-.pocket-spots .spots-header-actions {
+.pocket-dish .dish-header-actions {
   position: relative;
 }
 
-.pocket-spots .spots-header-actions > .spots-account-trigger {
+.pocket-dish .dish-header-actions > .dish-account-trigger {
   width: 52px;
   min-width: 52px;
   padding: 0;
 }
 
-.pocket-spots .spots-account-trigger i {
+.pocket-dish .dish-account-trigger i {
   width: 44px;
   height: 44px;
 }
 
-.pocket-spots .spots-main {
+.pocket-dish .dish-main {
   min-height: calc(100dvh - 80px);
 }
 
-.pocket-spots .spots-account-menu {
+.pocket-dish .dish-catalog-account-menu {
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
@@ -888,14 +888,14 @@
   color: var(--ink);
 }
 
-.spots-account-menu-heading {
+.dish-account-menu-heading {
   padding: 4px 14px 14px;
   font-size: 22px;
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
-.pocket-spots .spots-account-menu > button {
+.pocket-dish .dish-catalog-account-menu > button {
   width: 100%;
   min-height: 52px;
   display: flex;
@@ -910,77 +910,77 @@
   cursor: pointer;
 }
 
-.spots-account-menu > button svg {
+.dish-catalog-account-menu > button svg {
   flex-shrink: 0;
   color: #818b92;
 }
 
-.pocket-spots .spots-account-menu > button:hover,
-.pocket-spots .spots-account-menu > button:focus-visible {
+.pocket-dish .dish-catalog-account-menu > button:hover,
+.pocket-dish .dish-catalog-account-menu > button:focus-visible {
   background: #f0f2f4;
 }
 
-.pocket-spots .spots-account-menu > .spots-account-logout {
+.pocket-dish .dish-catalog-account-menu > .dish-catalog-account-logout {
   margin-top: 6px;
   color: #c84439;
 }
 
-.spots-account-menu > .spots-account-logout svg {
+.dish-catalog-account-menu > .dish-catalog-account-logout svg {
   color: inherit;
 }
 
 @media (max-width: 760px) {
-  .pocket-spots .spots-header {
+  .pocket-dish .dish-catalog-header {
     height: 128px;
   }
-  .pocket-spots .spots-header-inner {
+  .pocket-dish .dish-header-inner {
     grid-template-columns: 52px minmax(0, 1fr) 52px;
     grid-template-rows: 52px 52px;
     gap: 8px;
     padding-top: 8px;
     padding-bottom: 8px;
   }
-  .pocket-spots .spots-brand {
+  .pocket-dish .dish-catalog-brand {
     width: 52px;
   }
-  .pocket-spots .spots-global-search {
+  .pocket-dish .dish-global-search {
     grid-column: 1 / -1;
     grid-row: 2;
   }
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     grid-column: 2;
     grid-row: 1;
     justify-self: end;
     max-width: 100%;
     padding: 0 16px;
   }
-  .pocket-spots .spots-location b {
+  .pocket-dish .dish-location b {
     font-size: 15px;
   }
-  .pocket-spots .spots-header-actions {
+  .pocket-dish .dish-header-actions {
     display: flex;
     grid-column: 3;
     grid-row: 1;
   }
-  .pocket-spots .spots-header-actions > .spots-account-trigger {
+  .pocket-dish .dish-header-actions > .dish-account-trigger {
     display: inline-flex;
   }
-  .pocket-spots .spots-account-menu {
+  .pocket-dish .dish-catalog-account-menu {
     max-height: calc(100dvh - 90px);
   }
-  .pocket-spots .spots-main {
+  .pocket-dish .dish-main {
     min-height: calc(100dvh - 128px);
   }
 }
 
 /* A shared canvas with a distinct, responsive city catalog. */
 
-.pocket-spots,
-.pocket-spots .spots-main {
+.pocket-dish,
+.pocket-dish .dish-main {
   background: #fff;
 }
 
-.pocket-spots .spots-header {
+.pocket-dish .dish-catalog-header {
   border-bottom: 0;
   background: #f5f4f2;
   box-shadow: none;
@@ -988,20 +988,20 @@
   transition: box-shadow 180ms ease;
 }
 
-.pocket-spots .spots-header.scrolled {
+.pocket-dish .dish-catalog-header.scrolled {
   box-shadow: 0 5px 18px rgba(23, 33, 43, 0.1);
 }
 
-.pocket-spots .spots-header-inner {
+.pocket-dish .dish-header-inner {
   grid-template-columns: auto minmax(260px, 1fr) auto auto;
   gap: 20px;
 }
 
-.pocket-spots .spots-brand {
+.pocket-dish .dish-catalog-brand {
   margin-right: 24px;
 }
 
-.pocket-spots .spots-global-search {
+.pocket-dish .dish-global-search {
   width: 100%;
   max-width: none;
   gap: 16px;
@@ -1009,23 +1009,23 @@
   background: #fff;
 }
 
-.pocket-spots .spots-global-search > svg {
+.pocket-dish .dish-global-search > svg {
   flex-shrink: 0;
 }
 
-.pocket-spots .spots-location {
+.pocket-dish .dish-location {
   grid-column: 3;
   background: #fff;
   color: #20272c;
 }
 
-.pocket-spots .spots-header-actions {
+.pocket-dish .dish-header-actions {
   grid-column: 4;
   gap: 8px;
 }
 
-.pocket-spots .spots-language-trigger,
-.pocket-spots .spots-header-actions > .spots-account-trigger {
+.pocket-dish .dish-language-trigger,
+.pocket-dish .dish-header-actions > .dish-account-trigger {
   width: 52px;
   min-width: 52px;
   height: 52px;
@@ -1039,93 +1039,93 @@
     color 180ms ease;
 }
 
-.pocket-spots .spots-language-trigger:hover,
-.pocket-spots .spots-language-trigger.active,
-.pocket-spots .spots-header-actions > .spots-account-trigger:hover {
+.pocket-dish .dish-language-trigger:hover,
+.pocket-dish .dish-language-trigger.active,
+.pocket-dish .dish-header-actions > .dish-account-trigger:hover {
   background: #fff;
 }
 
-.pocket-spots .spots-page {
+.pocket-dish .dish-page {
   width: min(1920px, 100%);
   padding: 24px 32px 64px;
 }
 
 @media (max-width: 1199px) {
-  .pocket-spots .spots-header-inner {
+  .pocket-dish .dish-header-inner {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     gap: 16px;
   }
-  .pocket-spots .spots-brand {
+  .pocket-dish .dish-catalog-brand {
     margin-right: 12px;
   }
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     grid-column: 3;
   }
-  .pocket-spots .spots-header-actions {
+  .pocket-dish .dish-header-actions {
     grid-column: 4;
   }
 }
 
 @media (max-width: 899px) {
-  .pocket-spots .spots-page {
+  .pocket-dish .dish-page {
     padding: 16px 16px 96px;
   }
 }
 
 @media (max-width: 760px) {
-  .pocket-spots .spots-header-inner {
+  .pocket-dish .dish-header-inner {
     grid-template-columns: 52px minmax(0, 1fr) 112px;
     gap: 8px;
   }
-  .pocket-spots .spots-brand {
+  .pocket-dish .dish-catalog-brand {
     margin: 0;
   }
-  .pocket-spots .spots-location {
+  .pocket-dish .dish-location {
     grid-column: 2;
     padding: 0 12px;
   }
-  .pocket-spots .spots-header-actions {
+  .pocket-dish .dish-header-actions {
     grid-column: 3;
   }
-  .pocket-spots .spots-bottom-nav {
+  .pocket-dish .dish-bottom-nav {
     background: #fff;
     box-shadow: 0 -4px 16px rgba(23, 33, 43, 0.06);
   }
 }
 
-.pocket-spots .spots-category-catalog .cuisine-section {
+.pocket-dish .dish-category-catalog .cuisine-section {
   margin-bottom: 28px;
   padding: 10px 12px;
   border-radius: 999px;
   background: #f4f4f5;
 }
 
-.pocket-spots .spots-category-catalog .cuisine-strip {
+.pocket-dish .dish-category-catalog .cuisine-strip {
   align-items: center;
   padding: 0;
 }
 
-.pocket-spots .spots-category-catalog .cuisine-strip button {
+.pocket-dish .dish-category-catalog .cuisine-strip button {
   background: transparent;
   color: #3d464d;
 }
 
-.pocket-spots .spots-category-catalog .cuisine-strip button.active {
+.pocket-dish .dish-category-catalog .cuisine-strip button.active {
   background: #fff;
   color: var(--accent);
 }
 
-.pocket-spots .spots-category-catalog .cuisine-strip button.spots-filter-trigger {
+.pocket-dish .dish-category-catalog .cuisine-strip button.dish-filter-trigger {
   margin-left: auto;
   background: #fff;
   color: var(--ink);
 }
 
-.pocket-spots .spots-category-catalog .spots-category-filters {
+.pocket-dish .dish-category-catalog .dish-category-filters {
   margin: -4px 0 20px;
 }
 
-.spots-language-control {
+.dish-language-control {
   position: relative;
   width: 52px;
   height: 52px;
@@ -1135,18 +1135,18 @@
   border-radius: 50%;
 }
 
-.pocket-spots .spots-language-trigger {
+.pocket-dish .dish-language-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   line-height: 0;
 }
 
-.pocket-spots .spots-language-trigger svg {
+.pocket-dish .dish-language-trigger svg {
   display: block;
 }
 
-.pocket-spots .spots-language-menu {
+.pocket-dish .dish-language-menu {
   position: absolute;
   z-index: 80;
   top: calc(100% + 10px);
@@ -1159,7 +1159,7 @@
   box-shadow: 0 14px 36px rgba(23, 33, 43, 0.14);
 }
 
-.pocket-spots .spots-language-menu > button {
+.pocket-dish .dish-language-menu > button {
   width: 100%;
   min-height: 48px;
   display: flex;
@@ -1176,42 +1176,42 @@
   cursor: pointer;
 }
 
-.pocket-spots .spots-language-menu > button:hover,
-.pocket-spots .spots-language-menu > button:focus-visible {
+.pocket-dish .dish-language-menu > button:hover,
+.pocket-dish .dish-language-menu > button:focus-visible {
   background: #f5f4f2;
 }
 
-.pocket-spots .spots-language-menu svg {
+.pocket-dish .dish-language-menu svg {
   color: var(--accent);
 }
 
-.spots-filter-category {
+.dish-filter-category {
   margin: -12px 0 18px;
   color: #73808a;
   font-size: 15px;
 }
 
-.pocket-spots .spots-account-menu {
+.pocket-dish .dish-catalog-account-menu {
   border: 0;
   box-shadow: 0 14px 34px rgba(23, 33, 43, 0.12);
 }
 
-.pocket-spots [data-tooltip][aria-expanded="true"]::after {
+.pocket-dish [data-tooltip][aria-expanded="true"]::after {
   display: none;
 }
 
 @media (max-width: 760px) {
-  .pocket-spots .spots-category-catalog .cuisine-section {
+  .pocket-dish .dish-category-catalog .cuisine-section {
     margin: 0 0 24px;
     padding: 8px 10px;
     overflow: hidden;
   }
-  .pocket-spots .spots-category-catalog .cuisine-strip {
+  .pocket-dish .dish-category-catalog .cuisine-strip {
     width: 100%;
     overflow-x: auto;
     padding: 0;
   }
-  .pocket-spots .spots-category-catalog .cuisine-strip button.spots-filter-trigger {
+  .pocket-dish .dish-category-catalog .cuisine-strip button.dish-filter-trigger {
     position: sticky;
     right: 0;
     box-shadow: -10px 0 12px #f4f4f5;
@@ -1220,11 +1220,11 @@
 
 /* Short, consistent hints for icon-only controls. */
 
-.pocket-spots [data-tooltip] {
+.pocket-dish [data-tooltip] {
   position: relative;
 }
 
-.pocket-spots [data-tooltip]::after {
+.pocket-dish [data-tooltip]::after {
   position: absolute;
   z-index: 100;
   right: 50%;
@@ -1247,22 +1247,22 @@
   white-space: nowrap;
 }
 
-.pocket-spots [data-tooltip-placement="bottom"]::after {
+.pocket-dish [data-tooltip-placement="bottom"]::after {
   top: calc(100% + 9px);
   bottom: auto;
   transform: translate(50%, -4px);
 }
 
 @media (hover: hover) {
-  .pocket-spots [data-tooltip]:hover::after,
-  .pocket-spots [data-tooltip]:focus-visible::after {
+  .pocket-dish [data-tooltip]:hover::after,
+  .pocket-dish [data-tooltip]:focus-visible::after {
     transform: translate(50%, 0);
     opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pocket-spots [data-tooltip]::after {
+  .pocket-dish [data-tooltip]::after {
     transition: none;
   }
 }

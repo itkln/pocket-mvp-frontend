@@ -76,11 +76,11 @@ export function GuestProfile({
     { label: "Уведомления", screen: "notifications", icon: BellSolid, tone: "yellow" },
   ];
   return (
-    <section className="spots-profile">
-      <div className="spots-account-heading">
+    <section className="dish-profile">
+      <div className="dish-account-heading">
         <button
           type="button"
-          className="spots-back-button"
+          className="dish-back-button"
           aria-label={t("Назад")}
           onClick={() => onNavigate("discover")}
         >
@@ -89,9 +89,9 @@ export function GuestProfile({
         <h1>{t("Профиль")}</h1>
         <span />
       </div>
-      <button type="button" className="spots-profile-identity" onClick={onEditProfile}>
+      <button type="button" className="dish-profile-identity" onClick={onEditProfile}>
         <span
-          className="spots-profile-avatar"
+          className="dish-profile-avatar"
           style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}
         >
           {!user.avatar_url && userInitials(user)}
@@ -102,22 +102,22 @@ export function GuestProfile({
           </strong>
           <small>{t("Редактировать профиль")}</small>
         </span>
-        <Pencil className="spots-profile-edit-icon" size={18} />
+        <Pencil className="dish-profile-edit-icon" size={18} />
       </button>
-      <div className="spots-profile-menu">
-        <nav className="spots-profile-links" aria-label={t("Профиль")}>
+      <div className="dish-profile-menu">
+        <nav className="dish-profile-links" aria-label={t("Профиль")}>
           {links
             .filter((link) => !hideSavedPlaces || link.screen !== "saved")
             .map(({ label, screen, icon: Icon, tone }) => (
               <button type="button" key={screen} onClick={() => onNavigate(screen)}>
-                <span className={`spots-profile-icon ${tone}`}>
+                <span className={`dish-profile-icon ${tone}`}>
                   <Icon size={24} />
                 </span>
                 <span>{t(label)}</span>
               </button>
             ))}
         </nav>
-        <button type="button" className="spots-signout" onClick={onLogout}>
+        <button type="button" className="dish-signout" onClick={onLogout}>
           <LogOut size={20} />
           {t("Выйти из аккаунта")}
         </button>
@@ -148,11 +148,11 @@ export function GuestSettings({
     notifications ? "notifications" : (initialSection ?? null),
   );
   return (
-    <section className="spots-settings">
-      <div className="spots-account-heading">
+    <section className="dish-settings">
+      <div className="dish-account-heading">
         <button
           type="button"
-          className="spots-back-button"
+          className="dish-back-button"
           aria-label={t("Назад")}
           onClick={() =>
             onBack ? onBack() : section && !notifications ? setSection(null) : onNavigate("profile")
@@ -174,7 +174,7 @@ export function GuestSettings({
         <span />
       </div>
       {section ? (
-        <div className="spots-settings-detail" data-section={section}>
+        <div className="dish-settings-detail" data-section={section}>
           <AccountScreen
             embedded
             key={section}
@@ -187,9 +187,9 @@ export function GuestSettings({
         </div>
       ) : (
         <>
-          <div className="spots-settings-identity">
+          <div className="dish-settings-identity">
             <span
-              className="spots-profile-avatar"
+              className="dish-profile-avatar"
               style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}
             >
               {!user.avatar_url && userInitials(user)}
@@ -199,7 +199,7 @@ export function GuestSettings({
             </h2>
             <p>{user.email}</p>
           </div>
-          <nav className="spots-profile-links" aria-label={t("Разделы настроек")}>
+          <nav className="dish-profile-links" aria-label={t("Разделы настроек")}>
             {[
               { id: "profile" as const, label: "Личные данные", icon: UserSolid, tone: "blue" },
               { id: "security" as const, label: "Безопасность", icon: ShieldSolid, tone: "mint" },
@@ -213,7 +213,7 @@ export function GuestSettings({
                     : setSection(id)
                 }
               >
-                <span className={`spots-profile-icon ${tone}`}>
+                <span className={`dish-profile-icon ${tone}`}>
                   <Icon size={24} />
                 </span>
                 <span>{t(label)}</span>
@@ -270,18 +270,18 @@ export function GuestProfileDialog({
   return (
     <dialog
       ref={dialog}
-      className="spots-profile-dialog"
+      className="dish-profile-dialog"
       data-section={section}
-      aria-labelledby="spots-profile-dialog-title"
+      aria-labelledby="dish-profile-dialog-title"
       onClose={onClose}
       onClick={(event) => {
         if (event.target === event.currentTarget) dialog.current?.close();
       }}
     >
       {open && (
-        <div className="spots-profile-dialog-content">
-          <div className="spots-dialog-heading">
-            <h2 id="spots-profile-dialog-title">{t(title)}</h2>
+        <div className="dish-profile-dialog-content">
+          <div className="dish-dialog-heading">
+            <h2 id="dish-profile-dialog-title">{t(title)}</h2>
             <button
               type="button"
               className="icon-button"

@@ -82,7 +82,7 @@ export function TableEntry({
     return (
       <section className="dish-table-state">
         {toolbar}
-        <div className="spots-catalog-status" role={error ? "alert" : "status"}>
+        <div className="dish-catalog-status" role={error ? "alert" : "status"}>
           {error ? (
             <>
               <ReceiptText size={36} />

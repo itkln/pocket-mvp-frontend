@@ -249,7 +249,7 @@ describe("my reservations", () => {
     await screen.findByText("Бронь №BOOK123");
     expect(screen.getAllByRole("article")).toHaveLength(4);
     const strip = screen.getByRole("region", { name: "Фильтры броней" });
-    expect(strip).toHaveClass("spots-category-filters");
+    expect(strip).toHaveClass("dish-category-filters");
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
     fireEvent.click(within(strip).getByRole("button", { name: "Подтверждена" }));
     fireEvent.click(within(strip).getByRole("button", { name: "С предзаказом" }));
@@ -259,7 +259,7 @@ describe("my reservations", () => {
     );
     fireEvent.click(within(strip).getByRole("button", { name: "Фильтры" }));
     const filters = screen.getByRole("dialog", { name: "Фильтры" });
-    expect(filters).toHaveClass("spots-picker-dialog");
+    expect(filters).toHaveClass("dish-picker-dialog");
     fireEvent.click(
       within(within(filters).getByRole("region", { name: "Заведение" })).getByRole("button", {
         name: "Demo Bistro",

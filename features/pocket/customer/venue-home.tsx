@@ -69,7 +69,7 @@ export function VenueHome({
   };
   if (error)
     return (
-      <section className="spots-catalog-status" role="alert">
+      <section className="dish-catalog-status" role="alert">
         <strong>{t(error)}</strong>
         <button type="button" className="button secondary" onClick={retryLoad}>
           {t("Повторить")}
@@ -78,7 +78,7 @@ export function VenueHome({
     );
   if (!venue)
     return (
-      <section className="spots-catalog-status" role="status">
+      <section className="dish-catalog-status" role="status">
         {t("Загружаем заведение...")}
       </section>
     );

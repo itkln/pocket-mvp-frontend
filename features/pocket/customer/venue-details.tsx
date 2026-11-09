@@ -551,7 +551,7 @@ export function VenueDetailsScreen({
 
   return (
     <section
-      className={`spots-venue-detail spots-real-venue-detail ${standalone ? "venue-standalone" : ""} ${reservationPage ? "venue-reservation-page" : ""} ${searchOpen ? "venue-search-active" : ""} ${tableOrder ? "venue-table-mode" : ""} ${venue?.image_url ? "venue-cover-mode" : ""}`}
+      className={`dish-venue-detail dish-real-venue-detail ${standalone ? "venue-standalone" : ""} ${reservationPage ? "venue-reservation-page" : ""} ${searchOpen ? "venue-search-active" : ""} ${tableOrder ? "venue-table-mode" : ""} ${venue?.image_url ? "venue-cover-mode" : ""}`}
     >
       <header className={`venue-mobile-toolbar ${compactHeader ? "compact" : ""}`}>
         <div className="venue-mobile-toolbar-leading">
@@ -684,7 +684,7 @@ export function VenueDetailsScreen({
         </button>
       )}
       {venue ? (
-        <article className="spots-restaurant venue-detail-page" aria-labelledby="venue-title">
+        <article className="dish-restaurant venue-detail-page" aria-labelledby="venue-title">
           <div className="venue-primary-column">
             <div
               className="venue-overview-block"
@@ -1271,7 +1271,7 @@ export function VenueDetailsScreen({
           )}
         </article>
       ) : state.error ? (
-        <div className="spots-catalog-status" role="alert">
+        <div className="dish-catalog-status" role="alert">
           <strong>
             {t(
               state.error === "missing"
@@ -1294,7 +1294,7 @@ export function VenueDetailsScreen({
           )}
         </div>
       ) : (
-        <div className="spots-catalog-status" role="status">
+        <div className="dish-catalog-status" role="status">
           {t("Загружаем заведение...")}
         </div>
       )}

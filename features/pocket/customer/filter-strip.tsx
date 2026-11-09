@@ -20,11 +20,11 @@ export function CategoryFilterStrip({
 }) {
   const { t } = useI18n();
   return (
-    <section className="cuisine-section spots-category-filters" aria-label={ariaLabel}>
+    <section className="cuisine-section dish-category-filters" aria-label={ariaLabel}>
       <div className="cuisine-strip">
         <button
           type="button"
-          className={`spots-filter-trigger ${filtersActive ? "active" : ""}`}
+          className={`dish-filter-trigger ${filtersActive ? "active" : ""}`}
           aria-label={t("Фильтры")}
           aria-haspopup="dialog"
           onClick={onOpenFilters}

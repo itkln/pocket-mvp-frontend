@@ -72,13 +72,13 @@ export function SlideToConfirm({
     return (
       <button
         type="button"
-        className="button primary spots-click-confirm"
+        className="button primary dish-click-confirm"
         disabled={blocked}
         aria-label={`${t(busy ? pendingLabel : label)}${amount ? ` · ${amount}` : ""}`}
         aria-busy={busy}
         onClick={() => void confirm()}
       >
-        {busy && <LoaderCircle size={22} className="spots-slide-spinner" aria-hidden="true" />}
+        {busy && <LoaderCircle size={22} className="slide-confirm-spinner" aria-hidden="true" />}
         {t(busy ? pendingLabel : label)}
       </button>
     );
@@ -87,7 +87,7 @@ export function SlideToConfirm({
     <button
       ref={buttonRef}
       type="button"
-      className="spots-slide-confirm"
+      className="slide-confirm"
       disabled={blocked}
       aria-label={`${t(busy ? pendingLabel : label)}${amount ? ` · ${amount}` : ""}`}
       aria-describedby={hintID}
@@ -140,19 +140,19 @@ export function SlideToConfirm({
         if (event.detail === 0 && !drag.current) void confirm();
       }}
     >
-      <span className="spots-slide-fill" aria-hidden="true" />
-      <span className="spots-slide-copy" data-busy={busy} aria-hidden="true">
+      <span className="slide-confirm-fill" aria-hidden="true" />
+      <span className="slide-confirm-copy" data-busy={busy} aria-hidden="true">
         <strong>{t(busy ? pendingLabel : label)}</strong>
         <span>{t("Сдвиньте для подтверждения")}</span>
       </span>
-      <span className="spots-slide-handle" aria-hidden="true">
+      <span className="slide-confirm-handle" aria-hidden="true">
         {busy ? (
-          <LoaderCircle size={25} className="spots-slide-spinner" />
+          <LoaderCircle size={25} className="slide-confirm-spinner" />
         ) : (
           <ArrowRight size={27} />
         )}
       </span>
-      <span className="spots-slide-a11y" id={hintID}>
+      <span className="slide-confirm-a11y" id={hintID}>
         {t("Перетащите стрелку вправо. С клавиатуры нажмите Enter или пробел.")}
       </span>
     </button>

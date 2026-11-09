@@ -149,12 +149,12 @@ export function SpotsHeader({
   return (
     <header
       aria-label={`Навигация ${productName}`}
-      className={`spots-header ${dish ? "spots-dish-header" : ""} ${headerHidden ? "scroll-header-hidden" : ""} ${user ? "signed-in" : "guest"} ${city ? "has-city" : "needs-city"} ${categoryLabel ? "has-category" : ""} ${scrolled ? "scrolled" : ""} ${accountScreen ? "account-screen" : ""}`}
+      className={`dish-catalog-header ${dish ? "dish-catalog-dish-header" : ""} ${headerHidden ? "scroll-header-hidden" : ""} ${user ? "signed-in" : "guest"} ${city ? "has-city" : "needs-city"} ${categoryLabel ? "has-category" : ""} ${scrolled ? "scrolled" : ""} ${accountScreen ? "account-screen" : ""}`}
     >
-      <div className="spots-header-inner">
+      <div className="dish-header-inner">
         <button
           type="button"
-          className="spots-brand"
+          className="dish-catalog-brand"
           onClick={() => onNavigate("discover")}
           aria-label={`${productName}, главная`}
         >
@@ -162,14 +162,14 @@ export function SpotsHeader({
           <strong>{productName}</strong>
         </button>
         <div
-          className={`spots-global-search ${categoryLabel || venueName ? "has-context" : ""}`}
+          className={`dish-global-search ${categoryLabel || venueName ? "has-context" : ""}`}
           role="search"
         >
           <Search size={19} />
           {venueName ? (
             <button
               type="button"
-              className="spots-search-context"
+              className="dish-search-context"
               aria-label={t("Искать во всех заведениях")}
               title={venueName}
               onClick={onClearVenue}
@@ -181,7 +181,7 @@ export function SpotsHeader({
             categoryLabel && (
               <button
                 type="button"
-                className="spots-search-context"
+                className="dish-search-context"
                 aria-label={t("Сбросить категорию")}
                 onClick={onClearCategory}
               >
@@ -217,7 +217,7 @@ export function SpotsHeader({
         {!dish && (
           <button
             type="button"
-            className={`spots-location ${city ? "" : "spots-location-cta"}`}
+            className={`dish-location ${city ? "" : "dish-location-cta"}`}
             aria-label={city ? `Выбрать город: ${city}` : t("Выбрать место")}
             aria-haspopup="dialog"
             onClick={() => {
@@ -233,7 +233,7 @@ export function SpotsHeader({
         )}
         <nav
           ref={accountRoot}
-          className="spots-header-actions"
+          className="dish-header-actions"
           aria-label="Действия гостя"
           onBlur={(event) => {
             if (!event.currentTarget.contains(event.relatedTarget)) {
@@ -242,17 +242,17 @@ export function SpotsHeader({
             }
           }}
         >
-          <span className="spots-language-control">
+          <span className="dish-language-control">
             <button
               ref={languageTrigger}
               type="button"
-              className={`spots-language-trigger ${languageOpen ? "active" : ""}`}
+              className={`dish-language-trigger ${languageOpen ? "active" : ""}`}
               aria-label={t("Язык интерфейса")}
               data-tooltip={t("Язык интерфейса")}
               data-tooltip-placement="bottom"
               aria-haspopup="menu"
               aria-expanded={languageOpen}
-              aria-controls={languageOpen ? "spots-language-menu" : undefined}
+              aria-controls={languageOpen ? "dish-language-menu" : undefined}
               onClick={() => {
                 setAccountOpen(false);
                 if (window.matchMedia("(max-width: 760px)").matches)
@@ -261,14 +261,14 @@ export function SpotsHeader({
               }}
             >
               <Globe size={22} aria-hidden="true" />
-              <span className="spots-language-code" aria-hidden="true">
+              <span className="dish-language-code" aria-hidden="true">
                 {localeOptions.find((option) => option.value === locale)?.short}
               </span>
             </button>
             {languageOpen && (
               <div
-                className="spots-language-menu"
-                id="spots-language-menu"
+                className="dish-language-menu"
+                id="dish-language-menu"
                 role="menu"
                 aria-label={t("Язык интерфейса")}
               >
@@ -291,7 +291,7 @@ export function SpotsHeader({
             <button
               ref={accountTrigger}
               type="button"
-              className={`spots-account-trigger ${screen === "profile" || accountOpen ? "active" : ""}`}
+              className={`dish-account-trigger ${screen === "profile" || accountOpen ? "active" : ""}`}
               onClick={() => {
                 setLanguageOpen(false);
                 setAccountOpen(!accountOpen);
@@ -301,7 +301,7 @@ export function SpotsHeader({
               data-tooltip-placement="bottom"
               aria-haspopup="menu"
               aria-expanded={accountOpen}
-              aria-controls={accountOpen ? "spots-account-menu" : undefined}
+              aria-controls={accountOpen ? "dish-catalog-account-menu" : undefined}
             >
               {user.avatar_url ? (
                 <i style={{ backgroundImage: `url("${user.avatar_url}")` }} />
@@ -310,7 +310,7 @@ export function SpotsHeader({
               )}
             </button>
           ) : (
-            <button type="button" className="spots-login-trigger" onClick={onLogin}>
+            <button type="button" className="dish-login-trigger" onClick={onLogin}>
               <LogIn size={18} aria-hidden="true" />
               <span>{t("Войти")}</span>
             </button>
@@ -318,7 +318,7 @@ export function SpotsHeader({
           {!user && (
             <button
               type="button"
-              className="spots-mobile-menu-trigger"
+              className="dish-mobile-menu-trigger"
               aria-label={t("Открыть меню")}
               aria-haspopup="dialog"
               onClick={() => {
@@ -331,8 +331,8 @@ export function SpotsHeader({
           )}
           {user && accountOpen && (
             <div
-              className="spots-account-menu"
-              id="spots-account-menu"
+              className="dish-catalog-account-menu"
+              id="dish-catalog-account-menu"
               role="menu"
               aria-label="Аккаунт"
               onKeyDown={(event) => {
@@ -356,7 +356,7 @@ export function SpotsHeader({
                 }
               }}
             >
-              <div className="spots-account-menu-heading">
+              <div className="dish-account-menu-heading">
                 {[user.first_name, user.last_name].filter(Boolean).join(" ") || "Аккаунт"}
               </div>
               {accountItems.map(({ label, screen: target, icon: Icon, accountSection }) => (
@@ -377,7 +377,7 @@ export function SpotsHeader({
               <button
                 type="button"
                 role="menuitem"
-                className="spots-account-logout"
+                className="dish-catalog-account-logout"
                 onClick={() => {
                   setAccountOpen(false);
                   onLogout();
@@ -392,15 +392,15 @@ export function SpotsHeader({
       </div>
       <dialog
         ref={cityDialog}
-        className="spots-picker-dialog"
-        aria-labelledby="spots-city-title"
+        className="dish-picker-dialog"
+        aria-labelledby="dish-city-title"
         onClick={(event) => {
           if (event.target === event.currentTarget) cityDialog.current?.close();
         }}
       >
-        <div className="spots-picker-content">
-          <div className="spots-picker-heading">
-            <h2 id="spots-city-title">Ваш город</h2>
+        <div className="dish-picker-content">
+          <div className="dish-picker-heading">
+            <h2 id="dish-city-title">Ваш город</h2>
             <button
               type="button"
               className="icon-button"
@@ -412,7 +412,7 @@ export function SpotsHeader({
               <X size={20} />
             </button>
           </div>
-          <label className="spots-picker-search">
+          <label className="dish-picker-search">
             <Search size={18} />
             <input
               aria-label="Найти город"
@@ -421,7 +421,7 @@ export function SpotsHeader({
               onChange={(event) => setCityQuery(event.target.value)}
             />
           </label>
-          <div className="spots-city-options">
+          <div className="dish-city-options">
             {matchingCities.map((name) => (
               <button
                 type="button"
@@ -442,15 +442,15 @@ export function SpotsHeader({
       </dialog>
       <dialog
         ref={languageDialog}
-        className="spots-language-dialog"
-        aria-labelledby="spots-language-dialog-title"
+        className="dish-language-dialog"
+        aria-labelledby="dish-language-dialog-title"
         onClick={(event) => {
           if (event.target === event.currentTarget) languageDialog.current?.close();
         }}
       >
-        <div className="spots-language-dialog-content">
-          <div className="spots-picker-heading">
-            <h2 id="spots-language-dialog-title">{t("Язык интерфейса")}</h2>
+        <div className="dish-language-dialog-content">
+          <div className="dish-picker-heading">
+            <h2 id="dish-language-dialog-title">{t("Язык интерфейса")}</h2>
             <button
               type="button"
               className="icon-button"
@@ -460,7 +460,7 @@ export function SpotsHeader({
               <X size={20} />
             </button>
           </div>
-          <div className="spots-language-dialog-options">
+          <div className="dish-language-dialog-options">
             {localeOptions.map((option) => (
               <button
                 type="button"
@@ -479,14 +479,14 @@ export function SpotsHeader({
       {!user && (
         <dialog
           ref={mobileMenuDialog}
-          className="spots-mobile-menu-dialog"
-          aria-labelledby="spots-mobile-menu-title"
+          className="dish-mobile-menu-dialog"
+          aria-labelledby="dish-mobile-menu-title"
         >
-          <div className="spots-mobile-menu-shell">
-            <div className="spots-mobile-menu-heading">
+          <div className="dish-mobile-menu-shell">
+            <div className="dish-mobile-menu-heading">
               <button
                 type="button"
-                className="spots-back-button"
+                className="dish-back-button"
                 aria-label={t("Назад")}
                 onClick={() => {
                   if (mobileMenuView === "menu") mobileMenuDialog.current?.close();
@@ -495,9 +495,9 @@ export function SpotsHeader({
               >
                 <ArrowLeft size={26} />
               </button>
-              <h2 id="spots-mobile-menu-title">
+              <h2 id="dish-mobile-menu-title">
                 {mobileMenuView === "menu" ? (
-                  <span className="spots-menu-brand">
+                  <span className="dish-menu-brand">
                     <Image src="/logo.svg" alt="" width={30} height={30} />
                     Pocket Spots
                   </span>
@@ -508,13 +508,13 @@ export function SpotsHeader({
               <span aria-hidden="true" />
             </div>
             {mobileMenuView === "menu" && (
-              <div className="spots-mobile-menu-content">
-                <section className="spots-mobile-menu-card spots-mobile-auth-card">
+              <div className="dish-mobile-menu-content">
+                <section className="dish-mobile-menu-card dish-mobile-auth-card">
                   <h3>{t("Войдите в аккаунт")}</h3>
                   <p>{t("Сохраняйте места и управляйте бронированиями.")}</p>
                   <button
                     type="button"
-                    className="spots-mobile-login"
+                    className="dish-mobile-login"
                     onClick={() => {
                       mobileMenuDialog.current?.close();
                       onLogin();
@@ -524,12 +524,12 @@ export function SpotsHeader({
                   </button>
                 </section>
                 <section
-                  className="spots-mobile-menu-card spots-mobile-settings-card"
+                  className="dish-mobile-menu-card dish-mobile-settings-card"
                   aria-label={t("Меню")}
                 >
                   <button
                     type="button"
-                    className="spots-mobile-menu-row"
+                    className="dish-mobile-menu-row"
                     aria-label={`${t("Город")}: ${city ? t(city) : t("Выбрать место")}`}
                     onClick={() => setMobileMenuView("city")}
                   >
@@ -541,7 +541,7 @@ export function SpotsHeader({
                   </button>
                   <button
                     type="button"
-                    className="spots-mobile-menu-row"
+                    className="dish-mobile-menu-row"
                     aria-label={`${t("Язык интерфейса")}: ${localeOptions.find((option) => option.value === locale)?.label ?? locale.toUpperCase()}`}
                     onClick={() => setMobileMenuView("language")}
                   >
@@ -557,12 +557,12 @@ export function SpotsHeader({
               </div>
             )}
             {mobileMenuView === "city" && (
-              <div className="spots-mobile-menu-content spots-mobile-menu-subpage">
+              <div className="dish-mobile-menu-content dish-mobile-menu-subpage">
                 <section
-                  className="spots-mobile-menu-card spots-mobile-selection-card"
+                  className="dish-mobile-menu-card dish-mobile-selection-card"
                   aria-label={t("Город")}
                 >
-                  <div className="spots-mobile-selection-options">
+                  <div className="dish-mobile-selection-options">
                     {spotsCities.map((name) => (
                       <button
                         type="button"
@@ -582,12 +582,12 @@ export function SpotsHeader({
               </div>
             )}
             {mobileMenuView === "language" && (
-              <div className="spots-mobile-menu-content spots-mobile-menu-subpage">
+              <div className="dish-mobile-menu-content dish-mobile-menu-subpage">
                 <section
-                  className="spots-mobile-menu-card spots-mobile-selection-card"
+                  className="dish-mobile-menu-card dish-mobile-selection-card"
                   aria-label={t("Язык интерфейса")}
                 >
-                  <div className="spots-mobile-selection-options">
+                  <div className="dish-mobile-selection-options">
                     {localeOptions.map((option) => (
                       <button
                         type="button"
@@ -623,7 +623,7 @@ export function SpotsBottomNavigation({
 }: Pick<SpotsNavigationProps, "screen" | "onNavigate">) {
   const { t } = useI18n();
   return (
-    <nav className="spots-bottom-nav" aria-label="Основная навигация Pocket Spots">
+    <nav className="dish-bottom-nav" aria-label="Основная навигация Pocket Spots">
       {mobileItems.map(({ id, label, icon: Icon }) => {
         const active =
           screen === id ||
