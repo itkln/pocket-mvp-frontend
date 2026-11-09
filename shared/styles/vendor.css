@@ -5617,7 +5617,7 @@
   background: #fff;
   width: 46px;
   height: 46px;
-  border-radius: 50% !important;
+  border-radius: 50%;
 }
 .orders-refresh.spinning svg {
   animation: orders-spin 1s linear infinite;
@@ -6181,7 +6181,7 @@
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-radius: 999px !important;
+  border-radius: 999px;
   background: var(--accent);
   color: #fff;
   touch-action: pan-y;

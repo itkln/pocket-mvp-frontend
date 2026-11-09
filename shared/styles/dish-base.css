@@ -777,7 +777,7 @@
 
 .pocket-dish .dish-city-options button,
 .pocket-dish .dish-filter-options button {
-  border-radius: 999px !important;
+  border-radius: 999px;
 }
 
 .dish-city-options button[aria-pressed="true"],

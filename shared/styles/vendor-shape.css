@@ -48,7 +48,7 @@
 
 .vendor-menu .vendor-menu-stats > button,
 .vendor-orders .orders-ticket {
-  border-radius: var(--vendor-radius-block) !important;
+  border-radius: var(--vendor-radius-block);
 }
 .vendor-shell > .sidebar,
 .vendor-shell.sidebar-collapsed > .sidebar {
@@ -106,7 +106,7 @@
 }
 .vendor-shell .side-nav button,
 .orders-tabs button {
-  border-radius: var(--vendor-radius-control) !important;
+  border-radius: var(--vendor-radius-control);
 }
 .vendor-orders .orders-status,
 .orders-channel,

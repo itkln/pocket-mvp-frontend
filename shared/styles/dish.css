@@ -599,7 +599,7 @@
   border-top: 1px solid var(--dish-divider);
 }
 .pocket-dish .dish-account-heading > button {
-  border-radius: 50% !important;
+  border-radius: 50%;
 }
 .pocket-dish .dish-profile-links > button {
   border-radius: 0 !important;
@@ -5059,7 +5059,7 @@ body::-webkit-scrollbar,
   height: 64px;
   padding: 0;
   border: 1px solid #eceeef;
-  border-radius: 50% !important;
+  border-radius: 50%;
   background: #fff;
   color: var(--dish-text);
   box-shadow: 0 4px 18px rgba(23, 33, 43, 0.15);
