@@ -135,7 +135,7 @@ export function CategoryEditor({
                 category={category}
                 autoFocus={Boolean(category.isNew && index === drafts.length - 1)}
                 positionLabel={
-                  category.isNew ? "Новая категория" : positionCount(category.item_count)
+                  category.isNew ? t("Новая категория") : t(positionCount(category.item_count))
                 }
                 onChange={(patch) =>
                   setDrafts((current) =>
@@ -163,7 +163,7 @@ export function CategoryEditor({
       </div>
       {error && (
         <p role="alert" className="form-error">
-          {error}
+          {t(error)}
         </p>
       )}
       <footer>
@@ -194,7 +194,9 @@ function CategoryDraftRow({
       <div className="category-manager-copy">
         <input
           aria-label={
-            category.isNew ? t("Название новой категории") : `Название категории ${category.name}`
+            category.isNew
+              ? t("Название новой категории")
+              : t("Название категории {name}", { name: category.name })
           }
           autoFocus={autoFocus}
           value={category.name}
@@ -211,7 +213,10 @@ function CategoryDraftRow({
         <span className="switch">
           <input
             type="checkbox"
-            aria-label={`${category.is_active ? "Скрыть" : "Опубликовать"} категорию ${category.name || "новую"}`}
+            aria-label={t(
+              category.is_active ? "Скрыть категорию {name}" : "Опубликовать категорию {name}",
+              { name: category.name || t("новую") },
+            )}
             checked={category.is_active}
             onChange={(event) => onChange({ is_active: event.target.checked })}
           />
@@ -222,7 +227,11 @@ function CategoryDraftRow({
         type="button"
         className="category-delete"
         disabled={!category.isNew && category.item_count > 0}
-        aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`}
+        aria-label={
+          category.isNew
+            ? t("Удалить новую категорию")
+            : t("Удалить категорию {name}", { name: category.name })
+        }
         title={
           !category.isNew && category.item_count > 0
             ? t("Сначала удалите или перенесите позиции")
@@ -237,7 +246,7 @@ function CategoryDraftRow({
         <span className="switch">
           <input
             type="checkbox"
-            aria-label={`Предзаказ категории ${category.name || "новую"}`}
+            aria-label={t("Предзаказ категории {name}", { name: category.name || t("новую") })}
             checked={category.preorder_enabled}
             onChange={(event) => onChange({ preorder_enabled: event.target.checked })}
           />
@@ -295,7 +304,9 @@ export function MenuPreview({
         </div>
         <footer>
           <p>
-            {items.length ? `Доступных позиций: ${items.length}` : t("Нет опубликованных позиций")}
+            {items.length
+              ? t(`Доступных позиций: ${items.length}`)
+              : t("Нет опубликованных позиций")}
           </p>
           <Button kind="secondary" onClick={onClose}>
             {t("Закрыть")}

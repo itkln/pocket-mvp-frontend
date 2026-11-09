@@ -279,7 +279,7 @@ export function AccountScreen({
             <p>{user.email}</p>
             {avatarError && (
               <small className="account-avatar-error" role="alert">
-                {avatarError}
+                {t(avatarError)}
               </small>
             )}
           </div>
@@ -305,7 +305,7 @@ export function AccountScreen({
                 <span>
                   <Icon size={20} strokeWidth={1.8} />
                 </span>
-                <strong>{label}</strong>
+                <strong>{t(label)}</strong>
                 {value && <small>{value}</small>}
               </button>
             ))}
@@ -357,7 +357,7 @@ export function AccountScreen({
               </div>
               {profileError && (
                 <p className="form-error" role="alert">
-                  {profileError}
+                  {t(profileError)}
                 </p>
               )}
               <footer>
@@ -432,7 +432,7 @@ export function AccountScreen({
                   </div>
                   {formError && (
                     <p className="form-error" role="alert">
-                      {formError}
+                      {t(formError)}
                     </p>
                   )}
                   <div className="account-password-actions">
@@ -487,7 +487,7 @@ export function AccountScreen({
                   </div>
                   {formError && (
                     <p className="form-error" role="alert">
-                      {formError}
+                      {t(formError)}
                     </p>
                   )}
                   <div className="account-password-actions">

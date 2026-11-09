@@ -644,7 +644,7 @@ export const DesktopBookingFlow = forwardRef<
                   )}
                   {submitError && (
                     <p className="venue-booking-submit-error" role="alert">
-                      {submitError}
+                      {t(submitError)}
                     </p>
                   )}
                 </div>
@@ -690,7 +690,7 @@ export const DesktopBookingFlow = forwardRef<
                 </div>
                 {submitError && (
                   <p className="venue-booking-submit-error" role="alert">
-                    {submitError}
+                    {t(submitError)}
                   </p>
                 )}
                 <div className="desktop-booking-actions">
@@ -776,7 +776,7 @@ export const DesktopBookingFlow = forwardRef<
                 </div>
                 {submitError && (
                   <p className="venue-booking-submit-error" role="alert">
-                    {submitError}
+                    {t(submitError)}
                   </p>
                 )}
                 <button

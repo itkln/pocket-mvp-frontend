@@ -42,7 +42,7 @@ export function OwnerOverview({
   return (
     <>
       <PageHeader
-        title={`Добрый день, ${ownerName}`}
+        title={t("Добрый день, {name}", { name: ownerName })}
         subtitle={
           loading ? t("Обновляем показатели...") : t("Актуальные данные выбранного заведения.")
         }
@@ -63,7 +63,7 @@ export function OwnerOverview({
         <Metric
           label={t("Заказы")}
           value={String(dashboard?.orders_today ?? 0)}
-          change={`${dashboard?.new_orders ?? 0} новых`}
+          change={t(`${dashboard?.new_orders ?? 0} новых`)}
           icon={ShoppingBag}
           tone="green"
         />
@@ -77,7 +77,7 @@ export function OwnerOverview({
         <Metric
           label={t("Загрузка зала")}
           value={`${occupancy}%`}
-          change={`${dashboard?.active_tables ?? 0} из ${dashboard?.total_tables ?? 0}`}
+          change={t(`${dashboard?.active_tables ?? 0} из ${dashboard?.total_tables ?? 0}`)}
           icon={Table2}
           tone="gold"
         />
@@ -182,7 +182,7 @@ export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
                 )}
               </td>
               <td>
-                {order.source}
+                {t(order.source)}
                 {order.reservation_starts_at && (
                   <small className="order-reservation-code">
                     {new Date(order.reservation_starts_at).toLocaleString("ru-RU", {

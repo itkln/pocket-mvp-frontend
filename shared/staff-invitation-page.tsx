@@ -106,7 +106,7 @@ export default function StaffInvitationPage({ token }: { token: string }) {
             )}
             {error && (
               <p className="auth-error" role="alert">
-                {error}
+                {t(error)}
               </p>
             )}
             {!user && !error && (

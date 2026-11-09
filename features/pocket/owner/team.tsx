@@ -99,7 +99,7 @@ export function TeamScreen({
                   <small>{person.email}</small>
                 </div>
                 <select
-                  aria-label={"Роль " + person.display_name}
+                  aria-label={t("Роль {name}", { name: person.display_name })}
                   value={person.role}
                   onChange={(event) =>
                     void updateRole(person, event.target.value as OwnerStaffMember["role"])
@@ -114,7 +114,7 @@ export function TeamScreen({
                 <div className="row-actions">
                   <IconButton
                     icon={Ellipsis}
-                    label={"Действия с " + person.display_name}
+                    label={t("Действия с {name}", { name: person.display_name })}
                     onClick={() => setActions(actions === person.id ? null : person.id)}
                   />
                   {actions === person.id && (

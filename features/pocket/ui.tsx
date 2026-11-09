@@ -3,6 +3,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { type LucideIcon } from "lucide-react";
 import { type MenuItem } from "./model";
+import { useI18n } from "./i18n";
 
 export function money(value: number, currency = "EUR") {
   return new Intl.NumberFormat("en-US", {
@@ -74,10 +75,11 @@ export function IconButton({
 }
 
 export function StatusPill({ status }: { status: string }) {
+  const { t } = useI18n();
   return (
     <span className={`status status-${status.toLowerCase().replaceAll(" ", "-")}`}>
       <i />
-      {status}
+      {t(status)}
     </span>
   );
 }

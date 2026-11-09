@@ -75,7 +75,7 @@ export default function AuthPage({
         <Link
           className="auth-brand"
           href={product === "dish" ? destination : `/${locale}`}
-          aria-label={`${productName}, на главную`}
+          aria-label={t("{product}, на главную", { product: productName })}
         >
           <span className="auth-brand-mark">
             <Image src="/logo.svg" alt="" width={30} height={30} priority />
@@ -83,7 +83,9 @@ export default function AuthPage({
           <strong>{productName}</strong>
         </Link>
         <header className="auth-heading">
-          <h1>{isLogin ? `Войти в ${productName}` : t("Создать аккаунт")}</h1>
+          <h1>
+            {isLogin ? t("Войти в {product}", { product: productName }) : t("Создать аккаунт")}
+          </h1>
           <p>
             {product === "vendor"
               ? isLogin
@@ -194,7 +196,7 @@ export default function AuthPage({
           )}
           {error && (
             <p className="auth-error" role="alert">
-              {error}
+              {t(error)}
             </p>
           )}
           <button className="auth-submit" type="submit" disabled={submitting}>

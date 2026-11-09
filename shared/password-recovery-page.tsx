@@ -94,8 +94,8 @@ export default function PasswordRecoveryPage({
               <MailCheck size={24} />
             </span>
           )}
-          <h1>{title}</h1>
-          <p>{description}</p>
+          <h1>{t(title)}</h1>
+          <p>{t(description)}</p>
         </header>
 
         {!complete && (
@@ -163,7 +163,7 @@ export default function PasswordRecoveryPage({
             )}
             {error && (
               <p className="auth-error" role="alert">
-                {error}
+                {t(error)}
               </p>
             )}
             {!requestMode && error && (

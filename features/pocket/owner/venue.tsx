@@ -184,7 +184,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
         <select value={tab} onChange={(event) => setTab(event.target.value)}>
           {venueTabs.map((item) => (
             <option value={item.id} key={item.id}>
-              {item.id}
+              {t(item.id)}
             </option>
           ))}
         </select>
@@ -195,7 +195,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
           {venueTabs.map(({ id, icon: Icon }) => (
             <button className={tab === id ? "active" : ""} key={id} onClick={() => setTab(id)}>
               <Icon size={18} strokeWidth={1.8} />
-              <span>{id}</span>
+              <span>{t(id)}</span>
             </button>
           ))}
         </aside>
@@ -357,7 +357,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                     >
                       {currencyOptions.map((option) => (
                         <option value={option.value} key={option.value}>
-                          {option.label}
+                          {t(option.label)}
                         </option>
                       ))}
                     </select>

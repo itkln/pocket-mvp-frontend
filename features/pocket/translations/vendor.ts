@@ -1209,4 +1209,43 @@ export const vendorTranslations: TranslationRow[] = [
     "Видалити {name} з команди?",
     "Odstrániť člena {name} z tímu?",
   ],
+  ["Роль {name}", "Role of {name}", "Роль: {name}", "Rola: {name}"],
+  ["Действия с {name}", "Actions for {name}", "Дії з {name}", "Akcie pre {name}"],
+  [
+    "Скрыть категорию {name}",
+    "Hide category {name}",
+    "Сховати категорію {name}",
+    "Skryť kategóriu {name}",
+  ],
+  [
+    "Опубликовать категорию {name}",
+    "Publish category {name}",
+    "Опублікувати категорію {name}",
+    "Zverejniť kategóriu {name}",
+  ],
+  [
+    "Удалить новую категорию",
+    "Delete new category",
+    "Видалити нову категорію",
+    "Odstrániť novú kategóriu",
+  ],
+  [
+    "Удалить категорию {name}",
+    "Delete category {name}",
+    "Видалити категорію {name}",
+    "Odstrániť kategóriu {name}",
+  ],
+  [
+    "Предзаказ категории {name}",
+    "Preorder for category {name}",
+    "Передзамовлення категорії {name}",
+    "Predobjednávka kategórie {name}",
+  ],
+  ["новую", "new", "нову", "novú"],
+  [
+    "Название категории {name}",
+    "Category name {name}",
+    "Назва категорії {name}",
+    "Názov kategórie {name}",
+  ],
 ];

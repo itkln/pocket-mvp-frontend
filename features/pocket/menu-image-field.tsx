@@ -71,7 +71,7 @@ export function MenuImageField({
           <IconButton icon={Trash2} label={t("Удалить фото")} onClick={() => onChange("")} />
         )}
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{t(error)}</p>}
     </div>
   );
 }

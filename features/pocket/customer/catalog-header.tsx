@@ -124,7 +124,7 @@ export function DishCatalogHeader({
   const accountScreen = ["profile", "settings", "notifications"].includes(screen);
   return (
     <header
-      aria-label={`Навигация ${productName}`}
+      aria-label={t("Навигация {product}", { product: productName })}
       className={`dish-catalog-header dish-catalog-dish-header ${headerHidden ? "scroll-header-hidden" : ""} ${user ? "signed-in" : "guest"} needs-city ${scrolled ? "scrolled" : ""} ${accountScreen ? "account-screen" : ""}`}
     >
       <div className="dish-header-inner">
@@ -132,7 +132,7 @@ export function DishCatalogHeader({
           type="button"
           className="dish-catalog-brand"
           onClick={() => onNavigate("discover")}
-          aria-label={`${productName}, главная`}
+          aria-label={t("{product}, главная", { product: productName })}
         >
           <Image src="/logo.svg" alt="" width={30} height={30} priority />
           <strong>{productName}</strong>

@@ -235,62 +235,6 @@ const I18nContext = createContext<I18nValue>({
   t: (source, params) => interpolate(source, params),
 });
 
-const sourceText = new WeakMap<Text, string>();
-const renderedText = new WeakMap<Text, string>();
-const sourceAttributes = new WeakMap<Element, Map<string, string>>();
-const renderedAttributes = new WeakMap<Element, Map<string, string>>();
-const translatedAttributes = ["placeholder", "title", "aria-label", "alt"];
-
-const translateTextNode = (node: Text, locale: Locale) => {
-  const previousRendered = renderedText.get(node);
-  if (!sourceText.has(node) || (previousRendered !== undefined && node.data !== previousRendered))
-    sourceText.set(node, node.data);
-  const source = sourceText.get(node) ?? node.data;
-  const leading = source.match(/^\s*/)?.[0] ?? "";
-  const trailing = source.match(/\s*$/)?.[0] ?? "";
-  const core = source.trim();
-  const next = core ? `${leading}${translate(core, locale)}${trailing}` : source;
-  renderedText.set(node, next);
-  if (node.data !== next) node.data = next;
-};
-
-const translateElement = (element: Element, locale: Locale) => {
-  const sourceMap = sourceAttributes.get(element) ?? new Map<string, string>();
-  const renderedMap = renderedAttributes.get(element) ?? new Map<string, string>();
-  for (const attribute of translatedAttributes) {
-    const current = element.getAttribute(attribute);
-    if (current === null) continue;
-    if (
-      !sourceMap.has(attribute) ||
-      (renderedMap.has(attribute) && current !== renderedMap.get(attribute))
-    )
-      sourceMap.set(attribute, current);
-    const next = translate(sourceMap.get(attribute) ?? current, locale);
-    renderedMap.set(attribute, next);
-    if (current !== next) element.setAttribute(attribute, next);
-  }
-  sourceAttributes.set(element, sourceMap);
-  renderedAttributes.set(element, renderedMap);
-};
-
-const translateTree = (root: Node, locale: Locale) => {
-  if (root.nodeType === Node.TEXT_NODE) {
-    translateTextNode(root as Text, locale);
-    return;
-  }
-  if (
-    !(root instanceof Element) &&
-    !(root instanceof DocumentFragment) &&
-    !(root instanceof Document)
-  )
-    return;
-  if (root instanceof Element) {
-    if (["SCRIPT", "STYLE", "CODE"].includes(root.tagName)) return;
-    translateElement(root, locale);
-  }
-  root.childNodes.forEach((child) => translateTree(child, locale));
-};
-
 export function I18nProvider({
   children,
   initialLocale,
@@ -314,22 +258,6 @@ export function I18nProvider({
   }, [initialLocale]);
   useEffect(() => {
     document.documentElement.lang = locale;
-    translateTree(document.body, locale);
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === "characterData") translateTree(mutation.target, locale);
-        else if (mutation.type === "attributes") translateTree(mutation.target, locale);
-        else mutation.addedNodes.forEach((node) => translateTree(node, locale));
-      }
-    });
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      characterData: true,
-      attributes: true,
-      attributeFilter: translatedAttributes,
-    });
-    return () => observer.disconnect();
   }, [locale]);
   const value = useMemo<I18nValue>(
     () => ({

@@ -291,4 +291,8 @@ export const commonTranslations: TranslationRow[] = [
   ["Напитки", "Drinks", "Напої", "Nápoje"],
   ["Дата", "Date", "Дата", "Dátum"],
   ["Удалить?", "Delete?", "Видалити?", "Odstrániť?"],
+  ["{product}, на главную", "{product}, home", "{product}, на головну", "{product}, domov"],
+  ["Войти в {product}", "Sign in to {product}", "Увійти в {product}", "Prihlásiť sa do {product}"],
+  ["Навигация {product}", "{product} navigation", "Навігація {product}", "Navigácia {product}"],
+  ["{product}, главная", "{product}, home", "{product}, головна", "{product}, domov"],
 ];

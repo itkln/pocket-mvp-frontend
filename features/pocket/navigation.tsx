@@ -208,7 +208,7 @@ export function Sidebar({
               className={`nav-group ${mobilePrimaryGroup ? "mobile-primary-group" : ""}`}
               key={group.label}
             >
-              <p className="nav-label">{group.label}</p>
+              <p className="nav-label">{t(group.label)}</p>
               {items.map(({ id, label, icon: Icon, count }) => (
                 <button
                   key={id}
@@ -218,7 +218,7 @@ export function Sidebar({
                   aria-label={collapsed ? `${t(label)}${count ? `, ${count}` : ""}` : undefined}
                 >
                   <Icon size={20} strokeWidth={1.9} />
-                  <span>{label}</span>
+                  <span>{t(label)}</span>
                   {count && <b>{count}</b>}
                 </button>
               ))}
@@ -241,7 +241,7 @@ export function Sidebar({
                   <CurrentRoleIcon size={20} strokeWidth={1.9} />
                 </span>
                 <div>
-                  <strong>{roleMeta.label}</strong>
+                  <strong>{t(roleMeta.label)}</strong>
                 </div>
                 <ChevronDown size={16} strokeWidth={1.9} />
               </button>
@@ -331,7 +331,7 @@ export function MobileBottomNavigation({
         <button key={id} className={screen === id ? "active" : ""} onClick={() => onNavigate(id)}>
           <Icon size={20} strokeWidth={1.9} />
           <span>
-            {label === "План зала" ? t("Зал") : label === "Мои заказы" ? t("Заказы") : label}
+            {label === "План зала" ? t("Зал") : label === "Мои заказы" ? t("Заказы") : t(label)}
           </span>
         </button>
       ))}
@@ -447,12 +447,12 @@ export function Topbar({
         <div>
           <small>
             {role === "owner"
-              ? `${venueName} / Управление`
+              ? `${venueName} / ${t("Управление")}`
               : role === "staff"
-                ? `${venueName} / Смена`
+                ? `${venueName} / ${t("Смена")}`
                 : t("Сегодня в Братиславе")}
           </small>
-          <strong>{title}</strong>
+          <strong>{t(title)}</strong>
         </div>
       </div>
       <div className="topbar-actions" ref={actionMenus}>
@@ -503,7 +503,7 @@ export function Topbar({
                         }}
                       >
                         <ItemIcon size={18} />
-                        <span>{item.label}</span>
+                        <span>{t(item.label)}</span>
                         <ArrowRight size={15} />
                       </button>
                     );

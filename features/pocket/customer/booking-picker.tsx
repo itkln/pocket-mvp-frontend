@@ -816,7 +816,7 @@ export function BookingPicker({
           <div className="mobile-booking-footer">
             {submitError && (
               <p className="venue-booking-submit-error" role="alert">
-                {submitError}
+                {t(submitError)}
               </p>
             )}
             <div className="mobile-booking-footer-actions">

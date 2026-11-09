@@ -225,7 +225,7 @@ export function MenuItemDrawer({
           </section>
           {error && (
             <p className="form-error" role="alert">
-              {error}
+              {t(error)}
             </p>
           )}
         </fieldset>
@@ -363,7 +363,7 @@ export function MenuCoverDrawer({
           </section>
           {error && (
             <p role="alert" className="form-error">
-              {error}
+              {t(error)}
             </p>
           )}
         </div>

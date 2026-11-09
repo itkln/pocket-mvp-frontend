@@ -220,7 +220,7 @@ export function Modal({
       >
         <header>
           <div>
-            <h2>{title}</h2>
+            <h2>{t(title)}</h2>
           </div>
           <IconButton icon={X} label={t("Закрыть")} onClick={onClose} />
         </header>
@@ -301,7 +301,7 @@ export function Modal({
             )}
             {formError && (
               <p className="modal-form-error" role="alert">
-                {formError}
+                {t(formError)}
               </p>
             )}
             <footer>
@@ -337,7 +337,7 @@ export function Modal({
                       <Table2 size={20} />
                     </span>
                     <div>
-                      <strong>{order.source}</strong>
+                      <strong>{t(order.source)}</strong>
                       <p>{order.guest_name || t("Гость")}</p>
                     </div>
                   </div>

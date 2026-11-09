@@ -122,7 +122,7 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
                   <strong>{review.guest_name}</strong>
                   <small>
                     {new Date(review.created_at).toLocaleString(localeTags[locale])}{" "}
-                    {review.order ? "· Заказ " + review.order : ""}
+                    {review.order ? `· ${t("Заказ")} ${review.order}` : ""}
                   </small>
                 </div>
                 <div className="review-stars">

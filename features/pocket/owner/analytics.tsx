@@ -53,21 +53,21 @@ export function AnalyticsScreen() {
         <Metric
           label={t("Заказов сегодня")}
           value={String(dashboard?.orders_today ?? 0)}
-          change={`Завершено: ${completed.length}`}
+          change={t(`Завершено: ${completed.length}`)}
           icon={ReceiptText}
           tone="green"
         />
         <Metric
           label={t("Загрузка зала")}
           value={`${occupancy}%`}
-          change={`Активных столов: ${dashboard?.active_tables ?? 0}`}
+          change={t(`Активных столов: ${dashboard?.active_tables ?? 0}`)}
           icon={Table2}
           tone="blue"
         />
         <Metric
           label={t("Средняя оценка")}
           value={dashboard?.average_rating ? dashboard.average_rating.toFixed(1) : "—"}
-          change={`Отзывов: ${reviews.length}`}
+          change={t(`Отзывов: ${reviews.length}`)}
           icon={Star}
           tone="gold"
         />
@@ -108,11 +108,11 @@ export function AnalyticsScreen() {
                     <span className={`channel-summary-icon channel-${id}`}>
                       <Icon size={21} />
                     </span>
-                    <strong>{label}</strong>
+                    <strong>{t(label)}</strong>
                     <span
                       className="channel-summary-progress"
                       role="progressbar"
-                      aria-label={label}
+                      aria-label={t(label)}
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-valuenow={percentage}

@@ -291,7 +291,7 @@ export default function DishApp({
         </TooltipContext.Provider>
         {toast && (
           <div className="toast" role="status">
-            {toast}
+            {t(toast)}
           </div>
         )}
       </div>

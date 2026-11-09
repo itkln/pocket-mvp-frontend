@@ -91,8 +91,10 @@ export function SubscriptionScreen({
           <strong>{subscription ? "Pocket " + selected.name : t("Подписка не выбрана")}</strong>
           <p>
             {subscription?.trial_ends_at
-              ? "Пробный период до " +
-                new Date(subscription.trial_ends_at).toLocaleDateString(localeTags[locale])
+              ? t(
+                  "Пробный период до " +
+                    new Date(subscription.trial_ends_at).toLocaleDateString(localeTags[locale]),
+                )
               : t("Выберите тариф и начните 14-дневный пробный период.")}
           </p>
         </div>
@@ -137,7 +139,7 @@ export function SubscriptionScreen({
               <div className="plan-title">
                 <div>
                   <strong>{item.name}</strong>
-                  <span>{item.description}</span>
+                  <span>{t(item.description)}</span>
                 </div>
                 {plan === item.id && <Check size={18} />}
               </div>
@@ -149,14 +151,14 @@ export function SubscriptionScreen({
                 {item.features.map((feature) => (
                   <li key={feature}>
                     <Check size={15} />
-                    {feature}
+                    {t(feature)}
                   </li>
                 ))}
               </ul>
               <small>
                 <Store size={14} />
                 {Number.isFinite(item.limit)
-                  ? "До " + item.limit + " заведений"
+                  ? t("До " + item.limit + " заведений")
                   : t("Без ограничений")}
               </small>
             </button>

@@ -4,14 +4,14 @@ import { I18nProvider, translate, useI18n } from "./i18n";
 import { localeFromPathname, replacePathLocale } from "./locales";
 
 function LanguageHarness() {
-  const { setLocale } = useI18n();
+  const { setLocale, t } = useI18n();
   return (
     <>
       <button type="button" onClick={() => setLocale("en")}>
         English
       </button>
-      <h1>Заказы</h1>
-      <input aria-label="Поиск по команде" placeholder="Поиск по команде" />
+      <h1>{t("Заказы")}</h1>
+      <input aria-label={t("Поиск по команде")} placeholder={t("Поиск по команде")} />
     </>
   );
 }
@@ -50,7 +50,7 @@ describe("global localization", () => {
     expect(translate("Создать рабочее пространство", "ua")).toBe("Створити робочий простір");
   });
 
-  it("updates text and accessible field labels across the document", async () => {
+  it("re-renders translated text and field labels when the locale changes", async () => {
     render(
       <I18nProvider>
         <LanguageHarness />
