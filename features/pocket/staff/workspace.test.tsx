@@ -5,6 +5,7 @@ import { ConfirmProvider } from "../confirm-dialog";
 import { KitchenScreen } from "./kitchen";
 import { ServiceBoard } from "./service";
 import {
+  getOrderAlertSettings,
   getOwnerDashboard,
   loadOrderQueue,
   updateOrderStatus,
@@ -12,6 +13,7 @@ import {
 } from "../../../lib/owner-api";
 vi.mock("../../../lib/owner-api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/owner-api")>()),
+  getOrderAlertSettings: vi.fn(),
   getOwnerDashboard: vi.fn(),
   loadOrderQueue: vi.fn(),
   updateOrderStatus: vi.fn(),
@@ -35,6 +37,14 @@ beforeEach(() => {
     .fn()
     .mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
   vi.mocked(loadOrderQueue).mockResolvedValue({ orders: [order], hasMoreHistory: false });
+  vi.mocked(getOrderAlertSettings).mockResolvedValue({
+    warning_minutes: 10,
+    critical_minutes: 20,
+    warning_color: "#f59e0b",
+    critical_color: "#ef4444",
+    preorder_lead_minutes: 30,
+    can_edit: false,
+  });
 });
 const mount = (kitchen = true) =>
   render(
@@ -56,7 +66,14 @@ it("loads staff data without owner administration requests and saves expected st
   });
   fireEvent.click(action);
   await screen.findByRole("button", { name: "Заказ готов" });
-  expect(updateOrderStatus).toHaveBeenCalledWith("venue", "o", "preparing", "accepted", "staff");
+  expect(updateOrderStatus).toHaveBeenCalledWith(
+    "venue",
+    "o",
+    "preparing",
+    "accepted",
+    "staff",
+    undefined,
+  );
   expect(screen.getByText("Реальный суп")).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Отменить заказ" })).not.toBeInTheDocument();
 });
