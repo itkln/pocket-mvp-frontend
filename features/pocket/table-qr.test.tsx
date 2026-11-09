@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { issueTableQR } from "../../lib/table-orders-api";
-import { QrCodesDialog } from "./floor-plan";
+import { QrCodesDialog } from "./floor/qr-codes-dialog";
 vi.mock("../../lib/table-orders-api", () => ({ issueTableQR: vi.fn() }));
 vi.mock("qrcode", () => ({
   default: {

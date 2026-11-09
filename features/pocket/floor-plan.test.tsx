@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FloorPlan, tableCountLabel, type VenueFloor } from "./floor-plan";
+import { FloorPlan } from "./floor-plan";
+import { tableCountLabel, type VenueFloor } from "./floor/floor-model";
 import { getFloorPlan, saveFloorPlan } from "../../lib/owner-api";
 
 vi.mock("../../lib/owner-api", () => ({
