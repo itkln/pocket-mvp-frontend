@@ -1,17 +1,23 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import DishApp from "../../../shared/dish-app";
+import { TableBillPage, TableHomePage } from "../../../shared/dish-screens";
 import { getCurrentUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, type PublicVenue } from "../../../lib/public-catalog-api";
 import { getTableBill, resolveTableQR, type TableBill } from "../../../lib/table-orders-api";
 import { I18nProvider, translate } from "../i18n";
 
-const { push, replace } = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
+const { push, replace, segment } = vi.hoisted(() => ({
+  push: vi.fn(),
+  replace: vi.fn(),
+  segment: { current: null as string | null },
+}));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
   usePathname: () => "/ru/qr/test-token",
   useSearchParams: () => new URLSearchParams(),
+  useSelectedLayoutSegment: () => segment.current,
 }));
 vi.mock("../../../lib/auth-api", () => ({ getCurrentUser: vi.fn(), logout: vi.fn() }));
 vi.mock("../../../lib/table-orders-api", () => ({
@@ -59,12 +65,14 @@ const bill: TableBill = {
     },
   ],
 };
-const show = (billPage = false) =>
-  render(
+const show = (billPage = false) => {
+  segment.current = billPage ? "bill" : null;
+  return render(
     <I18nProvider initialLocale="ru">
-      <DishApp initialScreen={billPage ? "table-bill" : "table-home"} qrToken="test-token" />
+      <DishApp qrToken="test-token">{billPage ? <TableBillPage /> : <TableHomePage />}</DishApp>
     </I18nProvider>,
   );
+};
 beforeEach(() => {
   vi.clearAllMocks();
   localStorage.clear();

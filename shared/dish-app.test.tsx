@@ -1,14 +1,19 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import DishApp from "./dish-app";
+import { ProfilePage, ReservationsPage, SettingsPage, VenueMenuPage } from "./dish-screens";
 import { getCurrentUser } from "../lib/auth-api";
 import { I18nProvider } from "../features/pocket/i18n";
-const replace = vi.fn(),
-  push = vi.fn();
+const { replace, push, segment } = vi.hoisted(() => ({
+  replace: vi.fn(),
+  push: vi.fn(),
+  segment: { current: null as string | null },
+}));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace, push }),
   usePathname: () => "/ru/r/venue-id/profile",
   useSearchParams: () => new URLSearchParams(),
+  useSelectedLayoutSegment: () => segment.current,
 }));
 vi.mock("../lib/auth-api", () => ({ getCurrentUser: vi.fn(), logout: vi.fn() }));
 vi.mock("../features/pocket/customer/venue-home", () => ({ VenueHome: () => null }));
@@ -24,6 +29,18 @@ vi.mock("../features/pocket/customer/profile", () => ({
   GuestSettings: () => null,
   GuestProfileDialog: () => null,
 }));
+// The restaurant layout with the page its URL segment opens.
+const dish = (page?: "profile" | "reservations" | "settings") => {
+  segment.current = page ?? null;
+  const Page = page
+    ? { profile: ProfilePage, reservations: ReservationsPage, settings: SettingsPage }[page]
+    : VenueMenuPage;
+  return (
+    <DishApp venueID="venue-id">
+      <Page />
+    </DishApp>
+  );
+};
 beforeEach(() => {
   vi.clearAllMocks();
   window.matchMedia = vi.fn().mockImplementation((query: string) => ({
@@ -48,21 +65,13 @@ it("preserves a private account and removes favorites navigation", async () => {
     role: "customer",
     capabilities: ["customer"],
   });
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" initialScreen="profile" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish("profile")}</I18nProvider>);
   await screen.findByRole("button", { name: "Редактировать профиль" });
   expect(screen.getAllByText("Мои брони").length).toBeGreaterThan(0);
 });
 it("requires authentication to see personal reservations", async () => {
   vi.mocked(getCurrentUser).mockRejectedValue(new Error("unauthorized"));
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" initialScreen="reservations" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish("reservations")}</I18nProvider>);
   await waitFor(() =>
     expect(replace).toHaveBeenCalledWith("/ru/login?returnTo=%2Fru%2Fr%2Fvenue-id%2Fprofile"),
   );
@@ -70,11 +79,7 @@ it("requires authentication to see personal reservations", async () => {
 
 it("opens the same QR settings panel from the restaurant burger", async () => {
   vi.mocked(getCurrentUser).mockRejectedValue(new Error("unauthorized"));
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish()}</I18nProvider>);
   fireEvent.click(screen.getByRole("button", { name: "Настройки меню" }));
   const dialog = within(screen.getByRole("dialog", { name: "Настройки меню" }));
   expect(dialog.getByText("Войдите в аккаунт")).toBeInTheDocument();
@@ -87,11 +92,7 @@ it("opens the same QR settings panel from the restaurant burger", async () => {
 });
 it("opens language selection from the burger and keeps the current page", async () => {
   vi.mocked(getCurrentUser).mockRejectedValue(new Error("unauthorized"));
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish()}</I18nProvider>);
   fireEvent.click(screen.getByRole("button", { name: "Настройки меню" }));
   fireEvent.click(
     within(screen.getByRole("dialog")).getByRole("button", { name: "Язык интерфейса: Русский" }),
@@ -104,11 +105,7 @@ it("opens language selection from the burger and keeps the current page", async 
 
 it("opens sign in from the header and preserves the current restaurant route", async () => {
   vi.mocked(getCurrentUser).mockRejectedValue(new Error("unauthorized"));
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish()}</I18nProvider>);
   fireEvent.click(
     within(screen.getByRole("banner", { name: "Навигация Pocket Dish" })).getByRole("button", {
       name: "Войти",
@@ -127,11 +124,7 @@ it("keeps account navigation and logo inside the selected restaurant", async () 
     role: "customer",
     capabilities: ["customer"],
   });
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" initialScreen="profile" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish("profile")}</I18nProvider>);
   await screen.findByRole("button", { name: "Редактировать профиль" });
   fireEvent.click(screen.getByRole("button", { name: "Pocket Dish, главная" }));
   expect(push).toHaveBeenLastCalledWith("/ru/r/venue-id");
@@ -149,11 +142,7 @@ it("keeps account navigation and logo inside the selected restaurant", async () 
 
 it("uses the catalog language dropdown in the desktop header", async () => {
   vi.mocked(getCurrentUser).mockRejectedValue(new Error("unauthorized"));
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish()}</I18nProvider>);
   fireEvent.click(
     within(screen.getByRole("banner", { name: "Навигация Pocket Dish" })).getByRole("button", {
       name: "Язык интерфейса",
@@ -183,11 +172,7 @@ for (const [label, target] of [
       role: "customer",
       capabilities: ["customer"],
     });
-    render(
-      <I18nProvider initialLocale="ru">
-        <DishApp venueID="venue-id" initialScreen="profile" />
-      </I18nProvider>,
-    );
+    render(<I18nProvider initialLocale="ru">{dish("profile")}</I18nProvider>);
     await screen.findByRole("button", { name: "Редактировать профиль" });
     fireEvent.click(screen.getByRole("button", { name: "Настройки меню" }));
     fireEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: label }));
@@ -196,11 +181,7 @@ for (const [label, target] of [
 }
 it("hides the account section until the guest signs in", async () => {
   vi.mocked(getCurrentUser).mockRejectedValue(new Error("unauthorized"));
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish()}</I18nProvider>);
   fireEvent.click(screen.getByRole("button", { name: "Настройки меню" }));
   const dialog = within(screen.getByRole("dialog"));
   expect(dialog.queryByRole("region", { name: "Аккаунт" })).not.toBeInTheDocument();
@@ -220,11 +201,7 @@ it("replaces the old settings landing and bottom navigation with the account car
     role: "customer",
     capabilities: ["customer"],
   });
-  const result = render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" initialScreen="settings" />
-    </I18nProvider>,
-  );
+  const result = render(<I18nProvider initialLocale="ru">{dish("settings")}</I18nProvider>);
   await screen.findByRole("button", { name: "Редактировать профиль" });
   const account = within(screen.getByRole("region", { name: "Профиль" }));
   expect(account.getByRole("button", { name: "Безопасность" })).toBeInTheDocument();
@@ -243,11 +220,7 @@ it("returns to the restaurant after sign out without redirecting back to login",
     role: "customer",
     capabilities: ["customer"],
   });
-  render(
-    <I18nProvider initialLocale="ru">
-      <DishApp venueID="venue-id" initialScreen="profile" />
-    </I18nProvider>,
-  );
+  render(<I18nProvider initialLocale="ru">{dish("profile")}</I18nProvider>);
   fireEvent.click(await screen.findByRole("button", { name: "Выйти из аккаунта" }));
   await waitFor(() => expect(push).toHaveBeenCalledWith("/ru/r/venue-id"));
   expect(replace).not.toHaveBeenCalled();

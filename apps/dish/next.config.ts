@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: workspaceRoot,
   poweredByHeader: false,
   turbopack: { root: workspaceRoot },
+  // Ukrainian used to live under /uk; the query string is carried over automatically.
+  redirects: async () => [{ source: "/uk/:path*", destination: "/ua/:path*", permanent: false }],
 };
 
 export default nextConfig;
