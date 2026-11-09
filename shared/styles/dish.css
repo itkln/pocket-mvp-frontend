@@ -80,11 +80,6 @@
     padding-left: 48px;
   }
 }
-@media (min-width: 761px) {
-  .pocket-dish .dish-page.has-category {
-    padding-top: 12px;
-  }
-}
 .pocket-dish .dish-catalog-header {
   background: var(--dish-header-initial);
   transition:
@@ -116,59 +111,8 @@
 .pocket-dish .dish-catalog-header .dish-global-search {
   transition: background-color 320ms ease;
 }
-.pocket-dish .dish-catalog-header.has-city {
-  background: var(--dish-header-initial);
-}
-.pocket-dish .dish-catalog-header.scrolled.has-category {
-  box-shadow: none;
-}
-@media (max-width: 760px) {
-  .pocket-dish .dish-catalog-header.scrolled.has-category + .dish-main .dish-category-filters {
-    box-shadow: 0 5px 18px rgba(23, 33, 43, 0.1);
-  }
-}
-.pocket-dish .dish-catalog-header .dish-global-search,
-.pocket-dish .dish-catalog-header.has-city .dish-global-search {
+.pocket-dish .dish-catalog-header .dish-global-search {
   background: var(--dish-header-selected);
-}
-.pocket-dish header.dish-catalog-header button.dish-location {
-  width: max-content;
-  min-width: 0;
-  max-width: 320px;
-  padding-right: 18px;
-  padding-left: 18px;
-  background: var(--dish-header-selected);
-  color: var(--dish-text);
-  transition:
-    background-color 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
-}
-@media (min-width: 761px) {
-  .pocket-dish header.dish-catalog-header button.dish-location {
-    justify-content: center;
-    text-align: center;
-  }
-  .pocket-dish header.dish-catalog-header button.dish-location > span {
-    width: auto;
-    text-align: center;
-  }
-}
-.pocket-dish .dish-picker-search:focus-within {
-  outline: none;
-}
-.pocket-dish header.dish-catalog-header button.dish-location-cta {
-  background: var(--dish-header-selected);
-  color: var(--dish-text);
-}
-.pocket-dish .dish-location-cta svg {
-  color: inherit;
-}
-.pocket-dish header.dish-catalog-header button.dish-location-cta:hover {
-  background: #e8e7e4;
-}
-.pocket-dish header.dish-catalog-header button.dish-location-cta:active {
-  background: #dddcda;
 }
 .pocket-dish .needs-city .dish-language-trigger:hover,
 .pocket-dish .needs-city .dish-header-actions > .dish-account-trigger:hover {
@@ -280,38 +224,6 @@
   }
 }
 .pocket-dish .dish-main [data-tooltip]::after {
-  display: none;
-}
-.pocket-dish .dish-search-context {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 45%;
-  min-height: 36px;
-  flex: 0 0 auto;
-  padding: 6px 12px;
-  border: 0;
-  border-radius: 999px !important;
-  background: #dde2e6;
-  color: #303941;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-.pocket-dish .dish-global-search .dish-search-context span {
-  display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.dish-search-context svg {
-  flex-shrink: 0;
-}
-.pocket-dish .dish-global-search.has-context {
-  gap: 10px;
-  padding-left: 10px;
-}
-.pocket-dish .dish-global-search.has-context > svg {
   display: none;
 }
 
@@ -615,18 +527,6 @@
     background: var(--dish-card);
     color: var(--dish-text);
   }
-  .pocket-dish .dish-city-options button {
-    transition:
-      background-color 180ms ease,
-      color 180ms ease;
-  }
-  .pocket-dish .dish-city-options button:hover {
-    background: #f0f2f4;
-  }
-  .pocket-dish header.dish-catalog-header button.dish-location:not(.dish-location-cta):hover {
-    background: #e8e7e4;
-    transform: translateY(-1px);
-  }
   .pocket-dish .dish-category-catalog .cuisine-strip button:hover {
     background: #e1e4e6;
     color: var(--dish-text);
@@ -634,10 +534,6 @@
   .pocket-dish .dish-category-catalog .cuisine-strip button.active:hover {
     background: #cdeafa;
     color: var(--dish-cta);
-  }
-  .pocket-dish .dish-search-context:hover {
-    background: #cfd6db;
-    color: #202831;
   }
   .pocket-dish .dish-catalog-brand:hover {
     opacity: 0.72;
@@ -650,9 +546,6 @@
     height: auto;
     background: #fff;
     box-shadow: none;
-  }
-  .pocket-dish .dish-catalog-header.has-city {
-    background: #fff;
   }
   .pocket-dish .dish-catalog-header.scrolled {
     background: #fff;
@@ -704,31 +597,6 @@
     width: 34px;
     height: 34px;
   }
-  .pocket-dish .dish-header-inner > .dish-location {
-    z-index: 1;
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: center;
-    width: auto;
-    min-width: 0;
-    max-width: 100%;
-    padding: 0 16px;
-  }
-  .pocket-dish .dish-catalog-header.guest .dish-location {
-    display: none;
-  }
-  .pocket-dish header.dish-catalog-header.has-city button.dish-location {
-    background: transparent;
-  }
-  .pocket-dish .dish-location span {
-    min-width: 0;
-  }
-  .pocket-dish .dish-location b {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 15px;
-  }
   .pocket-dish .dish-header-actions {
     grid-column: 3;
     grid-row: 1;
@@ -774,9 +642,6 @@
     background: #f5f4f2;
     box-shadow: none;
   }
-  .pocket-dish .dish-catalog-header.has-city .dish-global-search {
-    background: #f5f4f2;
-  }
   .pocket-dish .dish-global-search:focus-within {
     border: 0;
     background: #efeeec;
@@ -791,7 +656,6 @@
     outline: none;
     box-shadow: 0 0 0 3px rgba(32, 40, 49, 0.12);
   }
-  .pocket-dish .dish-header-inner > .dish-location,
   .pocket-dish .dish-header-inner > .dish-header-actions,
   .pocket-dish .dish-header-inner > .dish-catalog-brand {
     min-height: 0;
@@ -809,7 +673,6 @@
     padding-top: 10px;
     padding-bottom: 10px;
   }
-  .pocket-dish .dish-catalog-header.scrolled .dish-location,
   .pocket-dish .dish-catalog-header.scrolled .dish-header-actions,
   .pocket-dish .dish-catalog-header.scrolled .dish-catalog-brand {
     opacity: 0;
@@ -826,12 +689,6 @@
   }
   .pocket-dish.guest .dish-page {
     padding-bottom: calc(32px + env(safe-area-inset-bottom));
-  }
-  .pocket-dish .dish-global-search.has-context input {
-    font-size: 14px;
-  }
-  .pocket-dish .dish-page.has-category {
-    padding-top: 0;
   }
   .pocket-dish .dish-category-catalog .dish-category-filters {
     top: 72px;
@@ -853,47 +710,6 @@
     button.dish-filter-trigger {
     position: static;
     box-shadow: none;
-  }
-  .pocket-dish .dish-bottom-nav {
-    min-height: calc(56px + env(safe-area-inset-bottom));
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
-    border-top: 0;
-    background: var(--dish-page);
-    box-shadow: 0 -6px 18px rgba(23, 33, 43, 0.1);
-  }
-  .pocket-dish .dish-bottom-nav button {
-    min-height: 48px;
-    gap: 2px;
-    color: var(--dish-text);
-    background: transparent;
-    opacity: 0.42;
-  }
-  .pocket-dish .dish-bottom-nav button svg {
-    width: 20px;
-    height: 20px;
-  }
-  .pocket-dish .dish-bottom-nav button:hover {
-    background: transparent;
-    opacity: 0.68;
-  }
-  .pocket-dish .dish-bottom-nav button.active {
-    color: var(--dish-text);
-    background: transparent;
-    opacity: 1;
-  }
-  .pocket-dish .dish-bottom-nav button:focus-visible {
-    outline: none;
-    box-shadow: none;
-    opacity: 0.78;
-  }
-  .pocket-dish .dish-bottom-nav button:focus-visible span {
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-  }
-  .pocket-dish .dish-bottom-nav button span {
-    font-size: 11px;
   }
   .pocket-dish .dish-main:has(.dish-profile) {
     background: #f4f4f5;
@@ -1034,14 +850,6 @@
   }
   .dish-reservations-empty .button {
     margin-top: 18px;
-  }
-}
-@media (max-width: 380px) {
-  .pocket-dish .dish-header-inner > .dish-location {
-    padding: 0 10px;
-  }
-  .pocket-dish .dish-location b {
-    font-size: 14px;
   }
 }
 
@@ -3564,8 +3372,7 @@
     overflow: hidden;
   }
 
-  .pocket-dish.venue-detail-active .dish-catalog-header,
-  .pocket-dish.venue-detail-active .dish-bottom-nav {
+  .pocket-dish.venue-detail-active .dish-catalog-header {
     display: none;
   }
   .pocket-dish.venue-detail-active .dish-main {
@@ -6549,7 +6356,6 @@ body:has(.pocket-dish .dish-tip-dialog[open]) {
 @media (prefers-reduced-motion: reduce) {
   .pocket-dish .dish-catalog-header,
   .pocket-dish .dish-catalog-header .dish-header-inner,
-  .pocket-dish .dish-catalog-header .dish-header-inner > .dish-location,
   .pocket-dish .dish-catalog-header .dish-header-inner > .dish-header-actions,
   .pocket-dish .dish-catalog-header .dish-header-inner > .dish-catalog-brand,
   .pocket-dish .dish-category-catalog .dish-category-filters,

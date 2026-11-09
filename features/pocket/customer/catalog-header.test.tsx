@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { SpotsHeader } from "./navigation";
+import { DishCatalogHeader } from "./catalog-header";
 import { I18nProvider } from "../i18n";
 
 const replace = vi.fn();
@@ -24,10 +24,10 @@ beforeEach(() => {
 });
 
 describe("customer header", () => {
-  it("searches and selects a city, with no cart button in the header", () => {
-    const onCityChange = vi.fn();
+  it("shows the Dish brand and menu search, with no cart or city controls", () => {
+    const onSearch = vi.fn();
     render(
-      <SpotsHeader
+      <DishCatalogHeader
         user={{
           id: "test",
           email: "test@example.com",
@@ -37,31 +37,48 @@ describe("customer header", () => {
           capabilities: ["customer"],
         }}
         screen="discover"
-        city="Братислава"
-        onCityChange={onCityChange}
         searchQuery=""
-        onSearch={vi.fn()}
+        onSearch={onSearch}
         onNavigate={vi.fn()}
         onLogin={vi.fn()}
         onLogout={vi.fn()}
       />,
     );
     expect(screen.queryByRole("button", { name: /Корзина/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Pocket Spots, главная" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Выбрать город: Братислава" }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Найти город" }), {
-      target: { value: "кош" },
+    expect(screen.queryByRole("button", { name: /город|место/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pocket Dish, главная" })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("textbox", { name: "Поиск по меню" }), {
+      target: { value: "суп" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Кошице" }));
-    expect(onCityChange).toHaveBeenCalledWith("Кошице");
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(onSearch).toHaveBeenCalledWith("суп");
+  });
+
+  it("titles the guest mobile menu Pocket Dish and offers only sign-in and language", () => {
+    const onLogin = vi.fn();
+    render(
+      <DishCatalogHeader
+        user={null}
+        screen="menu"
+        searchQuery=""
+        onSearch={vi.fn()}
+        onNavigate={vi.fn()}
+        onLogin={onLogin}
+        onLogout={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Открыть меню" }));
+    const dialog = screen.getByRole("dialog", { name: "Pocket Dish" });
+    expect(within(dialog).queryByRole("button", { name: /Город/ })).not.toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: /Язык интерфейса/ })).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Войти" }));
+    expect(onLogin).toHaveBeenCalledOnce();
   });
 
   it("opens account destinations, closes on Escape and outside click, and signs out", () => {
     const onNavigate = vi.fn();
     const onLogout = vi.fn();
     render(
-      <SpotsHeader
+      <DishCatalogHeader
         user={{
           id: "test",
           email: "test@example.com",
@@ -71,8 +88,6 @@ describe("customer header", () => {
           capabilities: ["customer"],
         }}
         screen="discover"
-        city="Братислава"
-        onCityChange={vi.fn()}
         searchQuery=""
         onSearch={vi.fn()}
         onNavigate={onNavigate}
@@ -84,7 +99,6 @@ describe("customer header", () => {
     for (const [label, route] of [
       ["Личные данные", "profile"],
       ["Мои брони", "reservations"],
-      ["Сохранённые места", "saved"],
       ["Уведомления", "notifications"],
       ["Безопасность", "settings"],
     ]) {
@@ -108,7 +122,7 @@ describe("customer header", () => {
   it("switches the language and preserves the current route", () => {
     render(
       <I18nProvider initialLocale="ru">
-        <SpotsHeader
+        <DishCatalogHeader
           user={{
             id: "test",
             email: "test@example.com",
@@ -118,8 +132,6 @@ describe("customer header", () => {
             capabilities: ["customer"],
           }}
           screen="discover"
-          city="Братислава"
-          onCityChange={vi.fn()}
           searchQuery=""
           onSearch={vi.fn()}
           onNavigate={vi.fn()}
@@ -131,7 +143,7 @@ describe("customer header", () => {
     fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "English" }));
     expect(replace).toHaveBeenCalledWith("/en/discover");
-    expect(screen.getByRole("textbox", { name: "Find a place or service" })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Search menu" })).toBeInTheDocument();
     expect(localStorage.getItem("pocket:locale")).toBe("en");
     expect(screen.queryByRole("menu", { name: "Interface language" })).not.toBeInTheDocument();
   });
@@ -142,7 +154,7 @@ describe("customer header", () => {
       .mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
     render(
       <I18nProvider initialLocale="ru">
-        <SpotsHeader
+        <DishCatalogHeader
           user={{
             id: "test",
             email: "test@example.com",
@@ -152,8 +164,6 @@ describe("customer header", () => {
             capabilities: ["customer"],
           }}
           screen="discover"
-          city="Братислава"
-          onCityChange={vi.fn()}
           searchQuery=""
           onSearch={vi.fn()}
           onNavigate={vi.fn()}
@@ -173,7 +183,7 @@ describe("customer header", () => {
 
   it("adds a header shadow only after scrolling", () => {
     render(
-      <SpotsHeader
+      <DishCatalogHeader
         user={{
           id: "test",
           email: "test@example.com",
@@ -183,8 +193,6 @@ describe("customer header", () => {
           capabilities: ["customer"],
         }}
         screen="discover"
-        city="Братислава"
-        onCityChange={vi.fn()}
         searchQuery=""
         onSearch={vi.fn()}
         onNavigate={vi.fn()}

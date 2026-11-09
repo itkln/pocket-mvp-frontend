@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ArrowLeft, Menu, Search } from "lucide-react";
 import { getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
 import { spotsAuthPath } from "../lib/spots-auth-navigation";
-import { SpotsHeader } from "../features/pocket/customer/navigation";
+import { DishCatalogHeader } from "../features/pocket/customer/catalog-header";
 import { VenueDetailsScreen } from "../features/pocket/customer/venue-details";
 import { TableEntry } from "../features/pocket/customer/table-entry";
 import { TableVenueScreen } from "../features/pocket/customer/table-venue";
@@ -104,15 +104,12 @@ export default function DishApp({
   return (
     <DishNavigationContext.Provider value={{ basePath, onLogout: signOut }}>
       <div
-        className={`pocket-dish pocket-dish ${user ? "signed-in" : "guest"} ${tableEntry ? "dish-table-entry-active" : ""} ${venueScreen ? "venue-detail-active" : "dish-account-active"}`}
+        className={`pocket-dish ${user ? "signed-in" : "guest"} ${tableEntry ? "dish-table-entry-active" : ""} ${venueScreen ? "venue-detail-active" : "dish-account-active"}`}
       >
         {!tableEntry && (
-          <SpotsHeader
-            variant="dish"
+          <DishCatalogHeader
             user={user}
             screen={initialScreen}
-            city=""
-            onCityChange={() => {}}
             searchQuery={menuQuery}
             onSearch={setMenuQuery}
             searchAutoFocus={params.get("search") === "1"}

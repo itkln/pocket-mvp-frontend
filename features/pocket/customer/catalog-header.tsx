@@ -7,14 +7,12 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   Bell,
-  Bookmark,
   CalendarDays,
   Check,
   ChevronRight,
   Globe,
   LogIn,
   LogOut,
-  MapPin,
   Menu,
   Search,
   ShieldCheck,
@@ -26,52 +24,35 @@ import { replacePathLocale } from "../locales";
 import { userInitials } from "../model";
 import { type AuthUser } from "../../../lib/auth-api";
 
-type SpotsNavigationProps = {
-  variant?: "catalog" | "dish";
+type DishCatalogHeaderProps = {
   searchAutoFocus?: boolean;
   user: AuthUser | null;
   screen: string;
-  city: string;
-  onCityChange: (city: string) => void;
   searchQuery: string;
-  categoryLabel?: string;
-  onClearCategory?: () => void;
-  venueName?: string;
-  onClearVenue?: () => void;
   onSearch: (value: string) => void;
   onNavigate: (screen: string) => void;
   onLogin: () => void;
   onLogout: () => void;
-  onEditProfile?: () => void;
   onAccountSection?: (section: "profile" | "security" | "notifications") => void;
 };
 
-export const spotsCities = ["Братислава", "Кошице", "Трнава", "Нитра", "Жилина"];
+const productName = "Pocket Dish";
 
-export function SpotsHeader({
-  variant = "catalog",
+// Top bar of Dish: brand, menu search, language and account controls.
+export function DishCatalogHeader({
   searchAutoFocus = false,
   user,
   screen,
-  city,
-  onCityChange,
   searchQuery,
-  categoryLabel,
-  onClearCategory,
-  venueName,
-  onClearVenue,
   onSearch,
   onNavigate,
   onLogin,
   onLogout,
   onAccountSection,
-}: SpotsNavigationProps) {
+}: DishCatalogHeaderProps) {
   const { locale, setLocale, t } = useI18n();
-  const dish = variant === "dish";
-  const productName = dish ? "Pocket Dish" : "Pocket Spots";
   const router = useRouter();
   const pathname = usePathname();
-  const cityDialog = useRef<HTMLDialogElement>(null);
   const languageDialog = useRef<HTMLDialogElement>(null);
   const mobileMenuDialog = useRef<HTMLDialogElement>(null);
   const accountRoot = useRef<HTMLElement>(null);
@@ -79,10 +60,9 @@ export function SpotsHeader({
   const languageTrigger = useRef<HTMLButtonElement>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
-  const [mobileMenuView, setMobileMenuView] = useState<"menu" | "city" | "language">("menu");
+  const [mobileMenuView, setMobileMenuView] = useState<"menu" | "language">("menu");
   const headerHidden = useScrollHeader();
   const [scrolled, setScrolled] = useState(false);
-  const [cityQuery, setCityQuery] = useState("");
   useEffect(() => {
     const updateScrolled = () => setScrolled(window.scrollY > 0);
     updateScrolled();
@@ -128,7 +108,6 @@ export function SpotsHeader({
       accountSection: "profile" as const,
     },
     { label: "Мои брони", screen: "reservations", icon: CalendarDays },
-    ...(!dish ? [{ label: "Сохранённые места", screen: "saved", icon: Bookmark }] : []),
     {
       label: "Уведомления",
       screen: "notifications",
@@ -142,14 +121,11 @@ export function SpotsHeader({
       accountSection: "security" as const,
     },
   ];
-  const matchingCities = spotsCities.filter((name) =>
-    name.toLocaleLowerCase("ru").includes(cityQuery.trim().toLocaleLowerCase("ru")),
-  );
   const accountScreen = ["profile", "settings", "notifications"].includes(screen);
   return (
     <header
       aria-label={`Навигация ${productName}`}
-      className={`dish-catalog-header ${dish ? "dish-catalog-dish-header" : ""} ${headerHidden ? "scroll-header-hidden" : ""} ${user ? "signed-in" : "guest"} ${city ? "has-city" : "needs-city"} ${categoryLabel ? "has-category" : ""} ${scrolled ? "scrolled" : ""} ${accountScreen ? "account-screen" : ""}`}
+      className={`dish-catalog-header dish-catalog-dish-header ${headerHidden ? "scroll-header-hidden" : ""} ${user ? "signed-in" : "guest"} needs-city ${scrolled ? "scrolled" : ""} ${accountScreen ? "account-screen" : ""}`}
     >
       <div className="dish-header-inner">
         <button
@@ -161,76 +137,16 @@ export function SpotsHeader({
           <Image src="/logo.svg" alt="" width={30} height={30} priority />
           <strong>{productName}</strong>
         </button>
-        <div
-          className={`dish-global-search ${categoryLabel || venueName ? "has-context" : ""}`}
-          role="search"
-        >
+        <div className="dish-global-search" role="search">
           <Search size={19} />
-          {venueName ? (
-            <button
-              type="button"
-              className="dish-search-context"
-              aria-label={t("Искать во всех заведениях")}
-              title={venueName}
-              onClick={onClearVenue}
-            >
-              <span>{venueName}</span>
-              <X size={15} />
-            </button>
-          ) : (
-            categoryLabel && (
-              <button
-                type="button"
-                className="dish-search-context"
-                aria-label={t("Сбросить категорию")}
-                onClick={onClearCategory}
-              >
-                <span>{t(categoryLabel)}</span>
-                <X size={15} />
-              </button>
-            )
-          )}
           <input
             autoFocus={searchAutoFocus}
             value={searchQuery}
             onChange={(event) => onSearch(event.target.value)}
-            placeholder={t(
-              dish
-                ? "Поиск по меню"
-                : venueName
-                  ? "Искать в заведении"
-                  : categoryLabel
-                    ? "Искать в категории"
-                    : "Найти место или услугу",
-            )}
-            aria-label={
-              dish
-                ? t("Поиск по меню")
-                : venueName
-                  ? `${t("Поиск по меню")}: ${venueName}`
-                  : categoryLabel
-                    ? `${t("Поиск")}: ${t(categoryLabel)}`
-                    : t("Найти место или услугу")
-            }
+            placeholder={t("Поиск по меню")}
+            aria-label={t("Поиск по меню")}
           />
         </div>
-        {!dish && (
-          <button
-            type="button"
-            className={`dish-location ${city ? "" : "dish-location-cta"}`}
-            aria-label={city ? `Выбрать город: ${city}` : t("Выбрать место")}
-            aria-haspopup="dialog"
-            onClick={() => {
-              setCityQuery("");
-              cityDialog.current?.showModal();
-            }}
-          >
-            <MapPin size={18} />
-            <span>
-              <b>{city ? t(city) : t("Выбрать место")}</b>
-            </span>
-          </button>
-        )}
         <nav
           ref={accountRoot}
           className="dish-header-actions"
@@ -391,56 +307,6 @@ export function SpotsHeader({
         </nav>
       </div>
       <dialog
-        ref={cityDialog}
-        className="dish-picker-dialog"
-        aria-labelledby="dish-city-title"
-        onClick={(event) => {
-          if (event.target === event.currentTarget) cityDialog.current?.close();
-        }}
-      >
-        <div className="dish-picker-content">
-          <div className="dish-picker-heading">
-            <h2 id="dish-city-title">Ваш город</h2>
-            <button
-              type="button"
-              className="icon-button"
-              aria-label="Закрыть выбор города"
-              data-tooltip="Закрыть"
-              data-tooltip-placement="bottom"
-              onClick={() => cityDialog.current?.close()}
-            >
-              <X size={20} />
-            </button>
-          </div>
-          <label className="dish-picker-search">
-            <Search size={18} />
-            <input
-              aria-label="Найти город"
-              placeholder="Найти город"
-              value={cityQuery}
-              onChange={(event) => setCityQuery(event.target.value)}
-            />
-          </label>
-          <div className="dish-city-options">
-            {matchingCities.map((name) => (
-              <button
-                type="button"
-                key={name}
-                aria-pressed={city === name}
-                onClick={() => {
-                  onCityChange(name);
-                  cityDialog.current?.close();
-                }}
-              >
-                <span>{name}</span>
-                {city === name && <Check size={18} />}
-              </button>
-            ))}
-            {!matchingCities.length && <p>Город не найден</p>}
-          </div>
-        </div>
-      </dialog>
-      <dialog
         ref={languageDialog}
         className="dish-language-dialog"
         aria-labelledby="dish-language-dialog-title"
@@ -499,10 +365,10 @@ export function SpotsHeader({
                 {mobileMenuView === "menu" ? (
                   <span className="dish-menu-brand">
                     <Image src="/logo.svg" alt="" width={30} height={30} />
-                    Pocket Spots
+                    {productName}
                   </span>
                 ) : (
-                  t(mobileMenuView === "city" ? "Город" : "Язык интерфейса")
+                  t("Язык интерфейса")
                 )}
               </h2>
               <span aria-hidden="true" />
@@ -530,18 +396,6 @@ export function SpotsHeader({
                   <button
                     type="button"
                     className="dish-mobile-menu-row"
-                    aria-label={`${t("Город")}: ${city ? t(city) : t("Выбрать место")}`}
-                    onClick={() => setMobileMenuView("city")}
-                  >
-                    <MapPin size={21} />
-                    <span>
-                      <strong>{city ? t(city) : t("Выбрать место")}</strong>
-                    </span>
-                    <ChevronRight size={21} />
-                  </button>
-                  <button
-                    type="button"
-                    className="dish-mobile-menu-row"
                     aria-label={`${t("Язык интерфейса")}: ${localeOptions.find((option) => option.value === locale)?.label ?? locale.toUpperCase()}`}
                     onClick={() => setMobileMenuView("language")}
                   >
@@ -553,31 +407,6 @@ export function SpotsHeader({
                     </span>
                     <ChevronRight size={21} />
                   </button>
-                </section>
-              </div>
-            )}
-            {mobileMenuView === "city" && (
-              <div className="dish-mobile-menu-content dish-mobile-menu-subpage">
-                <section
-                  className="dish-mobile-menu-card dish-mobile-selection-card"
-                  aria-label={t("Город")}
-                >
-                  <div className="dish-mobile-selection-options">
-                    {spotsCities.map((name) => (
-                      <button
-                        type="button"
-                        key={name}
-                        aria-pressed={city === name}
-                        onClick={() => {
-                          onCityChange(name);
-                          setMobileMenuView("menu");
-                        }}
-                      >
-                        <span>{t(name)}</span>
-                        {city === name && <Check size={19} />}
-                      </button>
-                    ))}
-                  </div>
                 </section>
               </div>
             )}
@@ -608,40 +437,5 @@ export function SpotsHeader({
         </dialog>
       )}
     </header>
-  );
-}
-
-const mobileItems = [
-  { id: "saved", label: "Избранное", icon: Bookmark },
-  { id: "reservations", label: "Мои брони", icon: CalendarDays },
-  { id: "profile", label: "Профиль", icon: UserRound },
-];
-
-export function SpotsBottomNavigation({
-  screen,
-  onNavigate,
-}: Pick<SpotsNavigationProps, "screen" | "onNavigate">) {
-  const { t } = useI18n();
-  return (
-    <nav className="dish-bottom-nav" aria-label="Основная навигация Pocket Spots">
-      {mobileItems.map(({ id, label, icon: Icon }) => {
-        const active =
-          screen === id ||
-          (id === "profile" && ["settings", "notifications"].includes(screen)) ||
-          (id === "reservations" && screen === "reservation");
-        return (
-          <button
-            type="button"
-            key={id}
-            className={active ? "active" : ""}
-            aria-current={active ? "page" : undefined}
-            onClick={() => onNavigate(id)}
-          >
-            <Icon size={22} />
-            <span>{t(label)}</span>
-          </button>
-        );
-      })}
-    </nav>
   );
 }

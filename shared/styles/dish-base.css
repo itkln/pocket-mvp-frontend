@@ -44,7 +44,6 @@
 }
 
 .dish-catalog-brand,
-.dish-location,
 .dish-global-search,
 .dish-header-actions > button {
   border: 0;
@@ -62,40 +61,6 @@
 .dish-catalog-brand strong {
   font-size: 20px;
   font-weight: 750;
-}
-
-.dish-location {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  text-align: left;
-}
-
-.dish-location:hover {
-  background: #f2f5f7;
-}
-
-.dish-location svg {
-  flex: none;
-  color: var(--accent);
-}
-
-.dish-location span,
-.dish-location b,
-.dish-location small {
-  display: block;
-}
-
-.dish-location b {
-  font-size: 14px;
-}
-
-.dish-location small {
-  color: #7b8790;
-  font-size: 12px;
 }
 
 .dish-global-search {
@@ -163,10 +128,6 @@
   width: min(1280px, 100%);
   margin: 0 auto;
   padding: 28px 28px 72px;
-}
-
-.dish-bottom-nav {
-  display: none;
 }
 
 .cuisine-strip::-webkit-scrollbar {
@@ -263,9 +224,6 @@
     grid-template-columns: auto auto minmax(180px, 1fr) auto;
     padding: 0 20px;
   }
-  .dish-location small {
-    display: none;
-  }
   .cuisine-strip {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -292,9 +250,6 @@
     height: 42px;
     justify-content: center;
   }
-  .dish-location {
-    display: none;
-  }
   .dish-global-search {
     height: 42px;
     justify-content: flex-start;
@@ -316,43 +271,6 @@
   }
   .dish-page {
     padding: 14px 12px calc(94px + env(safe-area-inset-bottom));
-  }
-  .dish-bottom-nav {
-    position: fixed;
-    z-index: 52;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    min-height: 68px;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    padding: 5px 6px calc(5px + env(safe-area-inset-bottom));
-    border-top: 1px solid #e5e9ec;
-    background: rgba(255, 255, 255, 0.97);
-    box-shadow: 0 -5px 20px rgba(23, 33, 43, 0.08);
-    backdrop-filter: blur(18px);
-  }
-  .dish-bottom-nav button {
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 3px 1px;
-    border: 0;
-    background: transparent;
-    color: #74818b;
-    cursor: pointer;
-  }
-  .dish-bottom-nav button span {
-    overflow: hidden;
-    font-size: 10px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .dish-bottom-nav button.active {
-    color: var(--accent);
   }
   .cuisine-section {
     margin-right: -12px;
@@ -459,17 +377,6 @@
   .pocket-dish .dish-header-inner {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
   }
-  .pocket-dish .dish-location {
-    min-width: 42px;
-    width: 42px;
-    height: 42px;
-    display: flex;
-    justify-content: center;
-    padding: 0;
-  }
-  .pocket-dish .dish-location span {
-    display: none;
-  }
   .pocket-dish .cuisine-section {
     margin: 8px -12px 24px;
   }
@@ -508,28 +415,6 @@
   padding-left: 32px;
 }
 
-.pocket-dish .dish-location {
-  min-width: 160px;
-  min-height: 48px;
-  padding: 6px 15px;
-  background: var(--accent-soft);
-  color: var(--ink);
-}
-
-.pocket-dish .dish-location:hover {
-  background: #d8eef9;
-}
-
-.pocket-dish .dish-location b {
-  font-size: 15px;
-}
-
-.pocket-dish .dish-location small {
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 600;
-}
-
 .pocket-dish .dish-page {
   width: min(1440px, 100%);
 }
@@ -541,26 +426,11 @@
   }
 }
 
-@media (max-width: 900px) {
-  .pocket-dish .dish-location {
-    min-width: 48px;
-    padding: 0 12px;
-  }
-  .pocket-dish .dish-location span {
-    display: none;
-  }
-}
-
 @media (max-width: 760px) {
   .pocket-dish .dish-header-inner {
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     padding-right: 12px;
     padding-left: 12px;
-  }
-  .pocket-dish .dish-location {
-    min-width: 42px;
-    min-height: 42px;
-    padding: 0;
   }
 }
 
@@ -577,53 +447,8 @@
 }
 
 .pocket-dish .dish-global-search,
-.pocket-dish .dish-location,
 .pocket-dish .dish-header-actions > button {
   border-radius: 999px;
-}
-
-.pocket-dish .dish-location {
-  min-width: auto;
-  padding-right: 18px;
-  padding-left: 18px;
-  border: 0;
-  background: #f0f2f4;
-}
-
-.pocket-dish .dish-location:hover {
-  background: #e6eaed;
-}
-
-.pocket-dish .dish-location svg {
-  color: #34424d;
-}
-
-.pocket-dish header.dish-catalog-header button.dish-location {
-  border-radius: 999px !important;
-}
-
-@media (max-width: 900px) {
-  .pocket-dish .dish-location {
-    min-width: 48px;
-    padding: 0 12px;
-  }
-}
-
-@media (min-width: 761px) and (max-width: 900px) {
-  .pocket-dish .dish-location {
-    min-width: auto;
-    padding: 0 16px;
-  }
-  .pocket-dish .dish-location span {
-    display: block;
-  }
-}
-
-@media (max-width: 760px) {
-  .pocket-dish .dish-location {
-    min-width: 42px;
-    padding: 0;
-  }
 }
 
 /* Pocket Spots: one fully rounded shape for interactive controls. */
@@ -631,10 +456,8 @@
 .pocket-dish .button,
 .pocket-dish .icon-button,
 .pocket-dish .dish-header-actions > button,
-.pocket-dish .dish-location,
 .pocket-dish .cuisine-strip button,
-.pocket-dish .back-link,
-.pocket-dish .dish-bottom-nav button {
+.pocket-dish .back-link {
   border-radius: 999px !important;
 }
 
@@ -714,52 +537,6 @@
   font-size: 24px;
 }
 
-.dish-picker-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 46px;
-  padding: 0 16px;
-  border-radius: 999px;
-  background: #f0f2f4;
-  color: #73808a;
-}
-
-.dish-picker-search input {
-  width: 100%;
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  font-size: 16px;
-  color: var(--ink);
-}
-
-.dish-picker-search:focus-within {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.dish-city-options {
-  display: grid;
-  gap: 4px;
-  margin-top: 16px;
-}
-
-.dish-city-options button {
-  min-height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
-  border: 0;
-  background: transparent;
-  text-align: left;
-  font-size: 16px;
-  cursor: pointer;
-}
-
 .dish-filter-options {
   display: flex;
   flex-wrap: wrap;
@@ -775,12 +552,10 @@
   cursor: pointer;
 }
 
-.pocket-dish .dish-city-options button,
 .pocket-dish .dish-filter-options button {
   border-radius: 999px;
 }
 
-.dish-city-options button[aria-pressed="true"],
 .dish-filter-options button[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--accent);
@@ -795,7 +570,6 @@
 
 @media (hover: hover) {
   .pocket-dish .cuisine-strip button:hover,
-  .pocket-dish .dish-city-options button:hover,
   .pocket-dish .dish-filter-options button:hover {
     background: #e6eaed;
   }
@@ -810,23 +584,6 @@
   }
   .pocket-dish .dish-header-actions {
     display: none;
-  }
-  .pocket-dish .dish-location {
-    width: auto;
-    min-width: 0;
-    max-width: 142px;
-    gap: 5px;
-    padding: 0 10px;
-  }
-  .pocket-dish .dish-location span {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .pocket-dish .dish-location b {
-    font-size: 13px;
   }
   .dish-picker-content {
     padding: 20px;
@@ -848,7 +605,6 @@
 }
 
 .pocket-dish .dish-header-inner > .dish-catalog-brand,
-.pocket-dish .dish-header-inner > .dish-location,
 .pocket-dish .dish-global-search,
 .pocket-dish .dish-header-actions > .dish-account-trigger {
   height: 52px;
@@ -947,16 +703,6 @@
     grid-column: 1 / -1;
     grid-row: 2;
   }
-  .pocket-dish .dish-location {
-    grid-column: 2;
-    grid-row: 1;
-    justify-self: end;
-    max-width: 100%;
-    padding: 0 16px;
-  }
-  .pocket-dish .dish-location b {
-    font-size: 15px;
-  }
   .pocket-dish .dish-header-actions {
     display: flex;
     grid-column: 3;
@@ -1013,12 +759,6 @@
   flex-shrink: 0;
 }
 
-.pocket-dish .dish-location {
-  grid-column: 3;
-  background: #fff;
-  color: #20272c;
-}
-
 .pocket-dish .dish-header-actions {
   grid-column: 4;
   gap: 8px;
@@ -1058,9 +798,6 @@
   .pocket-dish .dish-catalog-brand {
     margin-right: 12px;
   }
-  .pocket-dish .dish-location {
-    grid-column: 3;
-  }
   .pocket-dish .dish-header-actions {
     grid-column: 4;
   }
@@ -1080,16 +817,8 @@
   .pocket-dish .dish-catalog-brand {
     margin: 0;
   }
-  .pocket-dish .dish-location {
-    grid-column: 2;
-    padding: 0 12px;
-  }
   .pocket-dish .dish-header-actions {
     grid-column: 3;
-  }
-  .pocket-dish .dish-bottom-nav {
-    background: #fff;
-    box-shadow: 0 -4px 16px rgba(23, 33, 43, 0.06);
   }
 }
 
