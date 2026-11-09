@@ -115,13 +115,29 @@ export function OrdersScreen({
     }),
     [query, historyTable, dateFrom, dateTo, historyStatus, source],
   );
-  useEffect(() => {
-    if (mode !== "history" || !getHistoryPage) return;
-    const revision = ++historyRevision.current;
+  // A new history query starts from an empty, loading list; the request itself is debounced below.
+  const historyQuery =
+    mode === "history" && getHistoryPage
+      ? { filter: historyFilter, reload: historyReload, load: getHistoryPage }
+      : null;
+  const [lastHistoryQuery, setLastHistoryQuery] = useState<typeof historyQuery>(null);
+  if (
+    historyQuery &&
+    (lastHistoryQuery?.filter !== historyQuery.filter ||
+      lastHistoryQuery.reload !== historyQuery.reload ||
+      lastHistoryQuery.load !== historyQuery.load)
+  ) {
+    setLastHistoryQuery(historyQuery);
     setHistoryLoading(true);
     setHistoryError(false);
     setHistoryOrders([]);
     setHistoryCursor(undefined);
+  } else if (!historyQuery && lastHistoryQuery) {
+    setLastHistoryQuery(null);
+  }
+  useEffect(() => {
+    if (mode !== "history" || !getHistoryPage) return;
+    const revision = ++historyRevision.current;
     const timer = window.setTimeout(() => {
       getHistoryPage(historyFilter)
         .then((page) => {
@@ -269,10 +285,9 @@ export function OrdersScreen({
   const selected = selectedID
     ? [...historyOrders, ...orders].find((order) => order.id === selectedID)
     : visible[0];
+  // Select the first visible order once; later list changes keep the chosen order.
   const firstVisibleID = visible[0]?.id;
-  useEffect(() => {
-    if (!selectedID && firstVisibleID) setSelectedID(firstVisibleID);
-  }, [selectedID, firstVisibleID]);
+  if (!selectedID && firstVisibleID) setSelectedID(firstVisibleID);
   const handled = useRef<OrderOpenRequest | undefined>(undefined);
   useEffect(() => {
     if (!request || handled.current === request) return;

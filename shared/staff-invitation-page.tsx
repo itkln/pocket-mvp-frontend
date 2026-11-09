@@ -18,9 +18,12 @@ export default function StaffInvitationPage({ token }: { token: string }) {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [invitation, setInvitation] = useState<StaffInvitation | null>(null);
-  const [loading, setLoading] = useState(true);
+  const validToken = /^[A-Za-z0-9_-]{32,256}$/.test(token);
+  const [loadingState, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [errorState, setError] = useState("");
+  const loading = validToken && loadingState;
+  const error = validToken ? errorState : "Некорректная ссылка приглашения.";
   const lock = useRef(false);
   const returnTo = `/${locale}/invite?token=${encodeURIComponent(token)}`;
   const authLink = (mode: string) => `/${locale}/${mode}?returnTo=${encodeURIComponent(returnTo)}`;
@@ -31,6 +34,7 @@ export default function StaffInvitationPage({ token }: { token: string }) {
         ? "Приглашение уже принято, отозвано или срок ссылки истёк. Попросите владельца отправить новое."
         : "Не удалось проверить приглашение. Попробуйте ещё раз.";
   useEffect(() => {
+    if (!validToken) return;
     let active = true;
     async function load() {
       try {
@@ -45,14 +49,11 @@ export default function StaffInvitationPage({ token }: { token: string }) {
         if (active) setLoading(false);
       }
     }
-    if (!/^[A-Za-z0-9_-]{32,256}$/.test(token)) {
-      setError("Некорректная ссылка приглашения.");
-      setLoading(false);
-    } else void load();
+    void load();
     return () => {
       active = false;
     };
-  }, [token]);
+  }, [token, validToken]);
   const accept = async () => {
     if (lock.current) return;
     lock.current = true;

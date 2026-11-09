@@ -74,10 +74,15 @@ export default function VendorApp({
   const scope = `${role}:${venue?.id}`;
   const request = orderRequest?.scope === scope ? orderRequest : undefined;
   const [modal, setModal] = useState<"item" | "invite" | "order" | "venue" | null>(null);
+  // A new route (role/screen) reloads the account and venues; hide the shell until then.
+  const [authRoute, setAuthRoute] = useState(`${initialRole}/${initialScreen}`);
+  if (authRoute !== `${initialRole}/${initialScreen}`) {
+    setAuthRoute(`${initialRole}/${initialScreen}`);
+    setAuthReady(false);
+  }
 
   useEffect(() => {
     let active = true;
-    setAuthReady(false);
     getCurrentUser()
       .then(async (user) => {
         const isStaff = user.capabilities.includes("staff");
