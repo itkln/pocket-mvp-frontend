@@ -5428,10 +5428,6 @@
     padding: 16px;
   }
 }
-/* The global control reset uses !important; these cards are not compact controls. */
-.vendor-menu .vendor-menu-stats > button {
-  border-radius: 28px !important;
-}
 .vendor-category-panel .category-manager-copy input {
   font-size: 16px !important;
 }
@@ -5453,9 +5449,6 @@
   }
   .vendor-shell.sidebar-collapsed > .main-shell {
     margin-left: 100px;
-  }
-  .vendor-shell .side-nav button {
-    border-radius: 16px !important;
   }
 }
 /* Menu has one heading; utility actions share the page canvas. */
@@ -5643,7 +5636,6 @@
 .orders-tabs button {
   border: 0;
   padding: 9px 16px;
-  border-radius: 12px !important;
   background: transparent;
   cursor: pointer;
   font-weight: 600;
@@ -5728,7 +5720,6 @@
   margin-bottom: 8px;
   text-align: left;
   border: 0;
-  border-radius: 20px !important;
   background: #f6f7f9;
   cursor: pointer;
 }
