@@ -12,15 +12,10 @@
   --canvas: #f5f7f9;
   --sidebar: #ffffff;
 
-  /* Brand accent and secondary tone */
+  /* App accent. Dish replaces it with its brand colours on .pocket-dish (dish.css). */
   --accent: #229ed9;
   --accent-strong: #168acd;
   --accent-soft: #e8f5fb;
-
-  /* Fixed Pocket blue. Same as the Vendor accent, but not themed by Dish. */
-  --pocket-blue: #229ed9;
-  --pocket-blue-strong: #168acd;
-  --pocket-blue-soft: #e8f5fb;
 
   /* Secondary tone */
   --gold: #aa7726;

@@ -83,7 +83,7 @@ textarea:focus-visible {
   margin: -21px -22px 0 0;
   border: 2px solid #fff;
   border-radius: 50%;
-  background: var(--pocket-blue);
+  background: var(--accent);
 }
 
 .cart-button {
@@ -124,7 +124,7 @@ textarea:focus-visible {
 
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--pocket-blue);
+  color: var(--accent);
   font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
@@ -168,7 +168,7 @@ textarea:focus-visible {
 
 .button.quiet {
   background: transparent;
-  color: var(--pocket-blue);
+  color: var(--accent);
 }
 
 .button.danger {
@@ -213,8 +213,8 @@ textarea:focus-visible {
 }
 
 .metric-icon.green {
-  background: var(--pocket-blue-soft);
-  color: var(--pocket-blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .metric-icon.blue {
@@ -238,7 +238,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 4px;
   margin-top: 10px;
-  color: var(--pocket-blue);
+  color: var(--accent);
   font-size: 15px;
   font-weight: 600;
 }
@@ -269,7 +269,7 @@ textarea:focus-visible {
 }
 
 .online {
-  background: var(--pocket-blue);
+  background: var(--accent);
 }
 
 .pickup {
@@ -347,15 +347,15 @@ tbody tr:hover {
 .status-на-смене,
 .status-успешно,
 .status-свободен {
-  background: var(--pocket-blue-soft);
-  color: var(--pocket-blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .status-подан,
 .status-не-на-смене,
 .status-занят {
-  background: var(--pocket-blue-soft);
-  color: var(--pocket-blue-strong);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
 }
 
 .empty-state {
@@ -438,7 +438,7 @@ tbody tr:hover {
 }
 
 .switch input:checked + span {
-  background: var(--pocket-blue);
+  background: var(--accent);
 }
 
 .switch input:checked + span::before {
@@ -450,7 +450,7 @@ tbody tr:hover {
 }
 
 .floor-legend .busy {
-  background: var(--pocket-blue);
+  background: var(--accent);
 }
 
 .rating-main > strong {
@@ -512,7 +512,7 @@ tbody tr:hover {
   place-items: center;
   border-radius: 6px;
   background: var(--surface-soft);
-  color: var(--pocket-blue);
+  color: var(--accent);
 }
 
 .back-link {
@@ -925,12 +925,12 @@ td {
 /* Telegram-inspired interactive palette and menu controls. */
 
 .button.primary {
-  background: var(--pocket-blue);
+  background: var(--accent);
   color: #fff;
 }
 
 .button.primary:hover {
-  background: var(--pocket-blue-strong);
+  background: var(--accent-strong);
 }
 
 .toast {
@@ -1165,7 +1165,7 @@ td {
 }
 
 .auth-submit:hover {
-  background: var(--pocket-blue-strong);
+  background: var(--accent-strong);
 }
 
 .auth-submit:disabled {

@@ -38,6 +38,7 @@
   --dish-gradient-workshops: linear-gradient(135deg, #fff3e1, #f3cca0);
   --accent: var(--dish-brand);
   --accent-soft: var(--dish-active);
+  --accent-strong: var(--dish-cta);
   --ink: var(--dish-text);
   --muted: var(--dish-secondary);
   --line: var(--dish-divider);
