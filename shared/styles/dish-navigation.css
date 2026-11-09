@@ -916,7 +916,7 @@
   gap: 8px;
   width: auto;
   padding: 0 16px;
-  border-radius: 999px !important;
+  border-radius: 999px;
   font-size: 14px;
   font-weight: 650;
 }
@@ -1192,8 +1192,8 @@
     font-size: 16px;
   }
   .pocket-dish .venue-table-mode .venue-mobile-toolbar-title {
-    left: 64px !important;
-    right: 64px !important;
+    left: 64px;
+    right: 64px;
   }
 }
 
@@ -1243,7 +1243,7 @@
   height: 40px;
   min-height: 40px;
   padding: 0 16px;
-  border-radius: 999px !important;
+  border-radius: 999px;
 }
 
 /* Compact primary actions on the QR welcome screen. */
