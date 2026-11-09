@@ -1,17 +1,7 @@
 "use client";
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import {
-  ArrowLeft,
-  CalendarDays,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Minus,
-  Plus,
-  ShoppingBag,
-  X,
-} from "lucide-react";
+import { ArrowLeft, CalendarDays, ChevronDown, Minus, Plus, ShoppingBag, X } from "lucide-react";
 import type { AuthUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
 import { createReservationKey } from "../../../lib/reservation-key";
@@ -28,27 +18,12 @@ import {
 } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 import { BookingConfirmation } from "./booking-confirmation";
+import { addDays, asDay, bookingWindowDays, monthStart, venueToday } from "./booking/booking-dates";
+import { CalendarPopover } from "./booking/calendar-popover";
+import { TimeSlotPicker } from "./booking/time-slot-picker";
 
 type Step = "schedule" | "details" | "preorder" | "checkout";
 type Period = "day" | "evening";
-const asDay = (value: string) => new Date(`${value}T12:00:00Z`);
-const isoDay = (value: Date) => value.toISOString().slice(0, 10);
-const addDays = (value: string, count: number) => {
-  const result = asDay(value);
-  result.setUTCDate(result.getUTCDate() + count);
-  return isoDay(result);
-};
-const monthStart = (value: string) => `${value.slice(0, 7)}-01`;
-const moveMonth = (value: string, count: number) => {
-  const result = asDay(value);
-  result.setUTCMonth(result.getUTCMonth() + count, 1);
-  return isoDay(result);
-};
-const calendarDays = (month: string) => {
-  const offset = (asDay(month).getUTCDay() + 6) % 7;
-  return Array.from({ length: 42 }, (_, index) => addDays(month, index - offset));
-};
-
 export type DesktopBookingFlowHandle = {
   checkout: () => void;
   bookWithoutPreorder: () => void;
@@ -244,19 +219,8 @@ export const DesktopBookingFlow = forwardRef<
         ? "day"
         : period;
   const selectedSlot = current?.slots.find((slot) => slot.time === time);
-  const today = current
-    ? (() => {
-        const parts = new Intl.DateTimeFormat("en-US", {
-          timeZone: current.timezone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).formatToParts(new Date());
-        const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
-        return `${get("year")}-${get("month")}-${get("day")}`;
-      })()
-    : date;
-  const latest = today ? addDays(today, 30) : date;
+  const today = current ? venueToday(current.timezone) : date;
+  const latest = today ? addDays(today, bookingWindowDays) : date;
   const catalog = getPreorderCategories(menu).flatMap((category) => category.items);
   const selectedItems = Object.entries(quantities)
     .filter(([, quantity]) => quantity > 0)
@@ -559,67 +523,20 @@ export const DesktopBookingFlow = forwardRef<
                         <ChevronDown size={16} />
                       </button>
                       {calendarOpen && month && (
-                        <div
-                          className="venue-calendar-popover"
-                          role="dialog"
-                          aria-label={t("Выбор даты")}
-                        >
-                          <div className="venue-calendar-header">
-                            <strong>
-                              {new Intl.DateTimeFormat(localeTags[locale], {
-                                month: "long",
-                                year: "numeric",
-                                timeZone: "UTC",
-                              }).format(asDay(month))}
-                            </strong>
-                            <div>
-                              <button
-                                type="button"
-                                aria-label={t("Предыдущий месяц")}
-                                disabled={month <= monthStart(today)}
-                                onClick={() => setMonth(moveMonth(month, -1))}
-                              >
-                                <ChevronLeft size={17} />
-                              </button>
-                              <button
-                                type="button"
-                                aria-label={t("Следующий месяц")}
-                                disabled={moveMonth(month, 1) > monthStart(latest)}
-                                onClick={() => setMonth(moveMonth(month, 1))}
-                              >
-                                <ChevronRight size={17} />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="venue-calendar-weekdays" aria-hidden="true">
-                            {Array.from({ length: 7 }, (_, index) =>
-                              new Intl.DateTimeFormat(localeTags[locale], {
-                                weekday: "short",
-                                timeZone: "UTC",
-                              }).format(asDay(addDays("2026-09-28", index))),
-                            ).map((label, index) => (
-                              <span key={index}>{label}</span>
-                            ))}
-                          </div>
-                          <div className="venue-calendar-grid">
-                            {calendarDays(month).map((value) => (
-                              <button
-                                type="button"
-                                key={value}
-                                className={`${value.slice(0, 7) !== month.slice(0, 7) ? "outside" : ""} ${value === date ? "selected" : ""}`}
-                                aria-label={new Intl.DateTimeFormat(localeTags[locale], {
-                                  dateStyle: "full",
-                                  timeZone: "UTC",
-                                }).format(asDay(value))}
-                                aria-pressed={value === date}
-                                disabled={value < today || value > latest}
-                                onClick={() => changeDate(value)}
-                              >
-                                {Number(value.slice(8))}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                        <CalendarPopover
+                          month={month}
+                          date={date}
+                          today={today}
+                          latest={latest}
+                          dayLabel={(value) =>
+                            new Intl.DateTimeFormat(localeTags[locale], {
+                              dateStyle: "full",
+                              timeZone: "UTC",
+                            }).format(asDay(value))
+                          }
+                          onMonthChange={setMonth}
+                          onChoose={changeDate}
+                        />
                       )}
                     </div>
                     <div className="venue-guests">
@@ -660,54 +577,20 @@ export const DesktopBookingFlow = forwardRef<
                         </button>
                       </div>
                     ) : current?.slots.length ? (
-                      <>
-                        <div
-                          className="venue-time-periods"
-                          role="group"
-                          aria-label={t("Свободное время")}
-                        >
-                          <button
-                            type="button"
-                            aria-pressed={activePeriod === "day"}
-                            disabled={!daySlots.length}
-                            className={activePeriod === "day" ? "active" : ""}
-                            onClick={() => {
-                              setPeriod("day");
-                              setTime("");
-                            }}
-                          >
-                            {t("День")}
-                          </button>
-                          <button
-                            type="button"
-                            aria-pressed={activePeriod === "evening"}
-                            disabled={!eveningSlots.length}
-                            className={activePeriod === "evening" ? "active" : ""}
-                            onClick={() => {
-                              setPeriod("evening");
-                              setTime("");
-                            }}
-                          >
-                            {t("Вечер")}
-                          </button>
-                        </div>
-                        <div className="venue-time-grid">
-                          {(activePeriod === "day" ? daySlots : eveningSlots).map((slot) => (
-                            <button
-                              type="button"
-                              key={slot.time}
-                              className={time === slot.time ? "active" : ""}
-                              aria-pressed={time === slot.time}
-                              onClick={() => {
-                                setTime(slot.time);
-                                setSubmitError("");
-                              }}
-                            >
-                              {slot.time}
-                            </button>
-                          ))}
-                        </div>
-                      </>
+                      <TimeSlotPicker
+                        daySlots={daySlots}
+                        eveningSlots={eveningSlots}
+                        activePeriod={activePeriod}
+                        time={time}
+                        onPeriodChange={(value) => {
+                          setPeriod(value);
+                          setTime("");
+                        }}
+                        onTimeChange={(value) => {
+                          setTime(value);
+                          setSubmitError("");
+                        }}
+                      />
                     ) : (
                       <p role="status">{t("На эту дату свободных столов нет")}</p>
                     )}

@@ -5,8 +5,6 @@ import {
   ArrowLeft,
   CalendarDays,
   ChevronDown,
-  ChevronLeft,
-  ChevronRight,
   LayoutGrid,
   List,
   Minus,
@@ -31,32 +29,23 @@ import {
 } from "../../../lib/public-catalog-api";
 import { localeTags, useI18n } from "../i18n";
 import { BookingConfirmation } from "./booking-confirmation";
+import {
+  addDays,
+  asDay,
+  bookingWindowDays,
+  monthStart,
+  periodForTime,
+  venueToday,
+  type TimePeriod,
+} from "./booking/booking-dates";
+import { CalendarPopover } from "./booking/calendar-popover";
+import { TimeSlotPicker } from "./booking/time-slot-picker";
 
-const day = (value: string) => new Date(`${value}T12:00:00Z`);
-const isoDay = (value: Date) => value.toISOString().slice(0, 10);
-const addDays = (value: string, count: number) => {
-  const date = day(value);
-  date.setUTCDate(date.getUTCDate() + count);
-  return isoDay(date);
-};
-const monthStart = (value: string) => `${value.slice(0, 7)}-01`;
-const moveMonth = (value: string, count: number) => {
-  const date = day(value);
-  date.setUTCMonth(date.getUTCMonth() + count, 1);
-  return isoDay(date);
-};
-const calendarDays = (month: string) => {
-  const date = day(month);
-  const offset = (date.getUTCDay() + 6) % 7;
-  return Array.from({ length: 42 }, (_, index) => addDays(month, index - offset));
-};
 const wishOptions = [
   { id: "date", icon: "🌹", label: "Свидание" },
   { id: "birthday", icon: "🎂", label: "День рождения" },
   { id: "children", icon: "🧸", label: "С детьми" },
 ] as const;
-type TimePeriod = "day" | "evening";
-const periodForTime = (time: string): TimePeriod => (time < "18:00" ? "day" : "evening");
 
 export type BookingService = {
   id: string;
@@ -169,11 +158,6 @@ export function BookingPicker({
     year: "numeric",
     timeZone: "UTC",
   });
-  const monthFormatter = new Intl.DateTimeFormat(localeTags[locale], {
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -257,7 +241,6 @@ export function BookingPicker({
       : period === "evening" && !eveningSlots.length
         ? "day"
         : period;
-  const visibleSlots = activePeriod === "day" ? daySlots : eveningSlots;
   const selectedSlot = current?.slots.find((slot) => slot.time === time);
   const choosePeriod = (value: TimePeriod) => {
     if (value !== activePeriod) {
@@ -269,19 +252,8 @@ export function BookingPicker({
     setWishes((selected) =>
       selected.includes(id) ? selected.filter((value) => value !== id) : [...selected, id],
     );
-  const today = current
-    ? (() => {
-        const parts = new Intl.DateTimeFormat("en-US", {
-          timeZone: current.timezone,
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }).formatToParts(new Date());
-        const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
-        return `${get("year")}-${get("month")}-${get("day")}`;
-      })()
-    : date;
-  const latest = today ? addDays(today, 30) : date;
+  const today = current ? venueToday(current.timezone) : date;
+  const latest = today ? addDays(today, bookingWindowDays) : date;
   const catalog = categories.flatMap((category) => category.items);
   const detailItem = catalog.find((item) => item.id === detailItemID);
   const selectedItems = Object.entries(quantities)
@@ -499,7 +471,7 @@ export function BookingPicker({
             <div className={`mobile-preorder-top${preorderScrolled ? " is-scrolled" : ""}`}>
               <div className="mobile-preorder-summary">
                 <strong>
-                  {date ? formatter.format(day(date)) : ""} · {time}
+                  {date ? formatter.format(asDay(date)) : ""} · {time}
                 </strong>
                 <span>{t("Гостей: {count}", { count: guests })}</span>
               </div>
@@ -557,62 +529,19 @@ export function BookingPicker({
                         onClick={() => setCalendarOpen((value) => !value)}
                       >
                         <CalendarDays size={17} />
-                        <span>{date ? formatter.format(day(date)) : t("Дата")}</span>
+                        <span>{date ? formatter.format(asDay(date)) : t("Дата")}</span>
                         <ChevronDown className="venue-date-chevron" size={16} />
                       </button>
                       {calendarOpen && month && (
-                        <div
-                          className="venue-calendar-popover"
-                          role="dialog"
-                          aria-label={t("Выбор даты")}
-                        >
-                          <div className="venue-calendar-header">
-                            <strong>{monthFormatter.format(day(month))}</strong>
-                            <div>
-                              <button
-                                type="button"
-                                aria-label={t("Предыдущий месяц")}
-                                disabled={month <= monthStart(today)}
-                                onClick={() => setMonth(moveMonth(month, -1))}
-                              >
-                                <ChevronLeft size={17} />
-                              </button>
-                              <button
-                                type="button"
-                                aria-label={t("Следующий месяц")}
-                                disabled={moveMonth(month, 1) > monthStart(latest)}
-                                onClick={() => setMonth(moveMonth(month, 1))}
-                              >
-                                <ChevronRight size={17} />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="venue-calendar-weekdays" aria-hidden="true">
-                            {Array.from({ length: 7 }, (_, index) =>
-                              new Intl.DateTimeFormat(localeTags[locale], {
-                                weekday: "short",
-                                timeZone: "UTC",
-                              }).format(day(addDays("2026-09-28", index))),
-                            ).map((label, index) => (
-                              <span key={index}>{label}</span>
-                            ))}
-                          </div>
-                          <div className="venue-calendar-grid">
-                            {calendarDays(month).map((value) => (
-                              <button
-                                type="button"
-                                key={value}
-                                className={`${value.slice(0, 7) !== month.slice(0, 7) ? "outside" : ""} ${value === date ? "selected" : ""}`}
-                                aria-label={longFormatter.format(day(value))}
-                                aria-pressed={value === date}
-                                disabled={value < today || value > latest}
-                                onClick={() => chooseDate(value)}
-                              >
-                                {Number(value.slice(8))}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
+                        <CalendarPopover
+                          month={month}
+                          date={date}
+                          today={today}
+                          latest={latest}
+                          dayLabel={(value) => longFormatter.format(asDay(value))}
+                          onMonthChange={setMonth}
+                          onChoose={chooseDate}
+                        />
                       )}
                     </div>
                     {!service && (
@@ -669,43 +598,14 @@ export function BookingPicker({
                     </div>
                   ) : current?.slots.length ? (
                     <div className="mobile-booking-times">
-                      <div
-                        className="venue-time-periods"
-                        role="group"
-                        aria-label={t("Свободное время")}
-                      >
-                        <button
-                          type="button"
-                          aria-pressed={activePeriod === "day"}
-                          disabled={!daySlots.length}
-                          className={activePeriod === "day" ? "active" : ""}
-                          onClick={() => choosePeriod("day")}
-                        >
-                          {t("День")}
-                        </button>
-                        <button
-                          type="button"
-                          aria-pressed={activePeriod === "evening"}
-                          disabled={!eveningSlots.length}
-                          className={activePeriod === "evening" ? "active" : ""}
-                          onClick={() => choosePeriod("evening")}
-                        >
-                          {t("Вечер")}
-                        </button>
-                      </div>
-                      <div className="venue-time-grid">
-                        {visibleSlots.map((slot) => (
-                          <button
-                            type="button"
-                            key={slot.time}
-                            className={time === slot.time ? "active" : ""}
-                            aria-pressed={time === slot.time}
-                            onClick={() => setTime(slot.time)}
-                          >
-                            {slot.time}
-                          </button>
-                        ))}
-                      </div>
+                      <TimeSlotPicker
+                        daySlots={daySlots}
+                        eveningSlots={eveningSlots}
+                        activePeriod={activePeriod}
+                        time={time}
+                        onPeriodChange={choosePeriod}
+                        onTimeChange={setTime}
+                      />
                     </div>
                   ) : (
                     <>
@@ -834,7 +734,7 @@ export function BookingPicker({
                 <div className="desktop-booking-summary">
                   <strong>{venueName ?? t("Бронирование")}</strong>
                   <span>
-                    {date ? longFormatter.format(day(date)) : ""} · {time}{" "}
+                    {date ? longFormatter.format(asDay(date)) : ""} · {time}{" "}
                     {!service && <>· {t("Гостей: {count}", { count: guests })}</>}
                   </span>
                 </div>
