@@ -5,6 +5,7 @@ import { ConfirmProvider } from "../confirm-dialog";
 import { KitchenScreen } from "./kitchen";
 import { ServiceBoard } from "./service";
 import {
+  getOrder,
   getOrderAlertSettings,
   getOwnerDashboard,
   loadOrderQueue,
@@ -13,6 +14,7 @@ import {
 } from "../../../lib/owner-api";
 vi.mock("../../../lib/owner-api", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/owner-api")>()),
+  getOrder: vi.fn(),
   getOrderAlertSettings: vi.fn(),
   getOwnerDashboard: vi.fn(),
   loadOrderQueue: vi.fn(),
@@ -37,6 +39,7 @@ beforeEach(() => {
     .fn()
     .mockReturnValue({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() });
   vi.mocked(loadOrderQueue).mockResolvedValue({ orders: [order], hasMoreHistory: false });
+  vi.mocked(getOrder).mockImplementation(async (_venueID, id) => ({ ...order, id }));
   vi.mocked(getOrderAlertSettings).mockResolvedValue({
     warning_minutes: 10,
     critical_minutes: 20,
