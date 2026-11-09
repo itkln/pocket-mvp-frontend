@@ -12,5 +12,5 @@ it('shows only the page link and QR in its own tab without unrelated settings',a
  expect(screen.getByRole('link',{name:'Открыть Pocket Dish'})).toHaveAttribute('href','https://dish.example/ru/r/venue-id');
  expect(screen.getByRole('img',{name:'QR-код страницы ресторана'})).toBeInTheDocument();
  expect(screen.queryByText('Новый онлайн-заказ')).not.toBeInTheDocument();
- expect(screen.queryByRole('button',{name:'Сохранить',exact:true})).not.toBeInTheDocument();
+ expect(screen.queryByRole('button',{name:'Сохранить'})).not.toBeInTheDocument();
 });

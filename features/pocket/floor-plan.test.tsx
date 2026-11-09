@@ -24,18 +24,18 @@ describe("FloorPlan", () => {
 
     render(<FloorPlan mode="owner" venueID="venue-1" venueName="Pocket" notify={vi.fn()} embedded />);
 
-    expect(screen.getByRole("button", { name: "Добавить", exact: true })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Добавить" })).toBeDisabled();
     finishLoading([{ id: "floor-1", name: "1 этаж", tables: [], fixtures: [] }]);
-    await waitFor(() => expect(screen.getByRole("button", { name: "Добавить", exact: true })).toBeEnabled());
+    await waitFor(() => expect(screen.getByRole("button", { name: "Добавить" })).toBeEnabled());
 
-    fireEvent.click(screen.getByRole("button", { name: "Добавить", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Добавить" }));
     fireEvent.click(screen.getByRole("button", { name: /Стол\s*4 места/ }));
     expect(screen.getByRole("button", { name: /01\s*4 места/ })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Применить изменения" })).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Количество мест"), { target: { value: "6" } });
     expect(screen.getByRole("button", { name: /01\s*6 мест/ })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Сохранить план", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить план" }));
     await waitFor(() => expect(saveFloorPlan).toHaveBeenCalledWith("venue-1", [expect.objectContaining({ tables: [expect.objectContaining({ id: "01", seats: 6 })] })]));
   });
 

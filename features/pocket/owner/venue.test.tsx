@@ -44,11 +44,11 @@ describe("VenueScreen", () => {
     fireEvent.change(screen.getByLabelText("Загрузить иконку заведения"), { target: { files: [new File(["logo"], "logo.png", { type: "image/png" })] } });
     await waitFor(() => expect(notify).toHaveBeenCalledWith("Иконка готова. Нажмите «Сохранить»"));
     expect(drawImage).toHaveBeenCalledWith(expect.anything(), 0, 128, 512, 256);
-    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить", exact: true })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить" })[0]);
     await waitFor(() => expect(updateOwnerVenue).toHaveBeenCalledWith("venue-1", expect.objectContaining({ settings: expect.objectContaining({ logo_image_url: logoURL, cover_image_url: "/cover.jpg" }) })));
-    fireEvent.click(screen.getByRole("button", { name: "Удалить иконку", exact: true }));
-    await screen.findByRole("button", { name: "Загрузить иконку", exact: true });
-    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить", exact: true })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Удалить иконку" }));
+    await screen.findByRole("button", { name: "Загрузить иконку" });
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить" })[0]);
     await waitFor(() => expect(updateOwnerVenue).toHaveBeenLastCalledWith("venue-1", expect.objectContaining({ settings: expect.objectContaining({ logo_image_url: "", cover_image_url: "/cover.jpg" }) })));
   });
   it("saves currency without resending layout or account language settings", async () => {
@@ -57,7 +57,7 @@ describe("VenueScreen", () => {
     const { container } = render(<VenueScreen venue={venue} notify={vi.fn()} />);
 
     fireEvent.change(screen.getByLabelText("Валюта меню и заказов"), { target: { value: "UAH" } });
-    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить", exact: true })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить" })[0]);
 
     await waitFor(() => expect(updateOwnerVenue).toHaveBeenCalledWith("venue-1", expect.objectContaining({
       currency: "UAH",
@@ -76,7 +76,7 @@ describe("VenueScreen", () => {
 
     render(<VenueScreen venue={venue} notify={vi.fn()} onDelete={onDelete} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Удалить заведение", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Удалить заведение" }));
 
     await waitFor(() => expect(onDelete).toHaveBeenCalledOnce());
   });

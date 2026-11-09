@@ -52,6 +52,7 @@ export function OrdersScreen({ title = "Заказы", request }: { title?: stri
   const [historyCursor, setHistoryCursor] = useState<string>();
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState(false);
+  const [selectedID, setSelectedID] = useState("");
   const historyRevision = useRef(0);
   const historyFilter = useMemo<OrderQuery>(() => ({scope: "history", limit: 50, number: query.trim() || undefined, table: historyTable.trim() || undefined, date_from: dateFrom || undefined, date_to: dateTo || undefined, status: historyStatus ? [historyStatus as "completed" | "cancelled"] : undefined, channel: source === "all" ? undefined : source as "dine_in" | "preorder"}), [query, historyTable, dateFrom, dateTo, historyStatus, source]);
   useEffect(() => {
@@ -71,7 +72,6 @@ export function OrdersScreen({ title = "Заказы", request }: { title?: stri
     catch { if (revision === historyRevision.current) setHistoryError(true); }
     finally { if (revision === historyRevision.current) setHistoryLoading(false); }
   };
-  const [selectedID, setSelectedID] = useState("");
   const [mobileDetail, setMobileDetail] = useState(false);
   const [collapsed, setCollapsed] = useState<string[]>([]);
   const [now, setNow] = useState(() => Date.now());

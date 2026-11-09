@@ -40,7 +40,7 @@ beforeEach(() => {
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
   router.push.mockImplementation((url: string) => { window.history.pushState(null, "", url); window.dispatchEvent(new PopStateEvent("popstate")); });
-  vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer" });
+  vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer", capabilities: ["customer"] });
   vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-1", code: "BOOK123", starts_at: "2026-09-27T17:00:00Z", guest_count: 2, preorder_total_minor: 0, currency: "EUR" });
   vi.mocked(logout).mockResolvedValue();
   vi.mocked(listPublicVenues).mockImplementation(async (search = {}) => {
@@ -276,7 +276,7 @@ describe("Spots guest experience", () => {
     expect(screen.getByRole("heading", { name: "Бронирование" })).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: "19:00" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Назад к результатам" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Назад", exact: true }).querySelector(".lucide-arrow-left")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Назад" }).querySelector(".lucide-arrow-left")).toBeInTheDocument();
     expect(screen.queryByText("Подтверждение брони пока недоступно")).not.toBeInTheDocument();
     expect(screen.queryByText("North & Vine")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Поиск по меню" }));
@@ -296,7 +296,7 @@ describe("Spots guest experience", () => {
 
     router.replace.mockClear();
     nativeReplace(null, "", "/ru/checkout");
-    vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer" });
+    vi.mocked(getCurrentUser).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Anna", last_name: "Guest", role: "customer", capabilities: ["customer"] });
     const checkout = render(<SpotsApp initialScreen="checkout" />);
     await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/ru/discover"));
     expect(screen.queryByText("Предзаказ принят")).not.toBeInTheDocument();
@@ -364,7 +364,7 @@ describe("Spots guest experience", () => {
     fireEvent.click(within(categories).getByRole("button", { name: "Напитки" }));
     expect(within(categories).getByRole("button", { name: "Напитки" })).toHaveAttribute("aria-current", "location");
     expect(screen.queryByRole("button", { name: "Ещё о заведении" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Информация о заведении", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Информация о заведении" }));
     const info = screen.getByRole("dialog", { name: "Информация о заведении" });
     expect(within(info).getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
     expect(within(info).getByText(/Obchodná 24/)).toBeInTheDocument();
@@ -553,7 +553,7 @@ describe("Spots guest experience", () => {
       nativeReplace(null, "", "/ru/venue/casa");
       render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
       await screen.findByRole("heading", { name: "Casa Forma" });
-      fireEvent.click(screen.getByRole("button", { name: "Информация о заведении", exact: true }));
+      fireEvent.click(screen.getByRole("button", { name: "Информация о заведении" }));
       const info = screen.getByRole("dialog", { name: "Информация о заведении" });
       info.scrollTop = 20;
       fireEvent.touchStart(info, { touches: [{ clientX: 100, clientY: 100 }] });
@@ -593,7 +593,7 @@ describe("Spots guest experience", () => {
     expect(window.location.pathname).toBe("/ru/venue/north");
     expect(await screen.findByRole("heading", { name: "North & Vine" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Информация о заведении" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Назад", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
     fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Forma" }));
     expect(window.location.pathname).toBe("/ru/venue/casa");
     expect(await screen.findByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
@@ -633,7 +633,7 @@ describe("Spots guest experience", () => {
     localStorage.removeItem("pocket:spots-city");
 
     render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
-    fireEvent.click(await screen.findByRole("button", { name: "Назад", exact: true }));
+    fireEvent.click(await screen.findByRole("button", { name: "Назад" }));
     expect(window.location.pathname).toBe("/ru/restaurants");
     expect(new URLSearchParams(window.location.search).get("q")).toBe("pasta");
     expect(new URLSearchParams(window.location.search).get("filter")).toBe("Итальянская");
@@ -649,10 +649,10 @@ describe("Spots guest experience", () => {
     expect(within(screen.getByRole("navigation", { name: "Категории" })).getAllByRole("button")).toHaveLength(8);
     expect(document.querySelectorAll(".spots-category-illustration")).toHaveLength(8);
     fireEvent.click(choose);
-    fireEvent.click(screen.getByRole("button", { name: "Братислава", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Братислава" }));
     expect(screen.getByRole("banner")).toHaveClass("has-city");
     expect(localStorage.getItem("pocket:spots-city")).toBe("Братислава");
-    fireEvent.click(screen.getByRole("button", { name: "Профиль", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Профиль" }));
     expect(await screen.findByRole("heading", { name: "Профиль" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Выбрать город: Братислава" })).toBeInTheDocument();
     view.unmount();
@@ -664,17 +664,17 @@ describe("Spots guest experience", () => {
   it("opens dedicated profile settings while keeping working account forms and no content tooltips", async () => {
     render(<SpotsApp initialScreen="profile" />);
     await screen.findByRole("heading", { name: "Профиль" });
-    expect(screen.queryByRole("button", { name: "Мои заказы", exact: true })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Настройки", exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Мои заказы" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Настройки" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Anna Guest.*Редактировать профиль/ }));
     expect(router.push).toHaveBeenLastCalledWith("/ru/settings");
-    fireEvent.click(screen.getByRole("button", { name: "Личные данные", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Личные данные" }));
     expect(screen.getByRole("textbox", { name: "Имя" })).toHaveValue("Anna");
     expect(screen.getByRole("button", { name: "Сохранить изменения" })).toBeDisabled();
     expect(document.querySelector(".spots-main [title], .spots-main [data-tooltip]")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Назад", exact: true }));
-    expect(screen.getByRole("heading", { name: "Настройки", exact: true })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Безопасность", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    expect(screen.getByRole("heading", { name: "Настройки" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Безопасность" }));
     fireEvent.click(screen.getByRole("button", { name: "Изменить пароль" }));
     expect(screen.getByLabelText("Текущий пароль")).toBeInTheDocument();
   });
@@ -691,16 +691,16 @@ describe("Spots guest experience", () => {
     const input = await screen.findByRole("textbox", { name: "Поиск: Рестораны" });
     fireEvent.change(input, { target: { value: "Итальянский ресторан" } });
     expect(new URLSearchParams(window.location.search).get("q")).toBe("Итальянский ресторан");
-    fireEvent.click(await screen.findByRole("button", { name: "Итальянская", exact: true }));
+    fireEvent.click(await screen.findByRole("button", { name: "Итальянская" }));
     expect(new URLSearchParams(window.location.search).get("filter")).toBe("Итальянская");
-    expect(screen.queryByRole("region", { name: "Спорт", exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Спорт" })).not.toBeInTheDocument();
     fireEvent.click(await screen.findByRole("button", { name: "Открыть Casa Forma" }));
     expect(window.location.pathname).toBe("/ru/venue/casa");
     expect(await screen.findByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Назад", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
     expect(window.location.pathname).toBe("/ru/restaurants");
     expect(screen.getByRole("textbox", { name: "Поиск: Рестораны" })).toHaveValue("Итальянский ресторан");
-    expect(await screen.findByRole("button", { name: "Итальянская", exact: true })).toHaveAttribute("aria-pressed", "true");
+    expect(await screen.findByRole("button", { name: "Итальянская" })).toHaveAttribute("aria-pressed", "true");
     view.unmount();
     render(<SpotsApp initialScreen="restaurants" />);
     expect(await screen.findByRole("textbox", { name: "Поиск: Рестораны" })).toHaveValue("Итальянский ресторан");
@@ -711,7 +711,7 @@ describe("Spots guest experience", () => {
 
   it("edits desktop profile in a single modal and closes it only after a successful save", async () => {
     desktop = true;
-    vi.mocked(updateProfile).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Annie", last_name: "Guest", role: "customer" });
+    vi.mocked(updateProfile).mockResolvedValue({ id: "guest", email: "guest@example.com", first_name: "Annie", last_name: "Guest", role: "customer", capabilities: ["customer"] });
     render(<SpotsApp initialScreen="profile" />);
     const dialog = await screen.findByRole("dialog", { name: "Личные данные" });
     expect(router.replace).toHaveBeenCalledWith("/ru/discover?account=profile");
@@ -734,12 +734,12 @@ describe("Spots guest experience", () => {
     expect(await screen.findByRole("dialog", { name: "Личные данные" })).toBeInTheDocument();
     expect(router.push).not.toHaveBeenCalledWith("/ru/profile");
     expect(screen.queryByRole("heading", { name: "Профиль" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Закрыть", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Закрыть" }));
     fireEvent.click(screen.getByRole("button", { name: "Меню аккаунта" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Безопасность" }));
     expect(await screen.findByRole("dialog", { name: "Безопасность" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Изменить пароль" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Закрыть", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Закрыть" }));
     fireEvent.click(screen.getByRole("button", { name: "Меню аккаунта" }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Уведомления" }));
     expect(await screen.findByRole("dialog", { name: "Уведомления" })).toBeInTheDocument();
@@ -754,7 +754,7 @@ describe("Spots guest experience", () => {
     fireEvent.click(within(dialog).getByRole("button", { name: "Сохранить изменения" }));
     expect(await within(dialog).findByRole("alert")).toBeInTheDocument();
     expect(dialog).toHaveAttribute("open");
-    fireEvent.click(within(dialog).getByRole("button", { name: "Закрыть", exact: true }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "Закрыть" }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });

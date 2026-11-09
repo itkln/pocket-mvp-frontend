@@ -77,7 +77,7 @@ describe("BookingPicker", () => {
     expect(screen.queryByRole("button", { name: "Еда" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Продолжить к оплате/ })).toBeDisabled();
     expect(createPublicReservation).toHaveBeenCalledTimes(1);
-    fireEvent.click(screen.getByRole("button", { name: "Убрать", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Убрать" }));
     fireEvent.click(screen.getByRole("button", { name: "Забронировать без предзаказа" }));
     await waitFor(() => expect(createPublicReservation).toHaveBeenLastCalledWith("venue-a", expect.objectContaining({ items: [] })));
     expect(await screen.findByText("Номер брони: PLAIN")).toBeInTheDocument();

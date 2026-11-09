@@ -15,7 +15,7 @@ function Picker({ onChange = vi.fn(), initial = { mode: "none" } as TipDraft, di
   return <I18nProvider initialLocale="ru"><TipPicker value={value} subtotal={1090} currency="EUR" disabled={disabled} onChange={(next) => { setValue(next); onChange(next); }} /></I18nProvider>;
 }
 
-const openCustom = () => fireEvent.click(screen.getByRole("button", { name: "Другая сумма", exact: true }));
+const openCustom = () => fireEvent.click(screen.getByRole("button", { name: "Другая сумма" }));
 
 describe("inline table tips", () => {
   it("shows all presets immediately, defaults to No and applies percentages without a popup", () => {

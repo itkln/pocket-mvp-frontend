@@ -40,7 +40,7 @@ describe("MenuManager", () => {
     expect(screen.getByLabelText("Жиры, г")).toHaveValue(0);
     fireEvent.change(screen.getByLabelText("Белки, г"), { target: { value: "" } });
     fireEvent.change(screen.getByLabelText("Калории, ккал"), { target: { value: "20.5" } });
-    fireEvent.click(screen.getByRole("button", { name: "Сохранить", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
     await waitFor(() => expect(workspace.editItem).toHaveBeenCalledWith("dish", expect.objectContaining({ protein_g: null, energy_kcal: 20.5, fat_g: 0, carbs_g: 2.5, portion_weight_g: 200, sort_order: 2 })));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
@@ -71,7 +71,7 @@ describe("MenuManager", () => {
     expect(workspace.editItem).toHaveBeenCalledWith("coffee", expect.objectContaining({ is_available: true, energy_kcal: 10 }));
   });
   it("creates a position in the selected category using the drawer", async () => {
-    renderMenu(); fireEvent.click(screen.getByRole("button", { name: "Добавить", exact: true }));
+    renderMenu(); fireEvent.click(screen.getByRole("button", { name: "Добавить" }));
     fireEvent.change(screen.getByLabelText("Название", { exact: true }), { target: { value: "Кофе" } });
     fireEvent.change(screen.getByLabelText("Цена · EUR"), { target: { value: "4.50" } });
     fireEvent.click(screen.getByRole("button", { name: "Добавить в меню" }));
@@ -81,7 +81,7 @@ describe("MenuManager", () => {
     workspace.items = [nutritionItem]; workspace.editItem.mockRejectedValue(new Error("Failed")); renderMenu();
     fireEvent.click(screen.getByRole("button", { name: "Редактировать Чай" }));
     fireEvent.change(screen.getByLabelText("Название", { exact: true }), { target: { value: "Новый чай" } });
-    fireEvent.click(screen.getByRole("button", { name: "Сохранить", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
     await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
     expect(screen.getByLabelText("Название", { exact: true })).toHaveValue("Новый чай");
   });
@@ -101,7 +101,7 @@ describe("MenuManager", () => {
     renderMenu(); fireEvent.click(screen.getByRole("button", { name: "Добавить категорию" }));
     expect(screen.getByRole("textbox", { name: "Название новой категории" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Удалить новую категорию" }));
-    fireEvent.click(screen.getByRole("button", { name: "Добавить категорию", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Добавить категорию" }));
     await waitFor(() => expect(screen.getByRole("textbox", { name: "Название новой категории" })).toBeInTheDocument());
   });
 });

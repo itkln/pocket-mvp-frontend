@@ -9,7 +9,7 @@ describe("CategoryManagerDialog", () => {
     const { rerender } = render(<CategoryManagerDialog categories={[category]} initialCreate={false} onClose={vi.fn()} onRemove={vi.fn()} onSave={onSave} />);
     fireEvent.click(screen.getByRole("checkbox", { name: "Предзаказ категории Напитки" }));
     expect(screen.getByRole("checkbox", { name: "Скрыть категорию Напитки" })).toBeChecked();
-    fireEvent.click(screen.getByRole("button", { name: "Сохранить", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
     await waitFor(() => expect(onSave).toHaveBeenCalledWith([{ ...category, preorder_enabled: false }], []));
     rerender(<CategoryManagerDialog key="reloaded" categories={[{ ...category, preorder_enabled: false }]} initialCreate={false} onClose={vi.fn()} onRemove={vi.fn()} onSave={onSave} />);
     expect(screen.getByRole("checkbox", { name: "Предзаказ категории Напитки" })).not.toBeChecked();
@@ -23,7 +23,7 @@ describe("CategoryManagerDialog", () => {
     expect(screen.getByRole("heading", { name: "Управление категориями" })).toBeInTheDocument();
     const input = screen.getByRole("textbox", { name: "Название новой категории" });
     fireEvent.change(input, { target: { value: "Напитки" } });
-    fireEvent.click(screen.getByRole("button", { name: "Сохранить", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
 
     await waitFor(() => expect(onSave).toHaveBeenCalledWith([], [{ name: "Напитки", sort_order: 0, is_active: true, preorder_enabled: true }]));
   });

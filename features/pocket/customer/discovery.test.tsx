@@ -68,22 +68,22 @@ describe("Pocket Spots discovery", () => {
     expect(within(nav).getAllByRole("button")).toHaveLength(8);
     expect(nav.querySelectorAll("img")).toHaveLength(8);
     expect(screen.queryByRole("region", { name: /Фильтры заведений/ })).not.toBeInTheDocument();
-    fireEvent.click(within(nav).getByRole("button", { name: "Спорт", exact: true }));
+    fireEvent.click(within(nav).getByRole("button", { name: "Спорт" }));
     expect(onCategoryChange).toHaveBeenCalledWith("sports");
     expect(await screen.findByRole("button", { name: "Открыть North & Vine" })).toBeInTheDocument();
   });
 
   it.each(spotCategories)("limits $slug to its own data and filters", async ({ slug, label, filters }) => {
     render(<DiscoverScreen {...defaults} categorySlug={slug} />);
-    const category = await screen.findByRole("region", { name: label, exact: true });
+    const category = await screen.findByRole("region", { name: label });
     expect(category).toBeInTheDocument();
-    expect(within(category).queryByRole("heading", { name: label, exact: true })).not.toBeInTheDocument();
+    expect(within(category).queryByRole("heading", { name: label })).not.toBeInTheDocument();
     for (const other of spotCategories.filter((item) => item.slug !== slug)) {
-      expect(screen.queryByRole("region", { name: other.label, exact: true })).not.toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: other.label })).not.toBeInTheDocument();
     }
     const controls = screen.getByRole("region", { name: `Фильтры заведений: ${label}` });
     expect(within(controls).getAllByRole("button")).toHaveLength(filters.length + 1);
-    for (const filter of filters) expect(within(controls).getByRole("button", { name: filter, exact: true })).toBeInTheDocument();
+    for (const filter of filters) expect(within(controls).getByRole("button", { name: filter })).toBeInTheDocument();
   });
 
   it("passes search and category to the public API and never renders another category", async () => {
@@ -108,7 +108,7 @@ describe("Pocket Spots discovery", () => {
     expect(await screen.findByRole("button", { name: "Открыть North & Vine" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Итальянская" }));
     await screen.findByRole("button", { name: "Открыть Casa Forma" });
-    fireEvent.click(screen.getByRole("button", { name: "Фильтры", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Фильтры" }));
     const dialog = screen.getByRole("dialog", { name: "Фильтры" });
     fireEvent.click(within(dialog).getByRole("button", { name: "Сбросить" }));
     fireEvent.click(within(dialog).getByRole("button", { name: /Показать/ }));
@@ -194,12 +194,12 @@ describe("Pocket Spots discovery", () => {
 
   it("searches and selects a city, with no cart button in the header", () => {
     const onCityChange = vi.fn();
-    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer" }} screen="discover" city="Братислава" onCityChange={onCityChange} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogout={vi.fn()} />);
+    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={onCityChange} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} />);
     expect(screen.queryByRole("button", { name: /Корзина/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Pocket Spots, главная" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Выбрать город: Братислава" }));
     fireEvent.change(screen.getByRole("textbox", { name: "Найти город" }), { target: { value: "кош" } });
-    fireEvent.click(screen.getByRole("button", { name: "Кошице", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Кошице" }));
     expect(onCityChange).toHaveBeenCalledWith("Кошице");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
@@ -207,7 +207,7 @@ describe("Pocket Spots discovery", () => {
   it("opens account destinations, closes on Escape and outside click, and signs out", () => {
     const onNavigate = vi.fn();
     const onLogout = vi.fn();
-    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer" }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={onNavigate} onLogout={onLogout} />);
+    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={onNavigate} onLogin={vi.fn()} onLogout={onLogout} />);
     const trigger = screen.getByRole("button", { name: "Меню аккаунта" });
     for (const [label, route] of [["Личные данные", "profile"], ["Мои брони", "reservations"], ["Сохранённые места", "saved"], ["Уведомления", "notifications"], ["Безопасность", "settings"]]) {
       fireEvent.click(trigger);
@@ -229,9 +229,9 @@ describe("Pocket Spots discovery", () => {
 
 
   it("switches the language and preserves the current route", () => {
-    render(<I18nProvider initialLocale="ru"><SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer" }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogout={vi.fn()} /></I18nProvider>);
-    fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса", exact: true }));
-    fireEvent.click(screen.getByRole("menuitem", { name: "English", exact: true }));
+    render(<I18nProvider initialLocale="ru"><SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} /></I18nProvider>);
+    fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "English" }));
     expect(replace).toHaveBeenCalledWith("/en/discover");
     expect(screen.getByRole("textbox", { name: "Find a place or service" })).toBeInTheDocument();
     expect(localStorage.getItem("pocket:locale")).toBe("en");
@@ -240,18 +240,18 @@ describe("Pocket Spots discovery", () => {
 
   it("keeps the previous language modal for authenticated mobile users", () => {
     window.matchMedia = vi.fn().mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
-    render(<I18nProvider initialLocale="ru"><SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer" }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogout={vi.fn()} /></I18nProvider>);
+    render(<I18nProvider initialLocale="ru"><SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} /></I18nProvider>);
     expect(screen.queryByRole("button", { name: "Открыть меню" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса" }));
     const dialog = screen.getByRole("dialog", { name: "Язык интерфейса" });
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("button", { name: "English", exact: true }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "English" }));
     expect(replace).toHaveBeenCalledWith("/en/discover");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("adds a header shadow only after scrolling", () => {
-    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer" }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogout={vi.fn()} />);
+    render(<SpotsHeader user={{ id: "test", email: "test@example.com", first_name: "Test", last_name: "User", role: "customer", capabilities: ["customer"] }} screen="discover" city="Братислава" onCityChange={vi.fn()} searchQuery="" onSearch={vi.fn()} onNavigate={vi.fn()} onLogin={vi.fn()} onLogout={vi.fn()} />);
     const header = screen.getByRole("banner");
     expect(header).not.toHaveClass("scrolled");
     Object.defineProperty(window, "scrollY", { configurable: true, value: 20 });

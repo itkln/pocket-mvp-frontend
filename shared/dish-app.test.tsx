@@ -36,9 +36,9 @@ it('opens the same QR settings panel from the restaurant burger',async()=>{
  const dialog=within(screen.getByRole('dialog',{name:'Настройки меню'}));
  expect(dialog.getByText('Войдите в аккаунт')).toBeInTheDocument();
  expect(dialog.queryByRole('button',{name:'Вид меню: Карточки'})).not.toBeInTheDocument();
- expect(dialog.queryByRole('button',{name:'Меню',exact:true})).not.toBeInTheDocument();
- expect(dialog.queryByRole('button',{name:'Бронирование',exact:true})).not.toBeInTheDocument();
- fireEvent.click(dialog.getByRole('button',{name:'Войти',exact:true}));
+ expect(dialog.queryByRole('button',{name:'Меню'})).not.toBeInTheDocument();
+ expect(dialog.queryByRole('button',{name:'Бронирование'})).not.toBeInTheDocument();
+ fireEvent.click(dialog.getByRole('button',{name:'Войти'}));
  expect(push).toHaveBeenCalledWith('/ru/login?returnTo=%2Fru%2Fr%2Fvenue-id%2Fprofile');
  await act(async()=>{});
 });
@@ -56,7 +56,7 @@ it('opens language selection from the burger and keeps the current page',async()
 it('opens sign in from the header and preserves the current restaurant route',async()=>{
  vi.mocked(getCurrentUser).mockRejectedValue(new Error('unauthorized'));
  render(<I18nProvider initialLocale="ru"><DishApp venueID="venue-id"/></I18nProvider>);
- fireEvent.click(within(screen.getByRole('banner',{name:'Навигация Pocket Dish'})).getByRole('button',{name:'Войти',exact:true}));
+ fireEvent.click(within(screen.getByRole('banner',{name:'Навигация Pocket Dish'})).getByRole('button',{name:'Войти'}));
  expect(push).toHaveBeenCalledWith('/ru/login?returnTo=%2Fru%2Fr%2Fvenue-id%2Fprofile');
  await act(async()=>{});
 });
@@ -73,7 +73,7 @@ it('keeps account navigation and logo inside the selected restaurant',async()=>{
  fireEvent.click(account.getByRole('menuitem',{name:'Мои брони'}));
  expect(push).toHaveBeenLastCalledWith('/ru/r/venue-id/reservations');
  fireEvent.click(screen.getByRole('button',{name:'Настройки меню'}));
- fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Личные данные',exact:true}));
+ fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:'Личные данные'}));
  expect(push).toHaveBeenLastCalledWith('/ru/r/venue-id/settings?section=profile');
 });
 
@@ -93,7 +93,7 @@ for (const [label,target] of [['Личные данные','settings?section=pro
   render(<I18nProvider initialLocale="ru"><DishApp venueID="venue-id" initialScreen="profile"/></I18nProvider>);
   await screen.findByRole('button',{name:'Редактировать профиль'});
   fireEvent.click(screen.getByRole('button',{name:'Настройки меню'}));
-  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:label,exact:true}));
+  fireEvent.click(within(screen.getByRole('dialog')).getByRole('button',{name:label}));
   expect(push).toHaveBeenLastCalledWith(`/ru/r/venue-id/${target}`);
  });
 }
@@ -104,9 +104,9 @@ it('hides the account section until the guest signs in',async()=>{
  const dialog=within(screen.getByRole('dialog'));
  expect(dialog.queryByRole('region',{name:'Аккаунт'})).not.toBeInTheDocument();
  for(const name of ['Личные данные','Мои брони','Безопасность']) {
-  expect(dialog.queryByRole('button',{name,exact:true})).not.toBeInTheDocument();
+  expect(dialog.queryByRole('button',{name})).not.toBeInTheDocument();
  }
- expect(dialog.getByRole('button',{name:'Войти',exact:true})).toBeInTheDocument();
+ expect(dialog.getByRole('button',{name:'Войти'})).toBeInTheDocument();
  await act(async()=>{});
 });
 

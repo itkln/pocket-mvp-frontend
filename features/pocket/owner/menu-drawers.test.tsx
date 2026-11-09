@@ -14,15 +14,15 @@ describe("MenuCoverDrawer", () => {
     vi.mocked(listOwnerVenues).mockResolvedValue([{ ...venue, phone: "+421999", settings: { ...venue.settings, ordering_enabled: false, reservation_enabled: true } }]);
     vi.mocked(updateOwnerVenue).mockResolvedValue(venue);
     const onSave = vi.fn(); render(<MenuCoverDrawer venue={venue} onSave={onSave} onClose={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "Сохранить", exact: true })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "Удалить", exact: true }));
-    fireEvent.click(screen.getByRole("button", { name: "Сохранить", exact: true }));
+    expect(screen.getByRole("button", { name: "Сохранить" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Удалить" }));
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
     await waitFor(() => expect(updateOwnerVenue).toHaveBeenCalledWith("venue", expect.objectContaining({ phone: "+421999", settings: { cover_image_url: "", ordering_enabled: false, reservation_enabled: true } })));
     expect(onSave).toHaveBeenCalledWith(venue);
   });
   it("does not save a cover when editing is cancelled", () => {
     const onClose = vi.fn(); render(<MenuCoverDrawer venue={venue} onSave={vi.fn()} onClose={onClose} />);
-    fireEvent.click(screen.getByRole("button", { name: "Удалить", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Удалить" }));
     fireEvent.click(screen.getByRole("button", { name: "Отмена" }));
     expect(onClose).toHaveBeenCalledOnce(); expect(updateOwnerVenue).not.toHaveBeenCalled();
   });

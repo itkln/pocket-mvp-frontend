@@ -50,7 +50,7 @@ describe("VenueDetailsScreen preorder categories", () => {
     expect(screen.getByRole("dialog", { name: "Чай" })).toBeInTheDocument();
     fireEvent.click(within(screen.getByRole("dialog", { name: "Чай" })).getByRole("button", { name: "Закрыть" }));
     fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
-    fireEvent.click(screen.getByRole("button", { name: "Забронировать", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Anna Guest" } });
     fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
     fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
@@ -63,7 +63,7 @@ describe("VenueDetailsScreen preorder categories", () => {
     fireEvent(window, new Event("focus"));
     await waitFor(() => expect(within(preorder).getByText("Блюдо недоступно · 1")).toBeInTheDocument());
     expect(within(preorder).getByRole("button", { name: /^Продолжить к оплате/ })).toBeDisabled();
-    fireEvent.click(within(preorder).getByRole("button", { name: "Убрать", exact: true }));
+    fireEvent.click(within(preorder).getByRole("button", { name: "Убрать" }));
     expect(within(preorder).getByRole("button", { name: "Забронировать без предзаказа" })).toBeEnabled();
     fireEvent.click(within(preorder).getByRole("button", { name: "Назад к бронированию" }));
     expect(screen.getByLabelText("Имя")).toHaveValue("Anna Guest");
@@ -76,8 +76,8 @@ it("uses the reservation route entry on mobile without starting checkout", async
  const onReserve=vi.fn();
  render(<I18nProvider initialLocale="ru"><VenueDetailsScreen standalone venueID="venue-a" onBack={vi.fn()} onReserve={onReserve} saved={false}/></I18nProvider>);
  await screen.findByRole("heading",{name:"Demo Bistro"});
- expect(screen.queryByRole("heading",{name:"Бронирование",exact:true})).not.toBeInTheDocument();
- fireEvent.click(screen.getByRole("button",{name:"Забронировать онлайн",exact:true}));
+ expect(screen.queryByRole("heading",{name:"Бронирование"})).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole("button",{name:"Забронировать онлайн"}));
  expect(onReserve).toHaveBeenCalledOnce();
  expect(screen.queryByRole("button",{name:"18:00"})).not.toBeInTheDocument();
 });
@@ -87,7 +87,7 @@ it("closes the mobile reservation flow with the close button", async () => {
  render(<I18nProvider initialLocale="ru"><VenueDetailsScreen standalone reservationPage venueID="venue-a" onBack={onBack} saved={false}/></I18nProvider>);
  const dialog=await screen.findByRole("dialog",{name:"Бронирование"});
  expect(await within(dialog).findByRole("button",{name:"18:00"})).toBeInTheDocument();
- fireEvent.click(within(dialog.querySelector(".venue-booking-heading")! as HTMLElement).getByRole("button",{name:"Закрыть",exact:true}));
+ fireEvent.click(within(dialog.querySelector(".venue-booking-heading")! as HTMLElement).getByRole("button",{name:"Закрыть"}));
  expect(screen.queryByRole("dialog",{name:"Настройки меню"})).not.toBeInTheDocument();
  expect(onBack).toHaveBeenCalledOnce();
 });
@@ -105,7 +105,7 @@ it("shows desktop booking immediately and changes menu view without losing the s
  expect(screen.getByRole("button",{name:"18:00"})).toHaveAttribute("aria-pressed","true");
  fireEvent.click(controls.getByRole("button",{name:"Показать сеткой"}));
  expect(screen.getByRole("button",{name:"Подробнее о блюде: Паста"}).closest(".venue-public-menu-grid")).not.toHaveClass("venue-public-menu-list");
- fireEvent.click(screen.getByRole("button",{name:"Забронировать",exact:true}));
+ fireEvent.click(screen.getByRole("button",{name:"Забронировать"}));
  expect(screen.getByRole("dialog",{name:"Бронирование"})).toBeInTheDocument();
  expect(onReserve).not.toHaveBeenCalled();
 });

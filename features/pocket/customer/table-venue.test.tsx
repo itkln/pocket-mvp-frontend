@@ -22,7 +22,7 @@ beforeEach(() => {
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
   HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
   vi.mocked(resolveTableQR).mockResolvedValue({ venue_id: "venue-a", table_id: "table-a", table_identifier: "07", version: 1, currency: "EUR", ordering_enabled: true });
-  vi.mocked(getPublicVenue).mockResolvedValue({ id: "venue-a", name: "QR Bistro", category_slug: "restaurants", address: "Main 1", city: "Bratislava", rating: 4.3, review_count: 4, tags: [], filters: [], preorder_enabled: true } as PublicVenue);
+  vi.mocked(getPublicVenue).mockResolvedValue({ id: "venue-a", name: "QR Bistro", category_slug: "restaurants", address: "Main 1", city: "Bratislava", rating: 4.3, review_count: 4, tags: [], filters: [], preorder_enabled: true } as unknown as PublicVenue);
   vi.mocked(getPublicVenueMenu).mockResolvedValue(menu);
   vi.mocked(lookupTableOrder).mockRejectedValue(new APIError("not_found", "missing", 404));
   vi.mocked(createTableOrder).mockResolvedValue(receipt);
@@ -76,11 +76,11 @@ describe("QR table ordering on the venue page", () => {
   });
   it("shows the real menu including non-preorder categories, details and table cart without reservation controls", async () => {
     show();
-    expect(await screen.findByRole("button", { name: "Еда", exact: true })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Еда" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "QR Bistro" })).toBeInTheDocument();
     expect(screen.queryByText(/Заказ в заведении/)).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^Ваш заказ/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Забронировать", exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Забронировать" })).not.toBeInTheDocument();
     expect(screen.getAllByRole("button", { name: "Назад к столу" })).toHaveLength(2);
     expect(screen.getByRole("button", { name: "Открыть отзывы" })).toHaveTextContent("4.3");
     expect(screen.getByRole("button", { name: "Открыть отзывы" })).not.toHaveTextContent("Оценок");
@@ -88,7 +88,7 @@ describe("QR table ordering on the venue page", () => {
     const info = screen.getByRole("dialog", { name: "Информация о заведении" });
     expect(info).toHaveTextContent("Main 1");
     fireEvent.click(within(info).getByRole("button", { name: "Закрыть" }));
-    expect(screen.queryByRole("button", { name: "Настройки меню", exact: true })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Настройки меню" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "История заказов в заведении" }));
     expect(await within(screen.getByRole("dialog", { name: "История заказов в заведении" })).findByText("Вы ещё не отправили заказ")).toBeInTheDocument();
     fireEvent.click(within(screen.getByRole("dialog", { name: "История заказов в заведении" })).getByRole("button", { name: "Закрыть" }));

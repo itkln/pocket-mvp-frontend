@@ -39,11 +39,16 @@ Existing `/venue/{venueID}` links redirect to the new page. Guest accounts retai
 The former Spots catalog is preserved in source and an archive; it is not
 included in the deployed Dish navigation. See [MVP scope and restoration](docs/dish-mvp.md).
 
-Run the UI and API-client tests:
+Checks:
 
 ```bash
-npm test
+npm test            # UI and API-client tests (Vitest)
+npm run typecheck   # TypeScript, including tests
+npm run lint        # ESLint
+npm run format      # Prettier (format:check in CI)
 ```
+
+The archived Spots app can still be started with `npm run dev:spots` on port 3002.
 
 ## Production container
 
