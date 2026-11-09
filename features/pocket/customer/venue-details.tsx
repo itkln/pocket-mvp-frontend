@@ -8,7 +8,6 @@ import {
   useState,
   useSyncExternalStore,
   type CSSProperties,
-  type TouchEvent,
   type ReactNode,
 } from "react";
 import Image from "next/image";
@@ -20,31 +19,26 @@ import {
   List,
   Heart,
   Info,
-  MapPin,
-  Minus,
-  Plus,
   RefreshCw,
   Search,
   ShoppingBag,
   Star,
-  UserRound,
-  UsersRound,
   Utensils,
   X,
 } from "lucide-react";
-import { APIError } from "../../../lib/api-client";
 import {
   getPreorderCategories,
-  getPublicVenue,
-  getPublicVenueMenu,
-  getPublicVenueReviews,
   type PublicMenuCategory,
   type PublicMenuItem,
-  type PublicReview,
   type PublicVenue,
 } from "../../../lib/public-catalog-api";
 import { useI18n } from "../i18n";
 import { useMenuView } from "./menu-view";
+import { usePublicVenue, useVenueReviews } from "./venue/use-public-venue";
+import { VenueInfoSheet } from "./venue/venue-info-sheet";
+import { VenueReviewsDialog } from "./venue/venue-reviews-dialog";
+import { PreorderCart } from "./venue/preorder-cart";
+import { VenueMobileSearch } from "./venue/venue-mobile-search";
 import { PublicMenuCards } from "./public-menu-cards";
 import { PublicMenuItemDialog } from "./public-menu-item-dialog";
 import { BookingPicker } from "./booking-picker";
@@ -121,28 +115,22 @@ export function VenueDetailsScreen({
     mobileBookingSnapshot,
     () => false,
   );
-  const [state, setState] = useState<{ venue?: PublicVenue; error?: "missing" | "failed" }>({});
-  const [menuState, setMenuState] = useState<{
-    categories: PublicMenuCategory[];
-    loading: boolean;
-    error: boolean;
-  }>({ categories: [], loading: true, error: false });
-  const [reviewsState, setReviewsState] = useState<{
-    items: PublicReview[];
-    loading: boolean;
-    error: boolean;
-  }>({ items: [], loading: true, error: false });
-  const [reload, setReload] = useState(0);
-  const [reviewsReload, setReviewsReload] = useState(0);
+  const {
+    venueState: state,
+    menuState,
+    retry,
+    replaceMenu,
+  } = usePublicVenue(venueID, menuRevision);
   const [activeCategory, setActiveCategory] = useState("");
   const [compactHeader, setCompactHeader] = useState(false);
   const [menuPinned, setMenuPinned] = useState(false);
   const categoryNavRef = useRef<HTMLElement>(null);
   const [infoOpen, setInfoOpen] = useState(false);
+  const closeInfo = useCallback(() => setInfoOpen(false), []);
   const [menuView, setMenuView] = useMenuView();
-  const [infoDrag, setInfoDrag] = useState(0);
-  const [infoDragging, setInfoDragging] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
+  const closeReviews = useCallback(() => setReviewsOpen(false), []);
+  const { reviewsState, resetReviews, retryReviews } = useVenueReviews(venueID, reviewsOpen);
   const [searchOpen, setSearchOpen] = useState(initialSearchOpen);
   const [bookingOpen, setBookingOpen] = useState(reservationPage);
   const closeBooking = useCallback(() => {
@@ -160,17 +148,11 @@ export function VenueDetailsScreen({
   const [bookingFlowVersion, setBookingFlowVersion] = useState(0);
   const [detailItemID, setDetailItemID] = useState<string | null>(null);
   const [menuQuery, setMenuQuery] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
-  const infoCloseRef = useRef<HTMLButtonElement>(null);
-  const reviewsCloseRef = useRef<HTMLButtonElement>(null);
   const bookingTriggerRef = useRef<HTMLButtonElement>(null);
   const bookingFlowRef = useRef<DesktopBookingFlowHandle>(null);
   const bookingCloseRef = useRef<HTMLButtonElement>(null);
   const bookingOverlayRef = useRef<HTMLDivElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
-  const infoOverlayRef = useRef<HTMLDivElement>(null);
-  const infoTouchStart = useRef<{ x: number; y: number } | null>(null);
-  const infoDragRef = useRef(0);
   const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
   const preorderMenuRef = useRef<HTMLDivElement>(null);
   const preorderMenuScrollRef = useRef<HTMLDivElement>(null);
@@ -197,66 +179,6 @@ export function VenueDetailsScreen({
     if (state.venue) onVenueLoaded?.(state.venue);
   }, [state.venue, onVenueLoaded]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    getPublicVenue(venueID, controller.signal)
-      .then((venue) => setState({ venue }))
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setState({
-          error: error instanceof APIError && error.status === 404 ? "missing" : "failed",
-        });
-      });
-    return () => controller.abort();
-  }, [venueID, reload]);
-
-  useEffect(() => {
-    if (!reviewsOpen) return;
-    const controller = new AbortController();
-    getPublicVenueReviews(venueID, controller.signal)
-      .then((items) => setReviewsState({ items, loading: false, error: false }))
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setReviewsState({ items: [], loading: false, error: true });
-      });
-    return () => controller.abort();
-  }, [venueID, reviewsOpen, reviewsReload]);
-
-  useEffect(() => {
-    let controller: AbortController | undefined;
-    const loadMenu = () => {
-      controller?.abort();
-      const request = new AbortController();
-      controller = request;
-      getPublicVenueMenu(venueID, request.signal)
-        .then((categories) => {
-          if (!request.signal.aborted) setMenuState({ categories, loading: false, error: false });
-        })
-        .catch((error: unknown) => {
-          if (
-            request.signal.aborted ||
-            (error instanceof DOMException && error.name === "AbortError")
-          )
-            return;
-          setMenuState({ categories: [], loading: false, error: true });
-        });
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") loadMenu();
-    };
-    loadMenu();
-    window.addEventListener("focus", loadMenu);
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      controller?.abort();
-      window.removeEventListener("focus", loadMenu);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [venueID, reload, menuRevision]);
-
-  useEffect(() => {
-    if (searchOpen) searchRef.current?.focus();
-  }, [searchOpen]);
   useEffect(() => {
     if (!preorderMenuOpen) return;
     const previousOverflow = document.body.style.overflow;
@@ -294,36 +216,6 @@ export function VenueDetailsScreen({
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [preorderMenuOpen, detailItemID, backToBookingDetails]);
-  useEffect(() => {
-    if (!infoOpen) return;
-    if (window.innerWidth <= 760) infoCloseRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setInfoOpen(false);
-    };
-    const onPointerDown = (event: PointerEvent) => {
-      if (
-        window.innerWidth > 760 &&
-        !infoRef.current?.contains(event.target as Node) &&
-        !infoOverlayRef.current?.contains(event.target as Node)
-      )
-        setInfoOpen(false);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [infoOpen]);
-  useEffect(() => {
-    if (!reviewsOpen) return;
-    reviewsCloseRef.current?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setReviewsOpen(false);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [reviewsOpen]);
   useEffect(() => {
     if (!bookingOpen || !mobileBooking) return;
     const trigger = bookingTriggerRef.current;
@@ -448,30 +340,8 @@ export function VenueDetailsScreen({
     });
   };
   const openReviews = () => {
-    setReviewsState({ items: [], loading: true, error: false });
+    resetReviews();
     setReviewsOpen(true);
-  };
-  const onInfoTouchStart = (event: TouchEvent<HTMLElement>) => {
-    if (window.innerWidth > 760 || event.currentTarget.scrollTop > 0) return;
-    const touch = event.touches[0];
-    if (touch) infoTouchStart.current = { x: touch.clientX, y: touch.clientY };
-  };
-  const onInfoTouchMove = (event: TouchEvent<HTMLElement>) => {
-    const start = infoTouchStart.current;
-    const touch = event.touches[0];
-    if (!start || !touch || event.currentTarget.scrollTop > 0) return;
-    const distance = touch.clientY - start.y;
-    if (distance <= 0 || Math.abs(touch.clientX - start.x) > distance) return;
-    infoDragRef.current = Math.min(distance, 320);
-    setInfoDragging(true);
-    setInfoDrag(infoDragRef.current);
-  };
-  const onInfoTouchEnd = () => {
-    if (infoDragRef.current >= 80) setInfoOpen(false);
-    infoTouchStart.current = null;
-    infoDragRef.current = 0;
-    setInfoDragging(false);
-    setInfoDrag(0);
   };
   const photoStyle = venue?.image_url
     ? ({ backgroundImage: `url(${JSON.stringify(venue.image_url)})` } as CSSProperties)
@@ -606,66 +476,18 @@ export function VenueDetailsScreen({
         </div>
       </header>
       {searchOpen && (
-        <div className="venue-mobile-search" role="search" aria-label={t("Поиск по меню")}>
-          <div className="venue-mobile-search-bar">
-            <input
-              ref={searchRef}
-              type="search"
-              value={menuQuery}
-              onChange={(event) => setMenuQuery(event.target.value)}
-              placeholder={t("Поиск по меню")}
-              aria-label={t("Поиск по меню")}
-            />
-            {menuQuery && (
-              <button
-                type="button"
-                className="venue-search-clear"
-                aria-label={t("Очистить поиск")}
-                onClick={() => {
-                  setMenuQuery("");
-                  searchRef.current?.focus();
-                }}
-              >
-                <X size={18} />
-              </button>
-            )}
-            <button
-              type="button"
-              className="venue-search-cancel"
-              onClick={() => {
-                setSearchOpen(false);
-                setMenuQuery("");
-              }}
-            >
-              {t("Отменить")}
-            </button>
-          </div>
-          <div className="venue-search-results" aria-live="polite">
-            {!normalizedQuery ? (
-              <h2>{t("Что будем искать?")}</h2>
-            ) : menuState.loading ? (
-              <p>{t("Загружаем меню...")}</p>
-            ) : menuState.error ? (
-              <p>{t("Не удалось загрузить меню")}</p>
-            ) : searchResults.length ? (
-              menuCards(searchResults)
-            ) : (
-              <div className="venue-search-no-results">
-                <Search size={28} />
-                <h2>{t("Ничего не нашли")}</h2>
-                <p>{t("Попробуйте другое название блюда")}</p>
-              </div>
-            )}
-          </div>
-          {!tableOrder && venue?.category_slug !== "restaurants" && (
-            <div className="venue-mobile-booking-status" role="status">
-              <span>
-                <CalendarDays size={16} />
-                {t("Бронирование пока недоступно")}
-              </span>
-            </div>
-          )}
-        </div>
+        <VenueMobileSearch
+          query={menuQuery}
+          onQueryChange={setMenuQuery}
+          onCancel={() => {
+            setSearchOpen(false);
+            setMenuQuery("");
+          }}
+          searching={Boolean(normalizedQuery)}
+          menu={menuState}
+          results={searchResults.length ? menuCards(searchResults) : null}
+          bookingUnavailable={!tableOrder && venue?.category_slug !== "restaurants"}
+        />
       )}
       {tableOrder?.historyButton}
       {tableOrder && (
@@ -762,76 +584,13 @@ export function VenueDetailsScreen({
                   </div>
                 </div>
                 {infoOpen && (
-                  <div
-                    ref={infoOverlayRef}
-                    className="venue-info-overlay"
-                    onMouseDown={(event) => {
-                      if (event.target === event.currentTarget) setInfoOpen(false);
-                    }}
-                  >
-                    <section
-                      className={`venue-info-sheet ${infoDragging ? "dragging" : ""}`}
-                      role="dialog"
-                      aria-modal="true"
-                      aria-labelledby="venue-info-title"
-                      style={infoDrag ? { transform: `translateY(${infoDrag}px)` } : undefined}
-                      onTouchStart={onInfoTouchStart}
-                      onTouchMove={onInfoTouchMove}
-                      onTouchEnd={onInfoTouchEnd}
-                      onTouchCancel={onInfoTouchEnd}
-                    >
-                      <div className="venue-info-controls">
-                        <div className="venue-info-handle" aria-hidden="true" />
-                        <button
-                          ref={infoCloseRef}
-                          type="button"
-                          className="venue-info-close"
-                          aria-label={t("Закрыть")}
-                          onClick={() => setInfoOpen(false)}
-                        >
-                          <X size={22} />
-                        </button>
-                      </div>
-                      <h2 id="venue-info-title">{t("Информация о заведении")}</h2>
-                      <h3>{venue.name}</h3>
-                      <div className="venue-info-group">
-                        <strong>{t("Контакты")}</strong>
-                        <p>
-                          <MapPin size={18} />
-                          {venue.address}, {venue.city}, {venue.country_code}
-                        </p>
-                      </div>
-                      <div className="venue-info-group">
-                        <strong>{t("О месте")}</strong>
-                        <p>{venue.description || t("Описание заведения пока не добавлено")}</p>
-                        <div
-                          className={`venue-about-photo ${venue.image_url ? "has-image" : ""}`}
-                          style={photoStyle}
-                          role="img"
-                          aria-label={t("Фото заведения: {name}", { name: venue.name })}
-                        >
-                          {!venue.image_url && (
-                            <Image
-                              src={`/assets/categories/${illustration}.png`}
-                              alt=""
-                              width={170}
-                              height={170}
-                            />
-                          )}
-                        </div>
-                        {venue.filters.length > 0 && (
-                          <div className="venue-feature-list">
-                            {venue.filters.map((filter) => (
-                              <span key={filter}>
-                                <Check size={15} />
-                                {t(filter)}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </section>
-                  </div>
+                  <VenueInfoSheet
+                    venue={venue}
+                    photoStyle={photoStyle}
+                    illustration={illustration}
+                    anchorRef={infoRef}
+                    onClose={closeInfo}
+                  />
                 )}
               </div>
             </div>
@@ -955,148 +714,25 @@ export function VenueDetailsScreen({
                 </>
               }
               {preorderMenuOpen && (
-                <aside className="venue-preorder-cart" aria-label={t("Предзаказ")}>
-                  <header>
-                    <h2>{t("Предзаказ")}</h2>
-                    {preorderCount > 0 && (
-                      <button type="button" onClick={() => setPreorderQuantities({})}>
-                        {t("Очистить")}
-                      </button>
-                    )}
-                  </header>
-                  <div className="venue-preorder-cart-body">
-                    {bookingSummary && (
-                      <section
-                        className="venue-preorder-reservation-summary"
-                        aria-label={t("Бронирование")}
-                      >
-                        <h3>{t("Бронирование")}</h3>
-                        <div>
-                          <CalendarDays size={17} aria-hidden="true" />
-                          <span>
-                            {bookingSummary.dateLabel} · {bookingSummary.time}
-                          </span>
-                        </div>
-                        <div>
-                          <UsersRound size={17} aria-hidden="true" />
-                          <span>{t("Гостей: {count}", { count: bookingSummary.guests })}</span>
-                        </div>
-                        <div>
-                          <UserRound size={17} aria-hidden="true" />
-                          <span>
-                            {bookingSummary.name}
-                            <small>
-                              {bookingSummary.phone}
-                              {bookingSummary.email && <> · {bookingSummary.email}</>}
-                            </small>
-                          </span>
-                        </div>
-                        {bookingSummary.comment && <p>{bookingSummary.comment}</p>}
-                      </section>
-                    )}
-                    {preorderCount > 0 ? (
-                      <div className="venue-preorder-cart-items">
-                        {preorderSelectedItems.map((item) => (
-                          <article key={item.id}>
-                            <div
-                              className="venue-preorder-cart-image"
-                              style={
-                                item.image_url
-                                  ? { backgroundImage: `url(${JSON.stringify(item.image_url)})` }
-                                  : undefined
-                              }
-                            >
-                              {!item.image_url && <Utensils size={20} aria-hidden="true" />}
-                            </div>
-                            <div className="venue-preorder-cart-copy">
-                              <strong>{item.name}</strong>
-                              <span>
-                                {new Intl.NumberFormat(locale, {
-                                  style: "currency",
-                                  currency: item.currency,
-                                }).format((item.price_minor * preorderQuantities[item.id]) / 100)}
-                              </span>
-                            </div>
-                            <div className="venue-preorder-cart-quantity">
-                              <button
-                                type="button"
-                                aria-label={`${t("Убрать")} ${item.name}`}
-                                onClick={() => changePreorderQuantity(item.id, -1)}
-                              >
-                                <Minus size={16} />
-                              </button>
-                              <b>{preorderQuantities[item.id]}</b>
-                              <button
-                                type="button"
-                                aria-label={`${t("Добавить")} ${item.name}`}
-                                disabled={preorderQuantities[item.id] >= 30}
-                                onClick={() => changePreorderQuantity(item.id, 1)}
-                              >
-                                <Plus size={16} />
-                              </button>
-                            </div>
-                          </article>
-                        ))}
-                        {unavailablePreorderItems.map(([id, quantity]) => (
-                          <article key={id}>
-                            <div className="venue-preorder-cart-image">
-                              <Utensils size={20} aria-hidden="true" />
-                            </div>
-                            <div className="venue-preorder-cart-copy">
-                              <strong>
-                                {allMenuItems.find((item) => item.id === id)?.name ??
-                                  t("Блюдо недоступно")}
-                              </strong>
-                              <span>
-                                {t("Блюдо недоступно")} · {quantity}
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => changePreorderQuantity(id, -quantity)}
-                            >
-                              {t("Убрать")}
-                            </button>
-                          </article>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="venue-preorder-cart-empty">
-                        <ShoppingBag size={46} aria-hidden="true" />
-                        <h3>{t("В предзаказе пока пусто")}</h3>
-                        <p>{t("Добавьте блюда из меню")}</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="venue-preorder-cart-footer">
-                    {preorderCount > 0 ? (
-                      <button
-                        type="button"
-                        disabled={
-                          preorderSelectedItems.length !== Object.keys(preorderQuantities).length
-                        }
-                        onClick={() => {
-                          setPreorderMenuOpen(false);
-                          bookingFlowRef.current?.checkout();
-                        }}
-                      >
-                        <span>{t("Продолжить к оплате")}</span>
-                        <strong>{preorderTotalLabel}</strong>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="venue-preorder-book-without"
-                        onClick={() => {
-                          setPreorderMenuOpen(false);
-                          bookingFlowRef.current?.bookWithoutPreorder();
-                        }}
-                      >
-                        <span>{t("Забронировать без предзаказа")}</span>
-                      </button>
-                    )}
-                  </div>
-                </aside>
+                <PreorderCart
+                  bookingSummary={bookingSummary}
+                  quantities={preorderQuantities}
+                  selectedItems={preorderSelectedItems}
+                  unavailableItems={unavailablePreorderItems}
+                  allMenuItems={allMenuItems}
+                  count={preorderCount}
+                  totalLabel={preorderTotalLabel}
+                  onQuantityChange={changePreorderQuantity}
+                  onClear={() => setPreorderQuantities({})}
+                  onCheckout={() => {
+                    setPreorderMenuOpen(false);
+                    bookingFlowRef.current?.checkout();
+                  }}
+                  onBookWithoutPreorder={() => {
+                    setPreorderMenuOpen(false);
+                    bookingFlowRef.current?.bookWithoutPreorder();
+                  }}
+                />
               )}
             </div>
           </div>
@@ -1145,9 +781,7 @@ export function VenueDetailsScreen({
                     menuModeOpen={preorderMenuOpen}
                     onMenuModeChange={setPreorderMenuOpen}
                     onPreorderStart={setBookingSummary}
-                    onMenuUpdated={(categories) =>
-                      setMenuState({ categories, loading: false, error: false })
-                    }
+                    onMenuUpdated={replaceMenu}
                     onConfirmationClose={finishBooking}
                   />
                 )}
@@ -1189,85 +823,12 @@ export function VenueDetailsScreen({
             />
           )}
           {reviewsOpen && (
-            <div
-              className="venue-reviews-overlay"
-              onMouseDown={(event) => {
-                if (event.target === event.currentTarget) setReviewsOpen(false);
-              }}
-            >
-              <section
-                className="venue-reviews-dialog"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="venue-reviews-dialog-title"
-              >
-                <header>
-                  <h2 id="venue-reviews-dialog-title">{t("Рейтинг и отзывы")}</h2>
-                  <button
-                    ref={reviewsCloseRef}
-                    type="button"
-                    aria-label={t("Закрыть")}
-                    onClick={() => setReviewsOpen(false)}
-                  >
-                    <X size={21} />
-                  </button>
-                </header>
-                <div className="venue-reviews-score">
-                  <strong>{venue.review_count > 0 ? venue.rating.toFixed(1) : "—"}</strong>
-                  <span>{t("Оценок: {count}", { count: venue.review_count })}</span>
-                </div>
-                <div className="venue-reviews-list">
-                  <h3>{t("Отзывы")}</h3>
-                  {reviewsState.loading ? (
-                    <p role="status">{t("Загружаем отзывы...")}</p>
-                  ) : reviewsState.error ? (
-                    <div role="alert">
-                      <p>{t("Не удалось загрузить отзывы")}</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setReviewsState({ items: [], loading: true, error: false });
-                          setReviewsReload((value) => value + 1);
-                        }}
-                      >
-                        {t("Повторить")}
-                      </button>
-                    </div>
-                  ) : reviewsState.items.length ? (
-                    reviewsState.items.map((review) => (
-                      <article key={review.id}>
-                        <div className="venue-review-meta">
-                          <strong>{t("Гость")}</strong>
-                          <span aria-label={t("Оценка: {rating} из 5", { rating: review.rating })}>
-                            {Array.from({ length: 5 }, (_, index) => (
-                              <Star
-                                key={index}
-                                size={16}
-                                fill={index < review.rating ? "currentColor" : "none"}
-                              />
-                            ))}
-                          </span>
-                        </div>
-                        <small>
-                          {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
-                            new Date(review.created_at),
-                          )}
-                        </small>
-                        {review.body && <p>{review.body}</p>}
-                        {review.owner_reply && (
-                          <div className="venue-review-reply">
-                            <strong>{t("Ответ заведения")}</strong>
-                            <p>{review.owner_reply}</p>
-                          </div>
-                        )}
-                      </article>
-                    ))
-                  ) : (
-                    <p>{t("Отзывов пока нет")}</p>
-                  )}
-                </div>
-              </section>
-            </div>
+            <VenueReviewsDialog
+              venue={venue}
+              reviews={reviewsState}
+              onRetry={retryReviews}
+              onClose={closeReviews}
+            />
           )}
         </article>
       ) : state.error ? (
@@ -1280,14 +841,7 @@ export function VenueDetailsScreen({
             )}
           </strong>
           {state.error === "failed" && (
-            <button
-              type="button"
-              className="button secondary"
-              onClick={() => {
-                setState({});
-                setReload((value) => value + 1);
-              }}
-            >
+            <button type="button" className="button secondary" onClick={retry}>
               <RefreshCw size={17} />
               {t("Повторить")}
             </button>
