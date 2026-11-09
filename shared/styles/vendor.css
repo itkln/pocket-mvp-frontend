@@ -423,18 +423,6 @@
   margin: 0;
   font-weight: 600;
 }
-.mini-order {
-  margin-bottom: 14px;
-  padding: 9px;
-  border-radius: 6px;
-  background: var(--surface-soft);
-}
-.mini-order p {
-  display: flex;
-  justify-content: space-between;
-  margin: 7px 0;
-  font-size: 15px;
-}
 .table-detail .button {
   margin-top: 7px;
 }

@@ -63,7 +63,7 @@ export function FloorPlan({
   const errorMessage = useLocalizedError();
   const [floors, setFloors] = useState<VenueFloor[]>(initialFloors);
   const [activeFloorId, setActiveFloorId] = useState(initialFloors[0].id);
-  const [selected, setSelected] = useState<FloorSelection>({ kind: "table", id: "08" });
+  const [selected, setSelected] = useState<FloorSelection>(null);
   const [dragging, setDragging] = useState<FloorSelection>(null);
   const [zoom, setZoom] = useState(100);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
@@ -695,7 +695,7 @@ export function FloorPlan({
               onDelete={() => void removeTable(selectedTable)}
             />
           ) : (
-            <StaffTableDetail table={selectedTable} floorName={activeFloor.name} notify={notify} />
+            <StaffTableDetail table={selectedTable} floorName={activeFloor.name} />
           )
         ) : selectedFixture ? (
           <aside className="panel table-detail fixture-detail technical-detail">

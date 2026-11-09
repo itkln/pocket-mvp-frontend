@@ -26,18 +26,6 @@ export type FloorDragState = {
   offsetY: number;
 };
 
-export const tables: FloorTable[] = [
-  { id: "01", seats: 2, x: 8, y: 12, state: "free" },
-  { id: "02", seats: 2, x: 33, y: 12, state: "busy" },
-  { id: "03", seats: 4, x: 61, y: 10, state: "busy" },
-  { id: "04", seats: 4, x: 9, y: 42, state: "reserved" },
-  { id: "05", seats: 6, x: 37, y: 43, state: "free" },
-  { id: "06", seats: 2, x: 76, y: 45, state: "busy" },
-  { id: "07", seats: 4, x: 11, y: 74, state: "free" },
-  { id: "08", seats: 6, x: 42, y: 72, state: "busy" },
-  { id: "09", seats: 2, x: 78, y: 76, state: "reserved" },
-];
-
 export const initialFloors: VenueFloor[] = [
   {
     id: "floor-1",
