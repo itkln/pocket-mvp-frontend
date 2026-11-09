@@ -28,23 +28,18 @@ The restaurant ID is stable and does not change when its name changes. A general
 QR never selects a table and never publishes a draft restaurant. Publication uses
 Vendor's existing venue status: only active restaurants are public.
 
-## Preserved marketplace
+## Removed marketplace
 
-The former catalog and app shell remain in `apps/spots`, `shared/spots-app.tsx`
-and `features/pocket/customer/discover.tsx`. They are excluded from the Dish routes
-and default production build. Dish returns 404 for former discover, restaurant catalog,
-favorites and history routes; no city picker or cross-restaurant search
-is imported into the Dish shell. The catalog backend remains available for a
-future marketplace, but Dish never requests it.
+The former Spots catalog (`apps/spots`, `shared/spots-app.tsx`, discovery, saved
+venues and the old customer ordering/account screens) was removed from the source on
+2026-11-09. Only Vendor and Dish are developed. Dish returns 404 for former discover,
+restaurant catalog, favorites and history routes. The catalog backend remains
+available, but Dish never requests it.
 
-A source snapshot from before this transition is stored at
-`docs/archive/pocket-spots-before-dish-2026-10-19.zip`. It includes routes, app shell,
-customer features, shared styles, API clients and translations. Assets stay in
-`apps/spots/public`; the archive intentionally excludes dependencies, build output
-and environment secrets. To explore restoration, extract the archive into a
-separate directory and compare; do not overwrite current shared files wholesale.
-`npm run dev:spots` remains a manual development entry point only. The default
-`npm run build` builds Vendor and Dish.
+To look at the old catalog, use git history (the last commit containing it is the
+parent of the removal commit) or the snapshot
+`docs/archive/pocket-spots-before-dish-2026-10-19.zip`. Extract it into a separate
+directory and compare; do not overwrite current shared files wholesale.
 
 ## Runtime
 

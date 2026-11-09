@@ -1,12 +1,12 @@
 import { isValidElement } from "react";
 import { describe, expect, it } from "vitest";
-import SpotsPage from "../apps/spots/app/[locale]/[[...route]]/page";
+import DishPage from "../apps/dish/app/[locale]/[[...route]]/page";
 import VendorPage from "../apps/vendor/app/[locale]/[[...route]]/page";
 import PasswordRecoveryPage from "./password-recovery-page";
 
 describe("product-specific password recovery routes", () => {
   for (const [product, Page] of [
-    ["spots", SpotsPage],
+    ["dish", DishPage],
     ["vendor", VendorPage],
   ] as const) {
     it(`passes ${product} from its actual request and confirmation routes`, async () => {

@@ -36,8 +36,8 @@ The bill reads `POST /public/table-bill`, refreshes every 15 seconds while visib
 and uses server totals. Empty bills disable payment. Online acquiring and the
 payment action for populated bills are a separate task.
 Existing `/venue/{venueID}` links redirect to the new page. Guest accounts retain registration, profile and personal reservations.
-The former Spots catalog is preserved in source and an archive; it is not
-included in the deployed Dish navigation. See [MVP scope and restoration](docs/dish-mvp.md).
+The former Spots catalog has been removed from the source; a snapshot is kept in
+`docs/archive`. See [MVP scope](docs/dish-mvp.md).
 
 Checks:
 
@@ -47,8 +47,6 @@ npm run typecheck   # TypeScript, including tests
 npm run lint        # ESLint
 npm run format      # Prettier (format:check in CI)
 ```
-
-The archived Spots app can still be started with `npm run dev:spots` on port 3002.
 
 ## Production container
 
