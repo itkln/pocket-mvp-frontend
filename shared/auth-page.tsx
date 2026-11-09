@@ -5,19 +5,23 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import {vendorInviteReturnTo} from "../lib/staff-invitations";
 import { login, register } from "../lib/auth-api";
+import { spotsAuthPath, spotsReturnTo } from "../lib/spots-auth-navigation";
 import { useLocalizedError } from "../features/pocket/error-message";
 import { useI18n } from "../features/pocket/i18n";
 
 type AuthMode = "login" | "register";
-type PocketProduct = "vendor" | "spots";
+type PocketProduct = "vendor" | "spots" | "dish";
 
-export default function AuthPage({ mode, product = "vendor" }: { mode: AuthMode; product?: PocketProduct }) {
+export default function AuthPage({ mode, product = "vendor", returnTo }: { mode: AuthMode; product?: PocketProduct; returnTo?: string }) {
   const router = useRouter();
   const { locale } = useI18n();
   const errorMessage = useLocalizedError();
   const isLogin = mode === "login";
-  const productName = product === "vendor" ? "Pocket Vendor" : "Pocket Spots";
+  const productName = product === "vendor" ? "Pocket Vendor" : product === "dish" ? "Pocket Dish" : "Pocket Spots";
+  const destination = product !== "vendor" ? spotsReturnTo(returnTo, locale) : vendorInviteReturnTo(returnTo,locale);
+  const authPath = (screen: "login" | "register" | "forgot-password") => product !== "vendor" ? spotsAuthPath(locale, screen, returnTo) : `/${locale}/${screen}${destination!==`/${locale}`?`?returnTo=${encodeURIComponent(destination)}`:""}`;
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [error, setError] = useState("");
@@ -43,7 +47,7 @@ export default function AuthPage({ mode, product = "vendor" }: { mode: AuthMode;
 				password: String(data.get("password")),
 			});
 		}
-		router.replace(`/${locale}`);
+		router.replace(destination);
 		router.refresh();
 	} catch (caught) {
 		setError(errorMessage(caught, "Сервер временно недоступен. Попробуйте еще раз"));
@@ -54,7 +58,7 @@ export default function AuthPage({ mode, product = "vendor" }: { mode: AuthMode;
 
   return <main className="auth-screen">
     <section className="auth-screen-content">
-      <Link className="auth-brand" href={`/${locale}`} aria-label={`${productName}, на главную`}><span className="auth-brand-mark"><Image src="/logo.svg" alt="" width={30} height={30} priority /></span><strong>{productName}</strong></Link>
+      <Link className="auth-brand" href={product === "dish" ? destination : `/${locale}`} aria-label={`${productName}, на главную`}><span className="auth-brand-mark"><Image src="/logo.svg" alt="" width={30} height={30} priority /></span><strong>{productName}</strong></Link>
       <header className="auth-heading">
         <h1>{isLogin ? `Войти в ${productName}` : "Создать аккаунт"}</h1>
         <p>{product === "vendor" ? (isLogin ? "Управляйте заведением и работой команды." : "Аккаунт для управления заведениями и сотрудниками.") : (isLogin ? "Бронируйте столики и оформляйте предзаказ." : "Аккаунт для бронирований и предзаказов в заведениях.")}</p>
@@ -69,12 +73,12 @@ export default function AuthPage({ mode, product = "vendor" }: { mode: AuthMode;
           <label className="auth-field"><span>Повторите пароль</span><span className="auth-password"><input name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} autoComplete="new-password" placeholder="Повторите пароль" minLength={12} maxLength={128} required /><button type="button" onClick={() => setConfirmPasswordVisible((current) => !current)} aria-label={confirmPasswordVisible ? "Скрыть пароль" : "Показать пароль"}>{confirmPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}</button></span></label>
         </>}
 
-        {isLogin ? <div className="auth-options"><label><input type="checkbox" name="remember" />Запомнить меня</label><Link href={`/${locale}/forgot-password`}>Забыли пароль?</Link></div> : <label className="auth-consent"><input type="checkbox" required /><span>Я принимаю условия использования и политику конфиденциальности</span></label>}
+        {isLogin ? <div className="auth-options"><label><input type="checkbox" name="remember" />Запомнить меня</label><Link href={authPath("forgot-password")}>Забыли пароль?</Link></div> : <label className="auth-consent"><input type="checkbox" required /><span>Я принимаю условия использования и политику конфиденциальности</span></label>}
         {error && <p className="auth-error" role="alert">{error}</p>}
 		<button className="auth-submit" type="submit" disabled={submitting}>{submitting ? (isLogin ? "Входим..." : "Создаем аккаунт...") : (isLogin ? "Войти" : "Зарегистрироваться")}</button>
       </form>
 
-      <p className="auth-switch">{isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"} <Link href={`/${locale}/${isLogin ? "register" : "login"}`}>{isLogin ? "Зарегистрироваться" : "Войти"}</Link></p>
+      <p className="auth-switch">{isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"} <Link href={authPath(isLogin ? "register" : "login")}>{isLogin ? "Зарегистрироваться" : "Войти"}</Link></p>
     </section>
   </main>;
 }

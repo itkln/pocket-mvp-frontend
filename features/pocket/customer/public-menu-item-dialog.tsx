@@ -50,11 +50,10 @@ export function PublicMenuItemDialog({ item, onClose, onAddToPreorder }: {
         <div className="venue-preorder-product-info">
           <div className="venue-preorder-product-heading"><h2>{item.name}</h2>{item.portion_weight_g != null && <span>{number.format(item.portion_weight_g)} {t("г")}</span>}<strong>{new Intl.NumberFormat(localeTags[locale], { style: "currency", currency: item.currency }).format(item.price_minor / 100)}</strong></div>
           {item.description && <p>{item.description}</p>}
-          <section className="venue-product-nutrition" aria-label={t("Пищевая ценность")}>
+          {nutrients.some(({ value }) => value != null) && <section className="venue-product-nutrition" aria-label={t("Пищевая ценность")}>
             <p>{t("На 100 г")}</p>
-            <dl>{nutrients.map(({ value, label, unit }) => <div key={label}><dt>{t(label)}</dt><dd>{value == null ? "—" : number.format(value) + unit}</dd></div>)}</dl>
-            {nutrients.every(({ value }) => value == null) && <small>{t("Заведение пока не указало КБЖУ")}</small>}
-          </section>
+            <dl>{nutrients.map(({ value, label, unit }) => value == null ? null : <div key={label}><dt>{t(label)}</dt><dd>{number.format(value) + unit}</dd></div>)}</dl>
+          </section>}
         </div>
       </div>
     </div>
@@ -66,7 +65,7 @@ export function PublicMenuItemDialog({ item, onClose, onAddToPreorder }: {
     {onAddToPreorder && <footer className="venue-preorder-product-footer">
       <div className="venue-preorder-product-action">
         <div className="venue-preorder-cart-quantity"><button type="button" aria-label={t("Уменьшить количество")} disabled={quantity <= 1} onClick={() => setQuantity((value) => value - 1)}><Minus size={20} /></button><b>{quantity}</b><button type="button" aria-label={t("Увеличить количество")} disabled={quantity >= 30} onClick={() => setQuantity((value) => value + 1)}><Plus size={20} /></button></div>
-        <button type="button" onClick={() => { onAddToPreorder(quantity); onClose(); }}>{t("Добавить")}</button>
+        <button type="button" onClick={() => { onAddToPreorder(quantity); onClose(); }}><span>{t("Добавить")}</span><strong>{new Intl.NumberFormat(localeTags[locale], { style: "currency", currency: item.currency }).format(item.price_minor * quantity / 100)}</strong></button>
       </div>
     </footer>}
   </dialog>;

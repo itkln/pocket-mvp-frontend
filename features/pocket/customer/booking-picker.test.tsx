@@ -14,6 +14,7 @@ const bookingDate = (() => { const value = new Date(); value.setUTCDate(value.ge
 afterEach(() => vi.unstubAllGlobals());
 
 beforeEach(() => {
+  localStorage.clear();
   HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
   HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
   vi.mocked(createPublicReservation).mockReset();
@@ -27,6 +28,24 @@ beforeEach(() => {
 });
 
 describe("BookingPicker", () => {
+  it("confirms a preorder without offering tips", async () => {
+    vi.mocked(createPublicReservation).mockResolvedValue({ id: "reservation-food", code: "FOOD123", starts_at: `${bookingDate}T16:00:00Z`, guest_count: 2, preorder_total_minor: 1200, preorder_subtotal_minor: 1200, preorder_tip_minor: 0, currency: "EUR" });
+    render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" menu={menu} preorderEnabled /></I18nProvider>);
+    fireEvent.click(await screen.findByRole("button", { name: "18:00" }));
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Анна Гость" } });
+    fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421900123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить" }));
+    fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.click(screen.getByRole("button", { name: /^Продолжить к оплате/ }));
+    expect(screen.queryByRole("group", { name: "Чаевые" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Другая сумма" })).not.toBeInTheDocument();
+    expect(screen.getByText("Итого к оплате").parentElement).toHaveTextContent("12,00");
+    fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
+    await screen.findByText("Номер брони: FOOD123");
+    expect(createPublicReservation).toHaveBeenCalledWith("venue-a", expect.objectContaining({ expected_total_minor: 1200 }));
+    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).not.toHaveProperty("tip");
+    expect(screen.getByRole("status")).not.toHaveTextContent("Чаевые");
+  });
   it("shows only preorder categories, including navigation and dish details", async () => {
     const categories = [...menu, { id: "drinks", name: "Напитки", preorder_enabled: false, items: [{ id: "tea", name: "Чай", price_minor: 300, currency: "EUR" }] }];
     render(<I18nProvider initialLocale="ru"><BookingPicker venueID="venue-a" menu={categories} preorderEnabled /></I18nProvider>);
@@ -76,7 +95,7 @@ describe("BookingPicker", () => {
     expect(within(dialog).getByRole("img", { name: "Паста" })).toBeInTheDocument();
     expect(within(dialog).getByText("Паста с грибами и пармезаном")).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Увеличить количество" }));
-    fireEvent.click(within(dialog).getByRole("button", { name: "Добавить", exact: true }));
+    fireEvent.click(within(dialog).getByRole("button", { name: /^Добавить/ }));
     expect(screen.queryByRole("dialog", { name: "Паста" })).not.toBeInTheDocument();
     expect(screen.getByLabelText("Паста: 2")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Продолжить к оплате/ })).toHaveTextContent("24,00");
@@ -209,7 +228,15 @@ describe("BookingPicker", () => {
     expect(screen.getByRole("navigation", { name: "Категории меню" })).toBeInTheDocument();
     expect(document.querySelectorAll(".mobile-preorder-menu .venue-public-menu-grid")).toHaveLength(2);
     expect(screen.queryByRole("button", { name: "Убрать Паста" })).not.toBeInTheDocument();
+    const layoutToggle = screen.getByRole("button", { name: "Показать списком" });
+    expect(layoutToggle.previousElementSibling).toBe(screen.getByRole("button", { name: "Забронировать без предзаказа" }));
+    fireEvent.click(layoutToggle);
+    expect(document.querySelectorAll(".mobile-preorder-menu .venue-public-menu-list")).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: "Добавить Паста" }));
+    fireEvent.click(screen.getByRole("button", { name: "Показать сеткой" }));
+    expect(document.querySelectorAll(".mobile-preorder-menu .venue-public-menu-list")).toHaveLength(0);
+    expect(screen.getByLabelText("Паста: 1")).toBeInTheDocument();
+    expect(createPublicReservation).not.toHaveBeenCalled();
     fireEvent.click(desserts);
     expect(desserts).toHaveAttribute("aria-current", "location");
     expect(scrollTo).toHaveBeenCalled();

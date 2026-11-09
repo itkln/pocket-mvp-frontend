@@ -17,11 +17,20 @@ export type CustomerReservation = {
   guest_email?: string;
   notes?: string;
   preorder_total_minor: number;
+  preorder_tip_minor?: number;
   preorder_order_number?: number;
+  preorder_status?: string;
+  cancellation: { allowed: boolean; reason?: string; deadline?: string };
   currency: string;
   preorder_items: { name: string; quantity: number; unit_price_minor: number }[];
 };
 
 export async function listCustomerReservations(signal?: AbortSignal): Promise<CustomerReservation[]> {
   return (await apiRequest<{ reservations: CustomerReservation[] }>("/spots/me/reservations", { signal, cache: "no-store" })).reservations;
+}
+
+export async function cancelCustomerReservation(id: string): Promise<CustomerReservation> {
+  return (await apiRequest<{ reservation: CustomerReservation }>(`/spots/me/reservations/${encodeURIComponent(id)}/cancel`, {
+    method: "POST", cache: "no-store",
+  })).reservation;
 }

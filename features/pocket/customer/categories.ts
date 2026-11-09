@@ -1,12 +1,5 @@
 export const spotCategories = [
   { slug: "restaurants", label: "Рестораны", filters: ["Итальянская", "Азиатская", "Завтраки", "Кофе и десерты", "Лучшие", "Открыто", "С предзаказом"] },
-  { slug: "entertainment", label: "Развлечения", filters: ["Кино", "Квесты", "Для двоих", "Для компании"] },
-  { slug: "activities", label: "Активности", filters: ["Экскурсии", "На воде", "На улице"] },
-  { slug: "sports", label: "Спорт", filters: ["Тренажёрный зал", "Групповые занятия", "Лучшие", "Рядом"] },
-  { slug: "yoga-pilates", label: "Йога и пилатес", filters: ["Йога", "Пилатес", "Для начинающих", "Рядом"] },
-  { slug: "spa-massage", label: "SPA и массаж", filters: ["Расслабляющий", "Спортивный", "Лучшие", "Рядом"] },
-  { slug: "beauty", label: "Красота", filters: ["Стрижка", "Борода", "Аппаратный", "Педикюр", "Волосы", "Макияж"] },
-  { slug: "masterclasses", label: "Мастер-классы", filters: ["Керамика", "Живопись", "Для начинающих"] },
 ];
 
 export const categoryForRoute = (route?: string) => spotCategories.find((category) => category.slug === route);

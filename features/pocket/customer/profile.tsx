@@ -8,6 +8,7 @@ import { useI18n } from "../i18n";
 import { AccountScreen } from "../owner/account";
 
 type ProfileProps = {
+  hideSavedPlaces?: boolean;
   user: AuthUser;
   onNavigate: (screen: string) => void;
   onLogout: () => void;
@@ -46,7 +47,7 @@ function ShieldSolid({ size = 18 }: ProfileIconProps) {
   </svg>;
 }
 
-export function GuestProfile({ user, onNavigate, onLogout, onEditProfile }: ProfileProps) {
+export function GuestProfile({ user, onNavigate, onLogout, onEditProfile, hideSavedPlaces = false }: ProfileProps) {
   const { t } = useI18n();
   const links = [
     { label: "Мои брони", screen: "reservations", icon: CalendarSolid, tone: "blue" },
@@ -61,18 +62,18 @@ export function GuestProfile({ user, onNavigate, onLogout, onEditProfile }: Prof
     </button>
     <div className="spots-profile-menu">
       <nav className="spots-profile-links" aria-label={t("Профиль")}>
-        {links.map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={24} /></span><span>{t(label)}</span></button>)}
+        {links.filter(link => !hideSavedPlaces || link.screen !== "saved").map(({ label, screen, icon: Icon, tone }) => <button type="button" key={screen} onClick={() => onNavigate(screen)}><span className={`spots-profile-icon ${tone}`}><Icon size={24} /></span><span>{t(label)}</span></button>)}
       </nav>
       <button type="button" className="spots-signout" onClick={onLogout}><LogOut size={20} />{t("Выйти из аккаунта")}</button>
     </div>
   </section>;
 }
 
-export function GuestSettings({ user, onNavigate, onLogout, onUpdate, notify, onEditProfile, notifications = false }: ProfileProps & { onUpdate: (user: AuthUser) => void; notify: (message: string) => void; notifications?: boolean }) {
+export function GuestSettings({ user, onNavigate, onLogout, onUpdate, notify, onEditProfile, notifications = false, initialSection, onBack }: ProfileProps & { onUpdate: (user: AuthUser) => void; notify: (message: string) => void; notifications?: boolean; initialSection?: "profile" | "security"; onBack?: () => void }) {
   const { t } = useI18n();
-  const [section, setSection] = useState<"profile" | "security" | "notifications" | null>(notifications ? "notifications" : null);
+  const [section, setSection] = useState<"profile" | "security" | "notifications" | null>(notifications ? "notifications" : initialSection ?? null);
   return <section className="spots-settings">
-    <div className="spots-account-heading"><button type="button" className="spots-back-button" aria-label={t("Назад")} onClick={() => section && !notifications ? setSection(null) : onNavigate("profile")}><ArrowLeft size={26} /></button><h1>{t(section === "profile" ? "Личные данные" : section === "security" ? "Безопасность" : section === "notifications" ? "Уведомления" : "Настройки")}</h1><span /></div>
+    <div className="spots-account-heading"><button type="button" className="spots-back-button" aria-label={t("Назад")} onClick={() => onBack ? onBack() : section && !notifications ? setSection(null) : onNavigate("profile")}><ArrowLeft size={26} /></button><h1>{t(section === "profile" ? "Личные данные" : section === "security" ? "Безопасность" : section === "notifications" ? "Уведомления" : "Настройки")}</h1><span /></div>
     {section ? <div className="spots-settings-detail" data-section={section}><AccountScreen embedded key={section} initialSection={section} user={user} notify={notify} onLogout={onLogout} onUpdate={onUpdate} /></div> : <>
       <div className="spots-settings-identity"><span className="spots-profile-avatar" style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}>{!user.avatar_url && userInitials(user)}</span><h2>{user.first_name} {user.last_name}</h2><p>{user.email}</p></div>
       <nav className="spots-profile-links" aria-label={t("Разделы настроек")}>
@@ -106,7 +107,7 @@ export function GuestProfileDialog({ open, section = "profile", user, notify, on
     };
   }, [open]);
   const title = section === "security" ? "Безопасность" : section === "notifications" ? "Уведомления" : "Личные данные";
-  return <dialog ref={dialog} className="spots-profile-dialog" aria-labelledby="spots-profile-dialog-title" onClose={onClose} onClick={(event) => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
+  return <dialog ref={dialog} className="spots-profile-dialog" data-section={section} aria-labelledby="spots-profile-dialog-title" onClose={onClose} onClick={(event) => { if (event.target === event.currentTarget) dialog.current?.close(); }}>
     {open && <div className="spots-profile-dialog-content">
       <div className="spots-dialog-heading"><h2 id="spots-profile-dialog-title">{t(title)}</h2><button type="button" className="icon-button" aria-label={t("Закрыть")} onClick={() => dialog.current?.close()}><X size={22} /></button></div>
       <AccountScreen embedded key={section} initialSection={section} user={user} notify={notify} onUpdate={onUpdate} onLogout={() => {}} onProfileSaved={section === "profile" ? () => dialog.current?.close() : undefined} />

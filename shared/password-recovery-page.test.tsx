@@ -18,6 +18,13 @@ beforeEach(() => {
 });
 
 describe("PasswordRecoveryPage", () => {
+  it("preserves the Spots selection when returning to sign in from password recovery", () => {
+    const returnTo = "/ru/venue/casa?from=%2Fru%2Frestaurants";
+    render(<PasswordRecoveryPage mode="request" product="spots" returnTo={returnTo} />);
+    const href = screen.getByRole("link", { name: "Вернуться ко входу" }).getAttribute("href")!;
+    expect(new URL(href, "https://pocket.local").searchParams.get("returnTo")).toBe(returnTo);
+  });
+
   it("requests a reset without revealing whether the account exists", async () => {
     vi.mocked(requestPasswordReset).mockResolvedValue();
     render(<I18nProvider initialLocale="en"><PasswordRecoveryPage mode="request" /></I18nProvider>);

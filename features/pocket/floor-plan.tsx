@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import QRCode from "qrcode";
+import Image from "next/image";
 import { Building2, Check, ChevronDown, Download, DoorOpen, Ellipsis, Minus, PanelsTopLeft, Plus, QrCode, RefreshCw, RotateCcw, RotateCw, Table2, Trash2, UserRound, Wine, X } from "lucide-react";
 import { makeVenueSlug } from "./model";
 import { getFloorPlan, saveFloorPlan } from "../../lib/owner-api";
+import { issueTableQR, type TableQRCode } from "../../lib/table-orders-api";
 import { useConfirm } from "./confirm-dialog";
 import { useI18n } from "./i18n";
 import { useLocalizedError } from "./error-message";
@@ -53,9 +55,16 @@ export const tableCountLabel = (count: number) => {
   return `${count} ${noun}`;
 };
 
-export const downloadTableQr = async (venueName: string, tableId: string) => {
+const localQRCode = (qr: TableQRCode): TableQRCode => {
+  const url = new URL(qr.url);
+  if (["localhost", "127.0.0.1"].includes(url.hostname) && !["localhost", "127.0.0.1"].includes(window.location.hostname)) url.hostname = window.location.hostname;
+  return { ...qr, url: url.toString() };
+};
+export const downloadTableQr = async (venueName: string, tableId: string, venueID?: string, existingQR?: TableQRCode) => {
+  if (!venueID) throw new Error("Save the venue before generating a QR code");
   const venueSlug = makeVenueSlug(venueName);
-  const svg = await QRCode.toString(`https://pocket.app/${venueSlug}/t/${tableId}`, { type: "svg", errorCorrectionLevel: "H", margin: 2, width: 768 });
+  const qr = existingQR ?? localQRCode(await issueTableQR(venueID, tableId));
+  const svg = await QRCode.toString(qr.url, { type: "svg", errorCorrectionLevel: "H", margin: 2, width: 768 });
   const objectUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   const link = document.createElement("a");
   link.href = objectUrl;
@@ -286,7 +295,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
 
   const changeZoom = (step: number) => setZoom((current) => Math.max(60, Math.min(160, current + step)));
   const downloadQr = (tableId: string) => {
-    void downloadTableQr(venueName, tableId)
+    void downloadTableQr(venueName, tableId, venueID)
       .then(() => notify(`QR-код стола ${tableId} скачан`))
       .catch(() => notify("Не удалось скачать QR-код"));
   };
@@ -333,7 +342,7 @@ export function FloorPlan({ mode, venueID, venueName, notify, embedded = false }
       </section>
       {loading ? <aside className="panel table-detail floor-summary loading"><RefreshCw size={24} /><h2>Загружаем</h2><p>Получаем сохраненную расстановку.</p></aside> : selectedTable ? mode === "owner" ? <OwnerTableEditor key={`${activeFloor.id}-${selectedTable.id}`} table={selectedTable} floorName={activeFloor.name} onSave={(id, seats) => saveTableInfo(selectedTable, id, seats)} onDownload={() => downloadQr(selectedTable.id)} onDelete={() => void removeTable(selectedTable)} /> : <StaffTableDetail table={selectedTable} floorName={activeFloor.name} notify={notify} /> : selectedFixture ? <aside className="panel table-detail fixture-detail technical-detail"><div className="detail-heading"><div><small>{activeFloor.name.toUpperCase()} · ЭЛЕМЕНТ</small><h2>{fixtureLabel(selectedFixture.type)}</h2></div>{selectedFixture.type === "bar" ? <Wine size={22} /> : selectedFixture.type === "window" ? <PanelsTopLeft size={22} /> : <DoorOpen size={22} />}</div><div className="fixture-controls"><label><span>Поворот</span><div className="rotation-control"><IconButton icon={RotateCcw} label="Повернуть влево на 45 градусов" onClick={() => updateFixture(selectedFixture.id, { rotation: (selectedFixture.rotation - 45 + 360) % 360 })} /><strong>{selectedFixture.rotation}°</strong><IconButton icon={RotateCw} label="Повернуть вправо на 45 градусов" onClick={() => updateFixture(selectedFixture.id, { rotation: (selectedFixture.rotation + 45) % 360 })} /></div></label><label><span>Размер <b>{selectedFixture.size}%</b></span><div className="fixture-size-control"><IconButton icon={Minus} label="Уменьшить размер на 10 процентов" onClick={() => updateFixture(selectedFixture.id, { size: Math.max(50, selectedFixture.size - 10) })} /><input type="range" min="50" max="160" step="10" value={selectedFixture.size} onChange={(event) => updateFixture(selectedFixture.id, { size: Number(event.target.value) })} /><IconButton icon={Plus} label="Увеличить размер на 10 процентов" onClick={() => updateFixture(selectedFixture.id, { size: Math.min(160, selectedFixture.size + 10) })} /></div></label></div>{mode === "owner" && <Button className="full" kind="danger" icon={Trash2} onClick={() => void removeFixture(selectedFixture)}>Удалить с плана</Button>}</aside> : <aside className="panel table-detail floor-summary"><Building2 size={24} /><h2>{activeFloor.name}</h2><p>{tableCountLabel(activeFloor.tables.length)} · {activeFloor.fixtures.length} элементов</p>{mode === "owner" && <Button className="full" icon={Plus} onClick={addTable}>{activeFloor.tables.length ? "Добавить стол" : "Добавить первый стол"}</Button>}</aside>}
     </div>
-    {showQrCodes && <QrCodesDialog venueName={venueName} tables={allTables} onClose={() => setShowQrCodes(false)} notify={notify} />}
+    {showQrCodes && <QrCodesDialog venueID={venueID} venueName={venueName} tables={allTables} onClose={() => setShowQrCodes(false)} notify={notify} />}
   </>;
 }
 
@@ -350,13 +359,32 @@ export function StaffTableDetail({ table, floorName, notify }: { table: FloorTab
   return <aside className="panel table-detail"><div className="detail-heading"><div><small>{floorName.toUpperCase()} · СТОЛ</small><h2>{table.id}</h2></div><IconButton icon={Ellipsis} label="Действия" /></div><StatusPill status={table.state === "busy" ? "Занят" : table.state === "reserved" ? "Бронь" : "Свободен"} /><dl><div><dt>Мест</dt><dd>{table.seats}</dd></div><div><dt>Официант</dt><dd>София М.</dd></div><div><dt>Текущий счет</dt><dd>{table.state === "busy" ? "€76.50" : "—"}</dd></div><div><dt>Открыт</dt><dd>{table.state === "busy" ? "38 мин" : "—"}</dd></div></dl>{table.state === "busy" && <div className="mini-order"><p><span>Тальятелле</span><b>2</b></p><p><span>Буррата</span><b>1</b></p><p><span>Красный апельсин</span><b>3</b></p></div>}<Button className="full" kind="quiet" icon={UserRound} onClick={() => notify("Официант назначен")}>Назначить официанта</Button></aside>;
 }
 
-export function QrCodesDialog({ venueName, tables: qrTables, onClose, notify }: { venueName: string; tables: FloorTable[]; onClose: () => void; notify: (message: string) => void }) {
-  const [versions, setVersions] = useState<Record<string, number>>({});
-	const venueSlug = makeVenueSlug(venueName);
-  const regenerate = (tableId: string) => {
-    setVersions((current) => ({ ...current, [tableId]: (current[tableId] ?? 1) + 1 }));
-    notify(`QR-код стола ${tableId} перегенерирован`);
+export function QrCodesDialog({ venueID, venueName, tables: qrTables, onClose, notify }: { venueID?: string; venueName: string; tables: FloorTable[]; onClose: () => void; notify: (message: string) => void }) {
+  const { t } = useI18n();
+  const [codes, setCodes] = useState<Record<string, TableQRCode & { image: string }>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState("");
+  const tableIDs = qrTables.map((table) => table.id).join("\n");
+  useEffect(() => {
+    let active = true;
+    if (!venueID) return;
+    Promise.all(tableIDs.split("\n").filter(Boolean).map(async (id) => {
+      const qr = localQRCode(await issueTableQR(venueID, id));
+      return [id, { ...qr, image: await QRCode.toDataURL(qr.url, { width: 256, margin: 1 }) }] as const;
+    })).then((entries) => { if (active) setCodes(Object.fromEntries(entries)); }).catch(() => { if (active) setError("Не удалось загрузить QR-коды. Сохраните план зала и попробуйте снова."); });
+    return () => { active = false; };
+  }, [venueID, tableIDs]);
+  const regenerate = async (tableId: string) => {
+    if (!venueID || busy) return;
+    setBusy(tableId); setError("");
+    try {
+      const qr = localQRCode(await issueTableQR(venueID, tableId, true));
+      const image = await QRCode.toDataURL(qr.url, { width: 256, margin: 1 });
+      setCodes((current) => ({ ...current, [tableId]: { ...qr, image } }));
+      notify(`QR-код стола ${tableId} перегенерирован`);
+    } catch { setError("Не удалось загрузить QR-коды. Сохраните план зала и попробуйте снова."); }
+    finally { setBusy(null); }
   };
-  const download = (tableId: string) => { void downloadTableQr(venueName, tableId).then(() => notify(`QR-код стола ${tableId} скачан`)).catch(() => notify("Не удалось скачать QR-код")); };
-  return <div className="preview-backdrop" onMouseDown={onClose}><section className="qr-dialog" onMouseDown={(event) => event.stopPropagation()}><header><div><p className="eyebrow">QR-КОДЫ СТОЛОВ</p><h2>{venueName}</h2><p>После сканирования гость увидит меню, а заказ и счет автоматически привяжутся к выбранному столу. Перегенерация отключает прежний код.</p></div><IconButton icon={X} label="Закрыть QR-коды" onClick={onClose} /></header><div className="qr-grid">{qrTables.map((table) => { const version = versions[table.id] ?? 1; return <article key={table.id}><div className="qr-symbol"><QrCode size={72} strokeWidth={1.4} /></div><div><strong>Стол {table.id}</strong><span>{table.seats} места · версия {version}</span><small>pocket.app/{venueSlug}/t/{table.id}?v={version}</small></div><div className="qr-card-actions"><IconButton icon={RefreshCw} label={`Перегенерировать QR-код стола ${table.id}`} onClick={() => regenerate(table.id)} /><IconButton icon={Download} label={`Скачать QR-код стола ${table.id}`} onClick={() => download(table.id)} /></div></article>; })}</div><footer><p>Напечатайте коды и разместите их на соответствующих столах.</p><div><Button kind="secondary" onClick={onClose}>Закрыть</Button><Button icon={Download} onClick={() => notify("Архив QR-кодов подготовлен")}>Скачать все</Button></div></footer></section></div>;
+  const download = (tableId: string) => { void downloadTableQr(venueName, tableId, venueID, codes[tableId]).then(() => notify(`QR-код стола ${tableId} скачан`)).catch(() => notify("Не удалось скачать QR-код")); };
+  return <div className="preview-backdrop" onMouseDown={onClose}><section className="qr-dialog" onMouseDown={(event) => event.stopPropagation()}><header><div><p className="eyebrow">QR-КОДЫ СТОЛОВ</p><h2>{venueName}</h2><p>После сканирования гость увидит меню, а заказ и счет автоматически привяжутся к выбранному столу. Перегенерация отключает прежний код.</p></div><IconButton icon={X} label="Закрыть QR-коды" onClick={onClose} /></header>{error && <p className="form-error" role="alert">{t(error)}</p>}<div className="qr-grid">{qrTables.map((table) => { const qr = codes[table.id]; return <article key={table.id}><div className="qr-symbol">{qr ? <Image unoptimized src={qr.image} width={144} height={144} alt={t("QR-код стола {number}", { number: table.id })} /> : <QrCode size={72} strokeWidth={1.4} />}</div><div><strong>Стол {table.id}</strong><span>{table.seats} места{qr && ` · ${t("Версия {number}", { number: qr.version })}`}</span>{qr && <a href={qr.url} target="_blank" rel="noreferrer">{t("Открыть меню стола")}</a>}</div><div className="qr-card-actions"><button type="button" className="icon-button" disabled={!qr || Boolean(busy)} aria-label={`Перегенерировать QR-код стола ${table.id}`} onClick={() => void regenerate(table.id)}><RefreshCw size={19} /></button><button type="button" className="icon-button" disabled={!qr || Boolean(busy)} aria-label={`Скачать QR-код стола ${table.id}`} onClick={() => download(table.id)}><Download size={19} /></button></div></article>; })}</div><footer><p>Напечатайте коды и разместите их на соответствующих столах.</p><div><Button kind="secondary" onClick={onClose}>Закрыть</Button><Button icon={Download} disabled={Boolean(busy) || Object.keys(codes).length !== qrTables.length} onClick={() => { void Promise.all(qrTables.map((table) => downloadTableQr(venueName, table.id, venueID, codes[table.id]))).catch(() => notify(t("Не удалось скачать QR-коды"))); }}>Скачать все</Button></div></footer></section></div>;
 }

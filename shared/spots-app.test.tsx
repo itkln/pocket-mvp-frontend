@@ -67,7 +67,7 @@ describe("Spots guest experience", () => {
     nativeReplace(null, "", "/ru/reservations");
     vi.mocked(listCustomerReservations).mockResolvedValue([{
       id: "own-booking", code: "OWN123", venue_id: "north", venue_name: "North & Vine", venue_address: "Main 1", venue_city: "Bratislava", timezone: "Europe/Bratislava",
-      starts_at: "2099-10-04T17:00:00Z", ends_at: "2099-10-04T19:00:00Z", guest_count: 2, status: "confirmed", guest_name: "Other Guest", currency: "EUR", preorder_total_minor: 0, preorder_items: [],
+      starts_at: "2099-10-04T17:00:00Z", ends_at: "2099-10-04T19:00:00Z", guest_count: 2, status: "confirmed", guest_name: "Other Guest", currency: "EUR", preorder_total_minor: 0, preorder_items: [], cancellation: { allowed: true },
     }]);
     render(<SpotsApp initialScreen="reservations" />);
     expect(await screen.findByText("Бронь №OWN123")).toBeInTheDocument();
@@ -125,7 +125,51 @@ describe("Spots guest experience", () => {
     expect(router.replace).not.toHaveBeenCalledWith("/ru/login");
 
     fireEvent.click(login);
-    expect(router.push).toHaveBeenLastCalledWith("/ru/login");
+    expect(router.push).toHaveBeenLastCalledWith("/ru/login?returnTo=%2Fru%2Fdiscover");
+  });
+
+  it("loads a guest category while the session check is still pending and keeps the search at sign in", async () => {
+    nativeReplace(null, "", "/ru/restaurants?q=pasta&filter=Итальянская");
+    localStorage.setItem("pocket:spots-city", "Братислава");
+    vi.mocked(getCurrentUser).mockReturnValue(new Promise(() => {}));
+    render(<SpotsApp initialScreen="restaurants" />);
+    expect(await screen.findByText("Casa Forma")).toBeInTheDocument();
+    expect(listPublicVenues).toHaveBeenCalledWith(expect.objectContaining({ category: "restaurants", query: "pasta", filter: "Итальянская", city: "Братислава" }), expect.any(AbortSignal));
+    expect(screen.queryByText("Проверяем сессию...")).not.toBeInTheDocument();
+    const context = `${window.location.pathname}${window.location.search}`;
+    fireEvent.click(screen.getByRole("button", { name: "Войти" }));
+    expect(new URL(router.push.mock.calls.at(-1)![0], "https://pocket.local").searchParams.get("returnTo")).toBe(context);
+    expect(listSavedVenueIDs).not.toHaveBeenCalled();
+  });
+
+  it("opens a venue and menu without waiting for authentication", async () => {
+    const context = "/ru/venue/casa?from=%2Fru%2Frestaurants%3Fq%3Dpasta";
+    nativeReplace(null, "", context);
+    vi.mocked(getCurrentUser).mockReturnValue(new Promise(() => {}));
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([{ id: "pasta", name: "Паста", items: [{ id: "carbonara", name: "Карбонара", price_minor: 1290, currency: "EUR" }] }]);
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    expect(await screen.findByRole("heading", { name: "Карбонара" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Casa Forma" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Войти" }));
+    expect(new URL(router.push.mock.calls.at(-1)![0], "https://pocket.local").searchParams.get("returnTo")).toBe(context);
+    expect(router.replace).not.toHaveBeenCalled();
+  });
+
+  it("keeps the public catalogue available when session verification fails", async () => {
+    vi.mocked(getCurrentUser).mockRejectedValue(new Error("Identity service unavailable"));
+    render(<SpotsApp initialScreen="discover" />);
+    expect(await screen.findByText("Casa Forma")).toBeInTheDocument();
+    expect(router.replace).not.toHaveBeenCalled();
+    expect(listSavedVenueIDs).not.toHaveBeenCalled();
+  });
+
+  it.each(["saved", "reservations", "profile"])("gates the private %s screen and returns to it after sign in", async (route) => {
+    nativeReplace(null, "", `/ru/${route}`);
+    vi.mocked(getCurrentUser).mockRejectedValue(new AuthAPIError("unauthorized", "Unauthorized", 401));
+    render(<SpotsApp initialScreen={route} />);
+    await waitFor(() => expect(router.replace).toHaveBeenCalledWith(`/ru/login?returnTo=%2Fru%2F${route}`));
+    expect(listSavedVenueIDs).not.toHaveBeenCalled();
+    expect(listCustomerReservations).not.toHaveBeenCalled();
   });
 
   it("opens guest city and language choices from collapsed mobile menu rows", async () => {
@@ -264,6 +308,45 @@ describe("Spots guest experience", () => {
     expect(screen.queryByText("19 июля")).not.toBeInTheDocument();
   });
 
+  it("scopes desktop header search to the open venue and preserves the query when clearing that scope", async () => {
+    desktop = true;
+    nativeReplace(null, "", "/ru/venue/casa?from=%2Fru%2Frestaurants");
+    vi.mocked(getPublicVenueMenu).mockResolvedValue([
+      { id: "pasta", name: "Паста", items: [
+        { id: "carbonara", name: "Карбонара", price_minor: 1290, currency: "EUR", description: "Сливочная паста" },
+        { id: "bolognese", name: "Болоньезе", price_minor: 1190, currency: "EUR" },
+      ] },
+      { id: "drinks", name: "Напитки", items: [{ id: "tea", name: "Чай", price_minor: 390, currency: "EUR" }] },
+    ]);
+    render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
+    const input = await screen.findByRole("textbox", { name: "Поиск по меню: Casa Forma" });
+    expect(input).toHaveAttribute("placeholder", "Искать в заведении");
+    expect(screen.getByRole("button", { name: "Искать во всех заведениях" })).toHaveTextContent("Casa Forma");
+    expect(await screen.findByText("Карбонара")).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "сливочная" } });
+    const results = await screen.findByRole("region", { name: "Результаты поиска" });
+    expect(within(results).getByText("Карбонара")).toBeInTheDocument();
+    expect(screen.queryByText("Болоньезе")).not.toBeInTheDocument();
+    expect(screen.queryByText("Чай")).not.toBeInTheDocument();
+    expect(window.location.pathname).toBe("/ru/venue/casa");
+    expect(new URLSearchParams(window.location.search).get("from")).toBe("/ru/restaurants");
+    expect(new URLSearchParams(window.location.search).get("q")).toBe("сливочная");
+
+    fireEvent.change(input, { target: { value: "нет такого блюда" } });
+    expect(await screen.findByText("Ничего не нашли")).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "" } });
+    expect(await screen.findByText("Болоньезе")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Категории меню" })).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "паста" } });
+    fireEvent.click(screen.getByRole("button", { name: "Искать во всех заведениях" }));
+    expect(window.location.pathname).toBe("/ru/discover");
+    expect(new URLSearchParams(window.location.search).get("q")).toBe("паста");
+    expect(screen.getByRole("textbox", { name: "Найти место или услугу" })).toHaveValue("паста");
+    expect(screen.queryByRole("button", { name: "Искать во всех заведениях" })).not.toBeInTheDocument();
+  });
+
   it("searches published menu items and opens venue information from the mobile action", async () => {
     nativeReplace(null, "", "/ru/venue/casa");
     vi.mocked(getPublicVenueMenu).mockResolvedValue([
@@ -281,7 +364,7 @@ describe("Spots guest experience", () => {
     fireEvent.click(within(categories).getByRole("button", { name: "Напитки" }));
     expect(within(categories).getByRole("button", { name: "Напитки" })).toHaveAttribute("aria-current", "location");
     expect(screen.queryByRole("button", { name: "Ещё о заведении" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Открыть информацию о заведении" }));
+    fireEvent.click(screen.getByRole("button", { name: "Информация о заведении", exact: true }));
     const info = screen.getByRole("dialog", { name: "Информация о заведении" });
     expect(within(info).getByText("Fresh pasta on Obchodná.")).toBeInTheDocument();
     expect(within(info).getByText(/Obchodná 24/)).toBeInTheDocument();
@@ -327,8 +410,8 @@ describe("Spots guest experience", () => {
     expect(within(menu).getByLabelText("Паста: 1")).toBeInTheDocument();
     expect(cart).toHaveTextContent("Паста");
     fireEvent.click(within(menu).getByRole("button", { name: "Подробнее о блюде: Паста" }));
-    const product = within(menu).getByRole("dialog", { name: "Паста" });
-    fireEvent.click(within(product).getByRole("button", { name: "Добавить" }));
+    const product = screen.getByRole("dialog", { name: "Паста" });
+    fireEvent.click(within(product).getByRole("button", { name: /^Добавить/ }));
     expect(cart).toHaveTextContent("24,00");
     fireEvent.click(within(cart).getByRole("button", { name: "Убрать Паста" }));
     expect(cart).toHaveTextContent("12,00");
@@ -470,7 +553,7 @@ describe("Spots guest experience", () => {
       nativeReplace(null, "", "/ru/venue/casa");
       render(<SpotsApp initialScreen="venue" initialVenueId="casa" />);
       await screen.findByRole("heading", { name: "Casa Forma" });
-      fireEvent.click(screen.getByRole("button", { name: "Открыть информацию о заведении" }));
+      fireEvent.click(screen.getByRole("button", { name: "Информация о заведении", exact: true }));
       const info = screen.getByRole("dialog", { name: "Информация о заведении" });
       info.scrollTop = 20;
       fireEvent.touchStart(info, { touches: [{ clientX: 100, clientY: 100 }] });

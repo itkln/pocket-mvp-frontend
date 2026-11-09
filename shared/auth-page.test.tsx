@@ -25,6 +25,43 @@ beforeEach(() => {
 });
 
 describe("AuthPage", () => {
+  it("returns a Spots guest to the selected venue after sign in and carries context through auth links", async () => {
+    const returnTo = `/ru/venue/casa?${new URLSearchParams({ from: "/ru/restaurants?q=pasta&filter=Итальянская" })}`;
+    vi.mocked(login).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer" });
+    render(<AuthPage mode="login" product="spots" returnTo={returnTo} />);
+    for (const name of ["Зарегистрироваться", "Забыли пароль?"]) {
+      const href = screen.getByRole("link", { name }).getAttribute("href")!;
+      expect(new URL(href, "https://pocket.local").searchParams.get("returnTo")).toBe(returnTo);
+    }
+    fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
+    fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
+    fireEvent.click(screen.getByRole("button", { name: "Войти" }));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith(returnTo));
+  });
+
+  it("returns a newly registered Spots user to the selected category and filters", async () => {
+    const returnTo = "/ru/restaurants?q=pasta&filter=Open";
+    vi.mocked(register).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer" });
+    render(<AuthPage mode="register" product="spots" returnTo={returnTo} />);
+    fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Denis" } });
+    fireEvent.change(screen.getByLabelText("Фамилия"), { target: { value: "Itkin" } });
+    fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
+    fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
+    fireEvent.change(screen.getByLabelText("Повторите пароль"), { target: { value: "a secure password" } });
+    fireEvent.click(screen.getByLabelText(/Я принимаю/));
+    fireEvent.click(screen.getByRole("button", { name: "Зарегистрироваться" }));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith(returnTo));
+  });
+
+  it("keeps Vendor authentication on its own home screen", async () => {
+    vi.mocked(login).mockResolvedValue({ id: "1", email: "user@example.com", first_name: "Denis", last_name: "Itkin", role: "customer" });
+    render(<AuthPage mode="login" product="vendor" returnTo="/ru/venue/casa" />);
+    fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });
+    fireEvent.change(screen.getByLabelText("Пароль"), { target: { value: "a secure password" } });
+    fireEvent.click(screen.getByRole("button", { name: "Войти" }));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/ru"));
+  });
+
   it("does not register when passwords differ", async () => {
     render(<AuthPage mode="register" />);
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Denis" } });

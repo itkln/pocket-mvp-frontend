@@ -40,6 +40,6 @@ USER nextjs
 EXPOSE 3000
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=20s --retries=5 \
-  CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/ || exit 1
+  CMD if [ "$APP_TARGET" = "dish" ]; then wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/healthz; else wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/; fi
 
 CMD ["sh", "-c", "./node_modules/.bin/next start apps/${APP_TARGET} -p 3000"]

@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import StaffInvitationPage from "@pocket/shared/staff-invitation-page";
 import AuthPage from "@pocket/shared/auth-page";
 import PasswordRecoveryPage from "@pocket/shared/password-recovery-page";
 import VendorApp from "@pocket/shared/vendor-app";
@@ -16,8 +17,11 @@ export default async function LocalizedVendorPage({ params, searchParams }: { pa
     redirect(`/ua${route.length ? `/${route.map(encodeURIComponent).join("/")}` : ""}${nextQuery.size ? `?${nextQuery.toString()}` : ""}`);
   }
   if (!isLocale(locale)) notFound();
-  if (route[0] === "login") return route.length === 1 ? <AuthPage mode="login" product="vendor" /> : notFound();
-  if (route[0] === "register") return route.length === 1 ? <AuthPage mode="register" product="vendor" /> : notFound();
+  const query = await searchParams;
+ const returnTo=typeof query.returnTo==="string"?query.returnTo:undefined;
+ if(route[0]==="invite")return route.length===1?<StaffInvitationPage token={typeof query.token==="string"?query.token:""}/>:notFound();
+ if (route[0] === "login") return route.length === 1 ? <AuthPage mode="login" product="vendor" returnTo={returnTo} /> : notFound();
+  if (route[0] === "register") return route.length === 1 ? <AuthPage mode="register" product="vendor" returnTo={returnTo} /> : notFound();
   if (route[0] === "forgot-password") return route.length === 1 ? <PasswordRecoveryPage mode="request" product="vendor" /> : notFound();
   if (route[0] === "reset-password") {
     if (route.length !== 1) notFound();

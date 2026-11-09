@@ -1,0 +1,201 @@
+/* Vendor shape tokens apply after the shared legacy styles on every breakpoint. */
+:root {
+  --vendor-radius-block: 28px;
+  --vendor-radius-control: 16px;
+  --vendor-radius-badge: 8px;
+}
+
+/* Standalone surfaces share one shape, including dialogs rendered outside the shell. */
+:is(
+  .panel, .metric, .category-list, .manager-item, .team-panel,
+  .settings-form, .payment-banner, .payment-table-panel, .review-card,
+  .review-score, .review-stat, .reviews-toolbar, .subscription-plan,
+  .subscription-status, .subscription-summary, .account-section-panel,
+  .account-preference-panel, .account-security-panel, .account-security,
+  .profile-card, .shift-strip, .kanban > section, .ticket, .kitchen-ticket,
+  .mini-order, .modal, .menu-preview-modal, .qr-dialog,
+  .vendor-category-panel, .vendor-menu-group, .vendor-stop-summary,
+  .vendor-editor-card, .vendor-menu-empty, .orders-queue, .orders-card,
+  .orders-detail-empty
+) {
+  border-radius: var(--vendor-radius-block);
+}
+
+.vendor-menu .vendor-menu-stats > button,
+.vendor-orders .orders-ticket {
+  border-radius: var(--vendor-radius-block) !important;
+}
+.vendor-shell > .sidebar,
+.vendor-shell.sidebar-collapsed > .sidebar {
+  border-radius: var(--vendor-radius-block);
+}
+.vendor-menu-drawer {
+  border-radius: var(--vendor-radius-block) 0 0 var(--vendor-radius-block);
+}
+
+/* Buttons, fields, search/filter surfaces and popovers use the same compact radius. */
+:is(
+  .button, .search-field, .orders-search, .orders-source-filter select,
+  .orders-tabs, .segmented, .view-toggle, .vendor-menu-search,
+  .vendor-category-link, .vendor-category-panel .category-manager-row,
+  .vendor-category-notice, .permission-note, .orders-load-error,
+  .orders-actions > p[role="alert"], .review-table-filter, .review-reply-editor textarea,
+  .role-menu-popover, .venue-menu-popover, .item-actions-menu,
+  .menu-create-popover, .mobile-create-popover, .venue-create-preview,
+  .subscription-methods > button, .menu-image-editor .food-image,
+  .vendor-dish-thumb, .vendor-cover-preview, .vendor-cover-mini,
+  .field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+  .field select, .field textarea, .schedule-list input, .team-row select
+) {
+  border-radius: var(--vendor-radius-control);
+}
+.vendor-editor-card input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+.vendor-editor-card select,
+.vendor-editor-card textarea,
+.vendor-editor-card .menu-image-editor .food-image,
+.vendor-menu-group .button,
+.vendor-drawer-inner footer .button {
+  border-radius: var(--vendor-radius-control);
+}
+.vendor-shell .side-nav button,
+.orders-tabs button {
+  border-radius: var(--vendor-radius-control) !important;
+}
+.vendor-orders .orders-status,
+.orders-channel,
+.status,
+.review-table {
+  border-radius: var(--vendor-radius-badge);
+}
+
+/* Full-height mobile navigation and editors meet the screen edges. */
+@media (max-width: 900px) {
+  .vendor-shell > .sidebar,
+  .vendor-shell.sidebar-collapsed > .sidebar { border-radius: 0; }
+}
+@media (max-width: 760px) {
+  .vendor-menu-drawer { border-radius: 0; }
+}
+
+.notification-order-row {
+  position: static; text-align: start; border: 0; background: transparent; color: inherit; padding: 0; font: inherit; cursor: pointer;
+}
+.notification-list article { position: relative; }
+.notification-order-row::after { content: ""; position: absolute; inset: 0; }
+.vendor-order-banner {
+  position: fixed; z-index: 75; inset-inline-end: 16px; top: calc(64px + env(safe-area-inset-top));
+  width: min(360px, calc(100vw - 32px)); display: flex; align-items: center;
+  background: #09699a; color: white; border-radius: var(--vendor-radius-control); box-shadow: var(--shadow);
+}
+.vendor-order-banner button { border: 0; background: transparent; color: inherit; cursor: pointer; }
+.vendor-order-banner-body { flex: 1; display: flex; align-items: center; gap: 12px; padding: 14px 16px; font: inherit; text-align: start; }
+.vendor-order-banner-body small { display: block; margin-top: 2px; }
+.vendor-order-banner-close { width: 44px; height: 44px; margin-inline-end: 4px; }
+
+.vendor-orders .orders-ticket.just-arrived { background: #d2efff; box-shadow: inset 4px 0 #158fc9; }
+.vendor-orders .orders-ticket.just-arrived.selected { outline: 2px solid var(--blue); outline-offset: -2px; }
+@media (max-width: 760px) {
+  .orders-heading-actions { flex-wrap: wrap; }
+}
+
+.vendor-shell .orders-live { font-size: 15px; line-height: 1.45; color: var(--muted); }
+.vendor-shell .topbar-actions { gap: 8px; }
+.vendor-shell .topbar-action-trigger,
+.vendor-shell .topbar-language-trigger {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px; padding: 0 12px;
+  border: 0; border-radius: var(--vendor-radius-control); background: transparent; color: var(--ink);
+}
+.vendor-shell .topbar-action-trigger svg { width: 21px; height: 21px; }
+.vendor-shell .topbar-language-trigger b { font-size: 16px; }
+.vendor-shell .topbar-actions button[aria-expanded=true],
+.vendor-shell .topbar-action-trigger:hover, .vendor-shell .topbar-language-trigger:hover {
+  background: transparent; color: var(--blue);
+}
+.vendor-shell :is(.topbar-popover, .topbar-language-menu) {
+  padding: 16px; border: 0; border-radius: var(--vendor-radius-block);
+  background: white; box-shadow: 0 12px 32px rgba(23, 33, 43, .14);
+}
+.vendor-shell .notifications-popover { width: min(380px, calc(100vw - 24px)); }
+.vendor-shell .topbar-language-menu { width: 220px; }
+.vendor-shell :is(.topbar-search-results, .topbar-language-menu) button {
+  min-height: 44px; border-radius: var(--vendor-radius-control); font-size: 16px;
+}
+.vendor-shell .topbar-language-menu button span, .vendor-shell .topbar-search-input input { font-size: 16px; }
+.vendor-shell .topbar-language-menu button b, .vendor-shell .topbar-popover > header button { font-size: 14px; }
+.vendor-shell .topbar-popover > header strong { font-size: 18px; }
+.vendor-shell .notification-list article { padding: 12px; border-radius: var(--vendor-radius-control); }
+.vendor-shell .notification-list strong, .vendor-shell .notification-empty strong { font-size: 16px; }
+.vendor-shell .notification-list small, .vendor-shell .notification-empty p { font-size: 14px; }
+.vendor-shell .notification-empty { background: var(--surface-soft); border-radius: var(--vendor-radius-control); }
+@media (max-width: 640px) {
+  .vendor-shell .notifications-popover { position: fixed; top: 58px; right: 12px; }
+}
+@media (max-width: 640px) {
+  .vendor-shell .topbar-action-slot { display: block; }
+  .vendor-shell .topbar-search-popover {
+    position: fixed; top: 58px; right: 12px; width: min(360px, calc(100vw - 24px));
+  }
+}
+.orders-summary > .button { margin-top: 18px; }
+.order-booking-dialog {
+  width: min(440px, calc(100% - 24px)); margin: auto; padding: 24px; color: var(--ink);
+  border: 0; border-radius: var(--vendor-radius-block); background: white;
+}
+.order-booking-dialog::backdrop { background: rgb(23 33 43 / 40%); }
+.order-booking-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 20px; }
+.order-booking-dialog h3 { margin: 0; }
+
+.order-cancellation-dialog { border:0; border-radius:var(--vendor-radius-block, 28px); padding:24px; width:min(560px,calc(100vw - 24px)); color:var(--text,#202832); }
+.order-cancellation-dialog::backdrop { background:#18212c66; backdrop-filter:blur(3px); }
+.order-cancellation-dialog header { display:flex; align-items:center; justify-content:space-between; gap:16px; }
+.order-cancellation-dialog label { display:grid; gap:8px; margin-top:20px; }
+.order-cancellation-dialog select,.order-cancellation-dialog textarea { width:100%; padding:14px; border:0; border-radius:16px; background:#f5f6f8; font:inherit; }
+.order-cancellation-dialog textarea { min-height:100px; resize:vertical; }
+.order-cancellation-dialog small { display:block; text-align:right; color:#7b8794; }
+.order-cancellation-dialog footer { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:24px; }
+.order-cancellation-dialog footer button { width:100%; }
+.order-cancellation-dialog .danger { background:#d83c43; color:white; border:0; border-radius:16px; padding:14px; font:inherit; }
+.order-cancellation-dialog button:disabled { opacity:.5; }
+.orders-audit ol { list-style:none; padding:0; margin:0; }
+.orders-audit li { padding:16px 0; }
+.orders-audit li p { margin:6px 0; }
+.orders-audit-comment { white-space:pre-wrap; overflow-wrap:anywhere; }
+
+.orders-history-filters {display:flex;flex-wrap:wrap;gap:16px;align-items:end;margin-bottom:20px;background:white;border-radius:var(--vendor-radius-block,28px);padding:20px;}
+.orders-history-filters label {display:grid;gap:8px;flex:1;min-width:140px;}
+.orders-history-filters input,.orders-history-filters select {width:100%;min-width:0;background:#f4f5f7;border:0;border-radius:16px;padding:12px;font:inherit;color:inherit;}
+.orders-history-filters>span {width:100%;color:#788795;font-size:14px;}
+@media(max-width:760px){.vendor-orders.show-detail .orders-history-filters{display:none}.orders-history-filters{border-radius:0;padding:16px}.orders-history-filters label{min-width:120px}}
+.order-alert-dialog {border:0;border-radius:var(--vendor-radius-block,28px);padding:24px;width:min(560px,calc(100vw - 24px));max-height:calc(100dvh - 32px);overflow:auto;color:inherit;}
+.order-alert-dialog::backdrop {background:#17212b66;backdrop-filter:blur(4px)}
+.order-alert-dialog header,.order-alert-fields {display:flex;gap:16px;align-items:center;justify-content:space-between}
+.order-alert-dialog section {background:#f4f5f7;border-radius:20px;padding:16px;margin:16px 0}
+.order-alert-dialog label {display:grid;gap:8px;flex:1}
+.order-alert-dialog input {min-width:0;width:100%;border:0;background:#f4f5f7;border-radius:12px;padding:12px;font:inherit;color:inherit}
+.order-alert-dialog section input {background:white}
+.order-alert-dialog input[type=color]{height:48px;padding:6px;cursor:pointer}
+.order-alert-dialog footer {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}
+.order-alert-dialog footer>*{width:100%;justify-content:center}
+.order-alert-preview {padding:14px;border-radius:16px;margin-top:12px;font-weight:600}
+.orders-waiting-time {display:flex;align-items:center;gap:6px;font-weight:600}
+.orders-ticket.waiting-alert .orders-ticket-source,.orders-ticket.waiting-alert .orders-ticket-count,.orders-ticket.waiting-alert .orders-ticket-bottom,.orders-ticket.waiting-alert .orders-ticket-bottom>span,.orders-ticket.waiting-alert .orders-ticket-visit {color:inherit}
+.orders-ticket.waiting-alert.selected {outline:3px solid #149ed0;outline-offset:-3px}
+
+/* Compact queue tickets: price and source at left, waiting clock at right. */
+.vendor-orders .orders-ticket { position:relative; padding:16px; min-height:112px; }
+.orders-ticket-summary { display:flex; flex-direction:column; gap:5px; padding-right:66px; min-width:0; }
+.orders-ticket-price { font-size:20px; line-height:1.25; }
+.orders-ticket-number { font-size:14px; line-height:1.3; }
+.orders-ticket .orders-ticket-source { margin:0; font-size:14px; line-height:1.35; color:inherit; }
+.orders-ticket-timer { position:absolute; right:14px; top:14px; width:52px; height:52px; color:inherit; }
+.orders-ticket-timer svg { width:100%; height:100%; fill:none; stroke:currentColor; stroke-width:2; transform:rotate(-90deg); }
+.orders-ticket-timer .timer-track { opacity:.2; }
+.orders-ticket-timer .timer-progress { stroke-linecap:round; transition:stroke-dasharray 1s linear; }
+.orders-ticket-timer>span { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.05; }
+.orders-ticket-timer b { font-size:16px; font-weight:600; }
+.orders-ticket-timer small { font-size:11px; margin-top:2px; }
+.orders-ticket-state { position:absolute; top:16px; right:14px; max-width:92px; font-size:10px; }
+.orders-ticket:has(.orders-ticket-state) .orders-ticket-summary { padding-right:100px; }
+.orders-ticket .orders-ticket-visit { margin:8px 0 0; color:inherit; font-size:12px; }
+.vendor-orders .orders-ticket.just-arrived { background:#219ED9; box-shadow:none; }

@@ -4,6 +4,7 @@ import { getPublicVenue, getPublicVenueMenu, getSavedPublicReservation, getVenue
 import { I18nProvider } from "../i18n";
 import { VenueDetailsScreen } from "./venue-details";
 
+vi.mock("next/navigation", () => ({useRouter:()=>({push:vi.fn(),replace:vi.fn()}),usePathname:()=>"/ru/r/venue-a"}));
 vi.mock("../../../lib/public-catalog-api", async (original) => ({ ...await original<object>(), getPublicVenue: vi.fn(), getPublicVenueMenu: vi.fn(), getSavedPublicReservation: vi.fn(), getVenueAvailability: vi.fn() }));
 const date = (() => { const value = new Date(); value.setUTCDate(value.getUTCDate() + 2); return value.toISOString().slice(0, 10); })();
 const menu: PublicMenuCategory[] = [
@@ -25,6 +26,23 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("VenueDetailsScreen preorder categories", () => {
+  it("switches mobile menu layout beside the booking button without a burger", async () => {
+    localStorage.clear();
+    vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() })));
+    render(<I18nProvider initialLocale="ru"><VenueDetailsScreen venueID="venue-a" onBack={vi.fn()} saved={false} /></I18nProvider>);
+    const categories = await screen.findByRole("navigation", { name: "Категории меню" });
+    expect(screen.queryByRole("button", { name: "Настройки меню" })).not.toBeInTheDocument();
+    expect(within(categories).queryByRole("button", { name: "Показать списком" })).not.toBeInTheDocument();
+    const toggle = screen.getByRole("button", { name: "Показать списком" });
+    expect(toggle.previousElementSibling).toBe(screen.getByRole("button", { name: "Забронировать онлайн" }));
+    expect(screen.queryByRole("button", { name: "Открыть информацию о заведении" })).not.toBeInTheDocument();
+    fireEvent.click(toggle);
+    expect(screen.getByRole("button", { name: "Подробнее о блюде: Паста" }).closest(".venue-public-menu-grid")).toHaveClass("venue-public-menu-list");
+    expect(localStorage.getItem("pocket:menu-view")).toBe("list");
+    fireEvent.click(screen.getByRole("button", { name: "Показать сеткой" }));
+    expect(screen.getByRole("button", { name: "Подробнее о блюде: Паста" }).closest(".venue-public-menu-grid")).not.toHaveClass("venue-public-menu-list");
+  });
+
   it("keeps ordinary menu and dish information intact, filters preorder and permits removing newly disabled dishes", async () => {
     render(<I18nProvider initialLocale="ru"><VenueDetailsScreen venueID="venue-a" onBack={vi.fn()} saved={false} /></I18nProvider>);
     expect(await screen.findByRole("button", { name: "Напитки" })).toBeInTheDocument();
@@ -51,4 +69,43 @@ describe("VenueDetailsScreen preorder categories", () => {
     expect(screen.getByLabelText("Имя")).toHaveValue("Anna Guest");
     expect(screen.getByRole("button", { name: "Напитки" })).toBeInTheDocument();
   });
+});
+
+it("uses the reservation route entry on mobile without starting checkout", async () => {
+ vi.stubGlobal("matchMedia",vi.fn(()=>({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
+ const onReserve=vi.fn();
+ render(<I18nProvider initialLocale="ru"><VenueDetailsScreen standalone venueID="venue-a" onBack={vi.fn()} onReserve={onReserve} saved={false}/></I18nProvider>);
+ await screen.findByRole("heading",{name:"Demo Bistro"});
+ expect(screen.queryByRole("heading",{name:"Бронирование",exact:true})).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole("button",{name:"Забронировать онлайн",exact:true}));
+ expect(onReserve).toHaveBeenCalledOnce();
+ expect(screen.queryByRole("button",{name:"18:00"})).not.toBeInTheDocument();
+});
+it("closes the mobile reservation flow with the close button", async () => {
+ vi.stubGlobal("matchMedia",vi.fn(()=>({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()})));
+ const onBack=vi.fn();
+ render(<I18nProvider initialLocale="ru"><VenueDetailsScreen standalone reservationPage venueID="venue-a" onBack={onBack} saved={false}/></I18nProvider>);
+ const dialog=await screen.findByRole("dialog",{name:"Бронирование"});
+ expect(await within(dialog).findByRole("button",{name:"18:00"})).toBeInTheDocument();
+ fireEvent.click(within(dialog.querySelector(".venue-booking-heading")! as HTMLElement).getByRole("button",{name:"Закрыть",exact:true}));
+ expect(screen.queryByRole("dialog",{name:"Настройки меню"})).not.toBeInTheDocument();
+ expect(onBack).toHaveBeenCalledOnce();
+});
+
+it("shows desktop booking immediately and changes menu view without losing the selected time", async () => {
+ localStorage.clear();
+ const onReserve=vi.fn();
+ render(<I18nProvider initialLocale="ru"><VenueDetailsScreen standalone menuPage venueID="venue-a" onBack={vi.fn()} onReserve={onReserve} saved={false}/></I18nProvider>);
+ fireEvent.click(await screen.findByRole("button",{name:"18:00"}));
+ const categories=screen.getByRole("navigation",{name:"Категории меню"});
+ const controls=within(categories.parentElement!);
+ fireEvent.click(controls.getByRole("button",{name:"Показать списком"}));
+ expect(screen.getByRole("button",{name:"Подробнее о блюде: Паста"}).closest(".venue-public-menu-grid")).toHaveClass("venue-public-menu-list");
+ expect(localStorage.getItem("pocket:menu-view")).toBe("list");
+ expect(screen.getByRole("button",{name:"18:00"})).toHaveAttribute("aria-pressed","true");
+ fireEvent.click(controls.getByRole("button",{name:"Показать сеткой"}));
+ expect(screen.getByRole("button",{name:"Подробнее о блюде: Паста"}).closest(".venue-public-menu-grid")).not.toHaveClass("venue-public-menu-list");
+ fireEvent.click(screen.getByRole("button",{name:"Забронировать",exact:true}));
+ expect(screen.getByRole("dialog",{name:"Бронирование"})).toBeInTheDocument();
+ expect(onReserve).not.toHaveBeenCalled();
 });

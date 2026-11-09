@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { updateOwnerVenue, type OwnerVenue } from "../../../lib/owner-api";
 import { VenueScreen } from "./venue";
 
@@ -22,7 +22,35 @@ const venue: OwnerVenue = {
   created_at: "2026-01-01T00:00:00Z",
 };
 
+afterEach(() => vi.unstubAllGlobals());
+
 describe("VenueScreen", () => {
+  it("uploads a contained logo, persists it separately from the cover and can remove it", async () => {
+    const logoURL = "data:image/webp;base64,dGVzdA==";
+    vi.stubGlobal("Image", class {
+      naturalWidth = 800;
+      naturalHeight = 400;
+      onload?: () => void;
+      set src(_value: string) { queueMicrotask(() => this.onload?.()); }
+    });
+    vi.stubGlobal("URL", class extends URL { static createObjectURL = vi.fn(() => "blob:logo"); static revokeObjectURL = vi.fn(); });
+    const drawImage = vi.fn();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(logoURL);
+    vi.mocked(updateOwnerVenue).mockImplementation(async (_id, input) => ({ ...venue, ...input, settings: input.settings ?? {} } as OwnerVenue));
+    vi.mocked(updateOwnerVenue).mockClear();
+    const notify = vi.fn();
+    render(<VenueScreen venue={{ ...venue, settings: { ...venue.settings, cover_image_url: "/cover.jpg" } }} notify={notify} />);
+    fireEvent.change(screen.getByLabelText("Загрузить иконку заведения"), { target: { files: [new File(["logo"], "logo.png", { type: "image/png" })] } });
+    await waitFor(() => expect(notify).toHaveBeenCalledWith("Иконка готова. Нажмите «Сохранить»"));
+    expect(drawImage).toHaveBeenCalledWith(expect.anything(), 0, 128, 512, 256);
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить", exact: true })[0]);
+    await waitFor(() => expect(updateOwnerVenue).toHaveBeenCalledWith("venue-1", expect.objectContaining({ settings: expect.objectContaining({ logo_image_url: logoURL, cover_image_url: "/cover.jpg" }) })));
+    fireEvent.click(screen.getByRole("button", { name: "Удалить иконку", exact: true }));
+    await screen.findByRole("button", { name: "Загрузить иконку", exact: true });
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить", exact: true })[0]);
+    await waitFor(() => expect(updateOwnerVenue).toHaveBeenLastCalledWith("venue-1", expect.objectContaining({ settings: expect.objectContaining({ logo_image_url: "", cover_image_url: "/cover.jpg" }) })));
+  });
   it("saves currency without resending layout or account language settings", async () => {
     vi.mocked(updateOwnerVenue).mockImplementation(async (_id, input) => ({ ...venue, ...input, settings: input.settings ?? {} } as OwnerVenue));
 

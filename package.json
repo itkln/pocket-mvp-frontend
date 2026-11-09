@@ -6,14 +6,17 @@
     "dev": "npm run dev:vendor",
     "dev:vendor": "next dev apps/vendor -p 3000",
     "dev:spots": "next dev apps/spots -p 3001",
-    "build": "npm run build:vendor && npm run build:spots",
+    "build": "npm run build:vendor && npm run build:dish",
     "build:vendor": "next build apps/vendor",
     "build:spots": "next build apps/spots",
     "start": "npm run start:vendor",
     "start:vendor": "next start apps/vendor -p 3000",
     "start:spots": "next start apps/spots -p 3001",
     "lint": "eslint .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "dev:dish": "next dev apps/dish -p 3001",
+    "build:dish": "next build apps/dish",
+    "start:dish": "next start apps/dish -p 3001"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

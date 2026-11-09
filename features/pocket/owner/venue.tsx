@@ -7,11 +7,14 @@ import { useConfirm } from "../confirm-dialog";
 import { useI18n } from "../i18n";
 import { useLocalizedError } from "../error-message";
 import { Button, Field, PageHeader, PanelTitle } from "../ui";
+import { PublicPageSettings } from "./public-page";
 import { FloorPlan } from "../floor-plan";
+import { VenueLogo } from "../venue-logo";
 
 const venueTabs = [
   { id: "Основное", icon: Store },
   { id: "Расписание", icon: Clock3 },
+  { id: "Страница и QR", icon: Store },
   { id: "Заказы", icon: ShoppingBag },
   { id: "План зала", icon: LayoutDashboard },
   { id: "Уведомления", icon: Bell },
@@ -34,6 +37,9 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
   const [deleting, setDeleting] = useState(false);
   const [processingCover, setProcessingCover] = useState(false);
   const coverInput = useRef<HTMLInputElement>(null);
+  const logoInput = useRef<HTMLInputElement>(null);
+  const [processingLogo, setProcessingLogo] = useState(false);
+  const logoImage = settingText(draft, "logo_image_url");
   const floorTab = tab === "План зала";
   const set = (field: keyof VenueInput, value: string | Record<string, unknown>) => setDraft((current) => ({ ...current, [field]: value }));
   const coverImage = settingText(draft, "cover_image_url");
@@ -58,6 +64,25 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
     if (!await confirm({ description: t("Удалить обложку заведения?"), confirmLabel: t("Удалить") })) return;
     updateSettingValue("cover_image_url", "");
   };
+  const selectLogo = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) { notify("Выберите изображение в формате JPG, PNG или WebP"); return; }
+    if (file.size > 10 * 1024 * 1024) { notify("Изображение должно быть меньше 10 МБ"); return; }
+    setProcessingLogo(true);
+    try {
+      updateSettingValue("logo_image_url", await prepareLogoImage(file));
+      notify("Иконка готова. Нажмите «Сохранить»");
+    } catch {
+      notify("Не удалось обработать изображение");
+    } finally {
+      setProcessingLogo(false);
+    }
+  };
+  const removeLogo = async () => {
+    if (await confirm({ description: t("Удалить иконку заведения?"), confirmLabel: t("Удалить") })) updateSettingValue("logo_image_url", "");
+  };
   const save = async () => { setSaving(true); try { const updated = await updateOwnerVenue(venue.id, draft); onUpdate?.(updated); notify("Изменения сохранены"); } catch (error) { notify(errorMessage(error, "Не удалось сохранить изменения")); } finally { setSaving(false); } };
   const removeVenue = async () => {
     if (!onDelete || !await confirm({
@@ -75,10 +100,10 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
     }
   };
 
-  const saveButton = <Button icon={Check} disabled={saving || processingCover} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button>;
+  const saveButton = <Button icon={Check} disabled={saving || processingCover || processingLogo} onClick={() => void save()}>{saving ? "Сохраняем..." : "Сохранить"}</Button>;
 
   return <div className={`venue-settings-page ${floorTab ? "wide" : ""}`}>
-    <PageHeader title={venue.name} actions={!floorTab ? <div className="venue-desktop-save">{saveButton}</div> : undefined} />
+    <PageHeader title={venue.name} actions={!floorTab && tab !== "Страница и QR" ? <div className="venue-desktop-save">{saveButton}</div> : undefined} />
     <label className="venue-section-select">
       <span>Раздел</span>
       <select value={tab} onChange={(event) => setTab(event.target.value)}>
@@ -91,15 +116,22 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
         {venueTabs.map(({ id, icon: Icon }) => <button className={tab === id ? "active" : ""} key={id} onClick={() => setTab(id)}><Icon size={18} strokeWidth={1.8} /><span>{id}</span></button>)}
       </aside>
       {floorTab ? <section className="floor-settings-editor"><FloorPlan mode="owner" venueID={venue.id} venueName={venue.name} notify={notify} embedded /></section> : <section className="panel settings-form">
-        {tab === "Основное" ? <>
+        {tab === "Страница и QR" ? <PublicPageSettings venue={venue} notify={notify}/> : tab === "Основное" ? <>
           <PanelTitle title="Профиль заведения" subtitle="Эти данные видят гости." />
           <div className="cover-upload"><div className={`cover-photo ${coverImage ? "custom" : ""}`} style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined} role="img" aria-label="Обложка заведения" /><input ref={coverInput} className="cover-input" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => void selectCover(event)} /><div className="cover-actions">{coverImage && <Button kind="secondary" icon={Trash2} onClick={() => void removeCover()}>Удалить</Button>}<Button kind="secondary" icon={ImagePlus} disabled={processingCover} onClick={() => coverInput.current?.click()}>{processingCover ? "Обрабатываем..." : "Изменить обложку"}</Button></div></div>
+          <div className="venue-logo-upload">
+            <VenueLogo venueID={venue.id} name={draft.name} imageURL={logoImage} />
+            <div className="venue-logo-upload-content"><strong>{t("Иконка заведения")}</strong><p>{t("Показывается в подтверждении бронирования.")}</p>
+              <input ref={logoInput} className="cover-input" type="file" aria-label={t("Загрузить иконку заведения")} accept="image/jpeg,image/png,image/webp" onChange={(event) => void selectLogo(event)} />
+              <div className="venue-logo-upload-actions"><Button kind="secondary" icon={ImagePlus} disabled={processingLogo} onClick={() => logoInput.current?.click()}>{processingLogo ? "Обрабатываем..." : logoImage ? "Изменить иконку" : "Загрузить иконку"}</Button>{logoImage && <Button kind="quiet" icon={Trash2} ariaLabel={t("Удалить иконку")} onClick={() => void removeLogo()}>Удалить</Button>}</div>
+            </div>
+          </div>
           <div className="form-grid"><Field label="Название"><input value={draft.name} onChange={(event) => set("name", event.target.value)} /></Field><Field label="Тип кухни"><input value={draft.cuisine_type ?? ""} onChange={(event) => set("cuisine_type", event.target.value)} placeholder="Современная европейская" /></Field><Field label="Телефон"><input value={draft.phone ?? ""} onChange={(event) => set("phone", event.target.value)} /></Field><Field label="E-mail"><input type="email" value={draft.email ?? ""} onChange={(event) => set("email", event.target.value)} /></Field><Field label="Город"><input value={draft.city} onChange={(event) => set("city", event.target.value)} /></Field><Field label="Адрес"><input value={draft.address} onChange={(event) => set("address", event.target.value)} /></Field><Field label="Описание" wide><textarea value={draft.description ?? ""} onChange={(event) => set("description", event.target.value)} /></Field><Field label="Статус"><select value={draft.status} onChange={(event) => set("status", event.target.value)}><option value="draft">Черновик</option><option value="active">Открыто</option><option value="paused">Приостановлено</option><option value="closed">Закрыто</option></select></Field></div>
           <PanelTitle title="Валюта" subtitle="Используется в меню, заказах и отчетах." />
           <div className="form-grid localization-grid"><Field label="Валюта меню и заказов"><select value={draft.currency ?? "EUR"} onChange={(event) => set("currency", event.target.value)}>{currencyOptions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select></Field></div>
           {onDelete && <section className="venue-delete-section"><div><strong>Удалить заведение</strong><p>Меню, план зала и история заведения станут недоступны.</p></div><Button kind="danger" icon={Trash2} disabled={deleting} onClick={() => void removeVenue()}>{deleting ? "Удаление..." : "Удалить заведение"}</Button></section>}
         </> : tab === "Расписание" ? <ScheduleSettings draft={draft} setDraft={setDraft} /> : tab === "Заказы" ? <OrderSettings draft={draft} setDraft={setDraft} /> : <NotificationSettings draft={draft} setDraft={setDraft} />}
-        <footer className="venue-mobile-save">{saveButton}</footer>
+        {tab !== "Страница и QR" && <footer className="venue-mobile-save">{saveButton}</footer>}
       </section>}
     </div>
   </div>;
@@ -145,6 +177,34 @@ export const prepareCoverImage = (file: File) => new Promise<string>((resolve, r
     const firstPass = canvas.toDataURL("image/jpeg", 0.8);
     resolve(firstPass.length <= 800_000 ? firstPass : canvas.toDataURL("image/jpeg", 0.62));
     URL.revokeObjectURL(objectURL);
+  };
+  image.onerror = () => { URL.revokeObjectURL(objectURL); reject(new Error("Invalid image")); };
+  image.src = objectURL;
+});
+
+export const prepareLogoImage = (file: File) => new Promise<string>((resolve, reject) => {
+  const objectURL = URL.createObjectURL(file);
+  const image = new Image();
+  image.onload = () => {
+    try {
+      if (!image.naturalWidth || !image.naturalHeight) throw new Error("Invalid image dimensions");
+      const canvas = document.createElement("canvas");
+      const render = (size: number, quality: number) => {
+        canvas.width = canvas.height = size;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Canvas is unavailable");
+        const scale = Math.min(size / image.naturalWidth, size / image.naturalHeight);
+        const width = image.naturalWidth * scale;
+        const height = image.naturalHeight * scale;
+        context.drawImage(image, (size - width) / 2, (size - height) / 2, width, height);
+        return canvas.toDataURL("image/webp", quality);
+      };
+      let result = render(512, 0.85);
+      if (result.length > 180_000) result = render(256, 0.7);
+      if (result.length > 200_000) throw new Error("Image is too large");
+      resolve(result);
+    } catch (error) { reject(error); }
+    finally { URL.revokeObjectURL(objectURL); }
   };
   image.onerror = () => { URL.revokeObjectURL(objectURL); reject(new Error("Invalid image")); };
   image.src = objectURL;

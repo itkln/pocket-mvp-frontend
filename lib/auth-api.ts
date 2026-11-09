@@ -54,7 +54,7 @@ export async function logout(): Promise<void> {
   await apiRequest<void>("/auth/logout", { method: "POST" });
 }
 
-export async function requestPasswordReset(email: string, locale: string, product: "vendor" | "spots" = "vendor"): Promise<void> {
+export async function requestPasswordReset(email: string, locale: string, product: "vendor" | "spots" | "dish" = "vendor"): Promise<void> {
   await apiRequest<{ status: string }>("/auth/password-reset/request", {
     method: "POST",
     body: JSON.stringify({ email, locale, product }),

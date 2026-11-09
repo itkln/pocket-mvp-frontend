@@ -15,6 +15,8 @@ const account: AuthUser = { id: "user-1", email: "guest@example.test", first_nam
 afterEach(() => vi.unstubAllGlobals());
 
 beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
   vi.mocked(createPublicReservation).mockReset();
   vi.mocked(getPublicVenueMenu).mockReset();
   vi.mocked(getVenueAvailability).mockImplementation(async (venueID, selectedDate, guests) => ({
@@ -83,12 +85,17 @@ describe("DesktopBookingFlow", () => {
     expect(screen.getByText("Оплата в заведении")).toBeInTheDocument();
     expect(createPublicReservation).not.toHaveBeenCalled();
     expect(screen.getByText("Guest Name")).toBeInTheDocument();
+    expect(screen.queryByRole("group", { name: "Чаевые" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Другая сумма" })).not.toBeInTheDocument();
+    expect(screen.getByText("Итого к оплате").parentElement).toHaveTextContent("12,00");
     fireEvent.click(screen.getByRole("button", { name: "Назад" }));
     expect(onMenuModeChange).toHaveBeenLastCalledWith(true);
     expect(createPublicReservation).not.toHaveBeenCalled();
     act(() => ref.current?.checkout());
     fireEvent.click(screen.getByRole("button", { name: "Забронировать" }));
     await waitFor(() => expect(createPublicReservation).toHaveBeenCalledOnce());
+    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).toMatchObject({ expected_total_minor: 1200 });
+    expect(vi.mocked(createPublicReservation).mock.calls[0][1]).not.toHaveProperty("tip");
     expect(vi.mocked(createPublicReservation).mock.calls[0][1].items).toEqual([{ menu_item_id: "pasta", quantity: 1, expected_price_minor: 1200 }]);
     expect(await screen.findByText("Номер предзаказа: 42")).toBeInTheDocument();
   });

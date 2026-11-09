@@ -4,7 +4,7 @@ import { useRef, useState, type ChangeEvent } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
 import { IconButton } from "./ui";
 
-export function MenuImageField({ value, name, onChange }: { value: string; name: string; onChange: (value: string) => void }) {
+export function MenuImageField({ value, name, onChange, onProcessingChange }: { value: string; name: string; onChange: (value: string) => void; onProcessingChange?: (processing: boolean) => void }) {
   const input = useRef<HTMLInputElement>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
@@ -18,6 +18,7 @@ export function MenuImageField({ value, name, onChange }: { value: string; name:
       return;
     }
     setProcessing(true);
+    onProcessingChange?.(true);
     setError("");
     try {
       onChange(await prepareMenuImage(file));
@@ -25,6 +26,7 @@ export function MenuImageField({ value, name, onChange }: { value: string; name:
       setError("Не удалось обработать изображение");
     } finally {
       setProcessing(false);
+      onProcessingChange?.(false);
     }
   };
 

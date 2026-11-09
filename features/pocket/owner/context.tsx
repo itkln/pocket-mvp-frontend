@@ -1,17 +1,22 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
-  createCategory, createMenuItem, createStaff, deleteCategory, deleteMenuItem, deleteStaff,
-  getOwnerDashboard, listCategories, listMenuItems, listOrders, listPayments, listReviews, listStaff,
+  getOrderAlertSettings, saveOrderAlertSettings, type OrderAlertSettings, resendStaffInvitation, createCategory, createMenuItem, createStaff, deleteCategory, deleteMenuItem, deleteStaff,
+  listOrderPage, type OrderQuery, type OrderPage, getOrder, getOwnerDashboard, listCategories, listMenuItems, loadOrderQueue, listPayments, listReviews, listStaff,
   reorderCategories as saveCategoryOrder, reorderMenuItems as saveMenuItemOrder,
   replyReview, updateCategory, updateMenuItem, updateOrderStatus, updateStaff,
   type CategoryInput, type MenuItemInput, type OwnerCategory, type OwnerDashboard, type OwnerMenuItem,
-  type OwnerOrder, type OwnerPayment, type OwnerReview, type OwnerStaffMember, type StaffInput,
+  type OrderCancellation, type OwnerOrder, type OwnerPayment, type OwnerReview, type OwnerStaffMember, type StaffInput,
 } from "../../../lib/owner-api";
 import { useLocalizedError } from "../error-message";
 
 type OwnerWorkspace = {
+ orderAlerts?: OrderAlertSettings;
+ saveOrderAlerts: (value:OrderAlertSettings)=>Promise<void>;
+  venueTimezone?: string;
+  readScope?: string;
+  onArrivals?: (orders: OwnerOrder[]) => void;
   loading: boolean;
   error: string;
   dashboard: OwnerDashboard | null;
@@ -22,6 +27,9 @@ type OwnerWorkspace = {
   reviews: OwnerReview[];
   payments: OwnerPayment[];
   refresh: () => Promise<void>;
+  refreshOrders: () => Promise<OwnerOrder[] | undefined>;
+  hasMoreOrderHistory: boolean;
+  loadMoreOrderHistory: () => Promise<void>;
   addCategory: (input: CategoryInput) => Promise<void>;
   editCategory: (id: string, input: CategoryInput) => Promise<void>;
   removeCategory: (id: string) => Promise<void>;
@@ -30,10 +38,13 @@ type OwnerWorkspace = {
   removeItem: (id: string) => Promise<void>;
   reorderCategories: (ids: string[]) => Promise<void>;
   reorderItems: (categoryID: string, ids: string[]) => Promise<void>;
-  inviteStaff: (input: StaffInput) => Promise<void>;
+  resendInvitation: (id:string) => Promise<void>;
+  inviteStaff: (input: StaffInput) => Promise<boolean>;
   editStaff: (id: string, input: StaffInput) => Promise<void>;
   removeStaff: (id: string) => Promise<void>;
-  setOrderStatus: (id: string, status: OwnerOrder["status"]) => Promise<void>;
+  getHistoryPage?: (query: OrderQuery) => Promise<OrderPage>;
+  getOrderDetails: (id: string) => Promise<OwnerOrder>;
+  setOrderStatus: (id: string, status: OwnerOrder["status"], cancellation?: OrderCancellation) => Promise<void>;
   answerReview: (id: string, reply: string) => Promise<void>;
 };
 
@@ -51,7 +62,7 @@ function applyCategoryItemOrder(items: OwnerMenuItem[], categoryID: string, ids:
   return items.map((item) => item.category_id === categoryID ? ordered[index++] : item);
 }
 
-export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID?: string; children: ReactNode; onError: (message: string) => void }) {
+export function OwnerWorkspaceProvider({ venueID, venueTimezone, children, onError, onArrivals, readScope, ordersOnly = false }: { venueTimezone?: string; readScope?: string; onArrivals?: (orders: OwnerOrder[]) => void; ordersOnly?: boolean; venueID?: string; children: ReactNode; onError: (message: string) => void }) {
   const errorMessage = useLocalizedError();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -59,12 +70,23 @@ export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID
   const [categories, setCategories] = useState<OwnerCategory[]>([]);
   const [items, setItems] = useState<OwnerMenuItem[]>([]);
   const [staff, setStaff] = useState<OwnerStaffMember[]>([]);
+  const queueScope = useRef(new AbortController());
+  useEffect(() => {
+    if (queueScope.current.signal.aborted) queueScope.current = new AbortController();
+    const controller = queueScope.current;
+    return () => controller.abort();
+  }, [venueID, ordersOnly]);
+  const ordersRevision = useRef(0);
+  const orderMutationPending = useRef(false);
+  const [orderAlerts, setOrderAlerts] = useState<OrderAlertSettings>();
   const [orders, setOrders] = useState<OwnerOrder[]>([]);
+  const historyPages = useRef(1);
+  const [hasMoreOrderHistory, setHasMoreOrderHistory] = useState(false);
   const [reviews, setReviews] = useState<OwnerReview[]>([]);
   const [payments, setPayments] = useState<OwnerPayment[]>([]);
 
-  const run = useCallback(async (operation: () => Promise<void>) => {
-    try { setError(""); await operation(); }
+  const run = useCallback(async <T,>(operation: () => Promise<T>): Promise<T> => {
+    try { setError(""); return await operation(); }
     catch (caught) { const message = errorMessage(caught); setError(message); onError(message); throw caught; }
   }, [errorMessage, onError]);
 
@@ -74,26 +96,50 @@ export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID
       return;
     }
     setLoading(true);
+    const revision = ++ordersRevision.current;
     try {
+      if (ordersOnly) {
+        const next=await loadOrderQueue(venueID, historyPages.current, "staff", queueScope.current.signal);
+        if(revision===ordersRevision.current){setOrders(next.orders);setHasMoreOrderHistory(next.hasMoreHistory);}
+        setError(""); return;
+      }
       const [nextDashboard, nextCategories, nextItems, nextStaff, nextOrders, nextReviews, nextPayments] = await Promise.all([
         getOwnerDashboard(venueID), listCategories(venueID), listMenuItems(venueID), listStaff(venueID),
-        listOrders(venueID), listReviews(venueID), listPayments(venueID),
+        loadOrderQueue(venueID, historyPages.current, "owner", queueScope.current.signal), listReviews(venueID), listPayments(venueID),
       ]);
       setDashboard(nextDashboard); setCategories(nextCategories); setItems(nextItems); setStaff(nextStaff);
-      setOrders(nextOrders); setReviews(nextReviews); setPayments(nextPayments); setError("");
+      if (revision === ordersRevision.current) { setOrders(nextOrders.orders); setHasMoreOrderHistory(nextOrders.hasMoreHistory); }
+      setReviews(nextReviews); setPayments(nextPayments); setError("");
     } catch (caught) {
+      if (caught instanceof Error && caught.name === "AbortError") return;
       const message = errorMessage(caught, "Не удалось загрузить данные заведения");
       setError(message); onError(message);
     } finally { setLoading(false); }
-  }, [errorMessage, venueID, onError]);
+  }, [errorMessage, venueID, onError, ordersOnly]);
+
+  const refreshOrders = useCallback(async () => {
+    if (!venueID || orderMutationPending.current) return;
+    const revision = ++ordersRevision.current;
+    const [next, alerts] = await Promise.all([loadOrderQueue(venueID, historyPages.current, ordersOnly ? "staff" : "owner", queueScope.current.signal), getOrderAlertSettings(venueID, ordersOnly ? "staff" : "owner")]);
+    if (revision === ordersRevision.current) setOrderAlerts(alerts);
+    if (revision === ordersRevision.current) { setOrders(next.orders); setHasMoreOrderHistory(next.hasMoreHistory); return next.orders; }
+  }, [venueID, ordersOnly]);
+
+  const loadMoreOrderHistory = useCallback(async () => {
+    historyPages.current += 1;
+    try { await refreshOrders(); } catch (error) { historyPages.current -= 1; throw error; }
+  }, [refreshOrders]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void refresh(), 0);
     return () => window.clearTimeout(timeout);
   }, [refresh]);
 
+  const getHistoryPage = useCallback((query: OrderQuery) => listOrderPage(venueID!, {...query, scope: "history"}, ordersOnly ? "staff" : "owner"), [venueID, ordersOnly]);
+  const getOrderDetails = useCallback((id: string) => getOrder(venueID!, id, ordersOnly ? "staff" : "owner"), [venueID,ordersOnly]);
   const value = useMemo<OwnerWorkspace>(() => ({
-    loading,error,dashboard,categories,items,staff,orders,reviews,payments,refresh,
+    orderAlerts, saveOrderAlerts: async value => {const saved=await saveOrderAlertSettings(venueID!,value);setOrderAlerts(saved);},
+    venueTimezone,readScope,onArrivals,loading,error,dashboard,categories,items,staff,orders,reviews,payments,refresh,refreshOrders,hasMoreOrderHistory,loadMoreOrderHistory,
     addCategory: (input) => run(async()=>{const created=await createCategory(venueID!,input);setCategories(current=>[...current,created]);}),
     editCategory: (id,input) => run(async()=>{const updated=await updateCategory(venueID!,id,input);setCategories(current=>current.map(item=>item.id===id?updated:item));}),
     removeCategory: (id) => run(async()=>{await deleteCategory(venueID!,id);setCategories(current=>current.filter(item=>item.id!==id));}),
@@ -112,12 +158,23 @@ export function OwnerWorkspaceProvider({ venueID, children, onError }: { venueID
       try { await run(() => saveMenuItemOrder(venueID!, categoryID, ids)); }
       catch (error) { setItems(previous); throw error; }
     },
-    inviteStaff: (input) => run(async()=>{const created=await createStaff(venueID!,input);setStaff(current=>[...current,created]);}),
+    resendInvitation: (id) => run(()=>resendStaffInvitation(venueID!,id)),
+    inviteStaff: (input) => run(async()=>{const created=await createStaff(venueID!,input);setStaff(current=>[...current,created]);return created.invite_delivery!=="failed";}),
     editStaff: (id,input) => run(async()=>{const updated=await updateStaff(venueID!,id,input);setStaff(current=>current.map(item=>item.id===id?updated:item));}),
     removeStaff: (id) => run(async()=>{await deleteStaff(venueID!,id);setStaff(current=>current.filter(item=>item.id!==id));}),
-    setOrderStatus: (id,status) => run(async()=>{const updated=await updateOrderStatus(venueID!,id,status);setOrders(current=>current.map(item=>item.id===id?{...item,status:updated.status}:item));}),
+    getHistoryPage, getOrderDetails,
+    setOrderStatus: (id,status,cancellation) => run(async()=>{
+      const existing=orders.find(order=>order.id===id);
+      if(!existing) throw new Error("Заказ не найден");
+      orderMutationPending.current = true;
+      ++ordersRevision.current;
+      try {
+        const updated=await updateOrderStatus(venueID!,id,status,existing.status,ordersOnly ? "staff" : "owner",cancellation);
+        setOrders(current=>current.map(item=>item.id===id?updated:item));
+      } finally { orderMutationPending.current = false; }
+    }),
     answerReview: (id,reply) => run(async()=>{const updated=await replyReview(venueID!,id,reply);setReviews(current=>current.map(item=>item.id===id?updated:item));}),
-  }), [loading,error,dashboard,categories,items,staff,orders,reviews,payments,refresh,run,venueID]);
+  }), [orderAlerts,getHistoryPage,getOrderDetails,venueTimezone,readScope,onArrivals,loading,error,dashboard,categories,items,staff,orders,reviews,payments,refresh,refreshOrders,hasMoreOrderHistory,loadMoreOrderHistory,run,venueID,ordersOnly]);
 
   return <OwnerWorkspaceContext.Provider value={value}>{children}</OwnerWorkspaceContext.Provider>;
 }

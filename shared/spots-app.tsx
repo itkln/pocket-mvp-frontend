@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
@@ -9,6 +9,7 @@ import { DiscoverScreen, HistoryScreen } from "../features/pocket/customer";
 import { spotsCities, SpotsBottomNavigation, SpotsHeader } from "../features/pocket/customer/navigation";
 import { SavedPlacesScreen } from "../features/pocket/customer/discover";
 import { VenueDetailsScreen } from "../features/pocket/customer/venue-details";
+import { TableVenueScreen } from "../features/pocket/customer/table-venue";
 import { MyReservationsScreen } from "../features/pocket/customer/my-reservations";
 import type { PublicVenue } from "../lib/public-catalog-api";
 import { addSavedVenue, listSavedVenueIDs, removeSavedVenue } from "../lib/saved-venues-api";
@@ -18,11 +19,12 @@ import { useI18n } from "../features/pocket/i18n";
 import { localeFromPathname, type Locale } from "../features/pocket/locales";
 import { useAppShell } from "./use-app-shell";
 import { categoryForRoute, spotCategories } from "../features/pocket/customer/categories";
+import { spotsAuthPath } from "../lib/spots-auth-navigation";
 
-const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.filter((item) => !["browse-menu", "reservation"].includes(item.id)).map((item) => item.id), "saved", "reservations", "settings", "notifications", "venue"];
+const screens = [...spotCategories.map((item) => item.slug), ...customerNavigation.filter((item) => !["browse-menu", "reservation"].includes(item.id)).map((item) => item.id), "saved", "reservations", "settings", "notifications", "venue", "table"];
 const screenForRoute = (screen?: string) => screen && screens.includes(screen) ? screen : "discover";
 const spotsPath = (locale: Locale, screen: string) => `/${locale}/${screen}`;
-const isPublicScreen = (screen: string) => screen === "discover" || screen === "venue" || Boolean(categoryForRoute(screen));
+const isPublicScreen = (screen: string) => screen === "discover" || screen === "venue" || screen === "table" || Boolean(categoryForRoute(screen));
 type AccountDialogSection = "profile" | "security" | "notifications";
 const isAccountDialogSection = (value: string | null): value is AccountDialogSection => value === "profile" || value === "security" || value === "notifications";
 
@@ -46,7 +48,7 @@ const initialCity = () => {
   }
 };
 
-export default function SpotsApp({ initialScreen, initialVenueId }: { initialScreen?: string; initialVenueId?: string }) {
+export default function SpotsApp({ initialScreen, initialVenueId, initialQRToken }: { initialScreen?: string; initialVenueId?: string; initialQRToken?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { locale, t } = useI18n();
@@ -64,11 +66,18 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
 	const [savedRetry, setSavedRetry] = useState(0);
 	const pendingSaved = useRef(new Set<string>());
 	const [selectedVenueID, setSelectedVenueID] = useState(initialVenueId ?? "");
+  const venueSearchScope = screen === "venue" ? selectedVenueID : screen === "table" ? initialQRToken : undefined;
+  const [searchVenue, setSearchVenue] = useState<{ scope: string; name: string } | null>(null);
+  const onVenueLoaded = useCallback((venue: PublicVenue) => {
+    if (venueSearchScope) setSearchVenue({ scope: venueSearchScope, name: venue.name });
+  }, [venueSearchScope]);
+  const searchVenueName = venueSearchScope && searchVenue?.scope === venueSearchScope ? searchVenue.name : undefined;
 	const savedReady = Boolean(currentUser && savedForUser === currentUser.id);
   const appRef = useRef<HTMLDivElement>(null);
+  const signIn = () => router.push(spotsAuthPath(locale, "login", `${window.location.pathname}${window.location.search}${window.location.hash}`));
 
   useEffect(() => {
-    if (screen !== "discover" || !authReady) return;
+    if (screen !== "discover") return;
     const app = appRef.current;
     if (!app) return;
     let start: { x: number; y: number } | null = null;
@@ -94,11 +103,11 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
       app.removeEventListener("touchstart", onTouchStart);
       app.removeEventListener("touchmove", onTouchMove);
     };
-  }, [authReady, screen]);
+  }, [screen]);
 
   const toggleSaved = async (id: string) => {
     if (!currentUser) {
-      router.push(`/${locale}/login`);
+      signIn();
       return;
     }
     if (!savedReady || pendingSaved.current.has(id)) return;
@@ -156,7 +165,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
           if (initialScreen !== nextScreen) router.replace(spotsPath(routeLocale, nextScreen));
           return;
         }
-        router.replace(error instanceof AuthAPIError && error.status === 401 ? `/${routeLocale}/login` : `/${routeLocale}/login?error=unavailable`);
+        router.replace(spotsAuthPath(routeLocale, "login", `${window.location.pathname}${window.location.search}${window.location.hash}`, !(error instanceof AuthAPIError && error.status === 401)));
       });
     return () => { active = false; };
   }, [initialScreen, initialVenueId, router]);
@@ -174,7 +183,7 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
   const navigate = (next: string, params = new URLSearchParams()) => {
     const nextScreen = next.startsWith("venue/") ? "venue" : next;
     if (!currentUser && !isPublicScreen(nextScreen)) {
-      router.push(`/${locale}/login`);
+      router.push(spotsAuthPath(locale, "login", `${spotsPath(locale, next)}${params.size ? `?${params}` : ""}`));
       return;
     }
     setScreen(nextScreen);
@@ -186,13 +195,13 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
 
   const updateSearch = (key: "q" | "filter", value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    if (value && value !== "Все") params.set(key, value); else params.delete(key);
-    if (screen !== "discover" && !category) {
+    if (value && (key !== "filter" || value !== "Все")) params.set(key, value); else params.delete(key);
+    if (screen !== "discover" && !category && !venueSearchScope) {
       navigate("discover", new URLSearchParams(value ? { q: value } : {}));
       return;
     }
     // Next App Router syncs useSearchParams with the native History API.
-    window.history.replaceState(null, "", `${spotsPath(locale, screen)}${params.size ? `?${params}` : ""}`);
+    window.history.replaceState(null, "", `${venueSearchScope ? window.location.pathname : spotsPath(locale, screen)}${params.size ? `?${params}` : ""}`);
   };
   const navigateCategory = (slug: string) => navigate(slug, new URLSearchParams(searchQuery ? { q: searchQuery } : {}));
   const editProfile = () => {
@@ -256,19 +265,20 @@ export default function SpotsApp({ initialScreen, initialVenueId }: { initialScr
     window.scrollTo(0, 0);
   };
 
-  if (!authReady) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
+  if (!authReady && !isPublicScreen(screen)) return <main className="auth-loading" aria-live="polite">Проверяем сессию...</main>;
 
-  return <div ref={appRef} className={`pocket-spots ${currentUser ? "signed-in" : "guest"} ${screen === "venue" ? "venue-detail-active" : ""}`}>
+  return <div ref={appRef} className={`pocket-spots ${currentUser ? "signed-in" : "guest"} ${screen === "venue" || screen === "table" ? "venue-detail-active" : ""}`}>
     <SpotsHeader user={currentUser} screen={screen} city={city} onCityChange={(value) => {
       setCity(value);
       try { localStorage.setItem("pocket:spots-city", value); } catch { /* Keep the selection for this session. */ }
       navigate(category?.slug ?? "discover", category ? new URLSearchParams(searchParams.toString()) : new URLSearchParams());
-    }} searchQuery={searchQuery} categoryLabel={category?.label} onClearCategory={() => navigateCategory("discover")} onSearch={(value) => updateSearch("q", value)} onNavigate={navigate} onLogin={() => router.push(`/${locale}/login`)} onLogout={signOut} onEditProfile={editProfile} onAccountSection={openAccountSection} />
+    }} searchQuery={searchQuery} categoryLabel={category?.label} onClearCategory={() => navigateCategory("discover")} venueName={searchVenueName} onClearVenue={() => navigateCategory("discover")} onSearch={(value) => updateSearch("q", value)} onNavigate={navigate} onLogin={signIn} onLogout={signOut} onEditProfile={editProfile} onAccountSection={openAccountSection} />
     <TooltipContext.Provider value={false}><main className="spots-main">
       <div className={`spots-page ${category ? "has-category" : ""}`}>
         {(screen === "discover" || category) && <DiscoverScreen city={city} query={searchQuery} categorySlug={category?.slug} filter={filter} onCategoryChange={navigateCategory} onFilterChange={(value) => updateSearch("filter", value)} savedPlaces={savedReady ? savedPlaces : []} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onVenue={openVenue} />}
         {screen === "saved" && (savedReady ? <SavedPlacesScreen savedPlaces={savedPlaces} onToggleSaved={toggleSaved} onVenue={openVenue} /> : savedErrorUser === currentUser?.id ? <div className="spots-catalog-status" role="alert">Не удалось загрузить избранное <button type="button" className="button secondary" onClick={() => { setSavedErrorUser(""); setSavedRetry((value) => value + 1); }}>Повторить</button></div> : <div className="spots-catalog-status" role="status">Загружаем избранное...</div>)}
-        {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} user={currentUser} />}
+        {screen === "venue" && selectedVenueID && <VenueDetailsScreen key={selectedVenueID} venueID={selectedVenueID} saved={savedReady && savedPlaces.includes(selectedVenueID)} onToggleSaved={currentUser && savedReady ? toggleSaved : undefined} onBack={backToSource} user={currentUser} onVenueLoaded={onVenueLoaded} desktopMenuQuery={searchQuery} />}
+        {screen === "table" && initialQRToken && <TableVenueScreen user={currentUser} key={initialQRToken} token={initialQRToken} onBack={() => navigate("discover")} notify={shell.notify} onVenueLoaded={onVenueLoaded} desktopMenuQuery={searchQuery} />}
         {screen === "reservations" && currentUser && <MyReservationsScreen key={currentUser.id} onVenue={(id) => openVenue({ id })} onDiscover={() => navigate("discover")} />}
         {screen === "history" && <HistoryScreen />}
         {screen === "profile" && currentUser && <GuestProfile user={currentUser} onEditProfile={editProfile} onNavigate={navigate} onLogout={signOut} />}

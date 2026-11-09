@@ -7,11 +7,13 @@ import { useState, type FormEvent } from "react";
 import { useLocalizedError } from "../features/pocket/error-message";
 import { useI18n } from "../features/pocket/i18n";
 import { requestPasswordReset, resetPassword } from "../lib/auth-api";
+import { spotsAuthPath, spotsReturnTo } from "../lib/spots-auth-navigation";
 
 type RecoveryMode = "request" | "reset";
 
-export default function PasswordRecoveryPage({ mode, token = "", product = "vendor" }: { mode: RecoveryMode; token?: string; product?: "vendor" | "spots" }) {
+export default function PasswordRecoveryPage({ mode, token = "", product = "vendor", returnTo }: { mode: RecoveryMode; token?: string; product?: "vendor" | "spots" | "dish"; returnTo?: string }) {
   const { locale } = useI18n();
+  const authPath = (screen: "login" | "forgot-password") => product !== "vendor" ? spotsAuthPath(locale, screen, returnTo) : `/${locale}/${screen}`;
   const errorMessage = useLocalizedError();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -57,7 +59,7 @@ export default function PasswordRecoveryPage({ mode, token = "", product = "vend
 
   return <main className="auth-screen">
     <section className="auth-screen-content">
-      <Link className="auth-brand" href={`/${locale}`} aria-label="Pocket, на главную"><span className="auth-brand-mark"><Image src="/logo.svg" alt="" width={30} height={30} priority /></span><strong>Pocket</strong></Link>
+      <Link className="auth-brand" href={product === "dish" ? spotsReturnTo(returnTo, locale) : `/${locale}`} aria-label="Pocket, на главную"><span className="auth-brand-mark"><Image src="/logo.svg" alt="" width={30} height={30} priority /></span><strong>Pocket</strong></Link>
       <header className="auth-heading">
         {complete && <span className="auth-success-icon" aria-hidden="true"><MailCheck size={24} /></span>}
         <h1>{title}</h1>
@@ -70,11 +72,11 @@ export default function PasswordRecoveryPage({ mode, token = "", product = "vend
           <label className="auth-field"><span>Повторите новый пароль</span><span className="auth-password"><input name="confirmPassword" type={confirmPasswordVisible ? "text" : "password"} autoComplete="new-password" placeholder="Повторите новый пароль" minLength={12} maxLength={128} required /><button type="button" onClick={() => setConfirmPasswordVisible((current) => !current)} aria-label={confirmPasswordVisible ? "Скрыть пароль" : "Показать пароль"}>{confirmPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}</button></span></label>
         </>}
         {error && <p className="auth-error" role="alert">{error}</p>}
-        {!requestMode && error && <Link className="auth-recovery-link" href={`/${locale}/forgot-password`}>Запросить новую ссылку</Link>}
+        {!requestMode && error && <Link className="auth-recovery-link" href={authPath("forgot-password")}>Запросить новую ссылку</Link>}
         <button className="auth-submit" type="submit" disabled={submitting || (!requestMode && !token)}>{submitting ? requestMode ? "Отправляем..." : "Сохраняем..." : requestMode ? "Отправить ссылку" : "Сохранить пароль"}</button>
       </form>}
 
-      <p className="auth-switch">{complete && requestMode ? "Не получили письмо?" : "Вспомнили пароль?"} {complete && requestMode ? <button type="button" className="auth-link-button" onClick={() => setComplete(false)}>Отправить еще раз</button> : <Link href={`/${locale}/login`}>Вернуться ко входу</Link>}</p>
+      <p className="auth-switch">{complete && requestMode ? "Не получили письмо?" : "Вспомнили пароль?"} {complete && requestMode ? <button type="button" className="auth-link-button" onClick={() => setComplete(false)}>Отправить еще раз</button> : <Link href={authPath("login")}>Вернуться ко входу</Link>}</p>
     </section>
   </main>;
 }

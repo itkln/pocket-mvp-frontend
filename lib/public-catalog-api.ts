@@ -1,3 +1,4 @@
+import type { TipSelection } from "./gratuity";
 import type { MenuNutrition } from "./menu-nutrition";
 import { APIError, apiRequest } from "./api-client";
 
@@ -12,6 +13,7 @@ export type PublicVenue = {
   city: string;
   country_code: string;
   image_url?: string;
+  logo_url?: string;
   rating: number;
   review_count: number;
   tags: string[];
@@ -68,6 +70,8 @@ export type VenueAvailability = {
 };
 
 export type ReservationInput = {
+  tip?: TipSelection;
+  expected_total_minor?: number;
   starts_at: string;
   guests: number;
   guest_name: string;
@@ -83,6 +87,8 @@ export type CreatedReservation = {
   starts_at: string;
   guest_count: number;
   preorder_total_minor: number;
+  preorder_subtotal_minor?: number;
+  preorder_tip_minor?: number;
   preorder_order_number?: number;
   currency: string;
 };

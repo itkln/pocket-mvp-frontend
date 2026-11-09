@@ -63,7 +63,7 @@ export const customerNavigation = [
 ];
 
 export const staffNavigation = [
-  { id: "service", label: "Сервис", icon: Activity, count: 5 },
+  { id: "service", label: "Сервис", icon: Activity },
   { id: "kitchen", label: "Кухня", icon: Coffee },
   { id: "staff-floor", label: "Столы", icon: Table2 },
 ];
