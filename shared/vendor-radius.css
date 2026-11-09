@@ -1,10 +1,3 @@
-/* Vendor shape tokens apply after the shared legacy styles on every breakpoint. */
-:root {
-  --vendor-radius-block: 28px;
-  --vendor-radius-control: 16px;
-  --vendor-radius-badge: 8px;
-}
-
 /* Standalone surfaces share one shape, including dialogs rendered outside the shell. */
 :is(
   .panel,
@@ -190,7 +183,7 @@
   box-shadow: inset 4px 0 #158fc9;
 }
 .vendor-orders .orders-ticket.just-arrived.selected {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
 @media (max-width: 760px) {
@@ -231,7 +224,7 @@
 .vendor-shell .topbar-action-trigger:hover,
 .vendor-shell .topbar-language-trigger:hover {
   background: transparent;
-  color: var(--blue);
+  color: var(--accent);
 }
 .vendor-shell :is(.topbar-popover, .topbar-language-menu) {
   padding: 16px;
@@ -327,7 +320,7 @@
   border-radius: var(--vendor-radius-block, 28px);
   padding: 24px;
   width: min(560px, calc(100vw - 24px));
-  color: var(--text, #202832);
+  color: #202832;
 }
 .order-cancellation-dialog::backdrop {
   background: #18212c66;

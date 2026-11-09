@@ -80,7 +80,7 @@
 
 .spots-location svg {
   flex: none;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .spots-location span,
@@ -144,8 +144,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--blue-soft) center / cover no-repeat;
-  color: var(--blue);
+  background: var(--accent-soft) center / cover no-repeat;
+  color: var(--accent);
   font-size: 13px;
   font-style: normal;
   font-weight: 700;
@@ -200,8 +200,8 @@
 .cuisine-strip button:hover,
 .cuisine-strip button.active {
   border-color: #b9e2f5;
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .cuisine-strip button > span {
@@ -217,7 +217,7 @@
 
 .cuisine-strip button.active > span {
   background: #fff;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .cuisine-strip strong {
@@ -255,7 +255,7 @@
 }
 
 .pocket-spots .back-link {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 @media (max-width: 1050px) {
@@ -352,7 +352,7 @@
     white-space: nowrap;
   }
   .spots-bottom-nav button.active {
-    color: var(--blue);
+    color: var(--accent);
   }
   .cuisine-section {
     margin-right: -12px;
@@ -444,7 +444,7 @@
 
 .pocket-spots .cuisine-strip button.active {
   border: 0;
-  background: var(--blue);
+  background: var(--accent);
   color: #fff;
 }
 
@@ -512,7 +512,7 @@
   min-width: 160px;
   min-height: 48px;
   padding: 6px 15px;
-  background: var(--blue-soft);
+  background: var(--accent-soft);
   color: var(--ink);
 }
 
@@ -525,7 +525,7 @@
 }
 
 .pocket-spots .spots-location small {
-  color: var(--blue);
+  color: var(--accent);
   font-size: 12px;
   font-weight: 600;
 }
@@ -649,7 +649,7 @@
 }
 
 .pocket-spots button:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -678,8 +678,8 @@
 }
 
 .pocket-spots .cuisine-strip button.active {
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .pocket-spots .spots-picker-dialog {
@@ -736,7 +736,7 @@
 }
 
 .spots-picker-search:focus-within {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -782,8 +782,8 @@
 
 .spots-city-options button[aria-pressed="true"],
 .spots-filter-options button[aria-pressed="true"] {
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .spots-picker-footer {
@@ -1112,7 +1112,7 @@
 
 .pocket-spots .spots-category-catalog .cuisine-strip button.active {
   background: #fff;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .pocket-spots .spots-category-catalog .cuisine-strip button.spots-filter-trigger {
@@ -1182,7 +1182,7 @@
 }
 
 .pocket-spots .spots-language-menu svg {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .spots-filter-category {

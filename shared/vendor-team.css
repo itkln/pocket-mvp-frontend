@@ -136,7 +136,7 @@
 .team-invite-modal .field input:focus,
 .team-invite-modal select:focus,
 .vendor-team select:focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 .team-invite-modal .permission-note {

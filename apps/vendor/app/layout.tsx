@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Providers } from "../../../shared/providers";
+import "../../../shared/styles/tokens.css";
 import "../../../shared/styles/base.css";
 import "../../../shared/styles/vendor.css";
 import "../../../shared/vendor-radius.css";

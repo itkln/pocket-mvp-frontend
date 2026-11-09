@@ -1,0 +1,37 @@
+/* Design tokens shared by Vendor and Dish. Loaded first by both apps. */
+:root {
+  color-scheme: light;
+
+  /* Surfaces and text */
+  --surface: #ffffff;
+  --surface-soft: #f7f7f8;
+  --ink: #17212b;
+  --muted: #666666;
+  --line: #ececec;
+  --line-strong: #dedede;
+  --canvas: #f5f7f9;
+  --sidebar: #ffffff;
+
+  /* Brand accent and secondary tone */
+  --accent: #229ed9;
+  --accent-strong: #168acd;
+  --accent-soft: #e8f5fb;
+
+  /* Fixed Pocket blue. Same as the Vendor accent, but not themed by Dish. */
+  --pocket-blue: #229ed9;
+  --pocket-blue-strong: #168acd;
+  --pocket-blue-soft: #e8f5fb;
+
+  /* Secondary tone */
+  --gold: #aa7726;
+  --gold-soft: #f7eedb;
+
+  /* Elevation and shape */
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  --control-radius: 12px;
+
+  /* Vendor shape scale */
+  --vendor-radius-block: 28px;
+  --vendor-radius-control: 16px;
+  --vendor-radius-badge: 8px;
+}

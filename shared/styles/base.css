@@ -5,27 +5,6 @@
  * .category-manager-dialog) and Dish .back-link stay here because they precede
  * shared rules of equal specificity; moving them would change the cascade.
  */
-:root {
-  color-scheme: light;
-  --canvas: #ffffff;
-  --surface: #ffffff;
-  --surface-soft: #f7f7f8;
-  --ink: #17212b;
-  --muted: #666666;
-  --line: #ececec;
-  --line-strong: #dedede;
-  --coral: #229ed9;
-  --coral-dark: #168acd;
-  --coral-soft: #e8f5fb;
-  --green: #229ed9;
-  --green-soft: #e8f5fb;
-  --blue: #229ed9;
-  --blue-soft: #e8f5fb;
-  --gold: #aa7726;
-  --gold-soft: #f7eedb;
-  --sidebar: #f7f7f8;
-  --shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
-}
 
 * {
   box-sizing: border-box;
@@ -104,7 +83,7 @@ textarea:focus-visible {
   margin: -21px -22px 0 0;
   border: 2px solid #fff;
   border-radius: 50%;
-  background: var(--coral);
+  background: var(--pocket-blue);
 }
 
 .cart-button {
@@ -145,7 +124,7 @@ textarea:focus-visible {
 
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--coral);
+  color: var(--pocket-blue);
   font-size: 15px;
   font-weight: 600;
   text-transform: uppercase;
@@ -189,7 +168,7 @@ textarea:focus-visible {
 
 .button.quiet {
   background: transparent;
-  color: var(--green);
+  color: var(--pocket-blue);
 }
 
 .button.danger {
@@ -234,13 +213,13 @@ textarea:focus-visible {
 }
 
 .metric-icon.green {
-  background: var(--green-soft);
-  color: var(--green);
+  background: var(--pocket-blue-soft);
+  color: var(--pocket-blue);
 }
 
 .metric-icon.blue {
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .metric p {
@@ -259,7 +238,7 @@ textarea:focus-visible {
   align-items: center;
   gap: 4px;
   margin-top: 10px;
-  color: var(--green);
+  color: var(--pocket-blue);
   font-size: 15px;
   font-weight: 600;
 }
@@ -290,7 +269,7 @@ textarea:focus-visible {
 }
 
 .online {
-  background: var(--coral);
+  background: var(--pocket-blue);
 }
 
 .pickup {
@@ -353,8 +332,8 @@ tbody tr:hover {
 .status-новый,
 .status-приглашен,
 .status-возврат {
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .status-готовится,
@@ -368,15 +347,15 @@ tbody tr:hover {
 .status-на-смене,
 .status-успешно,
 .status-свободен {
-  background: var(--green-soft);
-  color: var(--green);
+  background: var(--pocket-blue-soft);
+  color: var(--pocket-blue);
 }
 
 .status-подан,
 .status-не-на-смене,
 .status-занят {
-  background: var(--coral-soft);
-  color: var(--coral-dark);
+  background: var(--pocket-blue-soft);
+  color: var(--pocket-blue-strong);
 }
 
 .empty-state {
@@ -459,7 +438,7 @@ tbody tr:hover {
 }
 
 .switch input:checked + span {
-  background: var(--green);
+  background: var(--pocket-blue);
 }
 
 .switch input:checked + span::before {
@@ -471,7 +450,7 @@ tbody tr:hover {
 }
 
 .floor-legend .busy {
-  background: var(--coral);
+  background: var(--pocket-blue);
 }
 
 .rating-main > strong {
@@ -533,7 +512,7 @@ tbody tr:hover {
   place-items: center;
   border-radius: 6px;
   background: var(--surface-soft);
-  color: var(--green);
+  color: var(--pocket-blue);
 }
 
 .back-link {
@@ -709,7 +688,7 @@ tbody tr:hover {
 }
 
 .button.secondary {
-  border-color: #dedede;
+  border-color: var(--line-strong);
 }
 
 .icon-button {
@@ -946,12 +925,12 @@ td {
 /* Telegram-inspired interactive palette and menu controls. */
 
 .button.primary {
-  background: #229ed9;
+  background: var(--pocket-blue);
   color: #fff;
 }
 
 .button.primary:hover {
-  background: #168acd;
+  background: var(--pocket-blue-strong);
 }
 
 .toast {
@@ -1084,7 +1063,7 @@ td {
 
 .auth-password:focus-within,
 .auth-field > input:focus {
-  border-color: var(--blue);
+  border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(34, 158, 217, 0.12);
   outline: 0;
 }
@@ -1130,7 +1109,7 @@ td {
   width: 16px;
   height: 16px;
   margin: 1px 0 0;
-  accent-color: var(--blue);
+  accent-color: var(--accent);
 }
 
 .auth-options button,
@@ -1138,7 +1117,7 @@ td {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--blue);
+  color: var(--accent);
   cursor: pointer;
   text-decoration: none;
 }
@@ -1157,7 +1136,7 @@ td {
 .auth-recovery-link {
   width: max-content;
   margin-top: -7px;
-  color: var(--blue);
+  color: var(--accent);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -1171,14 +1150,14 @@ td {
   margin: 0 auto 16px;
   border-radius: 50%;
   background: #eaf6fc;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .auth-submit {
   height: 46px;
   border: 0;
   border-radius: 7px;
-  background: var(--blue);
+  background: var(--accent);
   color: #fff;
   font-size: 15px;
   font-weight: 650;
@@ -1186,7 +1165,7 @@ td {
 }
 
 .auth-submit:hover {
-  background: var(--coral-dark);
+  background: var(--pocket-blue-strong);
 }
 
 .auth-submit:disabled {
@@ -1202,7 +1181,7 @@ td {
 }
 
 .auth-switch a {
-  color: var(--blue);
+  color: var(--accent);
   font-weight: 600;
   text-decoration: none;
 }
@@ -1211,7 +1190,7 @@ td {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--blue);
+  color: var(--accent);
   font: inherit;
   font-weight: 600;
   cursor: pointer;
@@ -1238,10 +1217,6 @@ td {
 
 /* Shared control shape, aligned with the softer pocket-ui treatment. */
 
-:root {
-  --control-radius: 12px;
-}
-
 button:not(.mobile-create-trigger):not(.heart-float):not(.floor-table) {
   border-radius: var(--control-radius);
 }
@@ -1254,10 +1229,6 @@ textarea,
 }
 
 /* Keep content surfaces calm and borderless; controls retain their affordances. */
-
-:root {
-  --canvas: #f7f8fa;
-}
 
 .panel,
 .metric {
@@ -1278,11 +1249,6 @@ thead th {
 }
 
 /* Practical navigation: task groups and Telegram-like active rows. */
-
-:root {
-  --canvas: #f5f7f9;
-  --sidebar: #ffffff;
-}
 
 .metric-grid {
   gap: 0;
@@ -1324,7 +1290,7 @@ thead th {
 
 .fixture-controls input[type="range"] {
   width: 100%;
-  accent-color: var(--blue);
+  accent-color: var(--accent);
 }
 
 @media (max-width: 640px) {
@@ -1732,7 +1698,7 @@ td {
 }
 
 .toast svg {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .account-page {
@@ -1758,8 +1724,8 @@ td {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--accent-soft);
+  color: var(--accent);
   font-size: 22px;
   font-weight: 650;
 }
@@ -1811,8 +1777,8 @@ td {
 }
 
 .account-section-list button.active {
-  background: var(--blue-soft);
-  color: var(--blue);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .account-section-list button > span {
@@ -1824,7 +1790,7 @@ td {
 }
 
 .account-section-list button.active > span {
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .account-section-list strong {
@@ -1976,7 +1942,7 @@ td {
   place-items: center;
   border: 3px solid #fff;
   border-radius: 50%;
-  background: var(--blue);
+  background: var(--accent);
   color: #fff;
   box-sizing: border-box;
 }
@@ -2033,7 +1999,7 @@ td {
 .account-security-list .button {
   min-height: 34px;
   padding: 0 10px;
-  color: var(--blue);
+  color: var(--accent);
 }
 
 .account-profile-actions {

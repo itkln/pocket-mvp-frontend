@@ -36,8 +36,8 @@
   --spots-gradient-spa: linear-gradient(135deg, #e8faf7, #9adbd8);
   --spots-gradient-beauty: linear-gradient(135deg, #ffedf4, #f7b9d1);
   --spots-gradient-workshops: linear-gradient(135deg, #fff3e1, #f3cca0);
-  --blue: var(--spots-brand);
-  --blue-soft: var(--spots-active);
+  --accent: var(--spots-brand);
+  --accent-soft: var(--spots-active);
   --ink: var(--spots-text);
   --muted: var(--spots-secondary);
   --line: var(--spots-divider);
