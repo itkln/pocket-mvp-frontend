@@ -423,7 +423,7 @@ export function FloorPlan({
         disabled={!dirty || saving || loading}
         onClick={() => void persistFloorPlan(floors, revisionRef.current, true)}
       >
-        {saving ? "Сохраняем..." : "Сохранить план"}
+        {saving ? t("Сохраняем...") : t("Сохранить план")}
       </Button>
       <Button
         kind="secondary"
@@ -431,47 +431,47 @@ export function FloorPlan({
         disabled={loading}
         onClick={() => setShowQrCodes(true)}
       >
-        QR-коды
+        {t("QR-коды")}
       </Button>
       <div className="floor-add-menu">
         <Button icon={Plus} disabled={loading} onClick={() => setAddMenuOpen((open) => !open)}>
-          Добавить <ChevronDown size={15} />
+          {t("Добавить")} <ChevronDown size={15} />
         </Button>
         {addMenuOpen && (
           <div className="floor-add-popover">
             <button onClick={addTable}>
               <Table2 size={19} />
               <span>
-                <strong>Стол</strong>
-                <small>4 места</small>
+                <strong>{t("Стол")}</strong>
+                <small>{t("4 места")}</small>
               </span>
             </button>
             <button onClick={() => addFixture("bar")}>
               <Wine size={19} />
               <span>
-                <strong>Бар</strong>
-                <small>Барная стойка</small>
+                <strong>{t("Бар")}</strong>
+                <small>{t("Барная стойка")}</small>
               </span>
             </button>
             <button onClick={() => addFixture("window")}>
               <PanelsTopLeft size={19} />
               <span>
-                <strong>Окно</strong>
-                <small>Граница зала</small>
+                <strong>{t("Окно")}</strong>
+                <small>{t("Граница зала")}</small>
               </span>
             </button>
             <button onClick={() => addFixture("entrance")}>
               <DoorOpen size={19} />
               <span>
-                <strong>Вход</strong>
-                <small>Дверь или проход</small>
+                <strong>{t("Вход")}</strong>
+                <small>{t("Дверь или проход")}</small>
               </span>
             </button>
             <button onClick={addFloor}>
               <Building2 size={19} />
               <span>
-                <strong>Этаж</strong>
-                <small>Новый план</small>
+                <strong>{t("Этаж")}</strong>
+                <small>{t("Новый план")}</small>
               </span>
             </button>
           </div>
@@ -483,16 +483,16 @@ export function FloorPlan({
   const editorHeading = embedded ? (
     <div className="floor-editor-heading">
       <div>
-        <h2>План зала</h2>
-        <p>Перетаскивайте элементы и настройте каждый этаж отдельно.</p>
+        <h2>{t("План зала")}</h2>
+        <p>{t("Перетаскивайте элементы и настройте каждый этаж отдельно.")}</p>
       </div>
       <div>{ownerActions}</div>
     </div>
   ) : (
     <PageHeader
-      title={mode === "owner" ? "План зала" : "Столы"}
-      subtitle={mode === "owner" ? undefined : "Состояние зала и ваши назначенные столы."}
-      actions={mode === "owner" ? ownerActions : <Button icon={Plus}>Открыть счет</Button>}
+      title={mode === "owner" ? t("План зала") : t("Столы")}
+      subtitle={mode === "owner" ? undefined : t("Состояние зала и ваши назначенные столы.")}
+      actions={mode === "owner" ? ownerActions : <Button icon={Plus}>{t("Открыть счет")}</Button>}
     />
   );
   const stageStyle = { "--floor-scale": zoom / 100 } as CSSProperties;
@@ -501,7 +501,7 @@ export function FloorPlan({
     <>
       {editorHeading}
       <div className="floor-levels">
-        <div className="floor-level-list" role="tablist" aria-label="Этажи заведения">
+        <div className="floor-level-list" role="tablist" aria-label={t("Этажи заведения")}>
           {floors.map((floor, index) => (
             <button
               role="tab"
@@ -519,7 +519,7 @@ export function FloorPlan({
         </div>
         <label className="floor-level-select">
           <select
-            aria-label="Выбрать этаж"
+            aria-label={t("Выбрать этаж")}
             value={activeFloorId}
             disabled={loading}
             onChange={(event) => {
@@ -545,7 +545,7 @@ export function FloorPlan({
             />
             <IconButton
               icon={Plus}
-              label="Добавить этаж"
+              label={t("Добавить этаж")}
               onClick={addFloor}
               className="add-floor-button"
             />
@@ -559,28 +559,36 @@ export function FloorPlan({
               <div className="floor-legend">
                 <span>
                   <i className="free" />
-                  Свободен
+                  {t("Свободен")}
                 </span>
                 <span>
                   <i className="busy" />
-                  Занят
+                  {t("Занят")}
                 </span>
                 <span>
                   <i className="reserved" />
-                  Бронь
+                  {t("Бронь")}
                 </span>
               </div>
             )}
             <div className="zoom-control">
-              <IconButton icon={Minus} label="Уменьшить масштаб" onClick={() => changeZoom(-20)} />
+              <IconButton
+                icon={Minus}
+                label={t("Уменьшить масштаб")}
+                onClick={() => changeZoom(-20)}
+              />
               <button
                 className="zoom-label"
                 onClick={() => setZoom(100)}
-                aria-label="Сбросить масштаб"
+                aria-label={t("Сбросить масштаб")}
               >
                 {zoom}%
               </button>
-              <IconButton icon={Plus} label="Увеличить масштаб" onClick={() => changeZoom(20)} />
+              <IconButton
+                icon={Plus}
+                label={t("Увеличить масштаб")}
+                onClick={() => changeZoom(20)}
+              />
             </div>
           </div>
           <div className="floor-canvas-viewport" style={stageStyle}>
@@ -616,17 +624,17 @@ export function FloorPlan({
                         {fixture.type === "bar" ? (
                           <>
                             <Wine size={16} />
-                            Бар
+                            {t("Бар")}
                           </>
                         ) : fixture.type === "window" ? (
                           <>
                             <PanelsTopLeft size={16} />
-                            Окно
+                            {t("Окно")}
                           </>
                         ) : (
                           <>
                             <DoorOpen size={16} />
-                            Вход
+                            {t("Вход")}
                           </>
                         )}
                       </button>
@@ -644,15 +652,17 @@ export function FloorPlan({
                         onClick={() => setSelected(target)}
                       >
                         <strong>{table.id}</strong>
-                        <span>{table.seats} места</span>
+                        <span>
+                          {table.seats} {t("места")}
+                        </span>
                       </button>
                     );
                   })}
                 {loading ? (
                   <div className="floor-empty loading">
                     <RefreshCw size={26} />
-                    <strong>Загружаем план</strong>
-                    <span>Получаем сохраненную расстановку</span>
+                    <strong>{t("Загружаем план")}</strong>
+                    <span>{t("Получаем сохраненную расстановку")}</span>
                   </div>
                 ) : (
                   activeFloor.tables.length === 0 &&
@@ -660,7 +670,7 @@ export function FloorPlan({
                     <div className="floor-empty">
                       <Building2 size={28} />
                       <strong>{activeFloor.name}</strong>
-                      <span>План пока пуст</span>
+                      <span>{t("План пока пуст")}</span>
                     </div>
                   )
                 )}
@@ -671,8 +681,8 @@ export function FloorPlan({
         {loading ? (
           <aside className="panel table-detail floor-summary loading">
             <RefreshCw size={24} />
-            <h2>Загружаем</h2>
-            <p>Получаем сохраненную расстановку.</p>
+            <h2>{t("Загружаем")}</h2>
+            <p>{t("Получаем сохраненную расстановку.")}</p>
           </aside>
         ) : selectedTable ? (
           mode === "owner" ? (
@@ -691,7 +701,9 @@ export function FloorPlan({
           <aside className="panel table-detail fixture-detail technical-detail">
             <div className="detail-heading">
               <div>
-                <small>{activeFloor.name.toUpperCase()} · ЭЛЕМЕНТ</small>
+                <small>
+                  {activeFloor.name.toUpperCase()} {t("· ЭЛЕМЕНТ")}
+                </small>
                 <h2>{fixtureLabel(selectedFixture.type)}</h2>
               </div>
               {selectedFixture.type === "bar" ? (
@@ -704,11 +716,11 @@ export function FloorPlan({
             </div>
             <div className="fixture-controls">
               <label>
-                <span>Поворот</span>
+                <span>{t("Поворот")}</span>
                 <div className="rotation-control">
                   <IconButton
                     icon={RotateCcw}
-                    label="Повернуть влево на 45 градусов"
+                    label={t("Повернуть влево на 45 градусов")}
                     onClick={() =>
                       updateFixture(selectedFixture.id, {
                         rotation: (selectedFixture.rotation - 45 + 360) % 360,
@@ -718,7 +730,7 @@ export function FloorPlan({
                   <strong>{selectedFixture.rotation}°</strong>
                   <IconButton
                     icon={RotateCw}
-                    label="Повернуть вправо на 45 градусов"
+                    label={t("Повернуть вправо на 45 градусов")}
                     onClick={() =>
                       updateFixture(selectedFixture.id, {
                         rotation: (selectedFixture.rotation + 45) % 360,
@@ -729,12 +741,12 @@ export function FloorPlan({
               </label>
               <label>
                 <span>
-                  Размер <b>{selectedFixture.size}%</b>
+                  {t("Размер")} <b>{selectedFixture.size}%</b>
                 </span>
                 <div className="fixture-size-control">
                   <IconButton
                     icon={Minus}
-                    label="Уменьшить размер на 10 процентов"
+                    label={t("Уменьшить размер на 10 процентов")}
                     onClick={() =>
                       updateFixture(selectedFixture.id, {
                         size: Math.max(50, selectedFixture.size - 10),
@@ -753,7 +765,7 @@ export function FloorPlan({
                   />
                   <IconButton
                     icon={Plus}
-                    label="Увеличить размер на 10 процентов"
+                    label={t("Увеличить размер на 10 процентов")}
                     onClick={() =>
                       updateFixture(selectedFixture.id, {
                         size: Math.min(160, selectedFixture.size + 10),
@@ -770,7 +782,7 @@ export function FloorPlan({
                 icon={Trash2}
                 onClick={() => void removeFixture(selectedFixture)}
               >
-                Удалить с плана
+                {t("Удалить с плана")}
               </Button>
             )}
           </aside>
@@ -779,11 +791,12 @@ export function FloorPlan({
             <Building2 size={24} />
             <h2>{activeFloor.name}</h2>
             <p>
-              {tableCountLabel(activeFloor.tables.length)} · {activeFloor.fixtures.length} элементов
+              {tableCountLabel(activeFloor.tables.length)} · {activeFloor.fixtures.length}{" "}
+              {t("элементов")}
             </p>
             {mode === "owner" && (
               <Button className="full" icon={Plus} onClick={addTable}>
-                {activeFloor.tables.length ? "Добавить стол" : "Добавить первый стол"}
+                {activeFloor.tables.length ? t("Добавить стол") : t("Добавить первый стол")}
               </Button>
             )}
           </aside>

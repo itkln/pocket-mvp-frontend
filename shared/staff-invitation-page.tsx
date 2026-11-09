@@ -14,7 +14,7 @@ const roles = {
   viewer: "Только просмотр",
 };
 export default function StaffInvitationPage({ token }: { token: string }) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const router = useRouter();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [invitation, setInvitation] = useState<StaffInvitation | null>(null);
@@ -80,24 +80,26 @@ export default function StaffInvitationPage({ token }: { token: string }) {
           <strong>Pocket Vendor</strong>
         </Link>
         <header className="auth-heading">
-          <h1>Приглашение в команду</h1>
-          <p>Войдите с e-mail, на который пришло приглашение, и подтвердите доступ.</p>
+          <h1>{t("Приглашение в команду")}</h1>
+          <p>{t("Войдите с e-mail, на который пришло приглашение, и подтвердите доступ.")}</p>
         </header>
         {loading ? (
-          <p role="status">Проверяем приглашение…</p>
+          <p role="status">{t("Проверяем приглашение…")}</p>
         ) : (
           <>
             {user && (
               <p>
-                Вы вошли как <strong>{user.email}</strong>
+                {t("Вы вошли как")} <strong>{user.email}</strong>
               </p>
             )}
             {invitation && (
               <div className="auth-heading">
                 <h2>{invitation.venue_name}</h2>
-                <p>Роль: {roles[invitation.role]}</p>
                 <p>
-                  Действует до{" "}
+                  {t("Роль:")} {roles[invitation.role]}
+                </p>
+                <p>
+                  {t("Действует до")}{" "}
                   {new Date(invitation.expires_at).toLocaleString(locale === "ua" ? "uk" : locale)}
                 </p>
               </div>
@@ -110,14 +112,14 @@ export default function StaffInvitationPage({ token }: { token: string }) {
             {!user && !error && (
               <div className="auth-form">
                 <Link className="auth-submit" href={authLink("login")}>
-                  Войти
+                  {t("Войти")}
                 </Link>
-                <Link href={authLink("register")}>Создать аккаунт</Link>
+                <Link href={authLink("register")}>{t("Создать аккаунт")}</Link>
               </div>
             )}
             {user && invitation && (
               <button className="auth-submit" disabled={busy} onClick={() => void accept()}>
-                {busy ? "Принимаем…" : "Принять приглашение"}
+                {busy ? t("Принимаем…") : t("Принять приглашение")}
               </button>
             )}
             {user && (
@@ -135,13 +137,13 @@ export default function StaffInvitationPage({ token }: { token: string }) {
                     }
                   }}
                 >
-                  Войти в другой аккаунт
+                  {t("Войти в другой аккаунт")}
                 </button>
               </p>
             )}
             {error && (
               <button className="auth-submit" onClick={() => window.location.reload()}>
-                Проверить снова
+                {t("Проверить снова")}
               </button>
             )}
           </>

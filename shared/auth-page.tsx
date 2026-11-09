@@ -24,7 +24,7 @@ export default function AuthPage({
   returnTo?: string;
 }) {
   const router = useRouter();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const errorMessage = useLocalizedError();
   const isLogin = mode === "login";
   const productName =
@@ -83,15 +83,15 @@ export default function AuthPage({
           <strong>{productName}</strong>
         </Link>
         <header className="auth-heading">
-          <h1>{isLogin ? `Войти в ${productName}` : "Создать аккаунт"}</h1>
+          <h1>{isLogin ? `Войти в ${productName}` : t("Создать аккаунт")}</h1>
           <p>
             {product === "vendor"
               ? isLogin
-                ? "Управляйте заведением и работой команды."
-                : "Аккаунт для управления заведениями и сотрудниками."
+                ? t("Управляйте заведением и работой команды.")
+                : t("Аккаунт для управления заведениями и сотрудниками.")
               : isLogin
-                ? "Бронируйте столики и оформляйте предзаказ."
-                : "Аккаунт для бронирований и предзаказов в заведениях."}
+                ? t("Бронируйте столики и оформляйте предзаказ.")
+                : t("Аккаунт для бронирований и предзаказов в заведениях.")}
           </p>
         </header>
 
@@ -99,21 +99,21 @@ export default function AuthPage({
           {!isLogin && (
             <div className="auth-name-grid">
               <label className="auth-field">
-                <span>Имя</span>
+                <span>{t("Имя")}</span>
                 <input
                   name="firstName"
                   autoComplete="given-name"
-                  placeholder="Имя"
+                  placeholder={t("Имя")}
                   maxLength={80}
                   required
                 />
               </label>
               <label className="auth-field">
-                <span>Фамилия</span>
+                <span>{t("Фамилия")}</span>
                 <input
                   name="lastName"
                   autoComplete="family-name"
-                  placeholder="Фамилия"
+                  placeholder={t("Фамилия")}
                   maxLength={80}
                   required
                 />
@@ -131,13 +131,13 @@ export default function AuthPage({
             />
           </label>
           <label className="auth-field">
-            <span>Пароль</span>
+            <span>{t("Пароль")}</span>
             <span className="auth-password">
               <input
                 name="password"
                 type={passwordVisible ? "text" : "password"}
                 autoComplete={isLogin ? "current-password" : "new-password"}
-                placeholder={isLogin ? "Введите пароль" : "От 12 до 128 символов"}
+                placeholder={isLogin ? t("Введите пароль") : t("От 12 до 128 символов")}
                 minLength={isLogin ? 1 : 12}
                 maxLength={128}
                 required
@@ -145,7 +145,7 @@ export default function AuthPage({
               <button
                 type="button"
                 onClick={() => setPasswordVisible((current) => !current)}
-                aria-label={passwordVisible ? "Скрыть пароль" : "Показать пароль"}
+                aria-label={passwordVisible ? t("Скрыть пароль") : t("Показать пароль")}
               >
                 {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -155,13 +155,13 @@ export default function AuthPage({
           {!isLogin && (
             <>
               <label className="auth-field">
-                <span>Повторите пароль</span>
+                <span>{t("Повторите пароль")}</span>
                 <span className="auth-password">
                   <input
                     name="confirmPassword"
                     type={confirmPasswordVisible ? "text" : "password"}
                     autoComplete="new-password"
-                    placeholder="Повторите пароль"
+                    placeholder={t("Повторите пароль")}
                     minLength={12}
                     maxLength={128}
                     required
@@ -169,7 +169,7 @@ export default function AuthPage({
                   <button
                     type="button"
                     onClick={() => setConfirmPasswordVisible((current) => !current)}
-                    aria-label={confirmPasswordVisible ? "Скрыть пароль" : "Показать пароль"}
+                    aria-label={confirmPasswordVisible ? t("Скрыть пароль") : t("Показать пароль")}
                   >
                     {confirmPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -182,14 +182,14 @@ export default function AuthPage({
             <div className="auth-options">
               <label>
                 <input type="checkbox" name="remember" />
-                Запомнить меня
+                {t("Запомнить меня")}
               </label>
-              <Link href={authPath("forgot-password")}>Забыли пароль?</Link>
+              <Link href={authPath("forgot-password")}>{t("Забыли пароль?")}</Link>
             </div>
           ) : (
             <label className="auth-consent">
               <input type="checkbox" required />
-              <span>Я принимаю условия использования и политику конфиденциальности</span>
+              <span>{t("Я принимаю условия использования и политику конфиденциальности")}</span>
             </label>
           )}
           {error && (
@@ -200,18 +200,18 @@ export default function AuthPage({
           <button className="auth-submit" type="submit" disabled={submitting}>
             {submitting
               ? isLogin
-                ? "Входим..."
-                : "Создаем аккаунт..."
+                ? t("Входим...")
+                : t("Создаем аккаунт...")
               : isLogin
-                ? "Войти"
-                : "Зарегистрироваться"}
+                ? t("Войти")
+                : t("Зарегистрироваться")}
           </button>
         </form>
 
         <p className="auth-switch">
-          {isLogin ? "Нет аккаунта?" : "Уже есть аккаунт?"}{" "}
+          {isLogin ? t("Нет аккаунта?") : t("Уже есть аккаунт?")}{" "}
           <Link href={authPath(isLogin ? "register" : "login")}>
-            {isLogin ? "Зарегистрироваться" : "Войти"}
+            {isLogin ? t("Зарегистрироваться") : t("Войти")}
           </Link>
         </p>
       </section>

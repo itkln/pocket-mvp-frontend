@@ -3,6 +3,7 @@
 import { Ellipsis, UserRound } from "lucide-react";
 import { Button, IconButton, StatusPill } from "../ui";
 import { FloorTable } from "./floor-model";
+import { useI18n } from "../i18n";
 
 export function StaffTableDetail({
   table,
@@ -13,14 +14,17 @@ export function StaffTableDetail({
   floorName: string;
   notify: (message: string) => void;
 }) {
+  const { t } = useI18n();
   return (
     <aside className="panel table-detail">
       <div className="detail-heading">
         <div>
-          <small>{floorName.toUpperCase()} · СТОЛ</small>
+          <small>
+            {floorName.toUpperCase()} {t("· СТОЛ")}
+          </small>
           <h2>{table.id}</h2>
         </div>
-        <IconButton icon={Ellipsis} label="Действия" />
+        <IconButton icon={Ellipsis} label={t("Действия")} />
       </div>
       <StatusPill
         status={
@@ -29,34 +33,34 @@ export function StaffTableDetail({
       />
       <dl>
         <div>
-          <dt>Мест</dt>
+          <dt>{t("Мест")}</dt>
           <dd>{table.seats}</dd>
         </div>
         <div>
-          <dt>Официант</dt>
-          <dd>София М.</dd>
+          <dt>{t("Официант")}</dt>
+          <dd>{t("София М.")}</dd>
         </div>
         <div>
-          <dt>Текущий счет</dt>
+          <dt>{t("Текущий счет")}</dt>
           <dd>{table.state === "busy" ? "€76.50" : "—"}</dd>
         </div>
         <div>
-          <dt>Открыт</dt>
-          <dd>{table.state === "busy" ? "38 мин" : "—"}</dd>
+          <dt>{t("Открыт")}</dt>
+          <dd>{table.state === "busy" ? t("38 мин") : "—"}</dd>
         </div>
       </dl>
       {table.state === "busy" && (
         <div className="mini-order">
           <p>
-            <span>Тальятелле</span>
+            <span>{t("Тальятелле")}</span>
             <b>2</b>
           </p>
           <p>
-            <span>Буррата</span>
+            <span>{t("Буррата")}</span>
             <b>1</b>
           </p>
           <p>
-            <span>Красный апельсин</span>
+            <span>{t("Красный апельсин")}</span>
             <b>3</b>
           </p>
         </div>
@@ -67,7 +71,7 @@ export function StaffTableDetail({
         icon={UserRound}
         onClick={() => notify("Официант назначен")}
       >
-        Назначить официанта
+        {t("Назначить официанта")}
       </Button>
     </aside>
   );

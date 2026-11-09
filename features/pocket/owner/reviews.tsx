@@ -8,7 +8,7 @@ import { useOwnerWorkspace } from "./context";
 
 export function ReviewsScreen({ notify }: { notify: (message: string) => void }) {
   const { reviews, answerReview } = useOwnerWorkspace();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const [tableFilter, setTableFilter] = useState("all");
   const [ratingFilter, setRatingFilter] = useState("all");
   const [query, setQuery] = useState("");
@@ -44,30 +44,32 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
   return (
     <>
       <PageHeader
-        title="Отзывы"
+        title={t("Отзывы")}
         actions={
           <Button kind="secondary" icon={Download} onClick={() => window.print()}>
-            Экспорт
+            {t("Экспорт")}
           </Button>
         }
       />
       <section className="reviews-overview">
         <div className="panel review-score">
-          <span>Средняя оценка</span>
+          <span>{t("Средняя оценка")}</span>
           <strong>{average ? average.toFixed(1) : "—"}</strong>
           <div className="review-stars">
             <Star size={16} fill="currentColor" />
           </div>
-          <small>{reviews.length} отзывов</small>
+          <small>
+            {reviews.length} {t("отзывов")}
+          </small>
         </div>
         <div className="panel review-stat">
           <span>
             <MessageSquareText size={19} />
           </span>
           <div>
-            <small>Без ответа</small>
+            <small>{t("Без ответа")}</small>
             <strong>{reviews.filter((review) => !review.owner_reply).length}</strong>
-            <p>Требуют внимания</p>
+            <p>{t("Требуют внимания")}</p>
           </div>
         </div>
       </section>
@@ -75,20 +77,20 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
         <label className="review-rating-select">
           <Star size={17} />
           <select value={ratingFilter} onChange={(event) => setRatingFilter(event.target.value)}>
-            <option value="all">Все оценки</option>
-            <option value="5">5 звезд</option>
-            <option value="4">4 звезды</option>
-            <option value="low">3 и ниже</option>
+            <option value="all">{t("Все оценки")}</option>
+            <option value="5">{t("5 звезд")}</option>
+            <option value="4">{t("4 звезды")}</option>
+            <option value="low">{t("3 и ниже")}</option>
           </select>
         </label>
         <div className="reviews-toolbar-actions">
           <label className="review-table-filter">
             <Table2 size={17} />
             <select value={tableFilter} onChange={(event) => setTableFilter(event.target.value)}>
-              <option value="all">Все столы</option>
+              <option value="all">{t("Все столы")}</option>
               {tables.map((table) => (
                 <option key={table} value={table}>
-                  Стол {table}
+                  {t("Стол")} {table}
                 </option>
               ))}
             </select>
@@ -98,7 +100,7 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Гость, заказ или текст"
+              placeholder={t("Гость, заказ или текст")}
             />
           </label>
         </div>
@@ -135,16 +137,16 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
                 {review.table && (
                   <span className="review-table">
                     <Table2 size={14} />
-                    Стол {review.table}
+                    {t("Стол")} {review.table}
                   </span>
                 )}
               </header>
-              <p className="review-text">{review.body || "Без текста"}</p>
+              <p className="review-text">{review.body || t("Без текста")}</p>
               {review.owner_reply && replying !== review.id && (
                 <div className="owner-review-reply">
                   <span>P</span>
                   <div>
-                    <strong>Ответ заведения</strong>
+                    <strong>{t("Ответ заведения")}</strong>
                     <p>{review.owner_reply}</p>
                   </div>
                 </div>
@@ -155,7 +157,7 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
                     autoFocus
                     value={reply}
                     onChange={(event) => setReply(event.target.value)}
-                    placeholder="Напишите ответ гостю"
+                    placeholder={t("Напишите ответ гостю")}
                   />
                   <div>
                     <Button
@@ -165,14 +167,14 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
                         setReply("");
                       }}
                     >
-                      Отмена
+                      {t("Отмена")}
                     </Button>
                     <Button
                       icon={Send}
                       disabled={!reply.trim()}
                       onClick={() => void publish(review.id)}
                     >
-                      Опубликовать
+                      {t("Опубликовать")}
                     </Button>
                   </div>
                 </div>
@@ -186,7 +188,7 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
                       setReply(review.owner_reply ?? "");
                     }}
                   >
-                    {review.owner_reply ? "Изменить ответ" : "Ответить"}
+                    {review.owner_reply ? t("Изменить ответ") : t("Ответить")}
                   </Button>
                 </footer>
               )}
@@ -196,11 +198,11 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
           <div className="panel">
             <EmptyIllustration
               icon={MessageSquareText}
-              title={reviews.length ? "Отзывы не найдены" : "Отзывов пока нет"}
+              title={reviews.length ? t("Отзывы не найдены") : t("Отзывов пока нет")}
               text={
                 reviews.length
-                  ? "Измените фильтры или поисковый запрос."
-                  : "Отзывы гостей появятся после завершенных заказов."
+                  ? t("Измените фильтры или поисковый запрос.")
+                  : t("Отзывы гостей появятся после завершенных заказов.")
               }
             />
           </div>

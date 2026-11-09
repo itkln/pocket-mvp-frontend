@@ -106,8 +106,8 @@ export function Sidebar({
         <button
           className="brand-toggle"
           onClick={toggleNavigation}
-          aria-label={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"}
-          title={collapsed ? "Развернуть навигацию" : "Свернуть навигацию"}
+          aria-label={collapsed ? t("Развернуть навигацию") : t("Свернуть навигацию")}
+          title={collapsed ? t("Развернуть навигацию") : t("Свернуть навигацию")}
         >
           <span className="brand-toggle-logo">
             <Image src="/logo.svg" alt="" width={28} height={28} priority />
@@ -123,7 +123,7 @@ export function Sidebar({
         <strong>{brand}</strong>
         <IconButton
           icon={X}
-          label="Закрыть меню"
+          label={t("Закрыть меню")}
           onClick={onClose}
           className="mobile-sidebar-close"
         />
@@ -135,7 +135,7 @@ export function Sidebar({
         >
           <span className="venue-avatar">P</span>
           <div>
-            <strong>Все заведения</strong>
+            <strong>{t("Все заведения")}</strong>
           </div>
           <Search size={16} />
         </div>
@@ -156,13 +156,13 @@ export function Sidebar({
               {venue ? venueInitials(venue) : <Store size={18} />}
             </span>
             <div>
-              <strong>{venue?.name ?? "Заведения"}</strong>
+              <strong>{venue?.name ?? t("Заведения")}</strong>
             </div>
             {canSwitchVenue && <ChevronDown className="venue-switcher-chevron" size={16} />}
           </button>
           {canSwitchVenue && venueMenuOpen && (
             <div className="venue-menu-popover">
-              <p className="venue-menu-label">Мои заведения</p>
+              <p className="venue-menu-label">{t("Мои заведения")}</p>
               {availableVenues.map((item) => (
                 <button
                   key={item.id}
@@ -189,7 +189,7 @@ export function Sidebar({
               onClick={startVenueCreation}
             >
               <Plus size={20} strokeWidth={1.9} />
-              <span>Добавить заведение</span>
+              <span>{t("Добавить заведение")}</span>
             </button>
           )}
         </div>
@@ -229,7 +229,7 @@ export function Sidebar({
       <div className={`sidebar-bottom ${selectableRoles.length === 1 ? "single-role" : ""}`}>
         {selectableRoles.length > 1 && (
           <>
-            <p className="nav-label">Текущая роль</p>
+            <p className="nav-label">{t("Текущая роль")}</p>
             <div className="role-menu">
               <button
                 className="role-menu-trigger collapsed-tooltip"
@@ -254,7 +254,7 @@ export function Sidebar({
                     >
                       <Store size={20} strokeWidth={1.9} />
                       <span>
-                        <strong>Владелец</strong>
+                        <strong>{t("Владелец")}</strong>
                       </span>
                       {role === "owner" && <Check size={16} />}
                     </button>
@@ -266,7 +266,7 @@ export function Sidebar({
                     >
                       <BadgeCheck size={20} strokeWidth={1.9} />
                       <span>
-                        <strong>Сотрудник</strong>
+                        <strong>{t("Сотрудник")}</strong>
                       </span>
                       {role === "staff" && <Check size={16} />}
                     </button>
@@ -278,7 +278,7 @@ export function Sidebar({
                     >
                       <UserRound size={20} strokeWidth={1.9} />
                       <span>
-                        <strong>Гость</strong>
+                        <strong>{t("Гость")}</strong>
                       </span>
                       {role === "customer" && <Check size={16} />}
                     </button>
@@ -323,13 +323,16 @@ export function MobileBottomNavigation({
   navigation: { id: string; label: string; icon: LucideIcon }[];
   onNavigate: (id: string) => void;
 }) {
+  const { t } = useI18n();
   const primaryItems = navigation.filter((item) => mobilePrimaryNavigation[role].includes(item.id));
   return (
-    <nav className="mobile-bottom-nav" aria-label="Основная навигация">
+    <nav className="mobile-bottom-nav" aria-label={t("Основная навигация")}>
       {primaryItems.map(({ id, label, icon: Icon }) => (
         <button key={id} className={screen === id ? "active" : ""} onClick={() => onNavigate(id)}>
           <Icon size={20} strokeWidth={1.9} />
-          <span>{label === "План зала" ? "Зал" : label === "Мои заказы" ? "Заказы" : label}</span>
+          <span>
+            {label === "План зала" ? t("Зал") : label === "Мои заказы" ? t("Заказы") : label}
+          </span>
         </button>
       ))}
     </nav>
@@ -440,14 +443,14 @@ export function Topbar({
   return (
     <header className="topbar">
       <div className="topbar-title">
-        <IconButton icon={MenuIcon} label="Открыть меню" onClick={onMenu} />
+        <IconButton icon={MenuIcon} label={t("Открыть меню")} onClick={onMenu} />
         <div>
           <small>
             {role === "owner"
               ? `${venueName} / Управление`
               : role === "staff"
                 ? `${venueName} / Смена`
-                : "Сегодня в Братиславе"}
+                : t("Сегодня в Братиславе")}
           </small>
           <strong>{title}</strong>
         </div>
@@ -456,7 +459,7 @@ export function Topbar({
         {role === "customer" && (
           <button className="cart-button" onClick={onCart}>
             <ShoppingBag size={18} />
-            <span>Корзина</span>
+            <span>{t("Корзина")}</span>
             {cartCount > 0 && <b>{cartCount}</b>}
           </button>
         )}
@@ -474,14 +477,14 @@ export function Topbar({
           {activePanel === "search" && (
             <section className="topbar-popover topbar-search-popover">
               <header>
-                <strong>Быстрый переход</strong>
+                <strong>{t("Быстрый переход")}</strong>
               </header>
               <label className="topbar-search-input">
                 <Search size={17} />
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Найти раздел"
+                  placeholder={t("Найти раздел")}
                   autoFocus
                 />
               </label>
@@ -506,7 +509,7 @@ export function Topbar({
                     );
                   })
                 ) : (
-                  <p>Ничего не найдено</p>
+                  <p>{t("Ничего не найдено")}</p>
                 )}
               </div>
             </section>
@@ -526,10 +529,10 @@ export function Topbar({
           {activePanel === "notifications" && (
             <section className="topbar-popover notifications-popover">
               <header>
-                <strong>Уведомления</strong>
+                <strong>{t("Уведомления")}</strong>
                 {notifications.length > 0 && (
                   <button type="button" onClick={onNotificationsClear}>
-                    Очистить
+                    {t("Очистить")}
                   </button>
                 )}
               </header>
@@ -576,8 +579,8 @@ export function Topbar({
               ) : (
                 <div className="notification-empty">
                   <BellOff size={22} />
-                  <strong>Новых уведомлений нет</strong>
-                  <p>Действия в приложении появятся здесь.</p>
+                  <strong>{t("Новых уведомлений нет")}</strong>
+                  <p>{t("Действия в приложении появятся здесь.")}</p>
                 </div>
               )}
             </section>

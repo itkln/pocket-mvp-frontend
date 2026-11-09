@@ -76,13 +76,13 @@ export function PublicPageSettings({
   return (
     <section className="venue-public-page-settings">
       <PanelTitle
-        title="Страница и QR"
-        subtitle="Публичная страница ресторана в Pocket Dish: меню и бронирование."
+        title={t("Страница и QR")}
+        subtitle={t("Публичная страница ресторана в Pocket Dish: меню и бронирование.")}
       />
       {error ? (
         <div role="alert">
           <p>{t("Не удалось загрузить ссылку")}</p>
-          <Button onClick={() => setRevision((value) => value + 1)}>Повторить</Button>
+          <Button onClick={() => setRevision((value) => value + 1)}>{t("Повторить")}</Button>
         </div>
       ) : !page ? (
         <p role="status">{t("Загрузка...")}</p>
@@ -98,7 +98,7 @@ export function PublicPageSettings({
           <div className="dish-public-link">
             <input aria-label={t("Публичная ссылка")} readOnly value={page.url} />
             <Button kind="secondary" icon={Copy} onClick={() => void copy()}>
-              Копировать ссылку
+              {t("Копировать ссылку")}
             </Button>
           </div>
           <div className="dish-public-qr">
@@ -117,7 +117,7 @@ export function PublicPageSettings({
               <strong>{venue.name}</strong>
               <p>{t("Этот QR открывает меню и бронирование без привязки к столу.")}</p>
               <Button icon={Download} onClick={() => void download()}>
-                Скачать QR
+                {t("Скачать QR")}
               </Button>
             </div>
           </div>

@@ -61,24 +61,24 @@ export function TeamScreen({
   return (
     <div className="vendor-team">
       <PageHeader
-        title="Команда"
+        title={t("Команда")}
         actions={
           <Button icon={Plus} onClick={onInvite}>
-            Пригласить сотрудника
+            {t("Пригласить сотрудника")}
           </Button>
         }
       />
       <section className="panel team-panel">
         <div className="list-toolbar">
           <p>
-            Сотрудников: <strong>{staff.length}</strong>
+            {t("Сотрудников:")} <strong>{staff.length}</strong>
           </p>
           <label className="search-field">
             <Search size={17} />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Поиск по команде"
+              placeholder={t("Поиск по команде")}
             />
           </label>
         </div>
@@ -105,10 +105,10 @@ export function TeamScreen({
                     void updateRole(person, event.target.value as OwnerStaffMember["role"])
                   }
                 >
-                  <option value="manager">Менеджер</option>
-                  <option value="waiter">Официант</option>
-                  <option value="kitchen">Кухня</option>
-                  <option value="viewer">Только просмотр</option>
+                  <option value="manager">{t("Менеджер")}</option>
+                  <option value="waiter">{t("Официант")}</option>
+                  <option value="kitchen">{t("Кухня")}</option>
+                  <option value="viewer">{t("Только просмотр")}</option>
                 </select>
                 <StatusPill status={statusLabel[person.status]} />
                 <div className="row-actions">
@@ -127,7 +127,7 @@ export function TeamScreen({
                         }}
                       >
                         <Mail size={16} />
-                        Скопировать e-mail
+                        {t("Скопировать e-mail")}
                       </button>
                       {person.status === "invited" && (
                         <button
@@ -146,18 +146,20 @@ export function TeamScreen({
                           }}
                         >
                           <Mail size={16} />
-                          Отправить приглашение снова
+                          {t("Отправить приглашение снова")}
                         </button>
                       )}
                       {person.status !== "invited" && (
                         <button onClick={() => void deactivate(person)}>
                           <UserX size={16} />
-                          {person.status === "inactive" ? "Вернуть доступ" : "Приостановить доступ"}
+                          {person.status === "inactive"
+                            ? t("Вернуть доступ")
+                            : t("Приостановить доступ")}
                         </button>
                       )}
                       <button className="danger" onClick={() => void remove(person)}>
                         <Trash2 size={16} />
-                        Удалить из команды
+                        {t("Удалить из команды")}
                       </button>
                     </div>
                   )}
@@ -168,11 +170,11 @@ export function TeamScreen({
         ) : (
           <EmptyIllustration
             icon={Search}
-            title={staff.length ? "Ничего не найдено" : "Команда пока пустая"}
+            title={staff.length ? t("Ничего не найдено") : t("Команда пока пустая")}
             text={
               staff.length
-                ? "Измените поисковый запрос."
-                : "Пригласите менеджера, официанта или сотрудника кухни."
+                ? t("Измените поисковый запрос.")
+                : t("Пригласите менеджера, официанта или сотрудника кухни.")
             }
           />
         )}

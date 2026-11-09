@@ -150,7 +150,7 @@ export function DishCatalogHeader({
         <nav
           ref={accountRoot}
           className="dish-header-actions"
-          aria-label="Действия гостя"
+          aria-label={t("Действия гостя")}
           onBlur={(event) => {
             if (!event.currentTarget.contains(event.relatedTarget)) {
               setAccountOpen(false);
@@ -250,7 +250,7 @@ export function DishCatalogHeader({
               className="dish-catalog-account-menu"
               id="dish-catalog-account-menu"
               role="menu"
-              aria-label="Аккаунт"
+              aria-label={t("Аккаунт")}
               onKeyDown={(event) => {
                 const items = Array.from(
                   event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'),
@@ -273,7 +273,7 @@ export function DishCatalogHeader({
               }}
             >
               <div className="dish-account-menu-heading">
-                {[user.first_name, user.last_name].filter(Boolean).join(" ") || "Аккаунт"}
+                {[user.first_name, user.last_name].filter(Boolean).join(" ") || t("Аккаунт")}
               </div>
               {accountItems.map(({ label, screen: target, icon: Icon, accountSection }) => (
                 <button

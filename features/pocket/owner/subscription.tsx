@@ -45,7 +45,7 @@ export function SubscriptionScreen({
   venueCount: number;
   notify: (message: string) => void;
 }) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const errorMessage = useLocalizedError();
   const [subscription, setSubscription] = useState<OwnerSubscription | null>(null);
   const [plan, setPlan] = useState<OwnerSubscription["plan"]>("business");
@@ -82,41 +82,41 @@ export function SubscriptionScreen({
   const selected = plans.find((item) => item.id === plan) ?? plans[1];
   return (
     <>
-      <PageHeader title="Подписка" />
+      <PageHeader title={t("Подписка")} />
       <section className={"subscription-status " + (subscription ? "active" : "")}>
         <span>
           <Sparkles size={22} />
         </span>
         <div>
-          <strong>{subscription ? "Pocket " + selected.name : "Подписка не выбрана"}</strong>
+          <strong>{subscription ? "Pocket " + selected.name : t("Подписка не выбрана")}</strong>
           <p>
             {subscription?.trial_ends_at
               ? "Пробный период до " +
                 new Date(subscription.trial_ends_at).toLocaleDateString(localeTags[locale])
-              : "Выберите тариф и начните 14-дневный пробный период."}
+              : t("Выберите тариф и начните 14-дневный пробный период.")}
           </p>
         </div>
         {subscription && (
-          <b>{subscription.status === "trialing" ? "Пробный период" : subscription.status}</b>
+          <b>{subscription.status === "trialing" ? t("Пробный период") : subscription.status}</b>
         )}
       </section>
       <div className="subscription-heading">
         <div>
-          <h2>Выберите тариф</h2>
-          <p>Тариф можно изменить по мере роста команды.</p>
+          <h2>{t("Выберите тариф")}</h2>
+          <p>{t("Тариф можно изменить по мере роста команды.")}</p>
         </div>
         <div className="segmented billing-toggle">
           <button
             className={billing === "monthly" ? "active" : ""}
             onClick={() => setBilling("monthly")}
           >
-            Ежемесячно
+            {t("Ежемесячно")}
           </button>
           <button
             className={billing === "yearly" ? "active" : ""}
             onClick={() => setBilling("yearly")}
           >
-            Ежегодно
+            {t("Ежегодно")}
           </button>
         </div>
       </div>
@@ -143,7 +143,7 @@ export function SubscriptionScreen({
               </div>
               <div className="plan-price">
                 <strong>{money(item.price)}</strong>
-                <span>/ месяц</span>
+                <span>{t("/ месяц")}</span>
               </div>
               <ul>
                 {item.features.map((feature) => (
@@ -157,7 +157,7 @@ export function SubscriptionScreen({
                 <Store size={14} />
                 {Number.isFinite(item.limit)
                   ? "До " + item.limit + " заведений"
-                  : "Без ограничений"}
+                  : t("Без ограничений")}
               </small>
             </button>
           );
@@ -166,15 +166,19 @@ export function SubscriptionScreen({
       <div className="subscription-actions">
         <p>
           {billing === "yearly"
-            ? "При ежегодной оплате два месяца бесплатно."
-            : "Списание один раз в месяц."}
+            ? t("При ежегодной оплате два месяца бесплатно.")
+            : t("Списание один раз в месяц.")}
         </p>
         <Button
           icon={Sparkles}
           disabled={saving || selected.limit < venueCount}
           onClick={() => void activate()}
         >
-          {saving ? "Сохраняем..." : subscription ? "Изменить тариф" : "Начать пробный период"}
+          {saving
+            ? t("Сохраняем...")
+            : subscription
+              ? t("Изменить тариф")
+              : t("Начать пробный период")}
         </Button>
       </div>
     </>

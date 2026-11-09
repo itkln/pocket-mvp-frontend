@@ -17,6 +17,7 @@ export function NewVenueModal({
   onClose: () => void;
   onCreate: (venue: VenueInput) => Promise<void>;
 }) {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [city, setCity] = useState("Братислава");
   const [address, setAddress] = useState("");
@@ -60,42 +61,42 @@ export function NewVenueModal({
               <Store size={21} />
             </span>
             <div>
-              <p className="eyebrow">НОВОЕ ПРОСТРАНСТВО</p>
-              <h2>Добавить заведение</h2>
+              <p className="eyebrow">{t("НОВОЕ ПРОСТРАНСТВО")}</p>
+              <h2>{t("Добавить заведение")}</h2>
             </div>
           </div>
-          <IconButton icon={X} label="Закрыть" onClick={onClose} />
+          <IconButton icon={X} label={t("Закрыть")} onClick={onClose} />
         </header>
         <form className="venue-create-form" onSubmit={submit}>
           <div className="modal-body">
             <p className="venue-create-intro">
-              Начните с основного. Меню, расписание и команду можно добавить позже.
+              {t("Начните с основного. Меню, расписание и команду можно добавить позже.")}
             </p>
-            <Field label="Название" wide>
+            <Field label={t("Название")} wide>
               <input
                 autoFocus
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                placeholder="Например, Mokka Bistro"
+                placeholder={t("Например, Mokka Bistro")}
                 maxLength={80}
                 required
               />
             </Field>
             <div className="venue-create-location">
-              <Field label="Город">
+              <Field label={t("Город")}>
                 <input
                   value={city}
                   onChange={(event) => setCity(event.target.value)}
-                  placeholder="Город"
+                  placeholder={t("Город")}
                   maxLength={80}
                   required
                 />
               </Field>
-              <Field label="Адрес">
+              <Field label={t("Адрес")}>
                 <input
                   value={address}
                   onChange={(event) => setAddress(event.target.value)}
-                  placeholder="Улица и номер"
+                  placeholder={t("Улица и номер")}
                   maxLength={120}
                 />
               </Field>
@@ -103,19 +104,19 @@ export function NewVenueModal({
             <div className="venue-create-preview" aria-live="polite">
               <span>{initials || <Store size={18} />}</span>
               <div>
-                <strong>{cleanName || "Название заведения"}</strong>
+                <strong>{cleanName || t("Название заведения")}</strong>
                 <small>
-                  {[city.trim(), address.trim()].filter(Boolean).join(" · ") || "Местоположение"}
+                  {[city.trim(), address.trim()].filter(Boolean).join(" · ") || t("Местоположение")}
                 </small>
               </div>
             </div>
           </div>
           <footer>
             <Button kind="quiet" onClick={onClose}>
-              Отмена
+              {t("Отмена")}
             </Button>
             <Button type="submit" icon={Plus} disabled={!cleanName || !city.trim() || submitting}>
-              {submitting ? "Добавляем..." : "Добавить заведение"}
+              {submitting ? t("Добавляем...") : t("Добавить заведение")}
             </Button>
           </footer>
         </form>
@@ -221,7 +222,7 @@ export function Modal({
           <div>
             <h2>{title}</h2>
           </div>
-          <IconButton icon={X} label="Закрыть" onClick={onClose} />
+          <IconButton icon={X} label={t("Закрыть")} onClick={onClose} />
         </header>
         {type !== "order" ? (
           <form noValidate onSubmit={submit}>
@@ -229,20 +230,20 @@ export function Modal({
               <div className="modal-body">
                 <div className="form-grid">
                   <div className="field wide">
-                    <span>Фото</span>
+                    <span>{t("Фото")}</span>
                     <MenuImageField
                       value={itemImage}
                       name="Новая позиция"
                       onChange={setItemImage}
                     />
                   </div>
-                  <Field label="Название" wide>
-                    <input name="name" autoFocus placeholder="Название блюда" required />
+                  <Field label={t("Название")} wide>
+                    <input name="name" autoFocus placeholder={t("Название блюда")} required />
                   </Field>
-                  <Field label="Категория">
+                  <Field label={t("Категория")}>
                     <select name="category" required defaultValue="">
                       <option value="" disabled>
-                        Выберите категорию
+                        {t("Выберите категорию")}
                       </option>
                       {workspace.categories.map((category) => (
                         <option key={category.id} value={category.id}>
@@ -251,7 +252,7 @@ export function Modal({
                       ))}
                     </select>
                   </Field>
-                  <Field label="Цена">
+                  <Field label={t("Цена")}>
                     <input
                       name="price"
                       type="number"
@@ -261,8 +262,11 @@ export function Modal({
                       required
                     />
                   </Field>
-                  <Field label="Описание" wide>
-                    <textarea name="description" placeholder="Ингредиенты и короткое описание" />
+                  <Field label={t("Описание")} wide>
+                    <textarea
+                      name="description"
+                      placeholder={t("Ингредиенты и короткое описание")}
+                    />
                   </Field>
                   <MenuNutritionFields />
                 </div>
@@ -271,26 +275,26 @@ export function Modal({
             {type === "invite" && (
               <div className="modal-body">
                 <div className="form-grid">
-                  <Field label="Имя">
-                    <input name="name" autoFocus placeholder="Имя сотрудника" required />
+                  <Field label={t("Имя")}>
+                    <input name="name" autoFocus placeholder={t("Имя сотрудника")} required />
                   </Field>
                   <Field label="E-mail">
                     <input name="email" type="email" placeholder="name@example.com" required />
                   </Field>
-                  <Field label="Роль" wide>
+                  <Field label={t("Роль")} wide>
                     <select name="role" defaultValue="waiter">
-                      <option value="waiter">Официант</option>
-                      <option value="manager">Менеджер</option>
-                      <option value="kitchen">Кухня</option>
-                      <option value="viewer">Только просмотр</option>
+                      <option value="waiter">{t("Официант")}</option>
+                      <option value="manager">{t("Менеджер")}</option>
+                      <option value="kitchen">{t("Кухня")}</option>
+                      <option value="viewer">{t("Только просмотр")}</option>
                     </select>
                   </Field>
                 </div>
                 <div className="permission-note">
                   <ShieldCheck size={20} />
                   <p>
-                    <strong>Доступ по роли</strong>
-                    <span>Сотрудник увидит только разрешенные разделы этого заведения.</span>
+                    <strong>{t("Доступ по роли")}</strong>
+                    <span>{t("Сотрудник увидит только разрешенные разделы этого заведения.")}</span>
                   </p>
                 </div>
               </div>
@@ -302,17 +306,17 @@ export function Modal({
             )}
             <footer>
               <Button kind="secondary" onClick={onClose}>
-                Отмена
+                {t("Отмена")}
               </Button>
               <Button
                 type="submit"
                 disabled={submitting || (type === "item" && workspace.categories.length === 0)}
               >
                 {submitting
-                  ? "Сохраняем..."
+                  ? t("Сохраняем...")
                   : type === "item"
-                    ? "Добавить в меню"
-                    : "Отправить приглашение"}
+                    ? t("Добавить в меню")
+                    : t("Отправить приглашение")}
               </Button>
             </footer>
           </form>
@@ -334,7 +338,7 @@ export function Modal({
                     </span>
                     <div>
                       <strong>{order.source}</strong>
-                      <p>{order.guest_name || "Гость"}</p>
+                      <p>{order.guest_name || t("Гость")}</p>
                     </div>
                   </div>
                   <dl className="order-total">
@@ -345,18 +349,18 @@ export function Modal({
                       </div>
                     )}
                     <div>
-                      <dt>Итого</dt>
+                      <dt>{t("Итого")}</dt>
                       <dd>{money(order.total_minor / 100, order.currency)}</dd>
                     </div>
                   </dl>
                 </>
               ) : (
-                <p>Заказов пока нет.</p>
+                <p>{t("Заказов пока нет.")}</p>
               )}
             </div>
             <footer>
               <Button kind="secondary" onClick={onClose}>
-                Закрыть
+                {t("Закрыть")}
               </Button>
               {order && order.status === "new" && (
                 <Button
@@ -366,7 +370,7 @@ export function Modal({
                     onClose();
                   }}
                 >
-                  Принять заказ
+                  {t("Принять заказ")}
                 </Button>
               )}
             </footer>

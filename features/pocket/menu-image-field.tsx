@@ -3,6 +3,7 @@
 import { useRef, useState, type ChangeEvent } from "react";
 import { ImagePlus, Trash2 } from "lucide-react";
 import { IconButton } from "./ui";
+import { useI18n } from "./i18n";
 
 export function MenuImageField({
   value,
@@ -15,6 +16,7 @@ export function MenuImageField({
   onChange: (value: string) => void;
   onProcessingChange?: (processing: boolean) => void;
 }) {
+  const { t } = useI18n();
   const input = useRef<HTMLInputElement>(null);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState("");
@@ -63,9 +65,11 @@ export function MenuImageField({
       <div className="menu-image-actions">
         <button type="button" onClick={() => input.current?.click()} disabled={processing}>
           <ImagePlus size={17} />
-          {processing ? "Обрабатываем..." : value ? "Изменить фото" : "Добавить фото"}
+          {processing ? t("Обрабатываем...") : value ? t("Изменить фото") : t("Добавить фото")}
         </button>
-        {value && <IconButton icon={Trash2} label="Удалить фото" onClick={() => onChange("")} />}
+        {value && (
+          <IconButton icon={Trash2} label={t("Удалить фото")} onClick={() => onChange("")} />
+        )}
       </div>
       {error && <p role="alert">{error}</p>}
     </div>

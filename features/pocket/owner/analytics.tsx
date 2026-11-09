@@ -15,6 +15,7 @@ import {
 import { Button, EmptyIllustration, PageHeader, PanelTitle, money } from "../ui";
 import { Metric } from "./dashboard";
 import { useOwnerWorkspace } from "./context";
+import { useI18n } from "../i18n";
 
 const channels: Array<{ id: string; label: string; icon: LucideIcon }> = [
   { id: "dine_in", label: "В зале", icon: Utensils },
@@ -24,6 +25,7 @@ const channels: Array<{ id: string; label: string; icon: LucideIcon }> = [
 ];
 
 export function AnalyticsScreen() {
+  const { t } = useI18n();
   const { dashboard, items, orders, reviews } = useOwnerWorkspace();
   const completed = orders.filter((order) => order.status === "completed");
   const occupancy = dashboard?.total_tables
@@ -33,37 +35,37 @@ export function AnalyticsScreen() {
   return (
     <>
       <PageHeader
-        title="Аналитика"
+        title={t("Аналитика")}
         actions={
           <Button kind="secondary" icon={Download} onClick={() => window.print()}>
-            Экспорт
+            {t("Экспорт")}
           </Button>
         }
       />
       <section className="metric-grid">
         <Metric
-          label="Выручка сегодня"
+          label={t("Выручка сегодня")}
           value={money((dashboard?.revenue_minor ?? 0) / 100)}
-          change="За текущий день"
+          change={t("За текущий день")}
           icon={CircleDollarSign}
           tone="coral"
         />
         <Metric
-          label="Заказов сегодня"
+          label={t("Заказов сегодня")}
           value={String(dashboard?.orders_today ?? 0)}
           change={`Завершено: ${completed.length}`}
           icon={ReceiptText}
           tone="green"
         />
         <Metric
-          label="Загрузка зала"
+          label={t("Загрузка зала")}
           value={`${occupancy}%`}
           change={`Активных столов: ${dashboard?.active_tables ?? 0}`}
           icon={Table2}
           tone="blue"
         />
         <Metric
-          label="Средняя оценка"
+          label={t("Средняя оценка")}
           value={dashboard?.average_rating ? dashboard.average_rating.toFixed(1) : "—"}
           change={`Отзывов: ${reviews.length}`}
           icon={Star}
@@ -72,7 +74,7 @@ export function AnalyticsScreen() {
       </section>
       <section className="analytics-grid">
         <div className="panel popular-list">
-          <PanelTitle title="Меню" />
+          <PanelTitle title={t("Меню")} />
           {items.length ? (
             items.slice(0, 8).map((item, index) => (
               <div className="popular-row" key={item.id}>
@@ -80,7 +82,7 @@ export function AnalyticsScreen() {
                 <p>
                   <strong>{item.name}</strong>
                   <small>
-                    {item.category} · {item.is_available ? "Доступно" : "Скрыто"}
+                    {item.category} · {item.is_available ? t("Доступно") : t("Скрыто")}
                   </small>
                 </p>
                 <b>{money(item.price_minor / 100)}</b>
@@ -89,13 +91,13 @@ export function AnalyticsScreen() {
           ) : (
             <EmptyIllustration
               icon={ReceiptText}
-              title="Недостаточно данных"
-              text="Добавьте позиции меню, чтобы видеть сводку."
+              title={t("Недостаточно данных")}
+              text={t("Добавьте позиции меню, чтобы видеть сводку.")}
             />
           )}
         </div>
         <div className="panel channel-summary">
-          <PanelTitle title="Заказы по каналам" />
+          <PanelTitle title={t("Заказы по каналам")} />
           {orders.length ? (
             <div className="channel-summary-list">
               {channels.map(({ id, label, icon: Icon }) => {
@@ -125,8 +127,8 @@ export function AnalyticsScreen() {
           ) : (
             <EmptyIllustration
               icon={ReceiptText}
-              title="Заказов пока нет"
-              text="Статистика появится после первого заказа."
+              title={t("Заказов пока нет")}
+              text={t("Статистика появится после первого заказа.")}
             />
           )}
         </div>

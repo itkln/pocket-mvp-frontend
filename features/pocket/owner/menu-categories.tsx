@@ -39,6 +39,7 @@ type CategoryEditorProps = {
 };
 
 export function CategoryManagerDialog(props: CategoryEditorProps) {
+  const { t } = useI18n();
   return (
     <div className="modal-backdrop" onMouseDown={props.onClose}>
       <section
@@ -46,8 +47,8 @@ export function CategoryManagerDialog(props: CategoryEditorProps) {
         onMouseDown={(event) => event.stopPropagation()}
       >
         <header>
-          <h2>Управление категориями</h2>
-          <IconButton icon={X} label="Закрыть" onClick={props.onClose} />
+          <h2>{t("Управление категориями")}</h2>
+          <IconButton icon={X} label={t("Закрыть")} onClick={props.onClose} />
         </header>
         <CategoryEditor {...props} />
       </section>
@@ -64,6 +65,7 @@ export function CategoryEditor({
   onRemove,
   onSave,
 }: CategoryEditorProps) {
+  const { t } = useI18n();
   const [drafts, setDrafts] = useState<CategoryDraft[]>(() => [
     ...categories.map((category) => ({ ...category })),
     ...(initialCreate ? [newCategoryDraft(newCategorySortOrder)] : []),
@@ -156,7 +158,7 @@ export function CategoryEditor({
             ))}
           </div>
         ) : (
-          <div className="category-manager-empty">Категорий пока нет</div>
+          <div className="category-manager-empty">{t("Категорий пока нет")}</div>
         )}
       </div>
       {error && (
@@ -166,7 +168,7 @@ export function CategoryEditor({
       )}
       <footer>
         <Button type="submit" disabled={!hasChanges || invalid || saving}>
-          {saving ? "Сохраняем..." : "Сохранить"}
+          {saving ? t("Сохраняем...") : t("Сохранить")}
         </Button>
       </footer>
     </form>
@@ -192,18 +194,18 @@ function CategoryDraftRow({
       <div className="category-manager-copy">
         <input
           aria-label={
-            category.isNew ? "Название новой категории" : `Название категории ${category.name}`
+            category.isNew ? t("Название новой категории") : `Название категории ${category.name}`
           }
           autoFocus={autoFocus}
           value={category.name}
           onChange={(event) => onChange({ name: event.target.value })}
-          placeholder={category.isNew ? "Название новой категории" : undefined}
+          placeholder={category.isNew ? t("Название новой категории") : undefined}
         />
         <small>{positionLabel}</small>
       </div>
       <label
         className="category-visibility"
-        title={category.is_active ? "Скрыть категорию" : "Показывать категорию"}
+        title={category.is_active ? t("Скрыть категорию") : t("Показывать категорию")}
       >
         <span>{t("Показывать в меню")}</span>
         <span className="switch">
@@ -223,15 +225,15 @@ function CategoryDraftRow({
         aria-label={`Удалить ${category.isNew ? "новую категорию" : `категорию ${category.name}`}`}
         title={
           !category.isNew && category.item_count > 0
-            ? "Сначала удалите или перенесите позиции"
-            : "Удалить категорию"
+            ? t("Сначала удалите или перенесите позиции")
+            : t("Удалить категорию")
         }
         onClick={onDelete}
       >
         <Trash2 size={17} />
       </button>
       <label className="category-preorder">
-        <span>Предзаказ</span>
+        <span>{t("Предзаказ")}</span>
         <span className="switch">
           <input
             type="checkbox"
@@ -255,20 +257,21 @@ export function MenuPreview({
   items: OwnerMenuItem[];
   onClose: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <div className="preview-backdrop" onMouseDown={onClose}>
       <section className="menu-preview-modal" onMouseDown={(event) => event.stopPropagation()}>
         <header>
           <div>
-            <p className="eyebrow">ПУБЛИЧНОЕ МЕНЮ</p>
+            <p className="eyebrow">{t("ПУБЛИЧНОЕ МЕНЮ")}</p>
             <h2>{venueName}</h2>
           </div>
-          <IconButton icon={X} label="Закрыть предпросмотр" onClick={onClose} />
+          <IconButton icon={X} label={t("Закрыть предпросмотр")} onClick={onClose} />
         </header>
         <div className="preview-stage">
           <div className="preview-device desktop">
             <div className="preview-venue">
-              <span>Меню заведения</span>
+              <span>{t("Меню заведения")}</span>
               <h3>{venueName}</h3>
             </div>
             <div className="preview-menu-grid">
@@ -292,10 +295,10 @@ export function MenuPreview({
         </div>
         <footer>
           <p>
-            {items.length ? `Доступных позиций: ${items.length}` : "Нет опубликованных позиций"}
+            {items.length ? `Доступных позиций: ${items.length}` : t("Нет опубликованных позиций")}
           </p>
           <Button kind="secondary" onClick={onClose}>
-            Закрыть
+            {t("Закрыть")}
           </Button>
         </footer>
       </section>

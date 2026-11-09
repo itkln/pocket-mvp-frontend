@@ -22,7 +22,7 @@ export default function PasswordRecoveryPage({
   product?: "vendor" | "spots" | "dish";
   returnTo?: string;
 }) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const authPath = (screen: "login" | "forgot-password") =>
     product !== "vendor" ? spotsAuthPath(locale, screen, returnTo) : `/${locale}/${screen}`;
   const errorMessage = useLocalizedError();
@@ -81,7 +81,7 @@ export default function PasswordRecoveryPage({
         <Link
           className="auth-brand"
           href={product === "dish" ? spotsReturnTo(returnTo, locale) : `/${locale}`}
-          aria-label="Pocket, на главную"
+          aria-label={t("Pocket, на главную")}
         >
           <span className="auth-brand-mark">
             <Image src="/logo.svg" alt="" width={30} height={30} priority />
@@ -115,13 +115,13 @@ export default function PasswordRecoveryPage({
             ) : (
               <>
                 <label className="auth-field">
-                  <span>Новый пароль</span>
+                  <span>{t("Новый пароль")}</span>
                   <span className="auth-password">
                     <input
                       name="password"
                       type={passwordVisible ? "text" : "password"}
                       autoComplete="new-password"
-                      placeholder="От 12 до 128 символов"
+                      placeholder={t("От 12 до 128 символов")}
                       minLength={12}
                       maxLength={128}
                       required
@@ -130,20 +130,20 @@ export default function PasswordRecoveryPage({
                     <button
                       type="button"
                       onClick={() => setPasswordVisible((current) => !current)}
-                      aria-label={passwordVisible ? "Скрыть пароль" : "Показать пароль"}
+                      aria-label={passwordVisible ? t("Скрыть пароль") : t("Показать пароль")}
                     >
                       {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </span>
                 </label>
                 <label className="auth-field">
-                  <span>Повторите новый пароль</span>
+                  <span>{t("Повторите новый пароль")}</span>
                   <span className="auth-password">
                     <input
                       name="confirmPassword"
                       type={confirmPasswordVisible ? "text" : "password"}
                       autoComplete="new-password"
-                      placeholder="Повторите новый пароль"
+                      placeholder={t("Повторите новый пароль")}
                       minLength={12}
                       maxLength={128}
                       required
@@ -151,7 +151,9 @@ export default function PasswordRecoveryPage({
                     <button
                       type="button"
                       onClick={() => setConfirmPasswordVisible((current) => !current)}
-                      aria-label={confirmPasswordVisible ? "Скрыть пароль" : "Показать пароль"}
+                      aria-label={
+                        confirmPasswordVisible ? t("Скрыть пароль") : t("Показать пароль")
+                      }
                     >
                       {confirmPasswordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -166,7 +168,7 @@ export default function PasswordRecoveryPage({
             )}
             {!requestMode && error && (
               <Link className="auth-recovery-link" href={authPath("forgot-password")}>
-                Запросить новую ссылку
+                {t("Запросить новую ссылку")}
               </Link>
             )}
             <button
@@ -176,23 +178,23 @@ export default function PasswordRecoveryPage({
             >
               {submitting
                 ? requestMode
-                  ? "Отправляем..."
-                  : "Сохраняем..."
+                  ? t("Отправляем...")
+                  : t("Сохраняем...")
                 : requestMode
-                  ? "Отправить ссылку"
-                  : "Сохранить пароль"}
+                  ? t("Отправить ссылку")
+                  : t("Сохранить пароль")}
             </button>
           </form>
         )}
 
         <p className="auth-switch">
-          {complete && requestMode ? "Не получили письмо?" : "Вспомнили пароль?"}{" "}
+          {complete && requestMode ? t("Не получили письмо?") : t("Вспомнили пароль?")}{" "}
           {complete && requestMode ? (
             <button type="button" className="auth-link-button" onClick={() => setComplete(false)}>
-              Отправить еще раз
+              {t("Отправить еще раз")}
             </button>
           ) : (
-            <Link href={authPath("login")}>Вернуться ко входу</Link>
+            <Link href={authPath("login")}>{t("Вернуться ко входу")}</Link>
           )}
         </p>
       </section>

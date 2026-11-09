@@ -231,7 +231,7 @@ export function AccountScreen({
     <div className="account-page">
       {!embedded && (
         <PageHeader
-          title="Настройки"
+          title={t("Настройки")}
           actions={
             <Button
               className="account-header-logout"
@@ -239,7 +239,7 @@ export function AccountScreen({
               icon={LogOut}
               onClick={onLogout}
             >
-              Выйти из аккаунта
+              {t("Выйти из аккаунта")}
             </Button>
           }
         />
@@ -286,7 +286,7 @@ export function AccountScreen({
           {!embedded && (
             <div className="account-profile-actions">
               <Button kind="quiet" icon={Pencil} onClick={() => setSection("profile")}>
-                Изменить профиль
+                {t("Изменить профиль")}
               </Button>
             </div>
           )}
@@ -315,11 +315,11 @@ export function AccountScreen({
           {section === "profile" && (
             <form className="account-profile-form" onSubmit={submitProfile}>
               <PanelTitle
-                title="Личные данные"
-                subtitle="Используются во всех ролях и заведениях."
+                title={t("Личные данные")}
+                subtitle={t("Используются во всех ролях и заведениях.")}
               />
               <div className="form-grid">
-                <Field label="Имя">
+                <Field label={t("Имя")}>
                   <input
                     value={profile.firstName}
                     onChange={(event) =>
@@ -329,7 +329,7 @@ export function AccountScreen({
                     autoComplete="given-name"
                   />
                 </Field>
-                <Field label="Фамилия">
+                <Field label={t("Фамилия")}>
                   <input
                     value={profile.lastName}
                     onChange={(event) =>
@@ -339,7 +339,7 @@ export function AccountScreen({
                     autoComplete="family-name"
                   />
                 </Field>
-                <Field label="Телефон">
+                <Field label={t("Телефон")}>
                   <input
                     type="tel"
                     value={profile.phone}
@@ -348,7 +348,7 @@ export function AccountScreen({
                     }
                     maxLength={40}
                     autoComplete="tel"
-                    placeholder="Добавить телефон"
+                    placeholder={t("Добавить телефон")}
                   />
                 </Field>
                 <Field label="E-mail">
@@ -362,7 +362,7 @@ export function AccountScreen({
               )}
               <footer>
                 <Button type="submit" disabled={!profileChanged || savingProfile}>
-                  {savingProfile ? "Сохраняем..." : "Сохранить изменения"}
+                  {savingProfile ? t("Сохраняем...") : t("Сохранить изменения")}
                 </Button>
               </footer>
             </form>
@@ -370,25 +370,25 @@ export function AccountScreen({
           {section === "notifications" && (
             <div className="account-preference-panel">
               <PanelTitle
-                title="Уведомления"
-                subtitle="Выберите события, которые важны лично вам."
+                title={t("Уведомления")}
+                subtitle={t("Выберите события, которые важны лично вам.")}
               />
               <div className="account-setting-rows">
                 <AccountToggle
-                  title="Статусы заказов"
-                  text="Изменения заказов, оплат и бронирований."
+                  title={t("Статусы заказов")}
+                  text={t("Изменения заказов, оплат и бронирований.")}
                   checked={preferences.orderUpdates}
                   onChange={(value) => updatePreference("orderUpdates", value)}
                 />
                 <AccountToggle
-                  title="Ответы на отзывы"
-                  text="Ответы заведений на ваши отзывы."
+                  title={t("Ответы на отзывы")}
+                  text={t("Ответы заведений на ваши отзывы.")}
                   checked={preferences.reviewReplies}
                   onChange={(value) => updatePreference("reviewReplies", value)}
                 />
                 <AccountToggle
-                  title="Новости Pocket"
-                  text="Редкие обновления о новых возможностях."
+                  title={t("Новости Pocket")}
+                  text={t("Редкие обновления о новых возможностях.")}
                   checked={preferences.productNews}
                   onChange={(value) => updatePreference("productNews", value)}
                 />
@@ -397,11 +397,14 @@ export function AccountScreen({
           )}
           {section === "security" && (
             <div className="account-preference-panel account-security-panel">
-              <PanelTitle title="Безопасность" subtitle="E-mail и пароль для входа в аккаунт." />
+              <PanelTitle
+                title={t("Безопасность")}
+                subtitle={t("E-mail и пароль для входа в аккаунт.")}
+              />
               {editingEmail ? (
                 <form className="account-password-form" noValidate onSubmit={submitEmail}>
                   <div className="form-grid">
-                    <Field label="Новый e-mail" wide>
+                    <Field label={t("Новый e-mail")} wide>
                       <input
                         name="new_email"
                         type="email"
@@ -410,7 +413,7 @@ export function AccountScreen({
                         autoFocus
                       />
                     </Field>
-                    <Field label="Текущий пароль" wide>
+                    <Field label={t("Текущий пароль")} wide>
                       <div className="account-password-input">
                         <input
                           name="current_password"
@@ -440,17 +443,17 @@ export function AccountScreen({
                         setFormError("");
                       }}
                     >
-                      Отмена
+                      {t("Отмена")}
                     </Button>
                     <Button type="submit" disabled={submitting}>
-                      {submitting ? "Сохраняем..." : "Сохранить e-mail"}
+                      {submitting ? t("Сохраняем...") : t("Сохранить e-mail")}
                     </Button>
                   </div>
                 </form>
               ) : editingPassword ? (
                 <form className="account-password-form" noValidate onSubmit={submitPassword}>
                   <div className="form-grid">
-                    <Field label="Текущий пароль" wide>
+                    <Field label={t("Текущий пароль")} wide>
                       <div className="account-password-input">
                         <input
                           name="current_password"
@@ -467,14 +470,14 @@ export function AccountScreen({
                         </button>
                       </div>
                     </Field>
-                    <Field label="Новый пароль">
+                    <Field label={t("Новый пароль")}>
                       <input
                         name="new_password"
                         type={showPasswords ? "text" : "password"}
                         autoComplete="new-password"
                       />
                     </Field>
-                    <Field label="Повторите новый пароль">
+                    <Field label={t("Повторите новый пароль")}>
                       <input
                         name="password_confirmation"
                         type={showPasswords ? "text" : "password"}
@@ -495,10 +498,10 @@ export function AccountScreen({
                         setFormError("");
                       }}
                     >
-                      Отмена
+                      {t("Отмена")}
                     </Button>
                     <Button type="submit" disabled={submitting}>
-                      {submitting ? "Сохраняем..." : "Сохранить пароль"}
+                      {submitting ? t("Сохраняем...") : t("Сохранить пароль")}
                     </Button>
                   </div>
                 </form>
@@ -518,12 +521,12 @@ export function AccountScreen({
                         setFormError("");
                       }}
                     >
-                      Изменить
+                      {t("Изменить")}
                     </Button>
                   </div>
                   <div>
                     <div>
-                      <strong>Пароль</strong>
+                      <strong>{t("Пароль")}</strong>
                       <p>••••••••••••</p>
                     </div>
                     <Button
@@ -535,7 +538,7 @@ export function AccountScreen({
                         setFormError("");
                       }}
                     >
-                      Изменить
+                      {t("Изменить")}
                     </Button>
                   </div>
                 </div>
@@ -579,7 +582,7 @@ function AccountToggle({
 }
 
 export function PaymentsScreen() {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const { payments } = useOwnerWorkspace();
   const paid = payments.filter((payment) => payment.status === "paid");
   const total = paid.reduce(
@@ -610,10 +613,10 @@ export function PaymentsScreen() {
   return (
     <>
       <PageHeader
-        title="Платежи"
+        title={t("Платежи")}
         actions={
           <Button kind="secondary" icon={Download} disabled={!payments.length} onClick={exportCSV}>
-            Скачать CSV
+            {t("Скачать CSV")}
           </Button>
         }
       />
@@ -623,22 +626,27 @@ export function PaymentsScreen() {
             <CreditCard size={20} />
           </span>
           <div className="metric-copy">
-            <p>Получено</p>
+            <p>{t("Получено")}</p>
             <strong>{money(total / 100)}</strong>
-            <small>Успешных платежей: {paid.length}</small>
+            <small>
+              {t("Успешных платежей:")} {paid.length}
+            </small>
           </div>
         </article>
       </section>
       <section className="panel payment-table-panel">
-        <PanelTitle title="Последние транзакции" subtitle="Данные платежного провайдера" />
+        <PanelTitle
+          title={t("Последние транзакции")}
+          subtitle={t("Данные платежного провайдера")}
+        />
         {payments.length ? (
           <div className="payment-table">
             <div className="payment-table-head">
-              <span>Платеж</span>
-              <span>Провайдер</span>
-              <span>Сумма</span>
-              <span>Статус</span>
-              <span>Дата</span>
+              <span>{t("Платеж")}</span>
+              <span>{t("Провайдер")}</span>
+              <span>{t("Сумма")}</span>
+              <span>{t("Статус")}</span>
+              <span>{t("Дата")}</span>
             </div>
             {payments.map((payment) => (
               <div className="payment-row" key={payment.id}>
@@ -669,8 +677,8 @@ export function PaymentsScreen() {
         ) : (
           <EmptyIllustration
             icon={CreditCard}
-            title="Транзакций пока нет"
-            text="Платежи появятся после подключения провайдера и первого онлайн-заказа."
+            title={t("Транзакций пока нет")}
+            text={t("Платежи появятся после подключения провайдера и первого онлайн-заказа.")}
           />
         )}
       </section>

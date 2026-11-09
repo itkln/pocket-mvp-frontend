@@ -15,6 +15,7 @@ import {
 import { type OwnerOrder } from "../../../lib/owner-api";
 import { Button, EmptyIllustration, PageHeader, PanelTitle, StatusPill, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
+import { useI18n } from "../i18n";
 
 const orderStatusLabel: Record<OwnerOrder["status"], string> = {
   new: "Новый",
@@ -33,6 +34,7 @@ export function OwnerOverview({
   ownerName: string;
   onNavigate: (screen: string) => void;
 }) {
+  const { t } = useI18n();
   const { dashboard, orders, loading } = useOwnerWorkspace();
   const occupancy = dashboard?.total_tables
     ? Math.round((dashboard.active_tables / dashboard.total_tables) * 100)
@@ -41,37 +43,39 @@ export function OwnerOverview({
     <>
       <PageHeader
         title={`Добрый день, ${ownerName}`}
-        subtitle={loading ? "Обновляем показатели..." : "Актуальные данные выбранного заведения."}
+        subtitle={
+          loading ? t("Обновляем показатели...") : t("Актуальные данные выбранного заведения.")
+        }
         actions={
           <Button icon={Download} kind="secondary" onClick={() => window.print()}>
-            Отчет
+            {t("Отчет")}
           </Button>
         }
       />
       <section className="metric-grid">
         <Metric
-          label="Выручка сегодня"
+          label={t("Выручка сегодня")}
           value={money((dashboard?.revenue_minor ?? 0) / 100)}
-          change="Оплаченные заказы"
+          change={t("Оплаченные заказы")}
           icon={CircleDollarSign}
           tone="coral"
         />
         <Metric
-          label="Заказы"
+          label={t("Заказы")}
           value={String(dashboard?.orders_today ?? 0)}
           change={`${dashboard?.new_orders ?? 0} новых`}
           icon={ShoppingBag}
           tone="green"
         />
         <Metric
-          label="Средний чек"
+          label={t("Средний чек")}
           value={money((dashboard?.average_order_minor ?? 0) / 100)}
-          change="За сегодня"
+          change={t("За сегодня")}
           icon={ReceiptText}
           tone="blue"
         />
         <Metric
-          label="Загрузка зала"
+          label={t("Загрузка зала")}
           value={`${occupancy}%`}
           change={`${dashboard?.active_tables ?? 0} из ${dashboard?.total_tables ?? 0}`}
           icon={Table2}
@@ -81,18 +85,18 @@ export function OwnerOverview({
       <section className="dashboard-grid">
         <div className="panel dashboard-orders">
           <PanelTitle
-            title="Последние заказы"
-            subtitle="Обновляются из рабочего API"
+            title={t("Последние заказы")}
+            subtitle={t("Обновляются из рабочего API")}
             action={
               <Button kind="quiet" onClick={() => onNavigate("orders")}>
-                Все заказы <ChevronRight size={16} />
+                {t("Все заказы")} <ChevronRight size={16} />
               </Button>
             }
           />
           <OrderTable orders={orders.slice(0, 5)} />
         </div>
         <div className="panel reviews-panel">
-          <PanelTitle title="Оценка гостей" subtitle="По опубликованным отзывам" />
+          <PanelTitle title={t("Оценка гостей")} subtitle={t("По опубликованным отзывам")} />
           {dashboard?.average_rating ? (
             <div className="rating-main">
               <strong>{dashboard.average_rating.toFixed(1)}</strong>
@@ -100,14 +104,14 @@ export function OwnerOverview({
                 <div className="stars">
                   <Star size={18} fill="currentColor" />
                 </div>
-                <small>Средняя оценка</small>
+                <small>{t("Средняя оценка")}</small>
               </div>
             </div>
           ) : (
             <EmptyIllustration
               icon={Star}
-              title="Оценок пока нет"
-              text="Средняя оценка появится после первого отзыва."
+              title={t("Оценок пока нет")}
+              text={t("Средняя оценка появится после первого отзыва.")}
             />
           )}
         </div>
@@ -144,12 +148,13 @@ export function Metric({
 }
 
 export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
+  const { t } = useI18n();
   if (!orders.length)
     return (
       <EmptyIllustration
         icon={CheckCircle2}
-        title="Заказов пока нет"
-        text="Новые онлайн-заказы появятся здесь автоматически."
+        title={t("Заказов пока нет")}
+        text={t("Новые онлайн-заказы появятся здесь автоматически.")}
       />
     );
   return (
@@ -157,12 +162,12 @@ export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
       <table>
         <thead>
           <tr>
-            <th>Заказ</th>
-            <th>Источник</th>
-            <th>Гость</th>
-            <th>Сумма</th>
-            <th>Статус</th>
-            <th>Создан</th>
+            <th>{t("Заказ")}</th>
+            <th>{t("Источник")}</th>
+            <th>{t("Гость")}</th>
+            <th>{t("Сумма")}</th>
+            <th>{t("Статус")}</th>
+            <th>{t("Создан")}</th>
           </tr>
         </thead>
         <tbody>
@@ -171,7 +176,9 @@ export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
               <td>
                 <strong>#{order.number}</strong>
                 {order.reservation_code && (
-                  <small className="order-reservation-code">Бронь {order.reservation_code}</small>
+                  <small className="order-reservation-code">
+                    {t("Бронь")} {order.reservation_code}
+                  </small>
                 )}
               </td>
               <td>
@@ -186,17 +193,20 @@ export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
                 )}
               </td>
               <td>
-                {order.guest_name || "Гость"}
+                {order.guest_name || t("Гость")}
                 {order.guest_phone && (
                   <small className="order-reservation-code">{order.guest_phone}</small>
                 )}
                 {order.guest_count ? (
-                  <small className="order-reservation-code">Гостей: {order.guest_count}</small>
+                  <small className="order-reservation-code">
+                    {t("Гостей:")} {order.guest_count}
+                  </small>
                 ) : null}
                 {order.items?.length ? (
                   <details className="order-preorder-items">
                     <summary>
-                      Блюда ({order.items.reduce((sum, item) => sum + item.quantity, 0)})
+                      {t("Блюда (")}
+                      {order.items.reduce((sum, item) => sum + item.quantity, 0)})
                     </summary>
                     <ul>
                       {order.items.map((item, index) => (
@@ -214,7 +224,7 @@ export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
                 <strong>{money(order.total_minor / 100)}</strong>
                 {Boolean(order.tip_minor) && (
                   <small className="order-reservation-code">
-                    Чаевые: {money(order.tip_minor! / 100)}
+                    {t("Чаевые:")} {money(order.tip_minor! / 100)}
                   </small>
                 )}
               </td>

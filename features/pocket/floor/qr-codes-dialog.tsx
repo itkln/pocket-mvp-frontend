@@ -79,14 +79,15 @@ export function QrCodesDialog({
       <section className="qr-dialog" onMouseDown={(event) => event.stopPropagation()}>
         <header>
           <div>
-            <p className="eyebrow">QR-КОДЫ СТОЛОВ</p>
+            <p className="eyebrow">{t("QR-КОДЫ СТОЛОВ")}</p>
             <h2>{venueName}</h2>
             <p>
-              После сканирования гость увидит меню, а заказ и счет автоматически привяжутся к
-              выбранному столу. Перегенерация отключает прежний код.
+              {t(
+                "После сканирования гость увидит меню, а заказ и счет автоматически привяжутся к выбранному столу. Перегенерация отключает прежний код.",
+              )}
             </p>
           </div>
-          <IconButton icon={X} label="Закрыть QR-коды" onClick={onClose} />
+          <IconButton icon={X} label={t("Закрыть QR-коды")} onClick={onClose} />
         </header>
         {error && (
           <p className="form-error" role="alert">
@@ -112,9 +113,12 @@ export function QrCodesDialog({
                   )}
                 </div>
                 <div>
-                  <strong>Стол {table.id}</strong>
+                  <strong>
+                    {t("Стол")} {table.id}
+                  </strong>
                   <span>
-                    {table.seats} места{qr && ` · ${t("Версия {number}", { number: qr.version })}`}
+                    {table.seats} {t("места")}
+                    {qr && ` · ${t("Версия {number}", { number: qr.version })}`}
                   </span>
                   {qr && (
                     <a href={qr.url} target="_blank" rel="noreferrer">
@@ -147,10 +151,10 @@ export function QrCodesDialog({
           })}
         </div>
         <footer>
-          <p>Напечатайте коды и разместите их на соответствующих столах.</p>
+          <p>{t("Напечатайте коды и разместите их на соответствующих столах.")}</p>
           <div>
             <Button kind="secondary" onClick={onClose}>
-              Закрыть
+              {t("Закрыть")}
             </Button>
             <Button
               icon={Download}
@@ -163,7 +167,7 @@ export function QrCodesDialog({
                 ).catch(() => notify(t("Не удалось скачать QR-коды")));
               }}
             >
-              Скачать все
+              {t("Скачать все")}
             </Button>
           </div>
         </footer>

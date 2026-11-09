@@ -218,7 +218,7 @@ export default function VendorApp({
   if (!authReady || !currentUser)
     return (
       <main className="auth-loading" aria-live="polite">
-        Проверяем сессию...
+        {t("Проверяем сессию...")}
       </main>
     );
 
@@ -306,10 +306,10 @@ export default function VendorApp({
                 <span>
                   <Store size={28} />
                 </span>
-                <h1>Добавьте первое заведение</h1>
-                <p>После создания откроются меню, команда, заказы и аналитика.</p>
+                <h1>{t("Добавьте первое заведение")}</h1>
+                <p>{t("После создания откроются меню, команда, заказы и аналитика.")}</p>
                 <Button icon={Plus} onClick={() => setModal("venue")}>
-                  Добавить заведение
+                  {t("Добавить заведение")}
                 </Button>
               </section>
             )}

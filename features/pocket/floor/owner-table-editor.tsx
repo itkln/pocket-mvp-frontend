@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Download, Table2, Trash2 } from "lucide-react";
 import { Button, Field } from "../ui";
 import { FloorTable } from "./floor-model";
+import { useI18n } from "../i18n";
 
 export function OwnerTableEditor({
   table,
@@ -18,6 +19,7 @@ export function OwnerTableEditor({
   onDownload: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useI18n();
   const [tableId, setTableId] = useState(table.id);
   const [seats, setSeats] = useState(table.seats);
   const applyTableId = () => {
@@ -27,13 +29,15 @@ export function OwnerTableEditor({
     <aside className="panel table-detail technical-detail">
       <div className="detail-heading">
         <div>
-          <small>{floorName.toUpperCase()} · СТОЛ</small>
+          <small>
+            {floorName.toUpperCase()} {t("· СТОЛ")}
+          </small>
           <h2>{table.id}</h2>
         </div>
         <Table2 size={22} />
       </div>
       <div className="table-editor-fields">
-        <Field label="Номер стола">
+        <Field label={t("Номер стола")}>
           <input
             value={tableId}
             maxLength={12}
@@ -44,7 +48,7 @@ export function OwnerTableEditor({
             }}
           />
         </Field>
-        <Field label="Количество мест">
+        <Field label={t("Количество мест")}>
           <select
             value={seats}
             onChange={(event) => {
@@ -61,14 +65,14 @@ export function OwnerTableEditor({
           </select>
         </Field>
         <p className="technical-position">
-          Позиция: {Math.round(table.x)}% × {Math.round(table.y)}%
+          {t("Позиция:")} {Math.round(table.x)}% × {Math.round(table.y)}%
         </p>
       </div>
       <Button className="full" kind="secondary" icon={Download} onClick={onDownload}>
-        Скачать QR-код
+        {t("Скачать QR-код")}
       </Button>
       <Button className="full" kind="danger" icon={Trash2} onClick={onDelete}>
-        Удалить стол
+        {t("Удалить стол")}
       </Button>
     </aside>
   );

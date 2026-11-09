@@ -165,7 +165,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
       disabled={saving || processingCover || processingLogo}
       onClick={() => void save()}
     >
-      {saving ? "Сохраняем..." : "Сохранить"}
+      {saving ? t("Сохраняем...") : t("Сохранить")}
     </Button>
   );
 
@@ -180,7 +180,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
         }
       />
       <label className="venue-section-select">
-        <span>Раздел</span>
+        <span>{t("Раздел")}</span>
         <select value={tab} onChange={(event) => setTab(event.target.value)}>
           {venueTabs.map((item) => (
             <option value={item.id} key={item.id}>
@@ -215,13 +215,16 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
               <PublicPageSettings venue={venue} notify={notify} />
             ) : tab === "Основное" ? (
               <>
-                <PanelTitle title="Профиль заведения" subtitle="Эти данные видят гости." />
+                <PanelTitle
+                  title={t("Профиль заведения")}
+                  subtitle={t("Эти данные видят гости.")}
+                />
                 <div className="cover-upload">
                   <div
                     className={`cover-photo ${coverImage ? "custom" : ""}`}
                     style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined}
                     role="img"
-                    aria-label="Обложка заведения"
+                    aria-label={t("Обложка заведения")}
                   />
                   <input
                     ref={coverInput}
@@ -233,7 +236,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                   <div className="cover-actions">
                     {coverImage && (
                       <Button kind="secondary" icon={Trash2} onClick={() => void removeCover()}>
-                        Удалить
+                        {t("Удалить")}
                       </Button>
                     )}
                     <Button
@@ -242,7 +245,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                       disabled={processingCover}
                       onClick={() => coverInput.current?.click()}
                     >
-                      {processingCover ? "Обрабатываем..." : "Изменить обложку"}
+                      {processingCover ? t("Обрабатываем...") : t("Изменить обложку")}
                     </Button>
                   </div>
                 </div>
@@ -267,10 +270,10 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                         onClick={() => logoInput.current?.click()}
                       >
                         {processingLogo
-                          ? "Обрабатываем..."
+                          ? t("Обрабатываем...")
                           : logoImage
-                            ? "Изменить иконку"
-                            : "Загрузить иконку"}
+                            ? t("Изменить иконку")
+                            : t("Загрузить иконку")}
                       </Button>
                       {logoImage && (
                         <Button
@@ -279,27 +282,27 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                           ariaLabel={t("Удалить иконку")}
                           onClick={() => void removeLogo()}
                         >
-                          Удалить
+                          {t("Удалить")}
                         </Button>
                       )}
                     </div>
                   </div>
                 </div>
                 <div className="form-grid">
-                  <Field label="Название">
+                  <Field label={t("Название")}>
                     <input
                       value={draft.name}
                       onChange={(event) => set("name", event.target.value)}
                     />
                   </Field>
-                  <Field label="Тип кухни">
+                  <Field label={t("Тип кухни")}>
                     <input
                       value={draft.cuisine_type ?? ""}
                       onChange={(event) => set("cuisine_type", event.target.value)}
-                      placeholder="Современная европейская"
+                      placeholder={t("Современная европейская")}
                     />
                   </Field>
-                  <Field label="Телефон">
+                  <Field label={t("Телефон")}>
                     <input
                       value={draft.phone ?? ""}
                       onChange={(event) => set("phone", event.target.value)}
@@ -312,39 +315,42 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                       onChange={(event) => set("email", event.target.value)}
                     />
                   </Field>
-                  <Field label="Город">
+                  <Field label={t("Город")}>
                     <input
                       value={draft.city}
                       onChange={(event) => set("city", event.target.value)}
                     />
                   </Field>
-                  <Field label="Адрес">
+                  <Field label={t("Адрес")}>
                     <input
                       value={draft.address}
                       onChange={(event) => set("address", event.target.value)}
                     />
                   </Field>
-                  <Field label="Описание" wide>
+                  <Field label={t("Описание")} wide>
                     <textarea
                       value={draft.description ?? ""}
                       onChange={(event) => set("description", event.target.value)}
                     />
                   </Field>
-                  <Field label="Статус">
+                  <Field label={t("Статус")}>
                     <select
                       value={draft.status}
                       onChange={(event) => set("status", event.target.value)}
                     >
-                      <option value="draft">Черновик</option>
-                      <option value="active">Открыто</option>
-                      <option value="paused">Приостановлено</option>
-                      <option value="closed">Закрыто</option>
+                      <option value="draft">{t("Черновик")}</option>
+                      <option value="active">{t("Открыто")}</option>
+                      <option value="paused">{t("Приостановлено")}</option>
+                      <option value="closed">{t("Закрыто")}</option>
                     </select>
                   </Field>
                 </div>
-                <PanelTitle title="Валюта" subtitle="Используется в меню, заказах и отчетах." />
+                <PanelTitle
+                  title={t("Валюта")}
+                  subtitle={t("Используется в меню, заказах и отчетах.")}
+                />
                 <div className="form-grid localization-grid">
-                  <Field label="Валюта меню и заказов">
+                  <Field label={t("Валюта меню и заказов")}>
                     <select
                       value={draft.currency ?? "EUR"}
                       onChange={(event) => set("currency", event.target.value)}
@@ -360,8 +366,8 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                 {onDelete && (
                   <section className="venue-delete-section">
                     <div>
-                      <strong>Удалить заведение</strong>
-                      <p>Меню, план зала и история заведения станут недоступны.</p>
+                      <strong>{t("Удалить заведение")}</strong>
+                      <p>{t("Меню, план зала и история заведения станут недоступны.")}</p>
                     </div>
                     <Button
                       kind="danger"
@@ -369,7 +375,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
                       disabled={deleting}
                       onClick={() => void removeVenue()}
                     >
-                      {deleting ? "Удаление..." : "Удалить заведение"}
+                      {deleting ? t("Удаление...") : t("Удалить заведение")}
                     </Button>
                   </section>
                 )}
@@ -504,19 +510,20 @@ const updateSetting = (setDraft: SettingsProps["setDraft"], key: string, value: 
   setDraft((current) => ({ ...current, settings: { ...current.settings, [key]: value } }));
 
 function ScheduleSettings({ draft, setDraft }: SettingsProps) {
+  const { t } = useI18n();
   return (
     <>
-      <PanelTitle title="Часы работы" subtitle="Доступность бронирований и заказов." />
+      <PanelTitle title={t("Часы работы")} subtitle={t("Доступность бронирований и заказов.")} />
       <div className="setting-toggles">
         <SettingToggle
-          title="Заведение открыто по расписанию"
-          text="Принимать брони только в рабочие часы."
+          title={t("Заведение открыто по расписанию")}
+          text={t("Принимать брони только в рабочие часы.")}
           checked={settingsValue(draft, "schedule_enabled", true)}
           onChange={(value) => updateSetting(setDraft, "schedule_enabled", value)}
         />
         <SettingToggle
-          title="Разрешить бронирование сегодня"
-          text="Гости могут выбрать свободное время на текущий день."
+          title={t("Разрешить бронирование сегодня")}
+          text={t("Гости могут выбрать свободное время на текущий день.")}
           checked={settingsValue(draft, "same_day_booking", true)}
           onChange={(value) => updateSetting(setDraft, "same_day_booking", value)}
         />
@@ -525,25 +532,26 @@ function ScheduleSettings({ draft, setDraft }: SettingsProps) {
   );
 }
 function OrderSettings({ draft, setDraft }: SettingsProps) {
+  const { t } = useI18n();
   return (
     <>
-      <PanelTitle title="Прием заказов" subtitle="Доступные каналы для гостей." />
+      <PanelTitle title={t("Прием заказов")} subtitle={t("Доступные каналы для гостей.")} />
       <div className="setting-toggles">
         <SettingToggle
-          title="Заказы в зале"
-          text="Заказ после сканирования QR-кода."
+          title={t("Заказы в зале")}
+          text={t("Заказ после сканирования QR-кода.")}
           checked={settingsValue(draft, "dine_in", true)}
           onChange={(value) => updateSetting(setDraft, "dine_in", value)}
         />
         <SettingToggle
-          title="Самовывоз"
-          text="Онлайн-заказы с получением в заведении."
+          title={t("Самовывоз")}
+          text={t("Онлайн-заказы с получением в заведении.")}
           checked={settingsValue(draft, "pickup", true)}
           onChange={(value) => updateSetting(setDraft, "pickup", value)}
         />
         <SettingToggle
-          title="Предзаказ при бронировании"
-          text="Выбор блюд до визита."
+          title={t("Предзаказ при бронировании")}
+          text={t("Выбор блюд до визита.")}
           checked={settingsValue(draft, "preorder", true)}
           onChange={(value) => updateSetting(setDraft, "preorder", value)}
         />
@@ -552,19 +560,20 @@ function OrderSettings({ draft, setDraft }: SettingsProps) {
   );
 }
 function NotificationSettings({ draft, setDraft }: SettingsProps) {
+  const { t } = useI18n();
   return (
     <>
-      <PanelTitle title="Уведомления" subtitle="События для владельца и команды." />
+      <PanelTitle title={t("Уведомления")} subtitle={t("События для владельца и команды.")} />
       <div className="setting-toggles">
         <SettingToggle
-          title="Новый онлайн-заказ"
-          text="Уведомлять рабочие устройства."
+          title={t("Новый онлайн-заказ")}
+          text={t("Уведомлять рабочие устройства.")}
           checked={settingsValue(draft, "notify_order", true)}
           onChange={(value) => updateSetting(setDraft, "notify_order", value)}
         />
         <SettingToggle
-          title="Новый отзыв"
-          text="Уведомлять владельца о новой оценке."
+          title={t("Новый отзыв")}
+          text={t("Уведомлять владельца о новой оценке.")}
           checked={settingsValue(draft, "notify_review", true)}
           onChange={(value) => updateSetting(setDraft, "notify_review", value)}
         />

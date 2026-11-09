@@ -129,7 +129,7 @@ export default function DishApp({
         )}
         {!tableEntry && (
           <header
-            aria-label="Мобильная навигация"
+            aria-label={t("Мобильная навигация")}
             className={`dish-header ${venueScreen ? "dish-header-venue" : ""}`}
           >
             <div className="dish-header-leading">
