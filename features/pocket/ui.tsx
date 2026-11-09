@@ -2,7 +2,6 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 import { type LucideIcon } from "lucide-react";
-import { type MenuItem } from "./model";
 import { useI18n } from "./i18n";
 
 export function money(value: number, currency = "EUR") {
@@ -81,17 +80,6 @@ export function StatusPill({ status }: { status: string }) {
       <i />
       {t(status)}
     </span>
-  );
-}
-
-export function FoodImage({ item, className = "" }: { item: MenuItem; className?: string }) {
-  return (
-    <div
-      className={`food-image ${className}`}
-      style={{ backgroundPosition: item.position }}
-      role="img"
-      aria-label={item.name}
-    />
   );
 }
 
