@@ -704,4 +704,9 @@ export const dishTranslations: TranslationRow[] = [
   ],
   ["Итальянская", "Italian", "Італійська", "Talianska"],
   ["Продолжить", "Continue", "Продовжити", "Pokračovať"],
+  ["Дата и время", "Date and time", "Дата й час", "Dátum a čas"],
+  ["мин", "min", "хв", "min"],
+  ["Заказ №{number}", "Order #{number}", "Замовлення №{number}", "Objednávka č. {number}"],
+  ["Навигация", "Navigation", "Навігація", "Navigácia"],
+  ["Мобильная навигация", "Mobile navigation", "Мобільна навігація", "Mobilná navigácia"],
 ];
