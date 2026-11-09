@@ -1,3 +1,9 @@
+/*
+ * Vendor shape layer: one radius scale (tokens --vendor-radius-*) for surfaces,
+ * controls and badges. Loaded after vendor.css on purpose, so it wins over the
+ * older per-component radii of equal specificity.
+ */
+
 /* Standalone surfaces share one shape, including dialogs rendered outside the shell. */
 :is(
   .panel,

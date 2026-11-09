@@ -3,8 +3,8 @@ import { Providers } from "../../../shared/providers";
 import "../../../shared/styles/tokens.css";
 import "../../../shared/styles/base.css";
 import "../../../shared/styles/vendor.css";
-import "../../../shared/vendor-radius.css";
-import "../../../shared/vendor-team.css";
+import "../../../shared/styles/vendor-shape.css";
+import "../../../shared/styles/vendor-team.css";
 
 export const metadata: Metadata = {
   title: "Pocket Vendor",

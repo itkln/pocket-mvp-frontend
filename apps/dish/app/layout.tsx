@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Providers } from "../../../shared/providers";
 import "../../../shared/styles/tokens.css";
 import "../../../shared/styles/base.css";
-import "../../../shared/styles/dish-shell.css";
-import "../../../shared/spots.css";
-import "../../../shared/dish.css";
+import "../../../shared/styles/dish-base.css";
+import "../../../shared/styles/dish.css";
+import "../../../shared/styles/dish-navigation.css";
 
 export const metadata: Metadata = {
   title: "Pocket Dish",

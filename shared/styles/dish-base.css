@@ -1,4 +1,4 @@
-/* Dish-only shell and screen styles moved out of the former globals.css. Loaded after base.css. */
+/* Dish-only shell styles split out of the former globals.css. Loaded after base.css. */
 .toolbar {
   display: flex;
   align-items: center;
