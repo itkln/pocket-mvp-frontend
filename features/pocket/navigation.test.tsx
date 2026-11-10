@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { I18nProvider } from "./i18n";
-import { Sidebar, Topbar } from "./navigation";
+import { Sidebar, Topbar, VenueSwitcher } from "./navigation";
 import { type Venue } from "./model";
 
 const replace = vi.fn();
@@ -119,57 +119,66 @@ const sidebarProps = {
   mobileNav: false,
   collapsed: false,
   onNavigate: vi.fn(),
-  onVenue: vi.fn(),
   onAddVenue: vi.fn(),
   onSignOut: vi.fn(),
   onClose: vi.fn(),
   onToggleCollapsed: vi.fn(),
 };
 
-describe("Sidebar venue navigation", () => {
+describe("Vendor venue and profile navigation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("adds a venue from the venue menu, even with a single venue", () => {
-    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
+  it("keeps venue creation in the sidebar and has no role switch", () => {
     render(
       <I18nProvider>
-        <Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden]} />
-      </I18nProvider>,
-    );
-
-    expect(screen.queryByText("Bratislava")).not.toBeInTheDocument();
-    expect(screen.queryByRole("menuitem", { name: "Добавить заведение" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /Zen Garden/ }));
-    fireEvent.click(screen.getByRole("menuitem", { name: "Добавить заведение" }));
-    expect(sidebarProps.onAddVenue).toHaveBeenCalledOnce();
-  });
-
-  it("groups own venues and workplaces and has no role switch", () => {
-    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
-    const northVine = venue("venue-2", "North & Vine", "Kosice", "manager");
-    render(
-      <I18nProvider>
-        <Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden, northVine]} />
+        <Sidebar {...sidebarProps} />
       </I18nProvider>,
     );
 
     expect(screen.queryByText("Текущая роль")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Добавить заведение" }));
+    expect(sidebarProps.onAddVenue).toHaveBeenCalledOnce();
+  });
+
+  it("shows the venue and the user's role there; one venue cannot be switched", () => {
+    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
+    render(
+      <I18nProvider>
+        <VenueSwitcher venue={zenGarden} venues={[zenGarden]} onVenue={vi.fn()} />
+      </I18nProvider>,
+    );
+
+    const switcher = screen.getByRole("button", { name: /Zen Garden/ });
+    expect(switcher).toHaveTextContent("Владелец");
+    expect(switcher).toBeDisabled();
+    expect(screen.queryByText("Bratislava")).not.toBeInTheDocument();
+  });
+
+  it("groups own venues and workplaces with the role", () => {
+    const onVenue = vi.fn();
+    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
+    const northVine = venue("venue-2", "North & Vine", "Kosice", "manager");
+    render(
+      <I18nProvider>
+        <VenueSwitcher venue={zenGarden} venues={[zenGarden, northVine]} onVenue={onVenue} />
+      </I18nProvider>,
+    );
+
     fireEvent.click(screen.getByRole("button", { name: /Zen Garden/ }));
     expect(screen.getByText("Мои заведения")).toBeInTheDocument();
     expect(screen.getByText("Где я работаю")).toBeInTheDocument();
     const workplace = screen.getByRole("menuitemradio", { name: /North & Vine/ });
     expect(workplace).toHaveTextContent("Менеджер");
     fireEvent.click(workplace);
-    expect(sidebarProps.onVenue).toHaveBeenCalledWith(northVine);
+    expect(onVenue).toHaveBeenCalledWith(northVine);
   });
 
   it("keeps account settings and sign-out in the profile menu", () => {
-    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
     render(
       <I18nProvider>
-        <Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden]} />
+        <Sidebar {...sidebarProps} />
       </I18nProvider>,
     );
 

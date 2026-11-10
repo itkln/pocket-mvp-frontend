@@ -19,7 +19,12 @@ import {
   staffNavigation,
   type Venue,
 } from "../features/pocket/model";
-import { MobileBottomNavigation, Sidebar, Topbar } from "../features/pocket/navigation";
+import {
+  MobileBottomNavigation,
+  Sidebar,
+  Topbar,
+  VenueSwitcher,
+} from "../features/pocket/navigation";
 import { OwnerWorkspaceProvider, useOwnerWorkspace } from "../features/pocket/owner/context";
 import { Modal, NewVenueModal } from "../features/pocket/dialogs";
 import { Button } from "../features/pocket/ui";
@@ -251,19 +256,17 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
             brand="Pocket Vendor"
             screen={screen}
             navigation={navigation}
-            venue={venue}
-            venues={availableVenues}
             mobileNav={shell.mobileNav}
             collapsed={shell.sidebarCollapsed}
             onNavigate={navigate}
             onSignOut={() => void signOut()}
-            onVenue={selectVenue}
             onAddVenue={() => setModal("venue")}
             onClose={() => shell.setMobileNav(false)}
             onToggleCollapsed={shell.toggleSidebar}
           />
           <main className="main-shell">
             <Topbar
+              start={<VenueSwitcher venue={venue} venues={availableVenues} onVenue={selectVenue} />}
               role={role}
               screen={screen}
               navigation={navigation}

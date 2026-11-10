@@ -293,3 +293,23 @@ button.overview-rating:hover {
     display: none;
   }
 }
+
+/* Venue settings: public page and QR. */
+.vendor-shell .venue-public-page-settings > p {
+  font-size: 16px;
+}
+.vendor-shell .venue-public-page-settings .dish-public-link input {
+  min-height: 52px;
+  padding: 0 16px;
+  border-radius: var(--vendor-radius-control);
+  font-size: 16px;
+}
+.vendor-shell .dish-public-qr strong {
+  font-size: 18px;
+}
+.vendor-shell .dish-public-qr p {
+  font-size: 16px;
+}
+.vendor-shell .venue-public-page-settings a.button {
+  text-decoration: none;
+}

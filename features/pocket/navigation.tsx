@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { type AuthUser } from "../../lib/auth-api";
@@ -18,7 +18,6 @@ import {
   Search,
   Settings,
   ShoppingBag,
-  Store,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -35,21 +34,115 @@ import {
 import { IconButton } from "./ui";
 import { localeOptions, localeTags, useI18n } from "./i18n";
 import { replacePathLocale } from "./locales";
+import { LocaleFlag } from "./locale-flag";
 
-// The Vendor sidebar. The selected venue decides the workspace: own venues open the owner's
-// screens, venues where the user works open the staff screens, so there is no role switch.
+// Closes a popover on an outside pointer press or Escape.
+function useDismiss(open: boolean, area: { current: HTMLElement | null }, close: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!area.current?.contains(event.target as Node)) close();
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [open, area, close]);
+}
+
+// The venue switcher at the top of the page. The selected venue decides the workspace: own
+// venues open the owner's screens, venues where the user works open the staff screens.
+export function VenueSwitcher({
+  venue,
+  venues,
+  onVenue,
+}: {
+  venue: Venue | null;
+  venues: Venue[];
+  onVenue: (venue: Venue) => void;
+}) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const area = useRef<HTMLDivElement>(null);
+  useDismiss(open, area, () => setOpen(false));
+  if (!venue) return null;
+  const ownVenues = venues.filter((item) => item.access_role === "owner");
+  const workplaces = venues.filter((item) => item.access_role !== "owner");
+  const canSwitch = venues.length > 1;
+  const roleLabel = (item: Venue) =>
+    item.access_role ? t(venueRoleLabels[item.access_role] ?? "") : "";
+  const option = (item: Venue, withRole: boolean) => (
+    <button
+      key={item.id}
+      type="button"
+      role="menuitemradio"
+      aria-checked={item.id === venue.id}
+      className={item.id === venue.id ? "active" : ""}
+      onClick={() => {
+        setOpen(false);
+        if (item.id !== venue.id) onVenue(item);
+      }}
+    >
+      <span className="venue-avatar">{venueInitials(item)}</span>
+      <span>
+        <strong>{item.name}</strong>
+        {withRole && <small>{roleLabel(item)}</small>}
+      </span>
+      {item.id === venue.id && <Check size={16} />}
+    </button>
+  );
+  return (
+    <div className="venue-menu topbar-venue" ref={area}>
+      <button
+        type="button"
+        className={`venue-switcher ${canSwitch ? "can-switch" : ""}`}
+        disabled={!canSwitch}
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={canSwitch ? open : undefined}
+        aria-haspopup={canSwitch ? "menu" : undefined}
+      >
+        <span className="venue-avatar">{venueInitials(venue)}</span>
+        <div>
+          <strong>{venue.name}</strong>
+          <small>{roleLabel(venue)}</small>
+        </div>
+        {canSwitch && <ChevronDown className="venue-switcher-chevron" size={16} />}
+      </button>
+      {open && (
+        <div className="venue-menu-popover" role="menu">
+          {ownVenues.length > 0 && (
+            <>
+              <p className="venue-menu-label">{t("Мои заведения")}</p>
+              {ownVenues.map((item) => option(item, false))}
+            </>
+          )}
+          {workplaces.length > 0 && (
+            <>
+              <p className="venue-menu-label">{t("Где я работаю")}</p>
+              {workplaces.map((item) => option(item, true))}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The Vendor sidebar: navigation of the current workspace, venue creation, settings and profile.
 export function Sidebar({
   user,
   role,
   brand = "Pocket",
   screen,
   navigation,
-  venue,
-  venues: availableVenues,
   mobileNav,
   collapsed,
   onNavigate,
-  onVenue,
   onAddVenue,
   onSignOut,
   onClose,
@@ -60,53 +153,22 @@ export function Sidebar({
   brand?: string;
   screen: string;
   navigation: { id: string; label: string; icon: LucideIcon; count?: number }[];
-  venue: Venue | null;
-  venues: Venue[];
   mobileNav: boolean;
   collapsed: boolean;
   onNavigate: (id: string) => void;
-  onVenue: (venue: Venue) => void;
   onAddVenue: () => void;
   onSignOut: () => void;
   onClose: () => void;
   onToggleCollapsed: () => void;
 }) {
   const { t } = useI18n();
-  const [venueMenuOpen, setVenueMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const venueMenu = useRef<HTMLDivElement>(null);
   const profileMenu = useRef<HTMLDivElement>(null);
-  const ownVenues = availableVenues.filter((item) => item.access_role === "owner");
-  const workplaces = availableVenues.filter((item) => item.access_role !== "owner");
-  const venueRole = venue?.access_role ? t(venueRoleLabels[venue.access_role] ?? "") : "";
-
-  useEffect(() => {
-    if (!venueMenuOpen && !profileMenuOpen) return;
-    const closeOutside = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (!venueMenu.current?.contains(target)) setVenueMenuOpen(false);
-      if (!profileMenu.current?.contains(target)) setProfileMenuOpen(false);
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setVenueMenuOpen(false);
-      setProfileMenuOpen(false);
-    };
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [venueMenuOpen, profileMenuOpen]);
+  useDismiss(profileMenuOpen, profileMenu, () => setProfileMenuOpen(false));
 
   const toggleNavigation = () => {
     if (window.matchMedia("(min-width: 901px)").matches) onToggleCollapsed();
     else onClose();
-  };
-  const chooseVenue = (item: Venue) => {
-    setVenueMenuOpen(false);
-    if (item.id !== venue?.id) onVenue(item);
   };
   const navButton = ({ id, label, icon: Icon, count }: (typeof navigation)[number]) => (
     <button
@@ -119,25 +181,6 @@ export function Sidebar({
       <Icon size={20} strokeWidth={1.9} />
       <span>{t(label)}</span>
       {count ? <b>{count}</b> : null}
-    </button>
-  );
-  const venueOption = (item: Venue, withRole: boolean) => (
-    <button
-      key={item.id}
-      type="button"
-      role="menuitemradio"
-      aria-checked={item.id === venue?.id}
-      className={item.id === venue?.id ? "active" : ""}
-      onClick={() => chooseVenue(item)}
-    >
-      <span className="venue-avatar">{venueInitials(item)}</span>
-      <span>
-        <strong>{item.name}</strong>
-        {withRole && item.access_role && (
-          <small>{t(venueRoleLabels[item.access_role] ?? "")}</small>
-        )}
-      </span>
-      {item.id === venue?.id && <Check size={16} />}
     </button>
   );
   const footer = sidebarFooterNavigation[role]
@@ -172,56 +215,16 @@ export function Sidebar({
           className="mobile-sidebar-close"
         />
       </div>
-      <div className="venue-menu" ref={venueMenu}>
-        <button
-          type="button"
-          className="venue-switcher can-switch collapsed-tooltip"
-          data-tooltip={collapsed ? (venue?.name ?? t("Заведения")) : undefined}
-          onClick={() => setVenueMenuOpen((open) => !open)}
-          aria-expanded={venueMenuOpen}
-          aria-haspopup="menu"
-          aria-label={collapsed ? `${t("Заведение")}: ${venue?.name ?? t("Заведения")}` : undefined}
-        >
-          <span className="venue-avatar">{venue ? venueInitials(venue) : <Store size={18} />}</span>
-          <div>
-            <strong>{venue?.name ?? t("Заведения")}</strong>
-            {venueRole && <small>{venueRole}</small>}
-          </div>
-          <ChevronDown className="venue-switcher-chevron" size={16} />
-        </button>
-        {venueMenuOpen && (
-          <div className="venue-menu-popover" role="menu">
-            {ownVenues.length > 0 && (
-              <>
-                <p className="venue-menu-label">{t("Мои заведения")}</p>
-                {ownVenues.map((item) => venueOption(item, false))}
-              </>
-            )}
-            {workplaces.length > 0 && (
-              <>
-                <p className="venue-menu-label">{t("Где я работаю")}</p>
-                {workplaces.map((item) => venueOption(item, true))}
-              </>
-            )}
-            <button
-              type="button"
-              role="menuitem"
-              className="venue-menu-add"
-              onClick={() => {
-                setVenueMenuOpen(false);
-                onAddVenue();
-              }}
-            >
-              <span className="venue-avatar">
-                <Plus size={18} />
-              </span>
-              <span>
-                <strong>{t("Добавить заведение")}</strong>
-              </span>
-            </button>
-          </div>
-        )}
-      </div>
+      <button
+        type="button"
+        className="sidebar-add-venue collapsed-tooltip"
+        data-tooltip={collapsed ? t("Добавить заведение") : undefined}
+        aria-label={collapsed ? t("Добавить заведение") : undefined}
+        onClick={onAddVenue}
+      >
+        <Plus size={20} strokeWidth={1.9} />
+        <span>{t("Добавить заведение")}</span>
+      </button>
       <nav className="side-nav">
         {navigationGroups[role].map((group) => {
           const items = group.ids
@@ -357,7 +360,9 @@ export function Topbar({
   onNavigate,
   onNotificationsRead,
   onNotificationsClear,
+  start,
 }: {
+  start?: ReactNode;
   role: Role;
   screen: string;
   navigation: { id: string; label: string; icon?: LucideIcon }[];
@@ -448,6 +453,7 @@ export function Topbar({
           <strong>{t(title)}</strong>
         </div>
       </div>
+      {start && <div className="topbar-start">{start}</div>}
       <div className="topbar-actions" ref={actionMenus}>
         {role === "customer" && (
           <button className="cart-button" onClick={onCart}>
@@ -590,7 +596,8 @@ export function Topbar({
               setLanguageMenuOpen((open) => !open);
             }}
           >
-            <b>{activeLanguage.short}</b>
+            <LocaleFlag locale={activeLanguage.value} />
+            <span>{activeLanguage.short}</span>
             <ChevronDown size={14} />
           </button>
           {languageMenuOpen && (
@@ -609,7 +616,7 @@ export function Topbar({
                     router.replace(replacePathLocale(pathname, option.value));
                   }}
                 >
-                  <b>{option.short}</b>
+                  <LocaleFlag locale={option.value} />
                   <span>{option.label}</span>
                   {locale === option.value && <Check size={15} />}
                 </button>

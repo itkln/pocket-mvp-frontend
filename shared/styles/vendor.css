@@ -2463,7 +2463,7 @@
     display: none;
   }
 
-  .sidebar-collapsed .venue-switcher {
+  .sidebar-collapsed .sidebar .venue-switcher {
     width: 48px;
     min-height: 48px;
     grid-template-columns: 1fr;
@@ -2474,12 +2474,12 @@
     padding: 7px;
   }
 
-  .sidebar-collapsed .venue-switcher > div,
-  .sidebar-collapsed .venue-switcher > svg {
+  .sidebar-collapsed .sidebar .venue-switcher > div,
+  .sidebar-collapsed .sidebar .venue-switcher > svg {
     display: none;
   }
 
-  .sidebar-collapsed .venue-menu-popover {
+  .sidebar-collapsed .sidebar .venue-menu-popover {
     top: 0;
     right: auto;
     left: calc(100% + 10px);
