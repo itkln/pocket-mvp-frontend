@@ -3,7 +3,6 @@ import { type OwnerVenue } from "../../lib/owner-api";
 import {
   Activity,
   BarChart3,
-  Coffee,
   LayoutDashboard,
   MessageSquareText,
   ReceiptText,
@@ -53,14 +52,13 @@ export const ownerNavigation = [
 
 export const staffNavigation = [
   { id: "service", label: "Сервис", icon: Activity },
-  { id: "kitchen", label: "Кухня", icon: Coffee },
   { id: "staff-floor", label: "Столы", icon: Table2 },
 ];
 
 export const mobilePrimaryNavigation: Record<Role, string[]> = {
   owner: ["overview", "orders", "menu"],
   customer: ["discover", "browse-menu", "reservation", "history"],
-  staff: ["service", "kitchen", "staff-floor"],
+  staff: ["service", "staff-floor"],
 };
 
 export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> = {
@@ -74,5 +72,5 @@ export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> 
     { label: "Главное", ids: ["discover", "browse-menu"] },
     { label: "Мои действия", ids: ["reservation", "history"] },
   ],
-  staff: [{ label: "Смена", ids: ["service", "kitchen", "staff-floor"] }],
+  staff: [{ label: "Смена", ids: ["service", "staff-floor"] }],
 };

@@ -3,7 +3,7 @@ import { apiRequest } from "./api-client";
 export type StaffInvitation = {
   venue_id: string;
   venue_name: string;
-  role: "manager" | "waiter" | "kitchen" | "viewer";
+  role: "manager" | "waiter";
   expires_at: string;
 };
 export async function staffInvitation(token: string, accept = false) {

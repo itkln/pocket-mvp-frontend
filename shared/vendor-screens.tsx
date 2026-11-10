@@ -15,7 +15,7 @@ import {
   TeamScreen,
   VenueScreen,
 } from "../features/pocket/owner";
-import { KitchenScreen, ServiceBoard } from "../features/pocket/staff";
+import { ServiceBoard } from "../features/pocket/staff";
 import { FloorPlan } from "../features/pocket/floor-plan";
 import { useVendorShell, type VendorRole } from "./vendor-shell-context";
 
@@ -99,12 +99,6 @@ export function ServicePage() {
   const page = useVenuePage("staff", "service");
   if (!page) return null;
   return <ServiceBoard request={page.request} />;
-}
-
-export function KitchenPage() {
-  const page = useVenuePage("staff", "kitchen");
-  if (!page) return null;
-  return <KitchenScreen request={page.request} />;
 }
 
 export function StaffFloorPage() {

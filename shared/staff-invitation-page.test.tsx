@@ -19,7 +19,7 @@ const token = "a".repeat(43);
 const invitation = {
   venue_id: "venue",
   venue_name: "Test Bistro",
-  role: "kitchen" as const,
+  role: "waiter" as const,
   expires_at: "2026-11-07T12:00:00Z",
 };
 beforeEach(() => {
@@ -62,7 +62,7 @@ it("inspects before explicit acceptance; accepts once and selects assigned workp
   expect(staffInvitation).toHaveBeenCalledTimes(2);
   expect(staffInvitation).toHaveBeenLastCalledWith(token, true);
   await act(async () => finish(invitation));
-  await waitFor(() => expect(replace).toHaveBeenCalledWith("/ru/staff/kitchen"));
+  await waitFor(() => expect(replace).toHaveBeenCalledWith("/ru/staff/service"));
   expect(Object.values(window.localStorage)).toContain("venue");
 });
 it("does not offer acceptance to a different email", async () => {

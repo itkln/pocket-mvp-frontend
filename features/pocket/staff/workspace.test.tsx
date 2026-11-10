@@ -2,7 +2,6 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { OwnerWorkspaceProvider } from "../owner/context";
 import { ConfirmProvider } from "../confirm-dialog";
-import { KitchenScreen } from "./kitchen";
 import { ServiceBoard } from "./service";
 import {
   getOrder,
@@ -49,11 +48,11 @@ beforeEach(() => {
     can_edit: false,
   });
 });
-const mount = (kitchen = true) =>
+const mount = () =>
   render(
     <ConfirmProvider>
       <OwnerWorkspaceProvider venueID="venue" ordersOnly onError={notify}>
-        {kitchen ? <KitchenScreen /> : <ServiceBoard />}
+        <ServiceBoard />
       </OwnerWorkspaceProvider>
     </ConfirmProvider>,
   );
@@ -81,7 +80,7 @@ it("loads staff data without owner administration requests and saves expected st
   expect(screen.queryByRole("button", { name: "Отменить заказ" })).not.toBeInTheDocument();
 });
 it("keeps the action disabled during save and refreshes a conflict without success", async () => {
-  mount(false);
+  mount();
   const action = await screen.findByRole("button", { name: "Начать приготовление" });
   let reject!: (error: Error) => void;
   vi.mocked(updateOrderStatus).mockImplementation(

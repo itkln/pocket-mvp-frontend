@@ -2,8 +2,10 @@ import type { CustomerReservation } from "./reservations-api";
 import type { MenuNutrition } from "./menu-nutrition";
 import { apiRequest } from "./api-client";
 
+// Venue staff roles. There is no kitchen or viewer role: waiters pass orders to the kitchen.
+export type StaffRole = "manager" | "waiter";
 export type OwnerVenue = {
-  access_role?: "owner" | "manager" | "waiter" | "kitchen" | "viewer";
+  access_role?: "owner" | StaffRole;
   id: string;
   name: string;
   slug: string;
@@ -90,7 +92,7 @@ export type OwnerStaffMember = {
   id: string;
   display_name: string;
   email: string;
-  role: "manager" | "waiter" | "kitchen" | "viewer";
+  role: StaffRole;
   status: "invited" | "active" | "inactive";
   invited_at: string;
   accepted_at?: string;

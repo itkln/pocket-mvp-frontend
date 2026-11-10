@@ -107,8 +107,6 @@ export function TeamScreen({
                 >
                   <option value="manager">{t("Менеджер")}</option>
                   <option value="waiter">{t("Официант")}</option>
-                  <option value="kitchen">{t("Кухня")}</option>
-                  <option value="viewer">{t("Только просмотр")}</option>
                 </select>
                 <StatusPill status={statusLabel[person.status]} />
                 <div className="row-actions">
@@ -174,7 +172,7 @@ export function TeamScreen({
             text={
               staff.length
                 ? t("Измените поисковый запрос.")
-                : t("Пригласите менеджера, официанта или сотрудника кухни.")
+                : t("Пригласите менеджера или официанта.")
             }
           />
         )}

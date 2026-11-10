@@ -15,7 +15,6 @@ import VendorApp, { resolveScreen } from "./vendor-app";
 import * as screens from "./vendor-screens";
 import AuthPage from "./auth-page";
 import StaffInvitationPage from "./staff-invitation-page";
-import type { Venue } from "../features/pocket/model";
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
   notFound: vi.fn(() => {
@@ -50,7 +49,7 @@ it("serves the workspace screens of each role and the sign-in routes", () => {
     "subscription",
     "account",
   ];
-  const staff = ["service", "kitchen", "staff-floor", "account"];
+  const staff = ["service", "staff-floor", "account"];
   expect(pageRoutes(appDir).sort()).toEqual(
     [
       "/",
@@ -79,16 +78,13 @@ it("renders every workspace page inside the Vendor shell", () => {
 });
 
 it("opens the screen the account may use", () => {
-  const venue = (access_role?: Venue["access_role"]) => ({ access_role }) as Venue;
-  expect(resolveScreen("owner", undefined, venue("owner"))).toBe("overview");
-  expect(resolveScreen("owner", "menu", venue("owner"))).toBe("menu");
-  expect(resolveScreen("staff", undefined, venue("waiter"))).toBe("service");
-  expect(resolveScreen("staff", "kitchen", venue("waiter"))).toBe("service");
-  expect(resolveScreen("staff", "service", venue("kitchen"))).toBe("kitchen");
-  expect(resolveScreen("staff", "kitchen", venue("manager"))).toBe("kitchen");
-  expect(resolveScreen("staff", "staff-floor", venue("owner"))).toBe("service");
-  expect(resolveScreen("staff", "account", venue("kitchen"))).toBe("account");
-  expect(resolveScreen("staff", undefined, null)).toBe("service");
+  expect(resolveScreen("owner", undefined)).toBe("overview");
+  expect(resolveScreen("owner", "menu")).toBe("menu");
+  // Staff work on the service screen; the kitchen screen no longer exists.
+  expect(resolveScreen("staff", undefined)).toBe("service");
+  expect(resolveScreen("staff", "kitchen")).toBe("service");
+  expect(resolveScreen("staff", "staff-floor")).toBe("service");
+  expect(resolveScreen("staff", "account")).toBe("account");
 });
 
 it("checks the locale, keeps sign-in addresses and redirects the old Ukrainian prefix", async () => {

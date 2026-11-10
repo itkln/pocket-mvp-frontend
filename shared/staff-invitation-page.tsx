@@ -10,8 +10,6 @@ import { useI18n } from "../features/pocket/i18n";
 const roles = {
   manager: "Менеджер",
   waiter: "Официант",
-  kitchen: "Кухня",
-  viewer: "Только просмотр",
 };
 export default function StaffInvitationPage({ token }: { token: string }) {
   const { locale, t } = useI18n();
@@ -62,7 +60,7 @@ export default function StaffInvitationPage({ token }: { token: string }) {
     try {
       const result = await staffInvitation(token, true);
       if (user) window.localStorage.setItem(selectedVenueKey(user.id), result.venue_id);
-      router.replace(`/${locale}/staff/${result.role === "kitchen" ? "kitchen" : "service"}`);
+      router.replace(`/${locale}/staff/service`);
       router.refresh();
     } catch (e) {
       setError(explain(e));

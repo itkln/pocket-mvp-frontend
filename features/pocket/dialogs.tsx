@@ -190,7 +190,7 @@ export function Modal({
         const delivered = await workspace.inviteStaff({
           display_name: name,
           email: String(data.get("email")).trim(),
-          role: String(data.get("role")) as "manager" | "waiter" | "kitchen" | "viewer",
+          role: String(data.get("role")) as "manager" | "waiter",
         });
         notify(
           delivered
@@ -285,8 +285,6 @@ export function Modal({
                     <select name="role" defaultValue="waiter">
                       <option value="waiter">{t("Официант")}</option>
                       <option value="manager">{t("Менеджер")}</option>
-                      <option value="kitchen">{t("Кухня")}</option>
-                      <option value="viewer">{t("Только просмотр")}</option>
                     </select>
                   </Field>
                 </div>

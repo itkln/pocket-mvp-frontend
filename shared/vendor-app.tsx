@@ -38,17 +38,11 @@ const screenForRole = (role: VendorRole, screen?: string) =>
 const vendorPath = (locale: Locale, role: VendorRole, screen: string) =>
   `/${locale}/${role}/${screen}`;
 
-// The screen an account opens for a URL. Staff land on service or kitchen by their venue role;
-// only owners and managers may pick between the two.
-export function resolveScreen(
-  role: VendorRole,
-  routeScreen: string | undefined,
-  venue: Venue | null,
-) {
+// The screen an account opens for a URL. Staff work on the service screen: waiters take every
+// order there and pass it to the kitchen outside Pocket.
+export function resolveScreen(role: VendorRole, routeScreen: string | undefined) {
   if (role !== "staff" || routeScreen === "account") return screenForRole(role, routeScreen);
-  const canUseBoth = ["owner", "manager"].includes(venue?.access_role ?? "");
-  if (canUseBoth && (routeScreen === "service" || routeScreen === "kitchen")) return routeScreen;
-  return venue?.access_role === "kitchen" ? "kitchen" : "service";
+  return "service";
 }
 
 // Layout shell of the Vendor workspace: /[locale], /owner/[screen] and /staff/[screen].
@@ -65,7 +59,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
   const [venue, setVenue] = useState<Venue | null>(null);
   const authReady = session?.forRole === routeRole;
   const role = session?.role ?? routeRole;
-  const screen = resolveScreen(role, routeScreen, venue);
+  const screen = resolveScreen(role, routeScreen);
   const shell = useAppShell(`${currentUser?.id}:${venue?.id}:${role}`);
   const [orderRequest, setOrderRequest] = useState<{ id: string; scope: string }>();
   const scope = `${role}:${venue?.id}`;
@@ -162,10 +156,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
   const selectVenue = (nextVenue: Venue) => {
     if (!currentUser) return;
     setVenue(nextVenue);
-    if (role === "staff") {
-      const nextScreen = nextVenue.access_role === "kitchen" ? "kitchen" : "service";
-      router.push(vendorPath(locale, role, nextScreen));
-    }
+    if (role === "staff") router.push(vendorPath(locale, role, "service"));
     window.localStorage.setItem(selectedVenueKey(currentUser.id), nextVenue.id);
     shell.notify(`Выбрано заведение ${nextVenue.name}`);
   };
@@ -198,13 +189,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
     );
 
   const navigation =
-    role === "owner"
-      ? ownerNavigation
-      : staffNavigation.filter((item) =>
-          ["owner", "manager"].includes(venue?.access_role ?? "")
-            ? ["service", "kitchen"].includes(item.id)
-            : item.id === (venue?.access_role === "kitchen" ? "kitchen" : "service"),
-        );
+    role === "owner" ? ownerNavigation : staffNavigation.filter((item) => item.id === "service");
   const availableRoles: Role[] = currentUser.capabilities.includes("owner")
     ? ["owner", "staff"]
     : currentUser.capabilities.includes("staff")
@@ -212,12 +197,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
       : ["owner"];
 
   const openOrder = (id: string) => {
-    const target =
-      role === "owner"
-        ? "orders"
-        : screen === "kitchen" || venue?.access_role === "kitchen"
-          ? "kitchen"
-          : "service";
+    const target = role === "owner" ? "orders" : "service";
     if (target !== screen) navigate(target);
     setOrderRequest({ id, scope });
   };
@@ -251,9 +231,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
         onArrivals={shell.notifyOrders}
       >
         <div
-          data-screen={
-            role === "staff" && ["service", "kitchen"].includes(screen) ? "orders" : screen
-          }
+          data-screen={role === "staff" && screen === "service" ? "orders" : screen}
           className={`app-shell vendor-shell ${shell.sidebarCollapsed ? "sidebar-collapsed" : ""}`}
         >
           <Sidebar
