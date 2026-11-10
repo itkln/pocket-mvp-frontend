@@ -43,6 +43,7 @@ it("serves the workspace screens of each role and the sign-in routes", () => {
     "overview",
     "orders",
     "menu",
+    "floor",
     "team",
     "analytics",
     "reviews",

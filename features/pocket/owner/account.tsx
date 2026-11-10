@@ -8,32 +8,11 @@ import {
   updateProfile,
   type AuthUser,
 } from "../../../lib/auth-api";
-import {
-  Bell,
-  Camera,
-  CreditCard,
-  Download,
-  Eye,
-  EyeOff,
-  LogOut,
-  Pencil,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
+import { Bell, Camera, Eye, EyeOff, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { userInitials } from "../model";
-import {
-  TooltipContext,
-  Button,
-  EmptyIllustration,
-  PageHeader,
-  PanelTitle,
-  Field,
-  StatusPill,
-  money,
-} from "../ui";
-import { localeTags, useI18n } from "../i18n";
+import { TooltipContext, Button, PageHeader, PanelTitle, Field } from "../ui";
+import { useI18n } from "../i18n";
 import { useLocalizedError } from "../error-message";
-import { useOwnerWorkspace } from "./context";
 
 type AccountSection = "profile" | "notifications" | "security";
 type AccountPreferences = { orderUpdates: boolean; productNews: boolean; reviewReplies: boolean };
@@ -283,13 +262,6 @@ export function AccountScreen({
               </small>
             )}
           </div>
-          {!embedded && (
-            <div className="account-profile-actions">
-              <Button kind="quiet" icon={Pencil} onClick={() => setSection("profile")}>
-                {t("Изменить профиль")}
-              </Button>
-            </div>
-          )}
         </section>
       )}
       <div className="account-settings-layout">
@@ -578,110 +550,5 @@ function AccountToggle({
         <span />
       </label>
     </div>
-  );
-}
-
-export function PaymentsScreen() {
-  const { locale, t } = useI18n();
-  const { payments } = useOwnerWorkspace();
-  const paid = payments.filter((payment) => payment.status === "paid");
-  const total = paid.reduce(
-    (sum, payment) => sum + payment.amount_minor - payment.refunded_minor,
-    0,
-  );
-  const exportCSV = () => {
-    const rows = [
-      ["id", "provider", "status", "amount", "currency", "created_at"],
-      ...payments.map((payment) => [
-        payment.id,
-        payment.provider,
-        payment.status,
-        String(payment.amount_minor),
-        payment.currency,
-        payment.created_at,
-      ]),
-    ];
-    const url = URL.createObjectURL(
-      new Blob([rows.map((row) => row.join(",")).join("\n")], { type: "text/csv" }),
-    );
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "pocket-payments.csv";
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-  return (
-    <>
-      <PageHeader
-        title={t("Платежи")}
-        actions={
-          <Button kind="secondary" icon={Download} disabled={!payments.length} onClick={exportCSV}>
-            {t("Скачать CSV")}
-          </Button>
-        }
-      />
-      <section className="metric-grid payment-metrics">
-        <article className="metric">
-          <span className="metric-icon green">
-            <CreditCard size={20} />
-          </span>
-          <div className="metric-copy">
-            <p>{t("Получено")}</p>
-            <strong>{money(total / 100)}</strong>
-            <small>
-              {t("Успешных платежей:")} {paid.length}
-            </small>
-          </div>
-        </article>
-      </section>
-      <section className="panel payment-table-panel">
-        <PanelTitle
-          title={t("Последние транзакции")}
-          subtitle={t("Данные платежного провайдера")}
-        />
-        {payments.length ? (
-          <div className="payment-table">
-            <div className="payment-table-head">
-              <span>{t("Платеж")}</span>
-              <span>{t("Провайдер")}</span>
-              <span>{t("Сумма")}</span>
-              <span>{t("Статус")}</span>
-              <span>{t("Дата")}</span>
-            </div>
-            {payments.map((payment) => (
-              <div className="payment-row" key={payment.id}>
-                <div className="payment-order">
-                  <span className="transaction-icon">
-                    <CreditCard size={18} />
-                  </span>
-                  <p>
-                    <strong>{payment.id.slice(0, 8)}</strong>
-                    <small>{payment.currency}</small>
-                  </p>
-                </div>
-                <span className="payment-method">{payment.provider}</span>
-                <b>{money(payment.amount_minor / 100)}</b>
-                <StatusPill
-                  status={
-                    payment.status === "paid"
-                      ? "Успешно"
-                      : payment.status === "refunded"
-                        ? "Возврат"
-                        : "В обработке"
-                  }
-                />
-                <span>{new Date(payment.created_at).toLocaleDateString(localeTags[locale])}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <EmptyIllustration
-            icon={CreditCard}
-            title={t("Транзакций пока нет")}
-            text={t("Платежи появятся после подключения провайдера и первого онлайн-заказа.")}
-          />
-        )}
-      </section>
-    </>
   );
 }

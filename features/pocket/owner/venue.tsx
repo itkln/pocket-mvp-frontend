@@ -7,7 +7,6 @@ import {
   ChevronDown,
   Clock3,
   ImagePlus,
-  LayoutDashboard,
   ShoppingBag,
   Store,
   Trash2,
@@ -18,7 +17,6 @@ import { useI18n } from "../i18n";
 import { useLocalizedError } from "../error-message";
 import { Button, Field, PageHeader, PanelTitle } from "../ui";
 import { PublicPageSettings } from "./public-page";
-import { FloorPlan } from "../floor-plan";
 import { VenueLogo } from "../venue-logo";
 
 const venueTabs = [
@@ -26,7 +24,6 @@ const venueTabs = [
   { id: "Расписание", icon: Clock3 },
   { id: "Страница и QR", icon: Store },
   { id: "Заказы", icon: ShoppingBag },
-  { id: "План зала", icon: LayoutDashboard },
   { id: "Уведомления", icon: Bell },
 ] as const;
 
@@ -64,7 +61,6 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
   const logoInput = useRef<HTMLInputElement>(null);
   const [processingLogo, setProcessingLogo] = useState(false);
   const logoImage = settingText(draft, "logo_image_url");
-  const floorTab = tab === "План зала";
   const set = (field: keyof VenueInput, value: string | Record<string, unknown>) =>
     setDraft((current) => ({ ...current, [field]: value }));
   const coverImage = settingText(draft, "cover_image_url");
@@ -170,11 +166,12 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
   );
 
   return (
-    <div className={`venue-settings-page ${floorTab ? "wide" : ""}`}>
+    <div className="venue-settings-page">
       <PageHeader
-        title={venue.name}
+        title={t("Заведение")}
+        subtitle={venue.name}
         actions={
-          !floorTab && tab !== "Страница и QR" ? (
+          tab !== "Страница и QR" ? (
             <div className="venue-desktop-save">{saveButton}</div>
           ) : undefined
         }
@@ -190,7 +187,7 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
         </select>
         <ChevronDown size={17} />
       </label>
-      <div className={"settings-layout " + (floorTab ? "floor-settings-layout" : "")}>
+      <div className="settings-layout">
         <aside className="settings-nav">
           {venueTabs.map(({ id, icon: Icon }) => (
             <button className={tab === id ? "active" : ""} key={id} onClick={() => setTab(id)}>
@@ -199,197 +196,176 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
             </button>
           ))}
         </aside>
-        {floorTab ? (
-          <section className="floor-settings-editor">
-            <FloorPlan
-              mode="owner"
-              venueID={venue.id}
-              venueName={venue.name}
-              notify={notify}
-              embedded
-            />
-          </section>
-        ) : (
-          <section className="panel settings-form">
-            {tab === "Страница и QR" ? (
-              <PublicPageSettings venue={venue} notify={notify} />
-            ) : tab === "Основное" ? (
-              <>
-                <PanelTitle
-                  title={t("Профиль заведения")}
-                  subtitle={t("Эти данные видят гости.")}
+        <section className="panel settings-form">
+          {tab === "Страница и QR" ? (
+            <PublicPageSettings venue={venue} notify={notify} />
+          ) : tab === "Основное" ? (
+            <>
+              <PanelTitle title={t("Профиль заведения")} subtitle={t("Эти данные видят гости.")} />
+              <div className="cover-upload">
+                <div
+                  className={`cover-photo ${coverImage ? "custom" : ""}`}
+                  style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined}
+                  role="img"
+                  aria-label={t("Обложка заведения")}
                 />
-                <div className="cover-upload">
-                  <div
-                    className={`cover-photo ${coverImage ? "custom" : ""}`}
-                    style={coverImage ? { backgroundImage: `url("${coverImage}")` } : undefined}
-                    role="img"
-                    aria-label={t("Обложка заведения")}
-                  />
+                <input
+                  ref={coverInput}
+                  className="cover-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(event) => void selectCover(event)}
+                />
+                <div className="cover-actions">
+                  {coverImage && (
+                    <Button kind="secondary" icon={Trash2} onClick={() => void removeCover()}>
+                      {t("Удалить")}
+                    </Button>
+                  )}
+                  <Button
+                    kind="secondary"
+                    icon={ImagePlus}
+                    disabled={processingCover}
+                    onClick={() => coverInput.current?.click()}
+                  >
+                    {processingCover ? t("Обрабатываем...") : t("Изменить обложку")}
+                  </Button>
+                </div>
+              </div>
+              <div className="venue-logo-upload">
+                <VenueLogo venueID={venue.id} name={draft.name} imageURL={logoImage} />
+                <div className="venue-logo-upload-content">
+                  <strong>{t("Иконка заведения")}</strong>
+                  <p>{t("Показывается в подтверждении бронирования.")}</p>
                   <input
-                    ref={coverInput}
+                    ref={logoInput}
                     className="cover-input"
                     type="file"
+                    aria-label={t("Загрузить иконку заведения")}
                     accept="image/jpeg,image/png,image/webp"
-                    onChange={(event) => void selectCover(event)}
+                    onChange={(event) => void selectLogo(event)}
                   />
-                  <div className="cover-actions">
-                    {coverImage && (
-                      <Button kind="secondary" icon={Trash2} onClick={() => void removeCover()}>
-                        {t("Удалить")}
-                      </Button>
-                    )}
+                  <div className="venue-logo-upload-actions">
                     <Button
                       kind="secondary"
                       icon={ImagePlus}
-                      disabled={processingCover}
-                      onClick={() => coverInput.current?.click()}
+                      disabled={processingLogo}
+                      onClick={() => logoInput.current?.click()}
                     >
-                      {processingCover ? t("Обрабатываем...") : t("Изменить обложку")}
+                      {processingLogo
+                        ? t("Обрабатываем...")
+                        : logoImage
+                          ? t("Изменить иконку")
+                          : t("Загрузить иконку")}
                     </Button>
-                  </div>
-                </div>
-                <div className="venue-logo-upload">
-                  <VenueLogo venueID={venue.id} name={draft.name} imageURL={logoImage} />
-                  <div className="venue-logo-upload-content">
-                    <strong>{t("Иконка заведения")}</strong>
-                    <p>{t("Показывается в подтверждении бронирования.")}</p>
-                    <input
-                      ref={logoInput}
-                      className="cover-input"
-                      type="file"
-                      aria-label={t("Загрузить иконку заведения")}
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={(event) => void selectLogo(event)}
-                    />
-                    <div className="venue-logo-upload-actions">
+                    {logoImage && (
                       <Button
-                        kind="secondary"
-                        icon={ImagePlus}
-                        disabled={processingLogo}
-                        onClick={() => logoInput.current?.click()}
+                        kind="quiet"
+                        icon={Trash2}
+                        ariaLabel={t("Удалить иконку")}
+                        onClick={() => void removeLogo()}
                       >
-                        {processingLogo
-                          ? t("Обрабатываем...")
-                          : logoImage
-                            ? t("Изменить иконку")
-                            : t("Загрузить иконку")}
+                        {t("Удалить")}
                       </Button>
-                      {logoImage && (
-                        <Button
-                          kind="quiet"
-                          icon={Trash2}
-                          ariaLabel={t("Удалить иконку")}
-                          onClick={() => void removeLogo()}
-                        >
-                          {t("Удалить")}
-                        </Button>
-                      )}
-                    </div>
+                    )}
                   </div>
                 </div>
-                <div className="form-grid">
-                  <Field label={t("Название")}>
-                    <input
-                      value={draft.name}
-                      onChange={(event) => set("name", event.target.value)}
-                    />
-                  </Field>
-                  <Field label={t("Тип кухни")}>
-                    <input
-                      value={draft.cuisine_type ?? ""}
-                      onChange={(event) => set("cuisine_type", event.target.value)}
-                      placeholder={t("Современная европейская")}
-                    />
-                  </Field>
-                  <Field label={t("Телефон")}>
-                    <input
-                      value={draft.phone ?? ""}
-                      onChange={(event) => set("phone", event.target.value)}
-                    />
-                  </Field>
-                  <Field label="E-mail">
-                    <input
-                      type="email"
-                      value={draft.email ?? ""}
-                      onChange={(event) => set("email", event.target.value)}
-                    />
-                  </Field>
-                  <Field label={t("Город")}>
-                    <input
-                      value={draft.city}
-                      onChange={(event) => set("city", event.target.value)}
-                    />
-                  </Field>
-                  <Field label={t("Адрес")}>
-                    <input
-                      value={draft.address}
-                      onChange={(event) => set("address", event.target.value)}
-                    />
-                  </Field>
-                  <Field label={t("Описание")} wide>
-                    <textarea
-                      value={draft.description ?? ""}
-                      onChange={(event) => set("description", event.target.value)}
-                    />
-                  </Field>
-                  <Field label={t("Статус")}>
-                    <select
-                      value={draft.status}
-                      onChange={(event) => set("status", event.target.value)}
-                    >
-                      <option value="draft">{t("Черновик")}</option>
-                      <option value="active">{t("Открыто")}</option>
-                      <option value="paused">{t("Приостановлено")}</option>
-                      <option value="closed">{t("Закрыто")}</option>
-                    </select>
-                  </Field>
-                </div>
-                <PanelTitle
-                  title={t("Валюта")}
-                  subtitle={t("Используется в меню, заказах и отчетах.")}
-                />
-                <div className="form-grid localization-grid">
-                  <Field label={t("Валюта меню и заказов")}>
-                    <select
-                      value={draft.currency ?? "EUR"}
-                      onChange={(event) => set("currency", event.target.value)}
-                    >
-                      {currencyOptions.map((option) => (
-                        <option value={option.value} key={option.value}>
-                          {t(option.label)}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                </div>
-                {onDelete && (
-                  <section className="venue-delete-section">
-                    <div>
-                      <strong>{t("Удалить заведение")}</strong>
-                      <p>{t("Меню, план зала и история заведения станут недоступны.")}</p>
-                    </div>
-                    <Button
-                      kind="danger"
-                      icon={Trash2}
-                      disabled={deleting}
-                      onClick={() => void removeVenue()}
-                    >
-                      {deleting ? t("Удаление...") : t("Удалить заведение")}
-                    </Button>
-                  </section>
-                )}
-              </>
-            ) : tab === "Расписание" ? (
-              <ScheduleSettings draft={draft} setDraft={setDraft} />
-            ) : tab === "Заказы" ? (
-              <OrderSettings draft={draft} setDraft={setDraft} />
-            ) : (
-              <NotificationSettings draft={draft} setDraft={setDraft} />
-            )}
-            {tab !== "Страница и QR" && <footer className="venue-mobile-save">{saveButton}</footer>}
-          </section>
-        )}
+              </div>
+              <div className="form-grid">
+                <Field label={t("Название")}>
+                  <input value={draft.name} onChange={(event) => set("name", event.target.value)} />
+                </Field>
+                <Field label={t("Тип кухни")}>
+                  <input
+                    value={draft.cuisine_type ?? ""}
+                    onChange={(event) => set("cuisine_type", event.target.value)}
+                    placeholder={t("Современная европейская")}
+                  />
+                </Field>
+                <Field label={t("Телефон")}>
+                  <input
+                    value={draft.phone ?? ""}
+                    onChange={(event) => set("phone", event.target.value)}
+                  />
+                </Field>
+                <Field label="E-mail">
+                  <input
+                    type="email"
+                    value={draft.email ?? ""}
+                    onChange={(event) => set("email", event.target.value)}
+                  />
+                </Field>
+                <Field label={t("Город")}>
+                  <input value={draft.city} onChange={(event) => set("city", event.target.value)} />
+                </Field>
+                <Field label={t("Адрес")}>
+                  <input
+                    value={draft.address}
+                    onChange={(event) => set("address", event.target.value)}
+                  />
+                </Field>
+                <Field label={t("Описание")} wide>
+                  <textarea
+                    value={draft.description ?? ""}
+                    onChange={(event) => set("description", event.target.value)}
+                  />
+                </Field>
+                <Field label={t("Статус")}>
+                  <select
+                    value={draft.status}
+                    onChange={(event) => set("status", event.target.value)}
+                  >
+                    <option value="draft">{t("Черновик")}</option>
+                    <option value="active">{t("Открыто")}</option>
+                    <option value="paused">{t("Приостановлено")}</option>
+                    <option value="closed">{t("Закрыто")}</option>
+                  </select>
+                </Field>
+              </div>
+              <PanelTitle
+                title={t("Валюта")}
+                subtitle={t("Используется в меню, заказах и отчетах.")}
+              />
+              <div className="form-grid localization-grid">
+                <Field label={t("Валюта меню и заказов")}>
+                  <select
+                    value={draft.currency ?? "EUR"}
+                    onChange={(event) => set("currency", event.target.value)}
+                  >
+                    {currencyOptions.map((option) => (
+                      <option value={option.value} key={option.value}>
+                        {t(option.label)}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+              {onDelete && (
+                <section className="venue-delete-section">
+                  <div>
+                    <strong>{t("Удалить заведение")}</strong>
+                    <p>{t("Меню, план зала и история заведения станут недоступны.")}</p>
+                  </div>
+                  <Button
+                    kind="danger"
+                    icon={Trash2}
+                    disabled={deleting}
+                    onClick={() => void removeVenue()}
+                  >
+                    {deleting ? t("Удаление...") : t("Удалить заведение")}
+                  </Button>
+                </section>
+              )}
+            </>
+          ) : tab === "Расписание" ? (
+            <ScheduleSettings draft={draft} setDraft={setDraft} />
+          ) : tab === "Заказы" ? (
+            <OrderSettings draft={draft} setDraft={setDraft} />
+          ) : (
+            <NotificationSettings draft={draft} setDraft={setDraft} />
+          )}
+          {tab !== "Страница и QR" && <footer className="venue-mobile-save">{saveButton}</footer>}
+        </section>
       </div>
     </div>
   );

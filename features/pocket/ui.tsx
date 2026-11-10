@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import { type LucideIcon } from "lucide-react";
+import { ChevronRight, type LucideIcon } from "lucide-react";
 import { useI18n } from "./i18n";
 
 export function money(value: number, currency = "EUR") {
@@ -123,6 +123,50 @@ export function PageHeader({
       </div>
       {actions && <div className="header-actions">{actions}</div>}
     </div>
+  );
+}
+
+// A stat card from the menu page: title row, large value, optional progress bar and caption.
+// With onClick the whole card is a button that leads to the related screen.
+export function StatCard({
+  title,
+  value,
+  caption,
+  progress,
+  onClick,
+  active = false,
+  tone,
+}: {
+  title: string;
+  value: ReactNode;
+  caption?: ReactNode;
+  progress?: number;
+  onClick?: () => void;
+  active?: boolean;
+  tone?: "warning";
+}) {
+  const className = `vendor-stat-card ${active ? "active" : ""} ${tone ? `tone-${tone}` : ""}`;
+  const content = (
+    <>
+      <span className="vendor-stat-heading">
+        {title}
+        {onClick && <ChevronRight size={18} />}
+      </span>
+      <strong>{value}</strong>
+      {progress !== undefined && (
+        <span className="vendor-stat-track">
+          <i style={{ width: `${Math.max(0, Math.min(100, progress))}%` }} />
+        </span>
+      )}
+      {caption && <small>{caption}</small>}
+    </>
+  );
+  return onClick ? (
+    <button type="button" className={className} onClick={onClick}>
+      {content}
+    </button>
+  ) : (
+    <article className={className}>{content}</article>
   );
 }
 

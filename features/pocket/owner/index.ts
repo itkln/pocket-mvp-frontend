@@ -5,6 +5,7 @@ export { AnalyticsScreen } from "./analytics";
 export { ReviewsScreen } from "./reviews";
 export { VenueScreen } from "./venue";
 export { SubscriptionScreen } from "./subscription";
-export { AccountScreen, PaymentsScreen } from "./account";
+export { AccountScreen } from "./account";
+export { PaymentsScreen } from "./payments";
 
 export { OrdersScreen } from "./orders";

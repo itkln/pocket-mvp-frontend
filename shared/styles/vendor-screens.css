@@ -1,0 +1,295 @@
+/* Screen layouts built on vendor-system.css. */
+
+/* Overview */
+.overview-stats {
+  --stat-columns: 4;
+}
+@media (max-width: 1100px) {
+  .overview-stats {
+    --stat-columns: 2;
+  }
+}
+@media (max-width: 640px) {
+  .vendor-stat-grid.overview-stats {
+    --stat-columns: 2;
+  }
+  .overview-stats .vendor-stat-card {
+    padding: 16px;
+  }
+  .overview-stats .vendor-stat-card > strong {
+    font-size: 20px;
+  }
+  .overview-stats .vendor-stat-card > small {
+    font-size: 14px;
+  }
+}
+.overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 20px;
+  align-items: start;
+}
+.overview-side {
+  display: grid;
+  gap: 20px;
+}
+.overview-attention ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.overview-attention li button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: var(--vendor-radius-control);
+  background: #f6f7f9;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+.overview-attention li button:hover {
+  background: var(--accent-soft);
+}
+.overview-attention li span {
+  flex: 1;
+}
+.overview-attention li b {
+  min-width: 28px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+}
+.overview-attention li svg {
+  color: var(--muted);
+}
+.overview-all-clear {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+.overview-all-clear svg {
+  flex-shrink: 0;
+  color: #2f9e6b;
+}
+.overview-rating {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+}
+button.overview-rating {
+  cursor: pointer;
+}
+button.overview-rating:hover {
+  background: #f7fcff;
+}
+.overview-rating .vendor-stat-heading {
+  font-size: 20px;
+}
+.overview-rating-score {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.overview-rating-score > strong {
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+}
+.overview-rating-score small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.overview-stars {
+  display: flex;
+  gap: 2px;
+  color: #e3a008;
+}
+.overview-rating-bars {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.overview-rating-bars li {
+  display: grid;
+  grid-template-columns: 16px 1fr 28px;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.overview-rating-bars li > span:last-child {
+  text-align: right;
+}
+.overview-rating-bars .vendor-stat-track i {
+  background: #e3a008;
+}
+.overview-order-table td:first-child {
+  width: 34%;
+}
+@media (max-width: 1200px) {
+  .overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .overview-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .overview-side {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .vendor-block {
+    padding: 20px;
+  }
+  .overview-order-table td:first-child {
+    width: auto;
+  }
+}
+
+/* Payments */
+.payments-block > header {
+  flex-wrap: wrap;
+  align-items: center;
+}
+.payment-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.payment-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.payments-table .payment-date::first-letter {
+  text-transform: uppercase;
+}
+@media (max-width: 760px) {
+  .payments-table td:nth-child(2) {
+    grid-column: 1;
+  }
+  .payments-table td:nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+  }
+  .payments-table td.numeric {
+    grid-column: 2;
+    grid-row: 1;
+  }
+}
+
+/* Venue settings: full page width; the floor plan has its own screen. */
+.vendor-shell .venue-settings-page {
+  width: 100%;
+}
+@media (min-width: 761px) {
+  .vendor-shell .settings-layout {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+
+/* Account settings: same frame as venue settings. */
+.vendor-shell .account-page {
+  width: 100%;
+  gap: 20px;
+}
+.vendor-shell .account-profile-hero {
+  grid-template-columns: 88px minmax(0, 1fr);
+  padding: 24px 28px;
+}
+.vendor-shell .account-profile-hero .account-profile-avatar {
+  width: 88px;
+  height: 88px;
+}
+.vendor-shell .account-profile-hero h2 {
+  font-size: 24px;
+}
+.vendor-shell .account-profile-hero p {
+  font-size: 16px;
+}
+@media (min-width: 761px) {
+  .vendor-shell .account-settings-layout {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 20px;
+  }
+}
+.vendor-shell .account-section-list button {
+  min-height: 52px;
+  font-size: 16px;
+}
+.vendor-shell .account-section-panel {
+  padding: 28px;
+}
+.vendor-shell .account-section-list strong {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Reviews */
+.review-score-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.review-score-value svg {
+  color: #e3a008;
+}
+.vendor-shell .reviews-list .review-card {
+  border: 0;
+  box-shadow: none;
+}
+
+/* Overview orders on a phone: number and total, guest and status, then time. */
+@media (max-width: 760px) {
+  .overview-order-table tr {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .overview-order-table td:nth-child(1) {
+    grid-area: 1 / 1;
+  }
+  .overview-order-table td:nth-child(3) {
+    grid-area: 1 / 2;
+  }
+  .overview-order-table td:nth-child(2) {
+    grid-area: 2 / 1;
+  }
+  .overview-order-table td:nth-child(4) {
+    grid-area: 2 / 2;
+    justify-self: end;
+  }
+  .overview-order-table td:nth-child(5) {
+    display: none;
+  }
+  .overview-orders > header p {
+    display: none;
+  }
+}

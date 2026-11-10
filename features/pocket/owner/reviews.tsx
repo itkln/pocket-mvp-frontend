@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Download, MessageSquareText, Search, Send, Star, Table2 } from "lucide-react";
-import { Button, EmptyIllustration, PageHeader } from "../ui";
+import { Button, EmptyIllustration, PageHeader, StatCard } from "../ui";
 import { localeTags, useI18n } from "../i18n";
 import { useOwnerWorkspace } from "./context";
 
@@ -35,6 +35,12 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
   const average = reviews.length
     ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
     : 0;
+  // The moment the screen opened: a stable reference for the 7-day window.
+  const [openedAt] = useState(() => Date.now());
+  const unanswered = reviews.filter((review) => !review.owner_reply).length;
+  const lastWeek = reviews.filter(
+    (review) => new Date(review.created_at).getTime() >= openedAt - 7 * 24 * 60 * 60 * 1000,
+  ).length;
   const publish = async (id: string) => {
     await answerReview(id, reply);
     setReplying(null);
@@ -51,27 +57,24 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
           </Button>
         }
       />
-      <section className="reviews-overview">
-        <div className="panel review-score">
-          <span>{t("Средняя оценка")}</span>
-          <strong>{average ? average.toFixed(1) : "—"}</strong>
-          <div className="review-stars">
-            <Star size={16} fill="currentColor" />
-          </div>
-          <small>
-            {reviews.length} {t("отзывов")}
-          </small>
-        </div>
-        <div className="panel review-stat">
-          <span>
-            <MessageSquareText size={19} />
-          </span>
-          <div>
-            <small>{t("Без ответа")}</small>
-            <strong>{reviews.filter((review) => !review.owner_reply).length}</strong>
-            <p>{t("Требуют внимания")}</p>
-          </div>
-        </div>
+      <section className="vendor-stat-grid reviews-stats">
+        <StatCard
+          title={t("Средняя оценка")}
+          value={
+            <span className="review-score-value">
+              {average ? average.toFixed(1) : "—"}
+              <Star size={22} fill="currentColor" />
+            </span>
+          }
+          caption={t("{count} отзывов", { count: reviews.length })}
+        />
+        <StatCard
+          title={t("Без ответа")}
+          value={unanswered}
+          caption={unanswered ? t("Требуют внимания") : t("На все отзывы есть ответ")}
+          tone={unanswered ? "warning" : undefined}
+        />
+        <StatCard title={t("За последние 7 дней")} value={lastWeek} caption={t("Новых отзывов")} />
       </section>
       <section className="reviews-toolbar">
         <label className="review-rating-select">
@@ -108,7 +111,7 @@ export function ReviewsScreen({ notify }: { notify: (message: string) => void })
       <div className="reviews-list">
         {filtered.length ? (
           filtered.map((review) => (
-            <article className="panel review-card" key={review.id}>
+            <article className="vendor-block review-card" key={review.id}>
               <header>
                 <span className="review-avatar">
                   {review.guest_name

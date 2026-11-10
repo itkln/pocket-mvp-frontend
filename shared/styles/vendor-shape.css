@@ -578,7 +578,7 @@
   font-weight: 600;
 }
 .orders-ticket-timer small {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 2px;
 }
 .orders-ticket-state {
@@ -586,7 +586,7 @@
   top: 16px;
   right: 14px;
   max-width: 92px;
-  font-size: 10px;
+  font-size: 12px;
 }
 .orders-ticket:has(.orders-ticket-state) .orders-ticket-summary {
   padding-right: 100px;
@@ -594,7 +594,7 @@
 .orders-ticket .orders-ticket-visit {
   margin: 8px 0 0;
   color: inherit;
-  font-size: 12px;
+  font-size: 14px;
 }
 .vendor-orders .orders-ticket.just-arrived {
   background: #219ed9;

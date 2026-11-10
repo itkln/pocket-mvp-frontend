@@ -2,17 +2,13 @@
 
 import {
   CalendarClock,
-  CircleDollarSign,
   Download,
   Globe2,
   ReceiptText,
-  Star,
-  Table2,
   Utensils,
   type LucideIcon,
 } from "lucide-react";
-import { Button, EmptyIllustration, PageHeader, PanelTitle, money } from "../ui";
-import { Metric } from "./dashboard";
+import { Button, EmptyIllustration, PageHeader, PanelTitle, StatCard, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 import { useI18n } from "../i18n";
 
@@ -40,38 +36,31 @@ export function AnalyticsScreen() {
           </Button>
         }
       />
-      <section className="metric-grid">
-        <Metric
-          label={t("Выручка сегодня")}
+      <section className="vendor-stat-grid overview-stats">
+        <StatCard
+          title={t("Выручка сегодня")}
           value={money((dashboard?.revenue_minor ?? 0) / 100)}
-          change={t("За текущий день")}
-          icon={CircleDollarSign}
-          tone="coral"
+          caption={t("За текущий день")}
         />
-        <Metric
-          label={t("Заказов сегодня")}
-          value={String(dashboard?.orders_today ?? 0)}
-          change={t(`Завершено: ${completed.length}`)}
-          icon={ReceiptText}
-          tone="green"
+        <StatCard
+          title={t("Заказов сегодня")}
+          value={dashboard?.orders_today ?? 0}
+          caption={t(`Завершено: ${completed.length}`)}
         />
-        <Metric
-          label={t("Загрузка зала")}
+        <StatCard
+          title={t("Загрузка зала")}
           value={`${occupancy}%`}
-          change={t(`Активных столов: ${dashboard?.active_tables ?? 0}`)}
-          icon={Table2}
-          tone="blue"
+          progress={occupancy}
+          caption={t(`Активных столов: ${dashboard?.active_tables ?? 0}`)}
         />
-        <Metric
-          label={t("Средняя оценка")}
+        <StatCard
+          title={t("Средняя оценка")}
           value={dashboard?.average_rating ? dashboard.average_rating.toFixed(1) : "—"}
-          change={t(`Отзывов: ${reviews.length}`)}
-          icon={Star}
-          tone="gold"
+          caption={t(`Отзывов: ${reviews.length}`)}
         />
       </section>
       <section className="analytics-grid">
-        <div className="panel popular-list">
+        <div className="vendor-block popular-list">
           <PanelTitle title={t("Меню")} />
           {items.length ? (
             items.slice(0, 8).map((item, index) => (
@@ -94,7 +83,7 @@ export function AnalyticsScreen() {
             />
           )}
         </div>
-        <div className="panel channel-summary">
+        <div className="vendor-block channel-summary">
           <PanelTitle title={t("Заказы по каналам")} />
           {orders.length ? (
             <div className="channel-summary-list">

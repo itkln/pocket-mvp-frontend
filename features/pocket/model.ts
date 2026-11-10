@@ -42,6 +42,7 @@ export const ownerNavigation = [
   { id: "overview", label: "Обзор", icon: LayoutDashboard },
   { id: "orders", label: "Заказы", icon: ReceiptText },
   { id: "menu", label: "Меню", icon: UtensilsCrossed },
+  { id: "floor", label: "План зала", icon: PanelsTopLeft },
   { id: "team", label: "Команда", icon: Users },
   { id: "analytics", label: "Аналитика", icon: BarChart3 },
   { id: "reviews", label: "Отзывы", icon: MessageSquareText },
@@ -72,7 +73,7 @@ export const mobilePrimaryNavigation: Record<Role, string[]> = {
 export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> = {
   owner: [
     { label: "Сегодня", ids: ["overview", "orders"] },
-    { label: "Операции", ids: ["menu", "team"] },
+    { label: "Операции", ids: ["menu", "floor", "team"] },
     { label: "Контроль", ids: ["analytics", "reviews", "payments"] },
     { label: "Настройки", ids: ["venue", "subscription"] },
   ],

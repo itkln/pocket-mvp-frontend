@@ -875,14 +875,14 @@
 }
 .venue-switcher small {
   color: #737373;
-  font-size: 12px;
+  font-size: 14px;
 }
 .side-nav {
   margin-top: 22px;
 }
 .nav-label {
   color: #8a8a8e;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 .side-nav button {
@@ -918,7 +918,7 @@
 }
 .user-chip small {
   color: #737373;
-  font-size: 12px;
+  font-size: 14px;
 }
 .topbar {
   height: 64px;
@@ -926,7 +926,7 @@
   background: rgba(255, 255, 255, 0.96);
 }
 .topbar-title small {
-  font-size: 12px;
+  font-size: 14px;
 }
 .topbar-title strong {
   font-size: 16px;
@@ -938,10 +938,10 @@
 }
 .floor-legend span,
 .zoom-label {
-  font-size: 12px;
+  font-size: 14px;
 }
 .floor-table span {
-  font-size: 11px;
+  font-size: 12px;
 }
 .search-field {
   height: 40px;
@@ -951,11 +951,11 @@
 }
 .segmented button {
   min-height: 34px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 .list-toolbar p {
-  font-size: 13px;
+  font-size: 14px;
 }
 .cover-photo {
   background-size: 300% auto;
@@ -1018,7 +1018,7 @@
   margin-top: 2px;
   overflow: hidden;
   color: #737373;
-  font-size: 11px;
+  font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1056,13 +1056,13 @@
   display: block;
 }
 .role-menu-popover span strong {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 .role-menu-popover span small {
   margin-top: 2px;
   color: #737373;
-  font-size: 11px;
+  font-size: 12px;
 }
 .side-nav button b,
 .cart-button b,
@@ -1143,7 +1143,7 @@
 }
 .preview-venue span {
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
 }
 .preview-venue h3 {
   margin: 5px 0 3px;
@@ -1152,7 +1152,7 @@
 .preview-venue p {
   margin: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .preview-menu-grid {
   display: grid;
@@ -1180,7 +1180,7 @@
   border-radius: 4px;
   background: #fff;
   color: #765813;
-  font-size: 9px;
+  font-size: 11px;
 }
 .preview-menu-grid article > div {
   display: grid;
@@ -1189,17 +1189,17 @@
 }
 .preview-menu-grid small {
   color: var(--accent);
-  font-size: 9px;
+  font-size: 11px;
   text-transform: uppercase;
 }
 .preview-menu-grid strong {
   overflow: hidden;
-  font-size: 13px;
+  font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .preview-menu-grid b {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 .menu-preview-modal > footer {
@@ -1215,7 +1215,7 @@
 .qr-dialog > footer p {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .qr-dialog {
   width: min(920px, 100%);
@@ -1224,7 +1224,7 @@
   max-width: 650px;
   margin: 6px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 .qr-grid {
@@ -1266,13 +1266,13 @@
 .qr-grid article span {
   margin-top: 2px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .qr-grid article small {
   margin-top: 6px;
   overflow: hidden;
   color: #888;
-  font-size: 9px;
+  font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1348,7 +1348,7 @@
 .venue-menu-label {
   margin: 7px 9px 4px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -1375,13 +1375,13 @@
   display: block;
 }
 .venue-menu-popover strong {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 .venue-menu-popover small {
   margin-top: 2px;
   color: #737373;
-  font-size: 11px;
+  font-size: 12px;
 }
 .venue-create-modal {
   width: min(500px, 100%);
@@ -1438,7 +1438,7 @@
   border-radius: 12px;
   background: var(--accent);
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
 }
 .venue-create-preview strong,
@@ -1454,7 +1454,7 @@
 .venue-create-preview small {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .venue-create-form > footer {
   display: flex;
@@ -1487,7 +1487,7 @@
   border-radius: 0;
   background: transparent;
   color: #777;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
 }
 .side-nav button.active b {
@@ -1559,14 +1559,14 @@
 .subscription-status p {
   margin: 3px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .subscription-status > b {
   padding: 5px 8px;
   border-radius: 5px;
   background: #fff;
   color: #555;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
 }
 .subscription-status.active > b {
@@ -1586,7 +1586,7 @@
 .subscription-heading p {
   margin: 4px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .billing-toggle button {
   min-width: 118px;
@@ -1598,7 +1598,7 @@
   border-radius: 4px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-size: 10px;
+  font-size: 12px;
 }
 .subscription-plans {
   display: grid;
@@ -1641,7 +1641,7 @@
 .plan-title span {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .plan-title > svg {
   color: var(--accent);
@@ -1658,13 +1658,13 @@
 }
 .plan-price span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .subscription-plan > p {
   min-height: 20px;
   margin: 2px 0 14px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .subscription-plan ul {
   display: grid;
@@ -1679,7 +1679,7 @@
   align-items: center;
   gap: 7px;
   color: #444;
-  font-size: 13px;
+  font-size: 14px;
 }
 .subscription-plan li svg {
   color: var(--accent);
@@ -1690,7 +1690,7 @@
   gap: 6px;
   margin-top: auto;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 @media (max-width: 900px) {
   .subscription-plans {
@@ -1754,7 +1754,7 @@
 .review-score > span {
   display: block;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .review-score > strong {
   display: inline-block;
@@ -1771,7 +1771,7 @@
   display: block;
   margin-top: 9px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .review-stat {
   display: grid;
@@ -1794,7 +1794,7 @@
 }
 .review-stat small {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .review-stat strong {
   margin-top: 3px;
@@ -1803,7 +1803,7 @@
 .review-stat p {
   margin: 4px 0 0;
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
 }
 .review-stars {
   display: flex;
@@ -1852,7 +1852,7 @@
   appearance: none;
   background: transparent;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
 }
 .review-table-filter > svg:last-child {
@@ -1879,7 +1879,7 @@
   border-radius: 50%;
   background: #e9e9eb;
   color: #444;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 .review-card > header > div:nth-child(2) strong,
@@ -1892,7 +1892,7 @@
 .review-card > header > div:nth-child(2) small {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .review-table {
   min-height: 28px;
@@ -1903,7 +1903,7 @@
   border-radius: 5px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
   white-space: nowrap;
 }
 .review-text {
@@ -1934,16 +1934,16 @@
   border-radius: 50%;
   background: var(--accent-soft);
   color: var(--accent);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 .owner-review-reply strong {
-  font-size: 12px;
+  font-size: 14px;
 }
 .owner-review-reply p {
   margin: 3px 0 0;
   color: #4d5551;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
 }
 .review-reply-editor {
@@ -1957,7 +1957,7 @@
   border-radius: 6px;
   outline: 0;
   resize: vertical;
-  font-size: 13px;
+  font-size: 14px;
 }
 .review-reply-editor textarea:focus {
   border-color: var(--accent);
@@ -2049,7 +2049,7 @@
   height: 15px;
   border-radius: 50%;
   background: var(--accent);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 600;
 }
 .segmented button.active b {
@@ -2101,7 +2101,7 @@
   .mobile-bottom-nav button span {
     max-width: 100%;
     overflow: hidden;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 500;
     line-height: 1.2;
     text-overflow: ellipsis;
@@ -2242,7 +2242,7 @@
 .nav-group .nav-label {
   margin: 0 10px 4px;
   color: #8b97a1;
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0;
 }
 .side-nav button {
@@ -2270,7 +2270,7 @@
   padding: 0 5px;
   background: #dce6ec;
   color: #60717c;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 .side-nav button.active b {
@@ -2303,7 +2303,7 @@
   color: var(--accent-strong);
 }
 .topbar-language-trigger > b {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
 }
 .topbar-language-trigger > svg {
@@ -2346,11 +2346,11 @@
   color: var(--accent);
 }
 .topbar-language-menu button b {
-  font-size: 11px;
+  font-size: 12px;
 }
 .topbar-language-menu button span {
   overflow: hidden;
-  font-size: 13px;
+  font-size: 14px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2644,7 +2644,7 @@
   border-radius: 0;
   background: transparent;
   color: #74828c;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
 }
 .side-nav button.active b {
@@ -2660,7 +2660,7 @@
     border-radius: 0;
     background: transparent;
     color: var(--accent);
-    font-size: 9px;
+    font-size: 11px;
   }
 }
 /* Multi-floor venue layout editor. */
@@ -2679,7 +2679,7 @@
 .floor-editor-heading p {
   margin: 5px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .floor-editor-heading > div:last-child {
   display: flex;
@@ -2730,18 +2730,18 @@
   border-radius: 50%;
   background: #edf2f5;
   color: #687781;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 .floor-level-list button strong {
   align-self: end;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 .floor-level-list button small {
   align-self: start;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
 }
 .floor-level-list button:hover {
   background: #f5f9fb;
@@ -2839,13 +2839,13 @@
 }
 .floor-add-popover strong {
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 .floor-add-popover small {
   margin-top: 2px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .floor-canvas-viewport {
   --floor-base-height: 520px;
@@ -2885,7 +2885,7 @@
   border: 0;
   background: transparent;
   color: #52616d;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -2902,7 +2902,7 @@
   border: 1px solid #cfdce3;
   background: #f3f8fb;
   color: #61727e;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   cursor: grab;
   touch-action: none;
@@ -2963,7 +2963,7 @@
 }
 .floor-empty span {
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .floor-empty.loading svg,
 .floor-summary.loading svg {
@@ -2984,7 +2984,7 @@
 .technical-position {
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .fixture-controls {
   display: grid;
@@ -2995,7 +2995,7 @@
   display: grid;
   gap: 8px;
   color: #59625d;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
 }
 .fixture-controls > label > span {
@@ -3032,7 +3032,7 @@
 }
 .rotation-control strong {
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   text-align: center;
 }
 .floor-summary {
@@ -3048,7 +3048,7 @@
 .floor-summary p {
   margin: 0 0 18px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 /* Review filters should read as one clean white control surface. */
 .reviews-toolbar {
@@ -3150,7 +3150,7 @@
   border-radius: 7px;
   background: transparent;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
 }
@@ -3211,7 +3211,7 @@
 .category-manager-row > div:first-child small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .category-manager-row.new {
   box-shadow: inset 3px 0 var(--accent);
@@ -3225,7 +3225,7 @@
   align-items: center;
   gap: 9px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .category-manager-row > .category-preorder {
   grid-column: 1 / -1;
@@ -3235,7 +3235,7 @@
   justify-content: space-between;
   gap: 10px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 .category-delete {
   width: 34px;
@@ -3354,7 +3354,7 @@
   border-radius: 50%;
   background: #f1f5f7;
   color: #687781;
-  font-size: 11px;
+  font-size: 12px;
 }
 .popular-list > .popular-row > p {
   min-width: 0;
@@ -3369,7 +3369,7 @@
   font-size: 14px;
 }
 .popular-list > .popular-row > p small {
-  font-size: 12px;
+  font-size: 14px;
 }
 .popular-list > .popular-row > b {
   font-size: 14px;
@@ -3451,7 +3451,7 @@
     font-size: 18px;
   }
   .person-copy small {
-    font-size: 12px;
+    font-size: 14px;
   }
   .team-row select {
     width: min(180px, 100%);
@@ -3507,7 +3507,7 @@
 .modal-form-error {
   margin: 12px 0 0;
   color: #b44d44;
-  font-size: 13px;
+  font-size: 14px;
 }
 .modal-form-error {
   padding: 0 20px 12px;
@@ -3521,7 +3521,7 @@
 .category-manager-copy small {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .category-manager-row.dragging {
   z-index: 20;
@@ -3550,7 +3550,7 @@
     background: var(--ink);
     box-shadow: 0 7px 20px rgba(23, 33, 43, 0.18);
     color: #fff;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     line-height: 1.3;
     opacity: 0;
@@ -3640,7 +3640,7 @@
   border: 0;
   background: transparent;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 14px;
   cursor: pointer;
 }
 .topbar-search-input {
@@ -3659,7 +3659,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: 13px;
+  font-size: 14px;
 }
 .topbar-search-results {
   display: grid;
@@ -3676,7 +3676,7 @@
   border: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
   cursor: pointer;
 }
@@ -3690,7 +3690,7 @@
   margin: 0;
   padding: 24px 8px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   text-align: center;
 }
 .notifications-popover {
@@ -3726,13 +3726,13 @@
   display: block;
 }
 .notification-list strong {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 550;
 }
 .notification-list small {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .notification-empty {
   display: grid;
@@ -3750,7 +3750,7 @@
 .notification-empty p {
   margin: 4px 0 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
 }
 @media (max-width: 640px) {
   .topbar-action-slot {
@@ -3937,7 +3937,7 @@
   background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 5px 18px rgba(23, 33, 43, 0.12);
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -3955,7 +3955,7 @@
   border-radius: 8px;
   background: rgba(255, 247, 246, 0.96);
   color: #b84f47;
-  font-size: 12px;
+  font-size: 14px;
 }
 .modal .menu-image-editor,
 .modal .menu-image-editor > .food-image {
@@ -4019,7 +4019,7 @@
   border-radius: 9px;
   background: transparent;
   color: #566570;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 550;
   cursor: pointer;
 }
@@ -4185,7 +4185,7 @@
   max-width: 520px;
   margin: 5px 0 0;
   color: #7e625d;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.45;
 }
 .venue-delete-section .button.danger {
@@ -4224,7 +4224,7 @@
     gap: 5px;
     margin-bottom: 12px;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
   }
   .venue-section-select select {
@@ -4457,12 +4457,12 @@
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
   white-space: nowrap;
 }
 .order-preorder-items {
   margin-top: 8px;
-  font-size: 13px;
+  font-size: 14px;
 }
 .order-preorder-items summary {
   color: var(--ink);
@@ -4490,7 +4490,7 @@
 .menu-nutrition-fields > p {
   margin: 6px 0 16px;
   color: #6b7280;
-  font-size: 13px;
+  font-size: 14px;
 }
 .order-preorder-items .order-notes {
   margin: 10px 0 0;
@@ -4517,7 +4517,7 @@
   display: inline-block;
   margin-top: 8px;
   color: var(--accent);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -4669,7 +4669,7 @@
 .vendor-menu small {
   display: block;
   color: #84909b;
-  font-size: 13px;
+  font-size: 14px;
 }
 .vendor-stat-track {
   height: 5px;
@@ -4761,7 +4761,7 @@
 }
 .vendor-category-link small {
   margin-top: 3px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .vendor-drag {
   display: grid;
@@ -5074,7 +5074,7 @@
   margin-bottom: 8px;
 }
 .vendor-editor-card .menu-nutrition-fields p {
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 16px;
 }
 .vendor-editor-card .menu-image-editor {
@@ -5119,7 +5119,7 @@
   display: block;
   margin-top: 3px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 .vendor-drawer-inner footer {
   display: flex;
@@ -5250,7 +5250,7 @@
   }
   .vendor-menu-group > header .button {
     padding: 9px 12px;
-    font-size: 13px;
+    font-size: 14px;
   }
   .vendor-menu-row {
     flex-wrap: wrap;
@@ -5348,7 +5348,7 @@
   font-size: 16px;
 }
 .vendor-category-panel .category-manager-copy small {
-  font-size: 13px;
+  font-size: 14px;
 }
 .vendor-category-panel .category-delete {
   grid-column: 2;
@@ -5562,7 +5562,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 .orders-live i {
@@ -5635,7 +5635,7 @@
   background: white;
 }
 .orders-tabs button > span {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 .orders-source-filter {
@@ -5695,7 +5695,7 @@
 .orders-group-title b {
   margin-left: 8px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
 }
 .orders-group-title .collapsed {
@@ -5724,7 +5724,7 @@
   gap: 5px;
   padding: 4px 9px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
   background: #eef0f3;
@@ -5779,7 +5779,7 @@
   margin: 0;
 }
 .orders-channel {
-  font-size: 12px;
+  font-size: 14px;
   background: #f4f5f7;
   border-radius: 8px;
   padding: 4px 9px;
@@ -5835,7 +5835,7 @@
   margin-bottom: 8px;
 }
 .orders-composition > header span {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--muted);
 }
 .orders-composition ul {
@@ -5869,7 +5869,7 @@
 .orders-composition li small {
   display: block;
   margin-top: 5px;
-  font-size: 12px;
+  font-size: 14px;
   color: #83909c;
 }
 .orders-totals {
@@ -5905,7 +5905,7 @@
 .orders-actions > small {
   display: block;
   margin-top: 12px;
-  font-size: 12px;
+  font-size: 14px;
   color: #8994a0;
 }
 .orders-actions > p[role="alert"],
@@ -6062,7 +6062,7 @@
   align-items: center;
   gap: 5px;
   margin-bottom: 12px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
 }
 .orders-ticket-visit svg {
@@ -6129,7 +6129,7 @@
   }
   .orders-mobile-navigation .orders-mobile-back {
     min-width: 0;
-    font-size: 13px;
+    font-size: 14px;
     gap: 6px;
   }
   .orders-mobile-cancel {
@@ -6141,7 +6141,7 @@
     background: transparent;
     padding: 10px 0;
     color: #be454d;
-    font-size: 13px;
+    font-size: 14px;
     cursor: pointer;
   }
   .orders-mobile-cancel svg {
@@ -6215,7 +6215,7 @@
 }
 .vendor-orders .slide-confirm-copy > span {
   max-width: 100%;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.25;
 }
 .vendor-orders .slide-confirm-copy[data-busy="true"] {
@@ -6261,7 +6261,7 @@
     font-size: 15px;
   }
   .vendor-orders .slide-confirm-copy > span {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

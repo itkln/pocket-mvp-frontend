@@ -28,7 +28,13 @@ function useVenuePage(role: VendorRole, screen: string) {
 export function OverviewPage() {
   const page = useVenuePage("owner", "overview");
   if (!page) return null;
-  return <OwnerOverview ownerName={page.user.first_name} onNavigate={page.navigate} />;
+  return (
+    <OwnerOverview
+      ownerName={page.user.first_name}
+      venueName={page.venue.name}
+      onNavigate={page.navigate}
+    />
+  );
 }
 
 export function OrdersPage() {
@@ -90,7 +96,7 @@ export function VenuePage() {
 export function PaymentsPage() {
   const page = useVenuePage("owner", "payments");
   if (!page) return null;
-  return <PaymentsScreen />;
+  return <PaymentsScreen venueName={page.venue.name} />;
 }
 
 export function SubscriptionPage() {
@@ -124,8 +130,9 @@ export function StaffVenuePage() {
   );
 }
 
-export function StaffFloorEditorPage() {
-  const page = useVenuePage("staff", "floor");
+// The floor plan editor and table QR codes: the owner and managers (V-BE-02).
+function FloorEditorScreen({ role }: { role: VendorRole }) {
+  const page = useVenuePage(role, "floor");
   if (!page) return null;
   return (
     <FloorPlan
@@ -136,6 +143,14 @@ export function StaffFloorEditorPage() {
       notify={page.notify}
     />
   );
+}
+
+export function OwnerFloorPage() {
+  return <FloorEditorScreen role="owner" />;
+}
+
+export function StaffFloorEditorPage() {
+  return <FloorEditorScreen role="staff" />;
 }
 
 export function StaffFloorPage() {

@@ -5,6 +5,8 @@ import "../../../shared/styles/base.css";
 import "../../../shared/styles/vendor.css";
 import "../../../shared/styles/vendor-shape.css";
 import "../../../shared/styles/vendor-team.css";
+import "../../../shared/styles/vendor-system.css";
+import "../../../shared/styles/vendor-screens.css";
 
 export const metadata: Metadata = {
   title: "Pocket Vendor",
