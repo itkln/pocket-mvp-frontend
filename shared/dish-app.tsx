@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useRouter, usePathname, useSearchParams, useSelectedLayoutSegment } from "next/navigation";
 import { Menu, Search } from "lucide-react";
 import { getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
-import { spotsAuthPath } from "../lib/spots-auth-navigation";
+import { dishAuthPath } from "../lib/dish-auth-navigation";
 import { DishCatalogHeader } from "../features/pocket/customer/catalog-header";
 import { GuestProfileDialog } from "../features/pocket/customer/profile";
 import { useI18n } from "../features/pocket/i18n";
@@ -84,7 +84,7 @@ export default function DishApp({
   }, []);
   useEffect(() => {
     if (ready && !user && !publicScreen && !signingOut)
-      router.replace(spotsAuthPath(locale, "login", `${pathname}${window.location.search}`));
+      router.replace(dishAuthPath(locale, "login", `${pathname}${window.location.search}`));
   }, [ready, user, publicScreen, signingOut, router, locale, pathname]);
   useEffect(() => {
     if (!toast) return;
@@ -141,7 +141,7 @@ export default function DishApp({
               onNavigate={navigate}
               onLogin={() =>
                 router.push(
-                  spotsAuthPath(
+                  dishAuthPath(
                     locale,
                     "login",
                     `${pathname}${window.location.search}${window.location.hash}`,

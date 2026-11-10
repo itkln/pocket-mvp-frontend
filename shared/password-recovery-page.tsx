@@ -7,7 +7,7 @@ import { useState, type FormEvent } from "react";
 import { useLocalizedError } from "../features/pocket/error-message";
 import { useI18n } from "../features/pocket/i18n";
 import { requestPasswordReset, resetPassword } from "../lib/auth-api";
-import { spotsAuthPath, spotsReturnTo } from "../lib/spots-auth-navigation";
+import { dishAuthPath, dishReturnTo } from "../lib/dish-auth-navigation";
 
 type RecoveryMode = "request" | "reset";
 
@@ -24,7 +24,7 @@ export default function PasswordRecoveryPage({
 }) {
   const { locale, t } = useI18n();
   const authPath = (screen: "login" | "forgot-password") =>
-    product !== "vendor" ? spotsAuthPath(locale, screen, returnTo) : `/${locale}/${screen}`;
+    product !== "vendor" ? dishAuthPath(locale, screen, returnTo) : `/${locale}/${screen}`;
   const errorMessage = useLocalizedError();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
@@ -80,7 +80,7 @@ export default function PasswordRecoveryPage({
       <section className="auth-screen-content">
         <Link
           className="auth-brand"
-          href={product === "dish" ? spotsReturnTo(returnTo, locale) : `/${locale}`}
+          href={product === "dish" ? dishReturnTo(returnTo, locale) : `/${locale}`}
           aria-label={t("Pocket, на главную")}
         >
           <span className="auth-brand-mark">

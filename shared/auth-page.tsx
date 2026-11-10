@@ -7,7 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { vendorInviteReturnTo } from "../lib/staff-invitations";
 import { login, register } from "../lib/auth-api";
-import { spotsAuthPath, spotsReturnTo } from "../lib/spots-auth-navigation";
+import { dishAuthPath, dishReturnTo } from "../lib/dish-auth-navigation";
 import { useLocalizedError } from "../features/pocket/error-message";
 import { useI18n } from "../features/pocket/i18n";
 
@@ -30,10 +30,10 @@ export default function AuthPage({
   const productName =
     product === "vendor" ? "Pocket Vendor" : product === "dish" ? "Pocket Dish" : "Pocket Spots";
   const destination =
-    product !== "vendor" ? spotsReturnTo(returnTo, locale) : vendorInviteReturnTo(returnTo, locale);
+    product !== "vendor" ? dishReturnTo(returnTo, locale) : vendorInviteReturnTo(returnTo, locale);
   const authPath = (screen: "login" | "register" | "forgot-password") =>
     product !== "vendor"
-      ? spotsAuthPath(locale, screen, returnTo)
+      ? dishAuthPath(locale, screen, returnTo)
       : `/${locale}/${screen}${destination !== `/${locale}` ? `?returnTo=${encodeURIComponent(destination)}` : ""}`;
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);

@@ -18,7 +18,7 @@ import nextConfig from "../apps/dish/next.config";
 import DishApp, { dishScreen } from "./dish-app";
 import * as screens from "./dish-screens";
 import AuthPage from "./auth-page";
-import { spotsReturnTo } from "../lib/spots-auth-navigation";
+import { dishReturnTo } from "../lib/dish-auth-navigation";
 vi.mock("next/navigation", () => ({
   redirect: vi.fn((url: string) => {
     throw new Error(`redirect:${url}`);
@@ -129,15 +129,15 @@ it("signs in with a return address and redirects the old Ukrainian prefix", asyn
 });
 
 it("keeps restaurant and QR destinations after sign-in without allowing external redirects", () => {
-  expect(spotsReturnTo("/ru/r/venue-id?q=tea#menu", "ru")).toBe("/ru/r/venue-id?q=tea#menu");
-  expect(spotsReturnTo("/ru/qr/existing-token", "ru")).toBe("/ru/qr/existing-token");
-  expect(spotsReturnTo("//evil.example/ru/r/id", "ru")).toBe("/ru");
-  expect(spotsReturnTo("/ru/r/venue-id/menu?category=breakfast", "ru")).toBe(
+  expect(dishReturnTo("/ru/r/venue-id?q=tea#menu", "ru")).toBe("/ru/r/venue-id?q=tea#menu");
+  expect(dishReturnTo("/ru/qr/existing-token", "ru")).toBe("/ru/qr/existing-token");
+  expect(dishReturnTo("//evil.example/ru/r/id", "ru")).toBe("/ru");
+  expect(dishReturnTo("/ru/r/venue-id/menu?category=breakfast", "ru")).toBe(
     "/ru/r/venue-id/menu?category=breakfast",
   );
-  expect(spotsReturnTo("/ru/r/venue-id/reservation", "ru")).toBe("/ru/r/venue-id/reservation");
-  expect(spotsReturnTo("/ru/qr/table-token/profile", "ru")).toBe("/ru/qr/table-token/profile");
-  expect(spotsReturnTo("/ru/r/id/reservation/extra", "ru")).toBe("/ru");
+  expect(dishReturnTo("/ru/r/venue-id/reservation", "ru")).toBe("/ru/r/venue-id/reservation");
+  expect(dishReturnTo("/ru/qr/table-token/profile", "ru")).toBe("/ru/qr/table-token/profile");
+  expect(dishReturnTo("/ru/r/id/reservation/extra", "ru")).toBe("/ru");
   for (const child of ["menu", "bill"])
-    expect(spotsReturnTo(`/ru/qr/token/${child}`, "ru")).toBe(`/ru/qr/token/${child}`);
+    expect(dishReturnTo(`/ru/qr/token/${child}`, "ru")).toBe(`/ru/qr/token/${child}`);
 });

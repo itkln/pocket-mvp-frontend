@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, Check } from "lucide-react";
 import { localeOptions, useI18n } from "../i18n";
 import { replacePathLocale, type Locale } from "../locales";
-import { spotsAuthPath } from "../../../lib/spots-auth-navigation";
+import { dishAuthPath } from "../../../lib/dish-auth-navigation";
 import type { AuthUser } from "../../../lib/auth-api";
 import { DishNavigationContext } from "./dish-navigation";
 import { DishAccountMenu } from "./dish-account-menu";
@@ -56,7 +56,7 @@ export function VenueMenuSettings({
     router.push(
       user
         ? `${dishNavigation?.basePath ?? `/${locale}`}/profile`
-        : spotsAuthPath(
+        : dishAuthPath(
             locale,
             "login",
             `${pathname}${window.location.search}${window.location.hash}`,
@@ -66,7 +66,7 @@ export function VenueMenuSettings({
   const openAccountSection = (target: string) => {
     const destination = `${dishNavigation?.basePath ?? `/${locale}`}/${target}`;
     onClose();
-    router.push(user ? destination : spotsAuthPath(locale, "login", destination));
+    router.push(user ? destination : dishAuthPath(locale, "login", destination));
   };
   const tableMenu = (dishNavigation?.basePath ?? pathname).split("/")[2] === "qr";
   return (

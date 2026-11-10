@@ -1,8 +1,8 @@
 import { categoryForRoute } from "../features/pocket/customer/categories";
 import type { Locale } from "../features/pocket/locales";
 
-// Only return to a known Spots screen on this origin and in the active locale.
-export function spotsReturnTo(value: string | undefined, locale: Locale): string {
+// Only return to a known Dish screen on this origin and in the active locale.
+export function dishReturnTo(value: string | undefined, locale: Locale): string {
   const fallback = `/${locale}`;
   if (
     !value ||
@@ -40,14 +40,14 @@ export function spotsReturnTo(value: string | undefined, locale: Locale): string
   return detail || page ? `${url.pathname}${url.search}${url.hash}` : fallback;
 }
 
-export function spotsAuthPath(
+export function dishAuthPath(
   locale: Locale,
   screen: "login" | "register" | "forgot-password",
   returnTo?: string,
   unavailable = false,
 ): string {
   const params = new URLSearchParams();
-  if (returnTo) params.set("returnTo", spotsReturnTo(returnTo, locale));
+  if (returnTo) params.set("returnTo", dishReturnTo(returnTo, locale));
   if (unavailable) params.set("error", "unavailable");
   return `/${locale}/${screen}${params.size ? `?${params}` : ""}`;
 }
