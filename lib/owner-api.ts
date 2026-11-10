@@ -104,20 +104,16 @@ export type StaffInput = {
   role: OwnerStaffMember["role"];
   status?: OwnerStaffMember["status"];
 };
-export type OrderStatus =
-  | "new"
-  | "accepted"
-  | "preparing"
-  | "ready"
-  | "served"
-  | "completed"
-  | "cancelled";
+// The waiter takes every order new -> preparing (passed to the kitchen) -> served -> completed.
+export type OrderStatus = "new" | "preparing" | "served" | "completed" | "cancelled";
+// Statuses removed on 2026-11-10 that still appear in the history of older orders.
+export type LegacyOrderStatus = "accepted" | "ready";
 export type OrderCancellation = { reason: string; comment?: string };
 export type OrderStatusEvent = {
   id: string;
   actor_name: string;
-  previous_status: OrderStatus;
-  new_status: OrderStatus;
+  previous_status: OrderStatus | LegacyOrderStatus;
+  new_status: OrderStatus | LegacyOrderStatus;
   reason?: string;
   comment?: string;
   created_at: string;
@@ -141,7 +137,7 @@ export type OwnerOrder = {
   tip_minor?: number;
   total_minor: number;
   currency: string;
-  status: "new" | "accepted" | "preparing" | "ready" | "served" | "completed" | "cancelled";
+  status: OrderStatus;
   notes?: string;
   created_at: string;
   reservation_status?: "pending" | CustomerReservation["status"];
@@ -286,7 +282,7 @@ export type OrderQuery = {
   date_to?: string;
   scope?: "active" | "history";
   status?: OrderStatus[];
-  channel?: "dine_in" | "preorder" | "online" | "pickup";
+  channel?: "dine_in" | "preorder" | "online";
   table_id?: string;
   limit?: number;
   cursor?: string;

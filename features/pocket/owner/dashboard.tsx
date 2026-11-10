@@ -16,16 +16,7 @@ import { type OwnerOrder } from "../../../lib/owner-api";
 import { Button, EmptyIllustration, PageHeader, PanelTitle, StatusPill, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 import { useI18n } from "../i18n";
-
-const orderStatusLabel: Record<OwnerOrder["status"], string> = {
-  new: "Новый",
-  accepted: "Принят",
-  preparing: "Готовится",
-  ready: "Готов",
-  served: "Подан",
-  completed: "Завершен",
-  cancelled: "Отменен",
-};
+import { orderStatusLabels } from "./order-workflow";
 
 export function OwnerOverview({
   ownerName,
@@ -229,7 +220,7 @@ export function OrderTable({ orders }: { orders: OwnerOrder[] }) {
                 )}
               </td>
               <td>
-                <StatusPill status={orderStatusLabel[order.status]} />
+                <StatusPill status={orderStatusLabels[order.status]} />
               </td>
               <td>
                 {new Date(order.created_at).toLocaleTimeString("ru-RU", {

@@ -23,7 +23,7 @@ const notify = vi.fn();
 const order: OwnerOrder = {
   id: "o",
   number: 12,
-  status: "accepted",
+  status: "new",
   allowed_actions: ["preparing"],
   source: "Стол 09",
   channel: "dine_in",
@@ -58,21 +58,21 @@ const mount = () =>
   );
 it("loads staff data without owner administration requests and saves expected status", async () => {
   mount();
-  const action = await screen.findByRole("button", { name: "Начать приготовление" });
+  const action = await screen.findByRole("button", { name: "Заказ готовится" });
   expect(loadOrderQueue).toHaveBeenCalledWith("venue", 1, "staff", expect.any(AbortSignal));
   expect(getOwnerDashboard).not.toHaveBeenCalled();
   vi.mocked(updateOrderStatus).mockResolvedValue({
     ...order,
     status: "preparing",
-    allowed_actions: ["ready"],
+    allowed_actions: ["served"],
   });
   fireEvent.click(action);
-  await screen.findByRole("button", { name: "Заказ готов" });
+  await screen.findByRole("button", { name: "Заказ отдан" });
   expect(updateOrderStatus).toHaveBeenCalledWith(
     "venue",
     "o",
     "preparing",
-    "accepted",
+    "new",
     "staff",
     undefined,
   );
@@ -81,7 +81,7 @@ it("loads staff data without owner administration requests and saves expected st
 });
 it("keeps the action disabled during save and refreshes a conflict without success", async () => {
   mount();
-  const action = await screen.findByRole("button", { name: "Начать приготовление" });
+  const action = await screen.findByRole("button", { name: "Заказ готовится" });
   let reject!: (error: Error) => void;
   vi.mocked(updateOrderStatus).mockImplementation(
     () =>
@@ -94,13 +94,13 @@ it("keeps the action disabled during save and refreshes a conflict without succe
   expect(action).toBeDisabled();
   expect(updateOrderStatus).toHaveBeenCalledTimes(1);
   vi.mocked(loadOrderQueue).mockResolvedValue({
-    orders: [{ ...order, status: "ready", allowed_actions: ["served"] }],
+    orders: [{ ...order, status: "preparing", allowed_actions: ["served"] }],
     hasMoreHistory: false,
   });
   reject(new Error("conflict"));
-  await screen.findByRole("button", { name: "Заказ подан" });
+  await screen.findByRole("button", { name: "Заказ отдан" });
   expect(screen.getByRole("alert")).toHaveTextContent("Действие не выполнено");
-  expect(screen.queryByRole("button", { name: "Начать приготовление" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Заказ готовится" })).not.toBeInTheDocument();
 });
 it("fails closed when the server does not grant actions", async () => {
   vi.mocked(loadOrderQueue).mockResolvedValue({
@@ -109,7 +109,7 @@ it("fails closed when the server does not grant actions", async () => {
   });
   mount();
   await screen.findByText("Реальный суп");
-  expect(screen.queryByRole("button", { name: "Начать приготовление" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Заказ готовится" })).not.toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Отменить заказ" })).not.toBeInTheDocument();
   await waitFor(() => expect(getOwnerDashboard).not.toHaveBeenCalled());
 });

@@ -2,7 +2,7 @@ import type { TranslationRow } from "./types";
 
 // Pocket Vendor: owner and staff workspace.
 export const vendorTranslations: TranslationRow[] = [
-  ["Ожидание кухни", "Kitchen waiting time", "Очікування кухні", "Čakanie na kuchyňu"],
+  ["Ожидание заказа", "Order waiting time", "Очікування замовлення", "Čakanie objednávky"],
   [
     "Подсветка новых и принятых заказов до начала готовки.",
     "Highlight new and accepted orders until preparation starts.",
@@ -72,8 +72,9 @@ export const vendorTranslations: TranslationRow[] = [
   ],
   ["В работе", "In progress", "У роботі", "V spracovaní"],
   ["История", "History", "Історія", "História"],
-  ["Принять заказ", "Accept order", "Прийняти замовлення", "Prijať objednávku"],
-  ["Заказ готов", "Order ready", "Замовлення готове", "Objednávka pripravená"],
+  ["Заказ готовится", "Mark as preparing", "Замовлення готується", "Objednávka sa pripravuje"],
+  ["Заказ отдан", "Mark as served", "Замовлення віддано", "Objednávka odovzdaná"],
+  ["Отдан", "Served", "Віддано", "Odovzdaná"],
   ["Отменить заказ", "Cancel order", "Скасувати замовлення", "Zrušiť objednávku"],
   ["Состав заказа", "Order items", "Склад замовлення", "Položky objednávky"],
   ["Сохранение...", "Saving...", "Збереження...", "Ukladá sa..."],
@@ -112,8 +113,7 @@ export const vendorTranslations: TranslationRow[] = [
     "Нові замовлення з’являться тут автоматично.",
     "Nové objednávky sa tu zobrazia automaticky.",
   ],
-  ["Готовы к подаче", "Ready to serve", "Готові до подачі", "Pripravené na podávanie"],
-  ["Поданы", "Served", "Подані", "Podané"],
+  ["Отданы", "Served", "Віддані", "Odovzdané"],
   ["Ко времени", "Scheduled", "На час", "Na konkrétny čas"],
   ["Выберите заказ", "Select an order", "Виберіть замовлення", "Vyberte objednávku"],
   [
@@ -147,9 +147,6 @@ export const vendorTranslations: TranslationRow[] = [
   ],
   ["Заказ отменён", "Order cancelled", "Замовлення скасовано", "Objednávka zrušená"],
   ["Заказ завершён", "Order completed", "Замовлення завершено", "Objednávka dokončená"],
-  ["Начать приготовление", "Start preparing", "Почати приготування", "Začať prípravu"],
-  ["Заказ подан", "Order served", "Замовлення подано", "Objednávka podaná"],
-  ["Выдать заказ", "Hand over order", "Видати замовлення", "Odovzdať objednávku"],
   ["Завершить заказ", "Complete order", "Завершити замовлення", "Dokončiť objednávku"],
   ["Показывать в меню", "Show in menu", "Показувати в меню", "Zobraziť v menu"],
   ["Стоп-лист", "Stop list", "Стоп-лист", "Stop list"],
@@ -819,12 +816,6 @@ export const vendorTranslations: TranslationRow[] = [
     "Order after scanning a QR code.",
     "Замовлення після сканування QR-коду.",
     "Objednávka po naskenovaní QR kódu.",
-  ],
-  [
-    "Онлайн-заказы с получением в заведении.",
-    "Online orders for pickup at the venue.",
-    "Онлайн-замовлення з отриманням у закладі.",
-    "Online objednávky s vyzdvihnutím v prevádzke.",
   ],
   [
     "Предзаказ при бронировании",

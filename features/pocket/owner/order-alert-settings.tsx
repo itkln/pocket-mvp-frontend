@@ -59,7 +59,7 @@ export function OrderAlertSettingsDialog({
         }}
       >
         <header>
-          <h2 id="order-alert-title">{t("Ожидание кухни")}</h2>
+          <h2 id="order-alert-title">{t("Ожидание заказа")}</h2>
           <IconButton
             icon={X}
             label={t("Закрыть")}

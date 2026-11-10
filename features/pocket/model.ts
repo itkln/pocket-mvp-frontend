@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 export type Role = "owner" | "customer" | "staff";
-export type Status = "Новый" | "Готовится" | "Готов" | "Подан";
 
 export const userInitials = (user: AuthUser) =>
   `${user.first_name.at(0) ?? ""}${user.last_name.at(0) ?? ""}`.toUpperCase();

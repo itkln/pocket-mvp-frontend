@@ -14,7 +14,7 @@ export function preparationStartsAt(order: OwnerOrder, leadMinutes: number) {
     : received;
 }
 export function orderWaiting(order: OwnerOrder, now: number, settings = defaultOrderAlerts) {
-  if (order.status !== "new" && order.status !== "accepted") return null;
+  if (order.status !== "new") return null;
   if (order.reservation_status === "cancelled") return null;
   const start = preparationStartsAt(order, settings.preorder_lead_minutes);
   if (!Number.isFinite(start) || now < start) return null;

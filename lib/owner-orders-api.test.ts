@@ -50,14 +50,14 @@ it("encodes filters and detail paths", async () => {
   request.mockResolvedValue({ order: order("id"), orders: [], has_more: false });
   await listOrderPage("venue", {
     scope: "active",
-    status: ["new", "accepted"],
+    status: ["new", "preparing"],
     channel: "dine_in",
     table_id: "table",
     limit: 30,
     cursor: "opaque",
   });
   const url = new URL(String(request.mock.calls[0][0]), "http://local");
-  expect(url.searchParams.get("status")).toBe("new,accepted");
+  expect(url.searchParams.get("status")).toBe("new,preparing");
   expect(url.searchParams.get("table_id")).toBe("table");
   expect(url.searchParams.get("cursor")).toBe("opaque");
   expect(await getOrder("venue", "id")).toEqual(order("id"));
@@ -70,11 +70,11 @@ it("uses staff endpoints for queue, history, workplaces and expected-status writ
     venues: [],
     orders: [],
     has_more: false,
-    order: order("id", "accepted"),
+    order: order("id", "preparing"),
   });
   await listStaffVenues();
   await loadOrderQueue("venue", 1, "staff");
-  await updateOrderStatus("venue", "id", "accepted", "new", "staff");
+  await updateOrderStatus("venue", "id", "preparing", "new", "staff");
   expect(request.mock.calls.map((call) => call[0])).toEqual([
     "/staff/venues",
     "/staff/venues/venue/orders?scope=active&limit=100",
@@ -82,7 +82,7 @@ it("uses staff endpoints for queue, history, workplaces and expected-status writ
     "/staff/venues/venue/orders/id",
   ]);
   expect(JSON.parse(request.mock.calls[3][1]!.body as string)).toEqual({
-    status: "accepted",
+    status: "preparing",
     expected_status: "new",
   });
 });

@@ -3,16 +3,14 @@ import { orderWaiting, defaultOrderAlerts, textOnColor } from "./order-waiting";
 import type { OwnerOrder } from "../../../lib/owner-api";
 const now = Date.parse("2026-11-06T12:00:00Z");
 const order = { status: "new", created_at: new Date(now).toISOString() } as OwnerOrder;
-describe("kitchen waiting", () => {
-  it("uses the highest reached threshold and does not reset accepted orders", () => {
+describe("order waiting", () => {
+  it("uses the highest reached threshold while the order is new", () => {
     expect(orderWaiting(order, now + 9 * 60000)?.color).toBeUndefined();
     expect(orderWaiting(order, now + 10 * 60000)?.color).toBe(defaultOrderAlerts.warning_color);
-    expect(orderWaiting({ ...order, status: "accepted" }, now + 20 * 60000)?.color).toBe(
-      defaultOrderAlerts.critical_color,
-    );
+    expect(orderWaiting(order, now + 20 * 60000)?.color).toBe(defaultOrderAlerts.critical_color);
   });
   it("stops highlighting when preparation starts or order is final", () => {
-    for (const status of ["preparing", "ready", "served", "completed", "cancelled"] as const)
+    for (const status of ["preparing", "served", "completed", "cancelled"] as const)
       expect(orderWaiting({ ...order, status }, now + 3600000)).toBeNull();
   });
   it("waits until scheduled preparation and never starts before receipt", () => {

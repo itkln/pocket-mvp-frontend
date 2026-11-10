@@ -363,12 +363,12 @@ export function Modal({
               {order && order.status === "new" && (
                 <Button
                   onClick={async () => {
-                    await workspace.setOrderStatus(order.id, "accepted");
-                    notify("Заказ принят");
+                    await workspace.setOrderStatus(order.id, "preparing");
+                    notify("Заказ готовится");
                     onClose();
                   }}
                 >
-                  {t("Принять заказ")}
+                  {t("Заказ готовится")}
                 </Button>
               )}
             </footer>

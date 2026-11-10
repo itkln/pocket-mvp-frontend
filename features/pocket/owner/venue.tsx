@@ -544,12 +544,6 @@ function OrderSettings({ draft, setDraft }: SettingsProps) {
           onChange={(value) => updateSetting(setDraft, "dine_in", value)}
         />
         <SettingToggle
-          title={t("Самовывоз")}
-          text={t("Онлайн-заказы с получением в заведении.")}
-          checked={settingsValue(draft, "pickup", true)}
-          onChange={(value) => updateSetting(setDraft, "pickup", value)}
-        />
-        <SettingToggle
           title={t("Предзаказ при бронировании")}
           text={t("Выбор блюд до визита.")}
           checked={settingsValue(draft, "preorder", true)}

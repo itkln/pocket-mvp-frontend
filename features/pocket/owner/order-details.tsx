@@ -114,9 +114,7 @@ export function OrderDetails({
                 ? "Предзаказ"
                 : order.channel === "dine_in"
                   ? "За столом"
-                  : order.channel === "pickup"
-                    ? "Самовывоз"
-                    : "Онлайн",
+                  : "Онлайн",
             )}
           </span>
         </div>

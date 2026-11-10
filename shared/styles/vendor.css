@@ -5735,14 +5735,9 @@
   background: #fff1d2;
   color: #876011;
 }
-.vendor-orders .orders-status.status-preparing,
-.vendor-orders .orders-status.status-accepted {
+.vendor-orders .orders-status.status-preparing {
   background: #e0f3ff;
   color: #087dad;
-}
-.vendor-orders .orders-status.status-ready {
-  background: #def4e7;
-  color: #27744b;
 }
 .vendor-orders .orders-status.status-cancelled {
   background: #fff0f0;

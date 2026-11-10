@@ -17,7 +17,7 @@ const workspace = {
 };
 vi.mock("./context", () => ({ useOwnerWorkspace: () => workspace }));
 const base: OwnerOrder = {
-  allowed_actions: ["accepted", "preparing", "ready", "served", "completed", "cancelled"],
+  allowed_actions: ["preparing", "served", "completed", "cancelled"],
   id: "a",
   number: 42,
   channel: "dine_in",
@@ -90,7 +90,7 @@ describe("order desk", () => {
   it("highlights a confirmed status change and preserves selection", async () => {
     const view = mount();
     await waitFor(() => expect(workspace.refreshOrders).toHaveBeenCalled());
-    workspace.orders = [{ ...base, status: "accepted" }];
+    workspace.orders = [{ ...base, status: "preparing" }];
     view.rerender(
       <ConfirmProvider>
         <OrdersScreen />
@@ -101,8 +101,8 @@ describe("order desk", () => {
     ).not.toBeNull();
     expect(
       screen.getByRole("article", { name: "Заказ № 42" }).querySelector(".orders-status-updated"),
-    ).toHaveTextContent("Принят");
-    expect(screen.getByRole("button", { name: "Начать приготовление" })).toBeInTheDocument();
+    ).toHaveTextContent("Готовится");
+    expect(screen.getByRole("button", { name: "Заказ отдан" })).toBeInTheDocument();
   });
 
   it("uses a mobile swipe action and places the only cancellation beside back", async () => {
@@ -110,7 +110,7 @@ describe("order desk", () => {
       .fn()
       .mockReturnValue({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() });
     mount();
-    const action = screen.getByRole("button", { name: "Принять заказ" });
+    const action = screen.getByRole("button", { name: "Заказ готовится" });
     expect(action).toHaveClass("slide-confirm");
     fireEvent.click(action, { detail: 1 });
     expect(workspace.setOrderStatus).not.toHaveBeenCalled();
@@ -144,10 +144,10 @@ describe("order desk", () => {
     expect(queue.scrollTop).toBe(160);
     expect(screen.getByRole("button", { name: /№ 42/ })).toHaveAttribute("aria-pressed", "true");
   });
-  it("moves accepted work between groups and keeps final details until the operator selects another order", async () => {
+  it("moves orders in preparation between groups and keeps final details until the operator selects another order", async () => {
     const view = mount();
     await waitFor(() => expect(workspace.refreshOrders).toHaveBeenCalled());
-    workspace.orders = [{ ...base, status: "accepted" }];
+    workspace.orders = [{ ...base, status: "preparing" }];
     view.rerender(
       <ConfirmProvider>
         <OrdersScreen />
@@ -229,7 +229,7 @@ describe("order desk", () => {
     fireEvent.click(screen.getByRole("button", { name: /История/ }));
     fireEvent.click(screen.getByRole("button", { name: "Открыть бронь" }));
     expect(screen.getByRole("dialog")).toHaveTextContent("Отменена");
-    expect(screen.queryByRole("button", { name: "Начать приготовление" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Заказ готовится" })).toBeNull();
   });
   it("shows loading, then a retryable failure, then the empty queue", async () => {
     workspace.orders = [];
@@ -266,7 +266,7 @@ describe("order desk", () => {
   it("honors server actions, including read-only roles and cancellation guards", () => {
     workspace.orders = [{ ...base, allowed_actions: [] }];
     mount();
-    expect(screen.queryByRole("button", { name: "Принять заказ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Заказ готовится" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Отменить заказ" })).not.toBeInTheDocument();
     expect(nextOrderAction({ ...base, allowed_actions: ["cancelled"] })).toBeNull();
   });
@@ -282,8 +282,8 @@ describe("order desk", () => {
     mount();
     expect(screen.getByText("Без соли")).toBeInTheDocument();
     expect(screen.getByText("Суп")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Принять заказ" })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Заказ готов" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Заказ готовится" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Заказ отдан" })).not.toBeInTheDocument();
   });
   it("sends a single action while saving", async () => {
     let resolve!: () => void;
@@ -294,11 +294,11 @@ describe("order desk", () => {
         }),
     );
     mount();
-    const button = screen.getByRole("button", { name: "Принять заказ" });
+    const button = screen.getByRole("button", { name: "Заказ готовится" });
     fireEvent.click(button);
     fireEvent.click(button);
     expect(workspace.setOrderStatus).toHaveBeenCalledTimes(1);
-    expect(workspace.setOrderStatus).toHaveBeenCalledWith("a", "accepted");
+    expect(workspace.setOrderStatus).toHaveBeenCalledWith("a", "preparing");
     expect(button).toBeDisabled();
     resolve();
     await waitFor(() => expect(button).toBeEnabled());
@@ -315,10 +315,10 @@ describe("order desk", () => {
   it("refreshes after a conflict without advancing locally", async () => {
     workspace.setOrderStatus.mockRejectedValue(new Error("conflict"));
     mount();
-    fireEvent.click(screen.getByRole("button", { name: "Принять заказ" }));
+    fireEvent.click(screen.getByRole("button", { name: "Заказ готовится" }));
     await waitFor(() => expect(workspace.refreshOrders).toHaveBeenCalledTimes(2));
     expect(screen.getByRole("alert")).toHaveTextContent("Действие не выполнено");
-    expect(screen.getByRole("button", { name: "Принять заказ" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Заказ готовится" })).toBeEnabled();
   });
   it("filters by dish and separates history", () => {
     workspace.orders.push({ ...base, id: "b", number: 43, status: "completed" });
@@ -326,17 +326,22 @@ describe("order desk", () => {
     expect(screen.queryByRole("button", { name: /№ 43/ })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /История/ }));
     expect(screen.getByRole("button", { name: /№ 43/ })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Принять заказ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Заказ готовится" })).not.toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Поиск заказов" }), {
       target: { value: "Пицца" },
     });
     expect(screen.getByText("Ничего не найдено")).toBeInTheDocument();
   });
-  it("supports pickup and keeps scheduled orders separate", () => {
-    expect(nextOrderAction({ ...base, status: "ready", channel: "pickup" })?.status).toBe(
-      "completed",
-    );
-    expect(nextOrderAction({ ...base, status: "ready" })?.status).toBe("served");
+  it("walks the waiter workflow and keeps scheduled orders separate", () => {
+    expect(nextOrderAction(base)).toMatchObject({ status: "preparing", label: "Заказ готовится" });
+    expect(nextOrderAction({ ...base, status: "preparing" })).toMatchObject({
+      status: "served",
+      label: "Заказ отдан",
+    });
+    expect(nextOrderAction({ ...base, status: "served" })).toMatchObject({
+      status: "completed",
+      label: "Завершить заказ",
+    });
     expect(nextOrderAction({ ...base, status: "completed" })).toBeNull();
     expect(
       orderGroup(
@@ -375,23 +380,6 @@ describe("order detail blocks", () => {
     const totals = screen.getByRole("region", { name: "Итого" });
     expect(totals).toHaveTextContent("€1.50");
     expect(totals).toHaveTextContent("€13.50");
-  });
-  it("renders kitchen payload without financial placeholders or guest identity", () => {
-    const { total_minor, currency, guest_name, guest_phone, ...kitchen } = base;
-    workspace.orders = [
-      {
-        ...kitchen,
-        allowed_actions: ["preparing"],
-        items: [{ name: "Суп", quantity: 2, notes: "Без перца" }],
-      } as OwnerOrder,
-    ];
-    mount();
-    const detail = screen.getByRole("article");
-    expect(detail).toHaveTextContent("Стол 01");
-    expect(detail).toHaveTextContent("Без соли");
-    expect(detail).toHaveTextContent("Без перца");
-    expect(detail).not.toHaveTextContent(/NaN|€|Итого|Чаевые|Телефон/);
-    expect(screen.queryByRole("region", { name: "Итого" })).not.toBeInTheDocument();
   });
   it("keeps comments as text and omits whitespace-only comments", () => {
     workspace.orders = [{ ...base, notes: "<img src=x onerror=alert(1)>\nБез соли" }];

@@ -6,7 +6,6 @@ import {
   Download,
   Globe2,
   ReceiptText,
-  ShoppingBag,
   Star,
   Table2,
   Utensils,
@@ -20,7 +19,6 @@ import { useI18n } from "../i18n";
 const channels: Array<{ id: string; label: string; icon: LucideIcon }> = [
   { id: "dine_in", label: "В зале", icon: Utensils },
   { id: "online", label: "Онлайн", icon: Globe2 },
-  { id: "pickup", label: "Самовывоз", icon: ShoppingBag },
   { id: "preorder", label: "Предзаказ", icon: CalendarClock },
 ];
 

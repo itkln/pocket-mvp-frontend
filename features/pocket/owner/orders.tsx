@@ -36,8 +36,7 @@ function waitingDisplay(minutes: number, locale: string) {
 const groups = [
   ["new", "Новые"],
   ["working", "В работе"],
-  ["ready", "Готовы к подаче"],
-  ["served", "Поданы"],
+  ["served", "Отданы"],
   ["scheduled", "Ко времени"],
   ["history", "История"],
 ] as const;
@@ -320,7 +319,7 @@ export function OrdersScreen({
           {orderAlerts.can_edit && (
             <IconButton
               icon={Settings2}
-              label={t("Ожидание кухни")}
+              label={t("Ожидание заказа")}
               onClick={() => setAlertsOpen(true)}
             />
           )}

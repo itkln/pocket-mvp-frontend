@@ -94,7 +94,6 @@ export const commonTranslations: TranslationRow[] = [
   ["Менеджер", "Manager", "Менеджер", "Manažér"],
   ["Официант", "Waiter", "Офіціант", "Čašník"],
   ["Онлайн", "Online", "Онлайн", "Online"],
-  ["Самовывоз", "Pickup", "Самовивіз", "Osobný odber"],
   ["Предзаказ", "Preorder", "Попереднє замовлення", "Predobjednávka"],
   ["Ответ заведения", "Venue reply", "Відповідь закладу", "Odpoveď prevádzky"],
   ["Отмена", "Cancel", "Скасувати", "Zrušiť"],
