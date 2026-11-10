@@ -1,0 +1,6672 @@
+/* Dish theme tokens and screen styles (formerly Pocket Spots). Scoped to .pocket-dish. */
+.pocket-dish {
+  --dish-brand: #109cdb;
+  --dish-cta: #087fbb;
+  --dish-cta-hover: #066ea4;
+  --dish-cta-pressed: #075880;
+  --dish-action-height: 56px;
+  --dish-menu-shadow: 0 7px 14px -8px rgba(23, 33, 43, 0.24);
+  --dish-action-shadow: 0 -8px 24px rgba(23, 33, 43, 0.08);
+  --dish-active: #e0f3ff;
+  --dish-page: #ffffff;
+  --dish-card: #f7f8fa;
+  --dish-header-initial: #ffffff;
+  --dish-header-selected: #f5f4f2;
+  --dish-text: #202831;
+  --dish-secondary: #596775;
+  --dish-muted: #737d87;
+  --dish-disabled: #a2aab2;
+  --dish-divider: #e9edf0;
+  --dish-success: #18795b;
+  --dish-warning: #95600d;
+  --dish-error: #c23e43;
+  --dish-sky: #dcefff;
+  --dish-yellow: #fff0ba;
+  --dish-mint: #d9f4e8;
+  --dish-coral: #ffdfd5;
+  --dish-lilac: #eee2ff;
+  --dish-aqua: #d8f2f3;
+  --dish-pink: #fce0eb;
+  --dish-peach: #ffe8cc;
+  --dish-gradient-restaurants: linear-gradient(135deg, #e9f6ff, #a7d9f5);
+  --dish-gradient-entertainment: linear-gradient(135deg, #fff7d6, #ffda88);
+  --dish-gradient-activities: linear-gradient(135deg, #e8faef, #9fe1c2);
+  --dish-gradient-sports: linear-gradient(135deg, #fff0e9, #ffb7a1);
+  --dish-gradient-yoga: linear-gradient(135deg, #f4edff, #d0b7ef);
+  --dish-gradient-spa: linear-gradient(135deg, #e8faf7, #9adbd8);
+  --dish-gradient-beauty: linear-gradient(135deg, #ffedf4, #f7b9d1);
+  --dish-gradient-workshops: linear-gradient(135deg, #fff3e1, #f3cca0);
+  --accent: var(--dish-brand);
+  --accent-soft: var(--dish-active);
+  --accent-strong: var(--dish-cta);
+  --ink: var(--dish-text);
+  --muted: var(--dish-secondary);
+  --line: var(--dish-divider);
+  background: var(--dish-page);
+  color: var(--dish-text);
+}
+
+.pocket-dish .button.primary {
+  background: var(--dish-cta);
+  color: #fff;
+}
+.pocket-dish .button.primary:hover:not(:disabled) {
+  background: var(--dish-cta-hover);
+}
+.pocket-dish .button.primary:active:not(:disabled) {
+  background: var(--dish-cta-pressed);
+}
+.pocket-dish .button:disabled {
+  background: var(--dish-card);
+  color: var(--dish-disabled);
+}
+.pocket-dish .form-error {
+  color: var(--dish-error);
+}
+.pocket-dish button:focus-visible,
+.pocket-dish input:focus-visible {
+  outline: 2px solid var(--dish-brand);
+  outline-offset: 3px;
+}
+.pocket-dish .dish-main {
+  background: var(--dish-page);
+}
+@media (min-width: 900px) {
+  .pocket-dish .dish-page {
+    width: min(1500px, 100%);
+    margin-right: auto;
+    margin-left: auto;
+    padding-right: 48px;
+    padding-left: 48px;
+  }
+}
+.pocket-dish .dish-catalog-header {
+  background: var(--dish-header-initial);
+  transition:
+    background-color 320ms ease,
+    box-shadow 220ms ease;
+}
+.pocket-dish .dish-catalog-header button:focus:not(:focus-visible),
+.pocket-dish .dish-catalog-header input:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+.pocket-dish .dish-catalog-header button:focus-visible,
+.pocket-dish .dish-catalog-header input:focus-visible {
+  outline: 2px solid #65717c;
+  outline-offset: 3px;
+}
+.pocket-dish .dish-catalog-header .dish-global-search,
+.pocket-dish .dish-catalog-header .dish-global-search:focus-within {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+.pocket-dish .dish-catalog-header .dish-global-search input:focus,
+.pocket-dish .dish-catalog-header .dish-global-search input:focus-visible {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+.pocket-dish .dish-catalog-header .dish-global-search {
+  transition: background-color 320ms ease;
+}
+.pocket-dish .dish-catalog-header .dish-global-search {
+  background: var(--dish-header-selected);
+}
+.pocket-dish .needs-city .dish-language-trigger:hover,
+.pocket-dish .needs-city .dish-header-actions > .dish-account-trigger:hover {
+  background: var(--dish-card);
+}
+.pocket-dish .dish-login-trigger {
+  min-width: max-content;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px !important;
+  background: var(--dish-cta);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pocket-dish .dish-mobile-menu-trigger {
+  display: none;
+}
+@media (min-width: 761px) {
+  .pocket-dish .dish-login-trigger {
+    min-width: 136px;
+    min-height: 48px;
+    padding-inline: 28px;
+  }
+}
+.pocket-dish .dish-login-trigger:hover {
+  background: var(--dish-cta-hover);
+}
+.pocket-dish .dish-login-trigger:active {
+  background: var(--dish-cta-pressed);
+}
+.pocket-dish .dish-catalog-account-menu > .dish-catalog-account-logout {
+  width: auto;
+  min-height: 44px;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px auto 0;
+  padding: 10px 14px;
+  border-radius: 0 !important;
+  background: transparent;
+  color: var(--dish-secondary);
+  font-size: 15px;
+  font-weight: 650;
+}
+.pocket-dish .dish-catalog-account-menu > .dish-catalog-account-logout svg {
+  color: inherit;
+}
+.pocket-dish .dish-catalog-account-menu > .dish-catalog-account-logout:hover {
+  background: transparent;
+  color: var(--dish-error);
+}
+.pocket-dish .dish-category-catalog .cuisine-section {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+.pocket-dish .dish-category-catalog .dish-category-filters {
+  position: sticky;
+  z-index: 40;
+  top: 80px;
+  padding: 16px 0;
+  background: #fff;
+}
+@media (min-width: 761px) {
+  .pocket-dish .dish-category-catalog .dish-category-filters {
+    position: relative;
+    top: auto;
+  }
+}
+.pocket-dish .dish-category-catalog .cuisine-strip {
+  gap: 8px;
+}
+.pocket-dish .dish-category-catalog .cuisine-strip button {
+  background: #f1f2f3;
+  min-height: 40px;
+}
+.pocket-dish .dish-category-catalog .cuisine-strip button.dish-filter-trigger {
+  position: static;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  margin-left: 0;
+  background: #f1f2f3;
+  box-shadow: none;
+}
+.pocket-dish .dish-category-catalog .cuisine-strip button.active {
+  background: var(--dish-active);
+  color: var(--dish-cta);
+}
+.pocket-dish .dish-catalog-status {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--dish-secondary);
+  text-align: center;
+}
+@keyframes dish-catalog-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pocket-dish .dish-main [data-tooltip]::after {
+  display: none;
+}
+
+.dish-profile-dialog {
+  width: min(520px, calc(100vw - 48px));
+  max-height: calc(100dvh - 64px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  color: var(--dish-text);
+  background: #fff;
+}
+.dish-profile-dialog::backdrop {
+  background: rgba(24, 30, 36, 0.42);
+}
+.dish-profile-dialog-content {
+  padding: 24px;
+}
+.dish-dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.dish-dialog-heading h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.dish-profile-dialog .account-settings-layout {
+  display: block;
+}
+.dish-profile-dialog .account-profile-hero,
+.dish-profile-dialog .panel-title {
+  display: none;
+}
+.dish-profile-dialog .account-section-panel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  min-height: 0;
+}
+.dish-profile-dialog .form-grid {
+  grid-template-columns: 1fr;
+}
+.dish-profile-dialog .field input {
+  min-height: 52px;
+  background: var(--dish-card);
+  border: 0;
+}
+.dish-profile-dialog .account-profile-form > footer .button {
+  width: 100%;
+}
+.dish-profile-dialog[data-section="security"] .dish-dialog-heading h2 {
+  font-size: 26px;
+}
+.dish-profile-dialog .account-security-list {
+  gap: 12px;
+}
+.dish-profile-dialog .account-security-list > div {
+  min-height: 74px;
+}
+.dish-profile-dialog .account-security-list strong {
+  font-size: 18px;
+}
+.dish-profile-dialog .account-security-list p {
+  margin-top: 6px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+.dish-profile-dialog .account-security-list .button {
+  font-size: 18px;
+}
+
+.dish-profile,
+.dish-settings {
+  width: min(760px, 100%);
+  margin: 0 auto;
+}
+.dish-account-heading {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.dish-account-heading h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.dish-back-button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dish-text);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+.dish-back-button:active {
+  transform: scale(0.94);
+}
+.dish-profile-identity {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  padding: 12px 0 32px;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.dish-profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--dish-sky) center / cover no-repeat;
+  color: var(--dish-cta);
+  font-size: 26px;
+  font-weight: 700;
+}
+.dish-profile-identity strong {
+  display: block;
+  font-size: 23px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.dish-profile-identity small {
+  display: block;
+  margin-top: 6px;
+  color: var(--dish-secondary);
+  font-size: 15px;
+}
+.dish-profile-edit-icon {
+  color: var(--dish-secondary);
+}
+.dish-profile-links {
+  display: grid;
+  border-top: 1px solid var(--dish-divider);
+}
+.dish-profile-links > button {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 76px;
+  padding: 16px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--dish-divider);
+  border-radius: 0;
+  background: transparent;
+  color: var(--dish-text);
+  font-size: 17px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+.dish-profile-links > button > span:not(.dish-profile-icon) {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.dish-profile-links > button > svg {
+  flex-shrink: 0;
+}
+.dish-profile-links > button > svg:last-child {
+  color: var(--dish-muted);
+}
+.dish-profile-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: 10px;
+  color: #fff;
+}
+.dish-profile-icon.blue {
+  background: linear-gradient(145deg, #55baf0, #087fc7);
+  color: #fff;
+}
+.dish-profile-icon.pink {
+  background: linear-gradient(145deg, #f17eac, #d93f79);
+  color: #fff;
+}
+.dish-profile-icon.mint {
+  background: linear-gradient(145deg, #62c991, #238e58);
+  color: #fff;
+}
+.dish-profile-icon.yellow {
+  background: linear-gradient(145deg, #f7c955, #de8f08);
+  color: #fff;
+}
+.dish-signout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  margin: 24px auto 0;
+  padding: 12px 20px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dish-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dish-settings-identity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 32px;
+  text-align: center;
+}
+.dish-settings-identity .dish-profile-avatar {
+  width: 96px;
+  height: 96px;
+  font-size: 30px;
+}
+.dish-settings-identity h2 {
+  margin: 20px 0 6px;
+  font-size: 24px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.dish-settings-identity p {
+  margin: 0;
+  color: var(--dish-secondary);
+  font-size: 15px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.dish-settings-detail .account-page > .page-header,
+.dish-settings-detail .account-section-list,
+.dish-settings-detail .account-profile-actions,
+.dish-settings-detail .panel-title {
+  display: none;
+}
+.dish-settings-detail .account-settings-layout {
+  display: block;
+}
+.dish-settings-detail .account-section-panel {
+  min-height: 0;
+  padding: 20px 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.dish-settings-detail .account-profile-hero {
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 20px;
+  padding: 0 0 24px;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid var(--dish-divider);
+  box-shadow: none;
+}
+.dish-settings-detail:not([data-section="profile"]) .account-profile-hero {
+  display: none;
+}
+.dish-settings-detail .account-profile-hero p {
+  overflow-wrap: anywhere;
+}
+.dish-settings-detail .field input {
+  min-height: 48px;
+}
+.dish-settings-detail .account-setting-rows {
+  border-top: 1px solid var(--dish-divider);
+}
+.pocket-dish .dish-account-heading > button {
+  border-radius: 50%;
+}
+.pocket-dish .dish-profile-links > button {
+  border-radius: 0 !important;
+}
+@media (hover: hover) {
+  .dish-profile-links > button:hover {
+    background: var(--dish-card);
+  }
+  .dish-profile-identity:hover small {
+    color: var(--dish-cta);
+  }
+  .dish-signout:hover {
+    background: var(--dish-card);
+    color: var(--dish-text);
+  }
+  .pocket-dish .dish-category-catalog .cuisine-strip button:hover {
+    background: #e1e4e6;
+    color: var(--dish-text);
+  }
+  .pocket-dish .dish-category-catalog .cuisine-strip button.active:hover {
+    background: #cdeafa;
+    color: var(--dish-cta);
+  }
+  .pocket-dish .dish-catalog-brand:hover {
+    opacity: 0.72;
+  }
+}
+@media (max-width: 760px) {
+  .pocket-dish .dish-catalog-header {
+    position: sticky;
+    top: 0;
+    height: auto;
+    background: #fff;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-catalog-header.scrolled {
+    background: #fff;
+    box-shadow: 0 5px 18px rgba(23, 33, 43, 0.1);
+  }
+  .pocket-dish .dish-catalog-header.account-screen {
+    display: none;
+  }
+  .pocket-dish .dish-header-inner {
+    grid-template-columns: 52px minmax(0, 1fr) 52px;
+    grid-template-rows: 52px 52px;
+    padding: 10px 16px 8px;
+    column-gap: 8px;
+    row-gap: 14px;
+    transition:
+      grid-template-rows 240ms ease,
+      row-gap 240ms ease,
+      padding 240ms ease;
+  }
+  .pocket-dish .dish-header-inner > .dish-catalog-brand {
+    display: inline-flex;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    width: 52px;
+    min-width: 52px;
+    margin: 0;
+    padding: 0;
+  }
+  .pocket-dish .dish-header-inner > .dish-catalog-brand strong {
+    display: none;
+  }
+  .pocket-dish .dish-header-inner > .dish-catalog-brand img {
+    width: 30px;
+    height: 30px;
+  }
+  .pocket-dish .dish-catalog-header.guest .dish-header-inner > .dish-catalog-brand {
+    grid-column: 2;
+    justify-self: center;
+    width: max-content;
+    min-width: 0;
+    gap: 8px;
+  }
+  .pocket-dish .dish-catalog-header.guest .dish-header-inner > .dish-catalog-brand strong {
+    display: block;
+    font-size: 20px;
+  }
+  .pocket-dish .dish-catalog-header.guest .dish-header-inner > .dish-catalog-brand img {
+    width: 34px;
+    height: 34px;
+  }
+  .pocket-dish .dish-header-actions {
+    grid-column: 3;
+    grid-row: 1;
+    width: 52px;
+    justify-content: flex-end;
+    pointer-events: auto;
+    transition: opacity 150ms ease;
+  }
+  .pocket-dish .dish-catalog-header.guest .dish-header-actions {
+    grid-column: 1;
+    justify-content: flex-start;
+  }
+  .pocket-dish .dish-language-control,
+  .pocket-dish .dish-login-trigger,
+  .pocket-dish .dish-header-actions > .dish-account-trigger {
+    display: none;
+  }
+  .pocket-dish .dish-catalog-header.signed-in .dish-language-control {
+    display: inline-flex;
+  }
+  .pocket-dish .dish-catalog-header.guest .dish-mobile-menu-trigger {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50% !important;
+    background: transparent;
+    color: var(--dish-text);
+  }
+  .pocket-dish .dish-catalog-header [data-tooltip]::after {
+    display: none;
+  }
+  .pocket-dish .dish-global-search {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: 52px;
+    margin: 0;
+    border: 0;
+    background: #f5f4f2;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-global-search:focus-within {
+    border: 0;
+    background: #efeeec;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-global-search input:focus,
+  .pocket-dish .dish-global-search input:focus-visible {
+    outline: none;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-catalog-header button:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(32, 40, 49, 0.12);
+  }
+  .pocket-dish .dish-header-inner > .dish-header-actions,
+  .pocket-dish .dish-header-inner > .dish-catalog-brand {
+    min-height: 0;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition:
+      opacity 200ms ease,
+      transform 240ms ease,
+      visibility 0s;
+  }
+  .pocket-dish .dish-catalog-header.scrolled .dish-header-inner {
+    grid-template-rows: 0px 52px;
+    row-gap: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .pocket-dish .dish-catalog-header.scrolled .dish-header-actions,
+  .pocket-dish .dish-catalog-header.scrolled .dish-catalog-brand {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition:
+      opacity 150ms ease,
+      transform 240ms ease,
+      visibility 0s 150ms;
+  }
+  .pocket-dish .dish-page {
+    padding: 16px 16px calc(76px + env(safe-area-inset-bottom));
+  }
+  .pocket-dish.guest .dish-page {
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+  .pocket-dish .dish-category-catalog .dish-category-filters {
+    top: 72px;
+    overflow: visible;
+    margin: 0 -16px 16px;
+    padding: 8px 0 8px 16px;
+  }
+  .pocket-dish .dish-category-catalog .dish-category-filters .cuisine-strip {
+    width: 100%;
+    overflow-x: auto;
+    padding-right: 16px;
+    scroll-padding-right: 16px;
+    overscroll-behavior-inline: contain;
+  }
+  .pocket-dish
+    .dish-category-catalog
+    .dish-category-filters
+    .cuisine-strip
+    button.dish-filter-trigger {
+    position: static;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-main:has(.dish-profile) {
+    background: #f4f4f5;
+  }
+  .pocket-dish .dish-page:has(.dish-profile) {
+    padding: 0 0 calc(56px + env(safe-area-inset-bottom));
+  }
+  .pocket-dish .dish-profile {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: calc(100dvh - 56px - env(safe-area-inset-bottom));
+  }
+  .pocket-dish .dish-profile > .dish-account-heading {
+    margin: 0;
+    padding: 14px 16px 0;
+  }
+  .pocket-dish .dish-profile > .dish-profile-identity {
+    padding: 20px 16px 36px;
+  }
+  .pocket-dish .dish-profile-menu {
+    flex: 1;
+    padding: 16px 16px 28px;
+    border-radius: 24px 24px 0 0;
+    background: #fff;
+  }
+  .dish-account-heading {
+    margin-bottom: 20px;
+    gap: 8px;
+  }
+  .dish-account-heading h1 {
+    font-size: 22px;
+  }
+  .dish-profile-identity {
+    grid-template-columns: 64px minmax(0, 1fr) 20px;
+    gap: 14px;
+    padding-bottom: 28px;
+  }
+  .dish-profile-avatar {
+    width: 64px;
+    height: 64px;
+    font-size: 23px;
+  }
+  .dish-profile-identity strong {
+    font-size: 21px;
+  }
+  .dish-profile-identity small {
+    font-size: 14px;
+  }
+  .dish-profile-links > button {
+    min-height: 72px;
+    font-size: 16px;
+    gap: 12px;
+  }
+  .dish-profile-links {
+    border-top: 0;
+  }
+  .dish-profile-links > button {
+    border-bottom: 0;
+  }
+  .dish-profile-icon {
+    flex-basis: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  .dish-settings-detail .account-profile-hero {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .dish-settings-detail .account-section-panel {
+    padding-top: 8px;
+  }
+  .dish-settings-detail[data-section="notifications"] .account-setting-rows {
+    border-top: 0;
+    gap: 8px;
+  }
+  .dish-settings-detail[data-section="notifications"] .account-setting-rows > div {
+    min-height: 86px;
+    padding: 12px 4px;
+  }
+  .dish-settings-detail[data-section="notifications"] .account-setting-rows strong {
+    font-size: 17px;
+  }
+  .dish-settings-detail[data-section="notifications"] .account-setting-rows p {
+    margin-top: 5px;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+  .dish-settings-detail[data-section="notifications"] .switch {
+    width: 50px;
+    height: 30px;
+  }
+  .dish-settings-detail[data-section="notifications"] .switch span {
+    border-radius: 15px;
+  }
+  .dish-settings-detail[data-section="notifications"] .switch span::before {
+    width: 24px;
+    height: 24px;
+    top: 3px;
+    left: 3px;
+  }
+  .dish-settings-detail[data-section="notifications"] .switch input:checked + span::before {
+    transform: translateX(20px);
+  }
+  .dish-settings-detail[data-section="security"] .account-security-list {
+    gap: 14px;
+  }
+  .dish-settings-detail[data-section="security"] .account-security-list > div {
+    min-height: 78px;
+  }
+  .dish-settings-detail[data-section="security"] .account-security-list strong {
+    font-size: 20px;
+  }
+  .dish-settings-detail[data-section="security"] .account-security-list p {
+    margin-top: 5px;
+    font-size: 17px;
+  }
+  .dish-settings-detail[data-section="security"] .account-security-list .button {
+    font-size: 18px;
+  }
+  .dish-settings-detail[data-section="profile"] .account-profile-hero {
+    padding-bottom: 24px;
+  }
+  .dish-settings-detail[data-section="profile"] .account-avatar-editor > span {
+    right: -7px;
+    bottom: -5px;
+    left: auto;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    padding: 0;
+    border-width: 3px;
+    border-radius: 50%;
+    transform: none;
+  }
+  .dish-reservations-empty {
+    gap: 10px;
+  }
+  .dish-reservations-empty .button {
+    margin-top: 18px;
+  }
+}
+
+.pocket-dish .dish-mobile-menu-dialog {
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #f4f4f5;
+  color: var(--dish-text);
+}
+.pocket-dish .dish-mobile-menu-dialog[open] {
+  animation: dish-menu-dialog-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pocket-dish .dish-mobile-menu-dialog::backdrop {
+  background: rgba(23, 33, 43, 0.24);
+}
+.pocket-dish .dish-mobile-menu-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #f4f4f5;
+}
+.pocket-dish .dish-mobile-menu-heading {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  padding: 8px 14px;
+  background: #fff;
+}
+.pocket-dish .dish-mobile-menu-heading h2 {
+  margin: 0;
+  font-size: 21px;
+  text-align: center;
+}
+.pocket-dish .dish-mobile-menu-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: dish-menu-view-in 180ms ease-out;
+}
+.pocket-dish .dish-mobile-menu-card {
+  padding: 24px 20px;
+  border-radius: 24px;
+  background: #fff;
+}
+.pocket-dish .dish-mobile-menu-card h3 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.pocket-dish .dish-mobile-auth-card {
+  border-radius: 0 0 24px 24px;
+}
+.pocket-dish .dish-mobile-auth-card p {
+  margin: 10px 0 22px;
+  color: var(--dish-secondary);
+  font-size: 16px;
+  line-height: 1.4;
+}
+.pocket-dish .dish-mobile-auth-card .dish-mobile-login {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 999px !important;
+  background: var(--dish-cta);
+  color: #fff;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pocket-dish .dish-mobile-settings-card {
+  flex: 1;
+  padding-top: 8px;
+  border-radius: 24px 24px 0 0;
+}
+.pocket-dish .dish-mobile-menu-row {
+  width: 100%;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border: 0;
+  border-bottom: 0;
+  border-radius: 0 !important;
+  background: transparent;
+  color: var(--dish-text);
+  text-align: left;
+  cursor: pointer;
+}
+.pocket-dish .dish-mobile-menu-row:last-child {
+  border-bottom: 0;
+}
+.pocket-dish .dish-mobile-menu-row > svg {
+  color: var(--dish-secondary);
+}
+.pocket-dish .dish-mobile-menu-row > span {
+  min-width: 0;
+}
+.pocket-dish .dish-mobile-menu-row strong {
+  overflow: hidden;
+  font-size: 17px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pocket-dish .dish-mobile-menu-subpage {
+  gap: 0;
+}
+.pocket-dish .dish-mobile-selection-card {
+  flex: 1;
+  padding-top: 8px;
+  border-radius: 0;
+}
+.pocket-dish .dish-mobile-selection-options {
+  display: grid;
+}
+.pocket-dish .dish-mobile-selection-options button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--dish-divider);
+  border-radius: 0 !important;
+  background: transparent;
+  color: var(--dish-text);
+  font: inherit;
+  font-size: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+.pocket-dish .dish-mobile-selection-options button:last-child {
+  border-bottom: 0;
+}
+.pocket-dish .dish-mobile-selection-options button[aria-pressed="true"] {
+  color: var(--dish-cta);
+  font-weight: 700;
+}
+@media (hover: hover) {
+  .dish-back-button:hover,
+  .pocket-dish .dish-mobile-menu-row:hover,
+  .pocket-dish .dish-mobile-selection-options button:hover {
+    background: #f1f2f3;
+  }
+  .pocket-dish .dish-mobile-auth-card .dish-mobile-login:hover {
+    background: var(--dish-cta-hover);
+  }
+}
+
+@keyframes dish-menu-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes dish-menu-view-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .dish-mobile-menu-dialog[open],
+  .pocket-dish .dish-mobile-menu-content {
+    animation: none;
+  }
+  .dish-back-button {
+    transition: none;
+  }
+}
+
+.pocket-dish .dish-language-dialog {
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  background: #fff;
+  color: var(--dish-text);
+  box-shadow: 0 18px 56px rgba(23, 33, 43, 0.18);
+}
+.pocket-dish .dish-language-dialog::backdrop {
+  background: rgba(23, 33, 43, 0.32);
+}
+.pocket-dish .dish-language-dialog-content {
+  padding: 20px;
+}
+.pocket-dish .dish-language-dialog-options {
+  display: grid;
+  gap: 4px;
+}
+.pocket-dish .dish-language-dialog-options button {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: var(--dish-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pocket-dish .dish-language-dialog-options button[aria-pressed="true"] {
+  background: #edf0f2;
+  font-weight: 700;
+}
+@media (hover: hover) {
+  .pocket-dish .dish-language-dialog-options button:hover {
+    background: #f1f2f3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish *,
+  .pocket-dish *::before,
+  .pocket-dish *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+/* Public venue page uses the same layout language as the former demo detail screen. */
+.pocket-dish .dish-venue-detail {
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px 0 48px;
+}
+.pocket-dish .dish-real-venue-detail {
+  position: relative;
+  padding-left: 64px;
+}
+.pocket-dish .dish-real-venue-detail > .back-link {
+  position: sticky;
+  z-index: 20;
+  top: 96px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  margin: 0 0 -48px -64px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--dish-text);
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+.pocket-dish .venue-mobile-toolbar,
+.pocket-dish .venue-mobile-booking-status,
+.pocket-dish .venue-about-photo,
+.pocket-dish .venue-mobile-search {
+  display: none;
+}
+.pocket-dish .venue-public-rating > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.pocket-dish .venue-public-rating b {
+  font-size: 14px;
+}
+.pocket-dish .venue-public-menu-content {
+  padding: 28px 32px 40px;
+}
+.pocket-dish .venue-public-menu-category {
+  scroll-margin-top: 160px;
+}
+.pocket-dish .venue-public-menu-category + .venue-public-menu-category {
+  margin-top: 40px;
+}
+.pocket-dish .venue-public-menu-category > h2 {
+  margin: 0 0 16px;
+  font-size: 24px;
+}
+.pocket-dish .venue-public-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px 14px;
+}
+.pocket-dish .venue-public-menu-card {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+}
+.pocket-dish .venue-public-menu-photo {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background-color: var(--dish-card);
+  background-position: center;
+  background-size: cover;
+  color: var(--dish-muted);
+}
+.pocket-dish .venue-public-menu-copy {
+  padding: 8px 2px 0;
+}
+.pocket-dish .venue-public-menu-copy strong {
+  display: block;
+  font-size: 15px;
+}
+.pocket-dish .venue-public-menu-copy h3 {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.pocket-dish .venue-public-menu-copy p {
+  display: -webkit-box;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--dish-muted);
+  font-size: 12px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.pocket-dish .dish-real-venue-detail .venue-overview-block {
+  overflow: visible;
+}
+.pocket-dish .dish-real-venue-detail .venue-public-photo {
+  border-radius: 24px 24px 0 0;
+}
+.pocket-dish .dish-real-venue-detail .venue-detail-summary {
+  position: relative;
+}
+.pocket-dish .venue-public-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 0 18px;
+  background: var(--dish-card);
+  color: #906617;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+.pocket-dish .venue-public-rating > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.pocket-dish .venue-public-rating b {
+  font-size: 16px;
+}
+.pocket-dish .venue-public-rating small {
+  color: var(--dish-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+.pocket-dish .venue-desktop-info-wrap {
+  display: block;
+}
+.pocket-dish .venue-desktop-info-button {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--dish-divider);
+  background: #fff;
+  color: var(--dish-text);
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+.pocket-dish .venue-desktop-info-button svg {
+  width: 21px;
+  height: 21px;
+}
+@media (hover: hover) {
+  .pocket-dish .dish-real-venue-detail > .back-link:hover {
+    background: #f0f2f4;
+  }
+  .pocket-dish .venue-public-rating:hover {
+    background: #f0f2f4;
+  }
+  .pocket-dish .venue-desktop-info-button:hover {
+    border-color: #d8dfe5;
+    background: #f7f8fa;
+  }
+}
+.pocket-dish .venue-public-rating:focus-visible,
+.pocket-dish .venue-desktop-info-button:focus-visible,
+.pocket-dish .venue-public-category-nav button:focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 2px;
+}
+.pocket-dish .venue-info-overlay {
+  position: absolute;
+  z-index: 45;
+  top: calc(100% - 6px);
+  left: 24px;
+  width: min(420px, calc(100% - 48px));
+}
+.pocket-dish .venue-info-sheet {
+  padding: 28px;
+  border: 1px solid var(--dish-divider);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 16px 42px rgba(23, 33, 43, 0.16);
+}
+.pocket-dish .venue-info-handle,
+.pocket-dish .venue-info-close {
+  display: none;
+}
+.pocket-dish .venue-info-sheet h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.pocket-dish .venue-info-sheet h3 {
+  margin: 0 0 20px;
+  font-size: 21px;
+}
+.pocket-dish .venue-info-group {
+  padding: 17px 0;
+  border-top: 1px solid var(--dish-divider);
+}
+.pocket-dish .venue-info-group > strong {
+  font-size: 14px;
+}
+.pocket-dish .venue-info-group > p {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 0;
+  color: var(--dish-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pocket-dish .venue-info-group > p > svg {
+  flex: 0 0 auto;
+}
+.pocket-dish .venue-reviews-overlay {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: rgba(20, 26, 31, 0.45);
+}
+.pocket-dish .venue-reviews-dialog {
+  width: min(600px, 100%);
+  max-height: calc(100dvh - 64px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.2);
+}
+.pocket-dish .venue-reviews-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 28px 8px;
+}
+.pocket-dish .venue-reviews-dialog > header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.pocket-dish .venue-reviews-dialog > header button {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: var(--dish-card);
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .venue-reviews-score {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 18px 28px 28px;
+}
+.pocket-dish .venue-reviews-score strong {
+  font-size: 44px;
+  line-height: 1;
+}
+.pocket-dish .venue-reviews-score span {
+  color: var(--dish-muted);
+  font-size: 13px;
+}
+.pocket-dish .venue-reviews-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 28px 32px;
+  border-top: 6px solid var(--dish-card);
+}
+.pocket-dish .venue-reviews-list > h3 {
+  margin: 0 0 20px;
+  font-size: 21px;
+}
+.pocket-dish .venue-reviews-list > article {
+  padding: 20px 0;
+  border-top: 1px solid var(--dish-divider);
+}
+.pocket-dish .venue-review-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pocket-dish .venue-review-meta > strong {
+  font-size: 15px;
+}
+.pocket-dish .venue-review-meta > span {
+  display: flex;
+  gap: 2px;
+  color: #e8a92f;
+}
+.pocket-dish .venue-reviews-list article > small {
+  display: block;
+  margin-top: 4px;
+  color: var(--dish-muted);
+  font-size: 12px;
+}
+.pocket-dish .venue-reviews-list article > p {
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+.pocket-dish .venue-review-reply {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--dish-card);
+}
+.pocket-dish .venue-review-reply strong {
+  font-size: 13px;
+}
+.pocket-dish .venue-review-reply p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pocket-dish .venue-public-photo {
+  height: clamp(180px, 16vw, 240px);
+  display: grid;
+  place-items: center;
+  background: var(--dish-gradient-restaurants);
+}
+.pocket-dish .venue-public-photo.has-image {
+  background-position: center 68%;
+  background-size: cover;
+}
+.pocket-dish .venue-public-photo img {
+  width: min(220px, 45%);
+  height: auto;
+  object-fit: contain;
+}
+.pocket-dish .venue-public-empty {
+  min-height: 104px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--dish-card);
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-public-empty svg {
+  flex: 0 0 auto;
+  color: var(--dish-muted);
+}
+.pocket-dish .venue-public-empty p {
+  margin: 0;
+  line-height: 1.5;
+}
+.pocket-dish .venue-public-booking {
+  min-height: 0;
+  gap: 10px;
+}
+.pocket-dish .venue-public-booking-shell {
+  display: contents;
+}
+.pocket-dish .venue-mobile-booking-close,
+.pocket-dish .venue-mobile-booking-cta {
+  display: none;
+}
+.pocket-dish .venue-public-booking > svg {
+  color: var(--dish-cta);
+}
+.pocket-dish .venue-public-booking > h2 {
+  margin: 4px 0 0;
+  font-size: 23px;
+}
+.pocket-dish .venue-public-booking > p {
+  margin: 0 0 8px;
+  color: var(--dish-secondary);
+  line-height: 1.5;
+}
+.pocket-dish .venue-public-booking > .button:disabled {
+  margin-top: 8px;
+  background: var(--dish-card);
+  color: var(--dish-disabled);
+  cursor: not-allowed;
+}
+.pocket-dish .dish-main:has(.venue-detail-page) {
+  background: #f4f4f5;
+}
+@media (min-width: 901px) {
+  .pocket-dish .dish-page:has(.venue-detail-page) {
+    width: min(1900px, 100%);
+    padding-right: 24px;
+    padding-left: 24px;
+  }
+}
+.pocket-dish .venue-detail-page {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  align-items: start;
+  gap: 16px;
+  margin: 0 auto;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-primary-column {
+  min-width: 0;
+  display: grid;
+  gap: 16px;
+}
+.pocket-dish .venue-overview-block {
+  overflow: clip;
+  border-radius: 24px;
+  background: #fff;
+}
+.pocket-dish .venue-detail-summary {
+  min-height: 154px;
+  padding: 28px 32px;
+}
+.pocket-dish .venue-detail-heading {
+  min-width: 0;
+}
+.pocket-dish .venue-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pocket-dish .venue-title-row .icon-button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+}
+.pocket-dish .venue-title-row .icon-button:hover,
+.pocket-dish .venue-title-row .icon-button.active {
+  background: var(--dish-active);
+  color: var(--dish-cta);
+}
+.pocket-dish .venue-title-row .icon-button.active::after {
+  display: none;
+}
+.pocket-dish .venue-detail-heading h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+}
+.pocket-dish .venue-detail-heading > p {
+  margin: 8px 0 0;
+  color: var(--dish-secondary);
+  font-size: 15px;
+}
+.pocket-dish .venue-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+.pocket-dish .venue-facts > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: var(--dish-card);
+  color: #37434c;
+  font-size: 14px;
+  font-weight: 650;
+}
+.pocket-dish .venue-facts > span:first-child {
+  color: #906617;
+}
+.pocket-dish .venue-facts small {
+  color: var(--dish-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+.pocket-dish .venue-detail-page button {
+  border: 0;
+  border-radius: 999px !important;
+}
+
+.pocket-dish .venue-section-nav {
+  position: sticky;
+  z-index: 12;
+  top: 80px;
+  display: flex;
+  gap: 10px;
+  margin: 0;
+  padding: 0 24px;
+  overflow-x: auto;
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.97);
+  scrollbar-width: none;
+  backdrop-filter: blur(14px);
+}
+.pocket-dish .venue-section-nav::after {
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: #e8ebed;
+  content: "";
+}
+.pocket-dish .venue-section-nav::-webkit-scrollbar {
+  display: none;
+}
+.pocket-dish .venue-public-category-nav::after {
+  content: none;
+}
+.pocket-dish .venue-section-nav button {
+  position: relative;
+  z-index: 1;
+  min-width: max-content;
+  min-height: 64px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #92979d;
+  font-size: 16px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+.pocket-dish .venue-section-nav button::after {
+  position: absolute;
+  right: 12px;
+  bottom: 0;
+  left: 12px;
+  height: 3px;
+  border-radius: 999px 999px 0 0;
+  background: var(--dish-cta);
+  content: "";
+  opacity: 0;
+  transform: scaleX(0.4);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+.pocket-dish .venue-section-nav button.active {
+  background: transparent;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-section-nav button.active::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+.pocket-dish .venue-detail-content {
+  min-width: 0;
+  display: grid;
+  gap: 0;
+  overflow: clip;
+  border-radius: 24px;
+  background: #fff;
+}
+.pocket-dish .dish-real-venue-detail .venue-detail-content {
+  overflow: visible;
+}
+.pocket-dish .dish-real-venue-detail .venue-public-category-sticky-shell {
+  display: contents;
+}
+.pocket-dish .dish-real-venue-detail .venue-public-category-nav {
+  border-radius: 24px 24px 0 0;
+}
+.pocket-dish .venue-category-controls {
+  display: contents;
+}
+@media (min-width: 761px) {
+  .pocket-dish .venue-category-controls {
+    position: sticky;
+    z-index: 12;
+    top: 80px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-right: 24px;
+    border-radius: 24px 24px 0 0;
+    background: #fff;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-category-controls .venue-public-category-nav {
+    position: relative;
+    top: auto;
+    flex: 1;
+    min-width: 0;
+    border-top-right-radius: 0;
+  }
+  .pocket-dish .venue-detail-page .venue-desktop-menu-view-toggle {
+    display: grid;
+    place-items: center;
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50% !important;
+    background: #eee;
+    color: var(--dish-text);
+    cursor: pointer;
+  }
+  .pocket-dish .venue-desktop-menu-view-toggle:hover {
+    background: #e0e0e0;
+  }
+  .pocket-dish .venue-preorder-menu-mode .venue-category-controls {
+    position: static;
+  }
+}
+@media (min-width: 901px) {
+  .pocket-dish .venue-category-controls {
+    position: static;
+  }
+}
+
+@media (min-width: 901px) {
+  /* A solid sticky shell masks the scrolling content while keeping the booking-card gap. */
+  .pocket-dish .dish-real-venue-detail .venue-public-category-sticky-shell {
+    position: sticky;
+    z-index: 12;
+    top: 80px;
+    display: block;
+    margin-top: -16px;
+    padding-top: 16px;
+    background: #f4f4f5;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-category-nav {
+    position: relative;
+    z-index: auto;
+    top: auto;
+    background: #fff;
+    backdrop-filter: none;
+  }
+}
+.pocket-dish .venue-menu-section {
+  overflow: clip;
+  padding: 24px 32px 34px;
+}
+
+.pocket-dish .venue-menu-categories {
+  display: flex;
+  gap: 5px;
+  margin: 0 0 20px;
+  padding: 0;
+  overflow-x: auto;
+  background: transparent;
+  scrollbar-width: none;
+}
+.pocket-dish .venue-menu-categories::-webkit-scrollbar {
+  display: none;
+}
+.pocket-dish .venue-menu-categories button {
+  min-width: max-content;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dish-card);
+  color: var(--dish-secondary);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.pocket-dish .venue-menu-categories button.active {
+  background: var(--dish-active);
+  color: var(--dish-cta);
+}
+.pocket-dish .venue-menu-categories button:hover {
+  background: #eaedef;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 28px 14px;
+}
+.pocket-dish .venue-menu-card {
+  min-width: 0;
+}
+.pocket-dish .venue-menu-card-media {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  background: var(--dish-card);
+}
+.pocket-dish .venue-menu-card-media > .food-image {
+  width: 100%;
+  height: 100%;
+}
+.pocket-dish .venue-menu-card-copy {
+  min-width: 0;
+  padding: 9px 5px 0;
+}
+.pocket-dish .venue-menu-card-copy > strong {
+  display: block;
+  font-size: 17px;
+}
+.pocket-dish .venue-menu-card h3 {
+  margin: 5px 0 0;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pocket-dish .venue-menu-card p {
+  display: -webkit-box;
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--dish-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.pocket-dish .venue-menu-hit {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #fff;
+  color: #8a621c;
+  font-size: 11px;
+  font-weight: 800;
+  box-shadow: 0 3px 10px rgba(23, 33, 43, 0.1);
+}
+.pocket-dish .venue-feature-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+}
+.pocket-dish .venue-feature-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: var(--dish-card);
+  color: #3d4952;
+  font-size: 13px;
+}
+.pocket-dish .venue-feature-list svg {
+  color: #289065;
+}
+
+.pocket-dish .venue-booking-card {
+  position: sticky;
+  top: 96px;
+  min-height: calc(100dvh - 112px);
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  border-radius: 24px;
+  background: #fff;
+}
+.pocket-dish .venue-booking-heading {
+  display: block;
+}
+.pocket-dish .venue-booking-heading h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.pocket-dish .venue-booking-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: 8px;
+  margin: 16px 0 18px;
+}
+.pocket-dish .venue-date-picker {
+  position: relative;
+  min-width: 0;
+}
+.pocket-dish .venue-date-trigger {
+  width: 100%;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  background: #f3f4f4;
+  color: var(--dish-text);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pocket-dish .venue-date-trigger span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pocket-dish .venue-date-trigger:hover,
+.pocket-dish .venue-date-trigger.active {
+  background: var(--dish-active);
+  color: var(--dish-cta);
+}
+.pocket-dish .venue-date-trigger.active .venue-date-chevron {
+  transform: rotate(180deg);
+}
+.pocket-dish .venue-date-chevron {
+  transition: transform 180ms ease;
+}
+.pocket-dish .venue-calendar-popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 300px;
+  padding: 16px;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 18px 48px rgba(23, 33, 43, 0.16);
+}
+.pocket-dish .venue-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.pocket-dish .venue-calendar-header > strong {
+  font-size: 15px;
+}
+.pocket-dish .venue-calendar-header > div {
+  display: flex;
+  gap: 4px;
+}
+.pocket-dish .venue-calendar-header button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .venue-calendar-header button:hover {
+  background: var(--dish-card);
+}
+.pocket-dish .venue-calendar-header button:disabled {
+  color: #cbd0d4;
+  cursor: default;
+}
+.pocket-dish .venue-calendar-weekdays,
+.pocket-dish .venue-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.pocket-dish .venue-calendar-weekdays {
+  margin: 10px 0 5px;
+}
+.pocket-dish .venue-calendar-weekdays span {
+  color: #a2abb2;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+.pocket-dish .venue-calendar-grid button {
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--dish-text);
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.pocket-dish .venue-calendar-grid button:hover {
+  background: var(--dish-card);
+}
+.pocket-dish .venue-calendar-grid button.outside {
+  color: #aeb6bc;
+}
+.pocket-dish .venue-calendar-grid button.selected {
+  background: var(--dish-cta);
+  color: #fff;
+}
+.pocket-dish .venue-calendar-grid button:disabled {
+  color: #d6dbde;
+  background: transparent;
+  cursor: default;
+}
+.pocket-dish .venue-guests {
+  min-width: 0;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #f3f4f4;
+}
+.pocket-dish .venue-guests button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--dish-card);
+  cursor: pointer;
+}
+.pocket-dish .venue-guests button:disabled {
+  opacity: 0.35;
+}
+.pocket-dish .venue-guests strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pocket-dish .venue-booking-label {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.pocket-dish .venue-time-periods {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 14px;
+}
+.pocket-dish .venue-time-periods button {
+  min-height: 38px;
+  padding: 0 15px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--dish-secondary);
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.pocket-dish .venue-time-periods button.active {
+  background: var(--dish-card);
+  color: var(--dish-text);
+}
+.pocket-dish .venue-time-periods button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.pocket-dish .venue-time-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+.pocket-dish .venue-time-grid button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: #f3f4f4;
+  color: #46535d;
+  font-size: 14px;
+  cursor: pointer;
+}
+.pocket-dish .venue-time-grid button:hover {
+  background: #e9edef;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-time-grid button.active {
+  background: var(--dish-active);
+  color: var(--dish-cta);
+  font-weight: 750;
+}
+.pocket-dish .venue-booking-card > .button {
+  min-height: 46px;
+  margin-top: 18px;
+  border-radius: var(--control-radius);
+  background: var(--dish-cta);
+}
+.pocket-dish .venue-booking-card > .button:hover {
+  background: var(--dish-cta-hover);
+}
+.pocket-dish .venue-booking-card > .button:focus-visible {
+  background: var(--dish-cta-pressed);
+  color: #fff;
+}
+.pocket-dish .venue-booking-card.venue-public-booking {
+  z-index: 20;
+  height: calc(100dvh - 112px);
+  min-height: 0;
+}
+@media (min-width: 761px) {
+  .pocket-dish .venue-booking-card.venue-public-booking:not(.details-open):not(.checkout-open) {
+    height: auto;
+    min-height: 0;
+    align-self: start;
+  }
+}
+.pocket-dish .venue-booking-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 2px;
+  scrollbar-width: none;
+}
+.pocket-dish .venue-booking-wishes {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+.pocket-dish .venue-booking-wishes h3 {
+  margin: 0;
+  color: var(--dish-text);
+  font-size: 19px;
+}
+.pocket-dish .venue-wish-options {
+  min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  touch-action: pan-x;
+}
+.pocket-dish .venue-wish-options::-webkit-scrollbar {
+  display: none;
+}
+.pocket-dish .venue-detail-page .venue-wish-options button {
+  min-height: 38px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid #dce1e3;
+  border-radius: 999px !important;
+  background: #fff;
+  color: var(--dish-text);
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pocket-dish .venue-detail-page .venue-wish-options button.active {
+  border-color: var(--dish-cta);
+  background: var(--dish-active);
+  color: var(--dish-cta);
+}
+.pocket-dish .venue-detail-page .venue-wish-options button:not(.active):focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 2px;
+  background: #fff;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-booking-wishes textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 108px;
+  padding: 15px 16px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  outline: none;
+  resize: vertical;
+  background: #f3f4f4;
+  color: var(--dish-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pocket-dish .venue-booking-wishes textarea::placeholder {
+  color: #90999f;
+}
+.pocket-dish .venue-booking-wishes textarea:focus {
+  border-color: var(--dish-cta);
+  background: #fff;
+}
+.pocket-dish .venue-booking-contact {
+  display: grid;
+  gap: 12px;
+  margin-top: 25px;
+}
+.pocket-dish .venue-booking-contact h3 {
+  margin: 0;
+  color: var(--dish-text);
+  font-size: 19px;
+}
+.pocket-dish .venue-booking-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e4e7e8;
+  border-radius: 14px;
+}
+.pocket-dish .venue-booking-menu-item > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+.pocket-dish .venue-booking-menu-item strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.pocket-dish .venue-booking-menu-item small {
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .venue-booking-menu-item > div {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pocket-dish .venue-booking-menu-item button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #eeeeee;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .venue-booking-menu-item button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pocket-dish .venue-booking-menu-item b {
+  min-width: 12px;
+  text-align: center;
+}
+.pocket-dish .venue-booking-menu-item.unavailable {
+  color: #a34536;
+}
+.pocket-dish .venue-booking-menu-item.unavailable button {
+  width: auto;
+  padding: 0 10px;
+  border-radius: 8px;
+}
+.pocket-dish .venue-booking-contact label {
+  display: grid;
+  gap: 5px;
+  color: var(--dish-secondary);
+  font-size: 13px;
+}
+.pocket-dish .venue-booking-contact input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #dce1e3;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--dish-text);
+  font: inherit;
+}
+.pocket-dish .venue-booking-contact input:focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 1px;
+}
+.pocket-dish .venue-booking-submit {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--dish-cta);
+  color: #fff;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pocket-dish .venue-booking-submit:disabled {
+  background: #e4e7e8;
+  color: var(--dish-disabled);
+  cursor: default;
+}
+.pocket-dish .venue-booking-submit-error {
+  margin: 12px 0 0;
+  color: #a34536;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.pocket-dish .venue-booking-confirmed {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-booking-confirmed > strong {
+  font-size: 20px;
+}
+.pocket-dish .venue-booking-confirmed p {
+  margin: 0;
+}
+.pocket-dish .desktop-booking-header {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pocket-dish .desktop-booking-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.pocket-dish .desktop-booking-header > button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 50%;
+  background: #f3f4f4;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .desktop-booking-backdrop {
+  position: fixed;
+  z-index: 109;
+  inset: 0;
+  background: rgba(22, 28, 34, 0.45);
+  animation: desktop-booking-fade 180ms ease-out both;
+}
+.pocket-dish .venue-booking-card.venue-public-booking.desktop-booking-flow.details-open {
+  position: fixed;
+  z-index: 110;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  box-sizing: border-box;
+  width: min(440px, calc(100vw - 32px));
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 26px;
+  border-radius: 26px;
+  animation: desktop-booking-slide 220ms ease-out both;
+}
+.pocket-dish .desktop-booking-schedule-body {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.pocket-dish .desktop-booking-details-body {
+  min-height: 0;
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.pocket-dish .desktop-booking-flow.details-open .desktop-booking-header {
+  justify-content: space-between;
+}
+.pocket-dish .desktop-booking-flow.details-open .desktop-booking-header h2 {
+  font-size: 26px;
+}
+.pocket-dish .desktop-booking-flow.details-open .desktop-booking-close {
+  width: 38px;
+  height: 38px;
+  background: transparent;
+}
+.pocket-dish .desktop-booking-flow.details-open .venue-booking-toolbar {
+  margin-bottom: 12px;
+}
+.pocket-dish .desktop-booking-flow.details-open .venue-booking-scroll {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+.pocket-dish .desktop-booking-details-scroll {
+  flex: 0 0 auto;
+  padding-right: 3px;
+}
+.pocket-dish .desktop-booking-details-scroll .venue-booking-wishes {
+  margin-top: 12px;
+}
+.pocket-dish .desktop-booking-details-scroll .venue-booking-contact {
+  margin-top: 22px;
+}
+.pocket-dish .desktop-booking-details-scroll .venue-booking-wishes textarea {
+  min-height: 72px;
+}
+.pocket-dish .desktop-booking-flow.details-open .desktop-booking-footer {
+  z-index: 3;
+  margin-top: 15px;
+}
+.pocket-dish .desktop-booking-notes {
+  display: grid;
+  gap: 5px;
+}
+.pocket-dish .desktop-booking-notes p {
+  margin: 0;
+  color: var(--dish-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+@keyframes desktop-booking-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes desktop-booking-slide {
+  from {
+    opacity: 0.5;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .desktop-booking-backdrop,
+  .pocket-dish .venue-booking-card.venue-public-booking.desktop-booking-flow.details-open {
+    animation: none;
+  }
+}
+.pocket-dish .desktop-booking-flow .venue-booking-toolbar {
+  margin-top: 20px;
+}
+.pocket-dish .desktop-booking-footer {
+  flex: 0 0 auto;
+}
+.pocket-dish .desktop-booking-summary {
+  display: grid;
+  gap: 4px;
+  margin-top: 20px;
+  padding: 13px 15px;
+  border-radius: 16px;
+  background: #f3f4f4;
+}
+.pocket-dish .desktop-booking-summary strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.pocket-dish .desktop-booking-summary span {
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .desktop-booking-preorder-content {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+.pocket-dish .desktop-booking-preorder-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pocket-dish .desktop-booking-preorder-heading h3,
+.pocket-dish .desktop-booking-checkout h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.pocket-dish .desktop-booking-preorder-heading button {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dish-active);
+  color: var(--dish-cta);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.pocket-dish .desktop-booking-selected-list {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  overflow-y: auto;
+  margin-top: 14px;
+  scrollbar-width: none;
+}
+.pocket-dish .desktop-booking-selected-list article {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef0f1;
+}
+.pocket-dish .desktop-booking-selected-list article > div:nth-child(2) {
+  min-width: 0;
+}
+.pocket-dish .desktop-booking-selected-list strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.pocket-dish .desktop-booking-selected-list small {
+  display: block;
+  margin-top: 3px;
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .desktop-booking-item-image {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background-position: center;
+  background-size: cover;
+}
+.pocket-dish .desktop-booking-item-image.placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--dish-card);
+  color: var(--dish-secondary);
+}
+.pocket-dish .desktop-booking-quantity {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.pocket-dish .desktop-booking-quantity button {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #eeeeee;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .desktop-booking-quantity button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pocket-dish .desktop-booking-quantity b {
+  min-width: 14px;
+  font-size: 12px;
+  text-align: center;
+}
+.pocket-dish .desktop-booking-empty {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 10px;
+  text-align: center;
+}
+.pocket-dish .desktop-booking-empty > svg {
+  margin-bottom: 14px;
+  color: var(--dish-secondary);
+}
+.pocket-dish .desktop-booking-empty strong {
+  font-size: 16px;
+}
+.pocket-dish .desktop-booking-empty p {
+  max-width: 240px;
+  margin: 7px 0 0;
+  color: var(--dish-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.pocket-dish .desktop-booking-actions {
+  margin-top: auto;
+}
+.pocket-dish .desktop-booking-checkout {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.pocket-dish .desktop-booking-checkout .desktop-booking-summary {
+  flex: 0 0 auto;
+}
+.pocket-dish .desktop-booking-checkout .desktop-booking-selected-list {
+  max-height: 210px;
+  margin-top: -8px;
+  flex: 0 0 auto;
+}
+.pocket-dish .desktop-booking-checkout .venue-booking-contact {
+  margin-top: 0;
+}
+.pocket-dish .desktop-booking-checkout .venue-booking-contact h3 {
+  font-size: 17px;
+}
+.pocket-dish .desktop-booking-account {
+  display: grid;
+  gap: 4px;
+}
+.pocket-dish .desktop-booking-account h3 {
+  margin-bottom: 4px;
+}
+.pocket-dish .desktop-booking-account strong {
+  font-size: 14px;
+}
+.pocket-dish .desktop-booking-account span {
+  color: var(--dish-secondary);
+  font-size: 13px;
+}
+.pocket-dish .desktop-booking-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+.pocket-dish .desktop-booking-total strong {
+  font-size: 18px;
+}
+.pocket-dish .desktop-booking-payment {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid #e6e9eb;
+  border-radius: 16px;
+}
+.pocket-dish .desktop-booking-payment strong {
+  font-size: 14px;
+}
+.pocket-dish .desktop-booking-payment p {
+  margin: 0;
+  color: var(--dish-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.pocket-dish .desktop-booking-checkout > .venue-booking-submit {
+  flex: 0 0 auto;
+  margin-top: 16px;
+}
+.pocket-dish .venue-booking-card.venue-public-booking.desktop-booking-flow.checkout-open {
+  position: fixed;
+  z-index: 150;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  padding: 26px 32px;
+  border-radius: 0;
+  background: #f4f4f5;
+}
+.pocket-dish .desktop-booking-flow.checkout-open .desktop-booking-header {
+  position: relative;
+  width: min(620px, 100%);
+  min-height: 48px;
+  margin: 0 auto;
+}
+.pocket-dish .desktop-booking-flow.checkout-open .desktop-booking-header h2 {
+  font-size: 28px;
+}
+.pocket-dish .desktop-booking-flow.checkout-open .desktop-booking-header > button {
+  position: absolute;
+  top: 0;
+  left: -68px;
+  width: 48px;
+  height: 48px;
+  background: #fff;
+}
+.pocket-dish .desktop-booking-flow.checkout-open .desktop-booking-checkout,
+.pocket-dish .desktop-booking-flow.checkout-open .venue-booking-confirmed {
+  box-sizing: border-box;
+  width: min(620px, 100%);
+  min-height: 0;
+  flex: 0 1 auto;
+  overflow-y: auto;
+  max-height: calc(100dvh - 122px);
+  margin: 16px auto 0;
+  padding: 24px;
+  border-radius: 24px;
+  background: #fff;
+}
+.pocket-dish .desktop-booking-flow.checkout-open .desktop-booking-summary {
+  margin-top: 0;
+}
+.pocket-dish .desktop-booking-review-items {
+  display: grid;
+  gap: 6px;
+}
+.pocket-dish .desktop-booking-review-items article {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 14px;
+}
+.pocket-dish .desktop-booking-review-items .desktop-booking-item-image {
+  width: 56px;
+  height: 56px;
+}
+.pocket-dish .desktop-booking-review-items strong {
+  white-space: nowrap;
+}
+.pocket-dish .desktop-booking-checkout .desktop-booking-total {
+  padding: 16px 0 4px;
+  border-top: 1px solid #eceeef;
+}
+.pocket-dish .desktop-booking-flow.checkout-open .venue-booking-confirmed {
+  align-content: start;
+  flex: 0 1 auto;
+  overflow: visible;
+}
+.pocket-dish .desktop-booking-flow.checkout-open .venue-booking-confirmed .venue-booking-submit {
+  margin-top: 16px;
+}
+@media (min-width: 761px) {
+  .pocket-dish .dish-real-venue-detail .venue-detail-content.venue-preorder-menu-mode {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr) clamp(300px, 32vw, 440px);
+    grid-template-rows: 64px minmax(0, 1fr);
+    gap: 0 16px;
+    overflow: hidden;
+    padding: 16px 24px;
+    border-radius: 0;
+    background: rgba(22, 28, 34, 0.45);
+    animation: desktop-booking-fade 180ms ease-out both;
+  }
+  .pocket-dish
+    .dish-real-venue-detail
+    .venue-preorder-menu-mode
+    .venue-public-category-sticky-shell {
+    position: relative;
+    z-index: 2;
+    top: auto;
+    grid-column: 2;
+    grid-row: 1;
+    display: block;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-preorder-menu-mode .venue-public-category-nav {
+    padding-left: 24px;
+    border-radius: 24px 24px 0 0;
+  }
+  .pocket-dish .venue-preorder-menu-mode .venue-public-menu-content {
+    min-height: 0;
+    grid-column: 2;
+    grid-row: 2;
+    overflow-y: auto;
+    border-radius: 0 0 24px 24px;
+    background: #fff;
+    overscroll-behavior: contain;
+  }
+  .pocket-dish .venue-preorder-menu-mode .venue-public-menu-grid {
+    max-width: 920px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pocket-dish .venue-preorder-menu-mode .venue-public-menu-category {
+    scroll-margin-top: 20px;
+  }
+  .pocket-dish .venue-preorder-menu-close {
+    grid-column: 1;
+    grid-row: 1;
+    z-index: 4;
+    justify-self: center;
+    align-self: start;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    margin-top: 10px;
+    padding: 0;
+    background: #fff;
+    color: var(--dish-text);
+    cursor: pointer;
+  }
+  .pocket-dish .venue-preorder-cart {
+    min-width: 0;
+    min-height: 0;
+    grid-column: 3;
+    grid-row: 1 / 3;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 24px;
+    background: #fff;
+  }
+  .pocket-dish .venue-preorder-cart header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 22px 24px 16px;
+  }
+  .pocket-dish .venue-preorder-cart header h2 {
+    margin: 0;
+    font-size: 24px;
+  }
+  .pocket-dish .venue-preorder-cart header button {
+    padding: 6px 0;
+    background: transparent;
+    color: var(--dish-secondary);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .pocket-dish .venue-preorder-cart-body {
+    min-height: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .pocket-dish .venue-preorder-reservation-summary {
+    display: grid;
+    gap: 8px;
+    margin: 0 16px 12px;
+    padding: 14px;
+    border-radius: 16px;
+    background: #f3f4f4;
+    overflow-wrap: anywhere;
+  }
+  .pocket-dish .venue-preorder-reservation-summary h3 {
+    margin: 0 0 3px;
+    font-size: 15px;
+  }
+  .pocket-dish .venue-preorder-reservation-summary > div {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .pocket-dish .venue-preorder-reservation-summary svg {
+    flex: 0 0 auto;
+    color: var(--dish-secondary);
+  }
+  .pocket-dish .venue-preorder-reservation-summary small {
+    display: block;
+    margin-top: 3px;
+    color: var(--dish-secondary);
+    font-size: 12px;
+  }
+  .pocket-dish .venue-preorder-reservation-summary p {
+    margin: 0;
+    color: var(--dish-secondary);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .pocket-dish .venue-preorder-cart-items {
+    padding: 0 16px;
+  }
+  .pocket-dish .venue-preorder-cart-items article {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 4px;
+    border-bottom: 1px solid #f0f1f2;
+  }
+  .pocket-dish .venue-preorder-cart-image {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    background-color: var(--dish-card);
+    background-position: center;
+    background-size: cover;
+    color: var(--dish-muted);
+  }
+  .pocket-dish .venue-preorder-cart-copy {
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+  .pocket-dish .venue-preorder-cart-copy strong {
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pocket-dish .venue-preorder-cart-copy span {
+    font-size: 13px;
+    font-weight: 750;
+  }
+  .pocket-dish .venue-preorder-cart-quantity {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 999px;
+    background: #f3f4f4;
+  }
+  .pocket-dish .venue-preorder-cart-quantity button {
+    width: 27px;
+    height: 27px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: transparent;
+    color: var(--dish-text);
+    cursor: pointer;
+  }
+  .pocket-dish .venue-preorder-cart-quantity button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+  .pocket-dish .venue-preorder-cart-quantity b {
+    min-width: 17px;
+    font-size: 13px;
+    text-align: center;
+  }
+  .pocket-dish .venue-preorder-cart-empty {
+    min-height: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+  }
+  .pocket-dish .venue-preorder-cart-empty > svg {
+    margin-bottom: 18px;
+    color: var(--dish-muted);
+  }
+  .pocket-dish .venue-preorder-cart-empty h3 {
+    max-width: 250px;
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.2;
+  }
+  .pocket-dish .venue-preorder-cart-empty p {
+    max-width: 230px;
+    margin: 9px 0 0;
+    color: var(--dish-secondary);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .pocket-dish .venue-preorder-cart-footer {
+    padding: 16px;
+    border-top: 1px solid #e8ebed;
+  }
+  .pocket-dish .venue-preorder-cart-footer button {
+    width: 100%;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    background: var(--dish-cta);
+    color: #fff;
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+  }
+  .pocket-dish .venue-preorder-cart-footer .venue-preorder-book-without {
+    justify-content: center;
+    text-align: center;
+  }
+  .pocket-dish .venue-preorder-cart-footer button:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  @media (max-width: 1100px) {
+    .pocket-dish .venue-preorder-menu-mode .venue-public-menu-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .pocket-dish .venue-preorder-menu-mode .venue-public-menu-content {
+      padding: 24px 20px 36px;
+    }
+  }
+}
+/* Dish details: independently scrolling content and a fixed action footer. */
+.pocket-dish .venue-preorder-product-dialog {
+  position: fixed;
+  box-sizing: border-box;
+  width: min(820px, calc(100vw - 48px));
+  max-height: min(780px, 92dvh);
+  overflow: hidden;
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 28px;
+  background: #fff;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-preorder-product-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.pocket-dish .venue-preorder-product-dialog::backdrop {
+  background: rgba(20, 27, 34, 0.48);
+}
+.pocket-dish .venue-preorder-product-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.pocket-dish .venue-preorder-product-close {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .venue-preorder-product-main {
+  display: grid;
+  grid-template-columns: minmax(0, 43%) minmax(0, 1fr);
+  align-items: start;
+  gap: 28px;
+  padding: 28px;
+}
+.pocket-dish .venue-preorder-product-image {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  background: #f3f4f4 center/cover no-repeat;
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-preorder-product-info {
+  padding-top: 44px;
+}
+.pocket-dish .venue-preorder-product-info > p {
+  margin: 0 0 24px;
+  font-size: 17px;
+  line-height: 1.5;
+}
+.pocket-dish .venue-product-nutrition > p {
+  margin: 0 0 12px;
+  color: var(--dish-secondary);
+  font-size: 14px;
+}
+.pocket-dish .venue-product-nutrition dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.pocket-dish .venue-product-nutrition dl > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.pocket-dish .venue-product-nutrition dt {
+  order: 1;
+  font-size: 12px;
+}
+.pocket-dish .venue-product-nutrition dd {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 650;
+}
+.pocket-dish .venue-product-nutrition > small {
+  display: block;
+  margin-top: 16px;
+  color: var(--dish-secondary);
+  line-height: 1.4;
+}
+.pocket-dish .venue-preorder-product-handle {
+  display: none;
+}
+.pocket-dish .venue-preorder-product-footer {
+  flex: 0 0 auto;
+  padding: 20px 28px 28px;
+  background: #fff;
+}
+.pocket-dish .venue-preorder-product-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin-bottom: 22px;
+}
+.pocket-dish .venue-preorder-product-heading h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 23px;
+  line-height: 1.25;
+}
+.pocket-dish .venue-preorder-product-heading > span {
+  color: var(--dish-secondary);
+  white-space: nowrap;
+}
+.pocket-dish .venue-preorder-product-heading > strong {
+  margin-left: auto;
+  font-size: 22px;
+  white-space: nowrap;
+}
+.pocket-dish .venue-preorder-product-action {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+.pocket-dish .venue-preorder-product-action .venue-preorder-cart-quantity {
+  flex: 0 0 auto;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 16px;
+  background: #f3f4f4;
+}
+.pocket-dish .venue-preorder-product-action .venue-preorder-cart-quantity button {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .venue-preorder-product-action .venue-preorder-cart-quantity button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.pocket-dish .venue-preorder-product-action .venue-preorder-cart-quantity b {
+  min-width: 24px;
+  text-align: center;
+}
+.pocket-dish .venue-preorder-product-action > button {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 16px;
+  border: 0;
+  background: var(--dish-cta);
+  color: #fff;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+.pocket-dish .venue-preorder-product-action > button strong {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: inherit;
+}
+@media (max-width: 760px) {
+  .pocket-dish .venue-preorder-product-dialog {
+    inset: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    margin: 0;
+    border-radius: 28px 28px 0 0;
+    animation: venue-product-sheet-in 0.25s ease-out;
+  }
+  .pocket-dish .venue-preorder-product-main {
+    display: block;
+    padding: 0;
+  }
+  .pocket-dish .venue-preorder-product-image {
+    height: clamp(210px, 38dvh, 360px);
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+  .pocket-dish .venue-preorder-product-info {
+    padding: 22px 20px 26px;
+  }
+  .pocket-dish .venue-preorder-product-info > p {
+    font-size: 16px;
+    line-height: 1.45;
+  }
+  .pocket-dish .venue-preorder-product-handle {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 50%;
+    width: 100px;
+    height: 32px;
+    transform: translateX(-50%);
+    display: grid;
+    place-items: center;
+    touch-action: none;
+    cursor: grab;
+  }
+  .pocket-dish .venue-preorder-product-handle > span {
+    width: 36px;
+    height: 4px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.65);
+  }
+  .pocket-dish .venue-preorder-product-footer {
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+  .pocket-dish .venue-preorder-product-heading {
+    gap: 6px 8px;
+    margin-bottom: 18px;
+    padding-right: 0;
+  }
+  .pocket-dish .venue-preorder-product-heading h2 {
+    font-size: 20px;
+  }
+  .pocket-dish .venue-preorder-product-heading > span {
+    font-size: 14px;
+  }
+  .pocket-dish .venue-preorder-product-heading > strong {
+    font-size: 19px;
+  }
+  .pocket-dish .venue-preorder-product-action {
+    gap: 10px;
+  }
+  .pocket-dish .venue-preorder-product-action > button {
+    font-size: 16px;
+  }
+}
+@keyframes venue-product-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .venue-preorder-product-dialog {
+    animation: none;
+  }
+}
+
+.pocket-dish .venue-booking-card.venue-public-booking > .button:disabled,
+.pocket-dish .venue-booking-card.venue-public-booking > .button:disabled:hover {
+  background: var(--dish-card);
+  color: var(--dish-disabled);
+}
+
+@media (max-width: 1700px) {
+  .pocket-dish .venue-menu-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1400px) {
+  .pocket-dish .venue-menu-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1100px) {
+  .pocket-dish .venue-menu-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .pocket-dish .venue-detail-page {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "overview" "booking" "content";
+  }
+  .pocket-dish .venue-primary-column {
+    display: contents;
+  }
+  .pocket-dish .venue-overview-block {
+    grid-area: overview;
+  }
+  .pocket-dish .venue-detail-content {
+    grid-area: content;
+  }
+  .pocket-dish .venue-booking-card {
+    grid-area: booking;
+  }
+  .pocket-dish .venue-booking-card {
+    position: static;
+  }
+  .pocket-dish .venue-time-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  .pocket-dish .venue-menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .pocket-dish .venue-overview-block,
+  .pocket-dish .venue-detail-content {
+    border-radius: 18px;
+  }
+  .pocket-dish .venue-detail-summary {
+    min-height: 0;
+    padding: 20px;
+  }
+  .pocket-dish .venue-detail-heading h1 {
+    font-size: 30px;
+  }
+  .pocket-dish .venue-section-nav {
+    top: 128px;
+    margin: 0;
+    border-radius: 0;
+  }
+  .pocket-dish .venue-section-nav button {
+    min-height: 50px;
+    padding: 0 12px;
+  }
+  .pocket-dish .venue-detail-page,
+  .pocket-dish .venue-detail-content {
+    gap: 12px;
+  }
+  .pocket-dish .venue-booking-card {
+    padding: 20px;
+    border-radius: 18px;
+  }
+  .pocket-dish .venue-booking-card.venue-public-booking {
+    height: calc(100dvh - 56px);
+  }
+  .pocket-dish .venue-menu-section {
+    padding: 20px;
+  }
+  .pocket-dish .venue-time-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .pocket-dish .venue-menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .pocket-dish .venue-menu-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 420px) {
+  .pocket-dish .venue-facts small {
+    display: none;
+  }
+}
+
+/* Compact public venue page: contextual toolbar, sticky sections and a small bottom status. */
+@media (max-width: 760px) {
+  /* Keep Chrome's pull-to-refresh from reloading mobile Spots at the scroll boundary. */
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
+
+  /* Native dialogs and custom venue sheets must not scroll the page behind them. */
+  html:has(.pocket-dish dialog[open], .pocket-dish [aria-modal="true"]),
+  body:has(.pocket-dish dialog[open], .pocket-dish [aria-modal="true"]) {
+    overflow: hidden;
+  }
+
+  .pocket-dish.venue-detail-active .dish-catalog-header {
+    display: none;
+  }
+  .pocket-dish.venue-detail-active .dish-main {
+    background: #fff;
+  }
+  .pocket-dish.venue-detail-active .dish-page,
+  .pocket-dish.venue-detail-active.guest .dish-page {
+    width: 100%;
+    padding: 0;
+  }
+  .pocket-dish .dish-real-venue-detail {
+    padding: 0 0 calc(92px + env(safe-area-inset-bottom));
+  }
+  .pocket-dish .dish-real-venue-detail > .back-link {
+    display: none;
+  }
+  .pocket-dish .venue-mobile-toolbar {
+    position: sticky;
+    z-index: 30;
+    top: 0;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    background: #fff;
+  }
+  .pocket-dish .venue-mobile-toolbar button {
+    width: 44px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--dish-text);
+    cursor: pointer;
+  }
+  .pocket-dish .venue-mobile-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .pocket-dish .venue-mobile-toolbar-title {
+    position: absolute;
+    left: 50%;
+    max-width: calc(100% - 170px);
+    overflow: hidden;
+    color: var(--dish-text);
+    font-size: 15px;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: opacity 150ms ease;
+    pointer-events: none;
+  }
+  .pocket-dish .venue-mobile-toolbar.compact .venue-mobile-toolbar-title {
+    opacity: 1;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-detail-page,
+  .pocket-dish .dish-real-venue-detail .venue-primary-column {
+    display: block;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-overview-block,
+  .pocket-dish .dish-real-venue-detail .venue-detail-content {
+    overflow: visible;
+    border-radius: 0;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-photo {
+    display: none;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-detail-summary {
+    padding: 10px 16px 10px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-title-row .icon-button {
+    display: none;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-detail-heading h1 {
+    font-size: clamp(26px, 7vw, 32px);
+    line-height: 1.12;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-detail-heading > p {
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-facts {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0;
+    margin-top: 8px;
+    overflow: visible;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-facts > span,
+  .pocket-dish .dish-real-venue-detail .venue-desktop-info-wrap {
+    display: none;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-facts > span {
+    min-height: 40px;
+    flex: 0 0 auto;
+    padding: 0 12px;
+    border-radius: 0;
+    background: transparent;
+    color: var(--dish-text);
+    font-size: 13px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-facts > span:first-child {
+    padding-left: 0;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-facts > span + span {
+    border-left: 1px solid var(--dish-divider);
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-rating > span {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-rating {
+    min-height: 40px;
+    padding: 0;
+    background: transparent;
+    color: var(--dish-text);
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-rating b {
+    font-size: 14px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-rating small {
+    display: block;
+    color: var(--dish-muted);
+    font-size: 11px;
+    line-height: 1.1;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-detail-content {
+    display: block;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-category-nav {
+    position: sticky;
+    top: 56px;
+    z-index: 25;
+    display: flex;
+    gap: 2px;
+    padding: 0 10px;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: 0 8px 18px -10px rgba(23, 33, 43, 0.2);
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-category-nav button {
+    min-height: 52px;
+    padding: 0 10px;
+    font-size: 14px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-menu-content {
+    padding: 24px 16px 40px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-menu-category {
+    scroll-margin-top: 120px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-empty {
+    min-height: 92px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-menu-grid,
+  .pocket-dish .venue-mobile-search .venue-public-menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 12px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-menu-category > h2 {
+    font-size: 22px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-menu-photo,
+  .pocket-dish .venue-mobile-search .venue-public-menu-photo {
+    border-radius: 18px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-menu-copy strong,
+  .pocket-dish .venue-mobile-search .venue-public-menu-copy strong {
+    font-size: 14px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-about-photo {
+    height: 190px;
+    display: grid;
+    place-items: center;
+    margin-top: 18px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: var(--dish-gradient-restaurants);
+  }
+  .pocket-dish .dish-real-venue-detail .venue-about-photo.has-image {
+    background-position: center;
+    background-size: cover;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-about-photo img {
+    width: 150px;
+    height: auto;
+    object-fit: contain;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-booking {
+    display: flex;
+    margin: 16px 0;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-booking-shell {
+    display: none;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-booking-shell.open {
+    position: fixed;
+    z-index: 80;
+    inset: 0;
+    display: block;
+    background: #fff;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-booking-shell.open .venue-public-booking {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    margin: 0;
+    padding: calc(28px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+    border-radius: 0;
+  }
+  .pocket-dish .venue-public-booking-shell .venue-booking-heading {
+    padding-right: 48px;
+  }
+  .pocket-dish .venue-public-booking-shell .venue-calendar-popover {
+    right: auto;
+    left: 0;
+    width: min(300px, calc(100vw - 40px));
+  }
+  .pocket-dish .venue-public-booking-shell .venue-wish-options {
+    padding-right: 20px;
+    scroll-snap-type: x proximity;
+  }
+  .pocket-dish .venue-public-booking-shell .venue-wish-options button {
+    scroll-snap-align: start;
+  }
+  .pocket-dish .venue-mobile-booking-close {
+    position: fixed;
+    z-index: 81;
+    top: calc(21px + env(safe-area-inset-top));
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--dish-text);
+    cursor: pointer;
+  }
+  .pocket-dish .venue-mobile-booking-cta:not(.booking-open) {
+    position: fixed;
+    z-index: 40;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    background: #fff;
+    box-shadow: var(--dish-action-shadow);
+  }
+  .pocket-dish .venue-mobile-booking-cta button {
+    min-height: 52px;
+    border: 0;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: 750;
+    cursor: pointer;
+  }
+  .pocket-dish .venue-mobile-booking-cta .venue-mobile-booking-primary {
+    min-width: 0;
+    flex: 1;
+    background: var(--dish-cta);
+    color: #fff;
+  }
+  .pocket-dish .venue-mobile-booking-cta .venue-mobile-menu-view-toggle {
+    width: 52px;
+    flex: 0 0 52px;
+    display: grid;
+    place-items: center;
+    background: #eeeeee;
+    color: var(--dish-text);
+  }
+  .pocket-dish .venue-mobile-booking-cta .venue-mobile-menu-view-toggle:hover {
+    background: #e0e0e0;
+  }
+  .pocket-dish .venue-mobile-booking-cta .venue-mobile-menu-view-toggle:active {
+    background: #d4d4d4;
+  }
+  .pocket-dish .venue-mobile-booking-cta button:focus-visible {
+    outline: 2px solid var(--dish-cta);
+    outline-offset: 2px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-booking-status {
+    position: fixed;
+    z-index: 40;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    padding: 9px 16px calc(9px + env(safe-area-inset-bottom));
+    background: #fff;
+    box-shadow: var(--dish-action-shadow);
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-booking-status > span {
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: var(--dish-card);
+    color: var(--dish-muted);
+    font-size: 12px;
+    font-weight: 650;
+  }
+  .pocket-dish .dish-real-venue-detail.venue-search-active > .venue-mobile-toolbar,
+  .pocket-dish .dish-real-venue-detail.venue-search-active > .venue-detail-page {
+    display: none;
+  }
+  .pocket-dish .venue-mobile-search {
+    display: block;
+    min-height: 100dvh;
+    padding-bottom: 80px;
+    background: #fff;
+  }
+  .pocket-dish .venue-mobile-search-bar {
+    position: sticky;
+    z-index: 35;
+    top: 0;
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 12px 0 18px;
+    background: #fff;
+    box-shadow: 0 2px 9px rgba(23, 33, 43, 0.09);
+  }
+  .pocket-dish .venue-mobile-search-bar input {
+    min-width: 0;
+    flex: 1;
+    height: 44px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--dish-text);
+    font: inherit;
+    font-size: 14px;
+  }
+  .pocket-dish .venue-mobile-search-bar input::-webkit-search-cancel-button {
+    display: none;
+  }
+  .pocket-dish .venue-mobile-search-bar button {
+    display: grid;
+    flex: 0 0 auto;
+    place-items: center;
+    min-height: 40px;
+    border: 0;
+    background: transparent;
+    color: var(--dish-text);
+    cursor: pointer;
+  }
+  .pocket-dish .venue-mobile-search-bar .venue-search-clear {
+    width: 36px;
+    color: var(--dish-muted);
+  }
+  .pocket-dish .venue-mobile-search-bar .venue-search-cancel {
+    margin-left: 8px;
+    padding: 0 4px 0 13px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    font-size: 14px;
+  }
+  .pocket-dish .venue-search-results {
+    padding: 24px 16px;
+  }
+  .pocket-dish .venue-search-results > h2,
+  .pocket-dish .venue-search-no-results h2 {
+    margin: 0;
+    font-size: 20px;
+  }
+  .pocket-dish .venue-search-no-results {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 90px 0;
+    color: var(--dish-muted);
+    text-align: center;
+  }
+  .pocket-dish .venue-search-no-results h2 {
+    color: var(--dish-text);
+  }
+  .pocket-dish .venue-search-no-results p {
+    margin: 0;
+    font-size: 14px;
+  }
+  .pocket-dish .venue-info-overlay {
+    position: fixed;
+    z-index: 70;
+    inset: 0;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    background: rgba(0, 0, 0, 0.5);
+    animation: dish-venue-info-backdrop-in 240ms ease-out both;
+  }
+  .pocket-dish .venue-info-sheet {
+    width: 100%;
+    max-height: min(80dvh, 720px);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    padding: 12px 20px calc(28px + env(safe-area-inset-bottom));
+    border-radius: 24px 24px 0 0;
+    background: #fff;
+    box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.1);
+    animation: dish-venue-info-sheet-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    transition: transform 180ms ease;
+  }
+  .pocket-dish .venue-info-sheet.dragging {
+    transition: none;
+  }
+  .pocket-dish .venue-info-handle {
+    width: 36px;
+    height: 4px;
+    display: block;
+    margin: 0 auto 14px;
+    border-radius: 4px;
+    background: #d8dde1;
+  }
+  .pocket-dish .venue-info-close {
+    float: right;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--dish-card);
+    color: var(--dish-text);
+    cursor: pointer;
+  }
+  .pocket-dish .venue-info-sheet h2 {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0 40px 18px 0;
+    font-size: 22px;
+    clip-path: none;
+    white-space: normal;
+  }
+  .pocket-dish .venue-info-sheet h3 {
+    margin: 0 0 16px;
+    font-size: 17px;
+  }
+  .pocket-dish .venue-info-group {
+    padding: 18px 0;
+    border-top: 1px solid var(--dish-divider);
+  }
+  .pocket-dish .venue-info-group > strong {
+    font-size: 15px;
+  }
+  .pocket-dish .venue-info-group > p {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 10px 0 0;
+    color: var(--dish-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .pocket-dish .venue-info-group > p > svg {
+    flex: 0 0 auto;
+  }
+  .pocket-dish .venue-reviews-overlay {
+    align-items: stretch;
+    padding: 0;
+  }
+  .pocket-dish .venue-reviews-dialog {
+    width: 100%;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+  .pocket-dish .venue-reviews-dialog > header {
+    padding: 18px 16px 8px;
+  }
+  .pocket-dish .venue-reviews-score {
+    padding: 20px 16px 24px;
+  }
+  .pocket-dish .venue-reviews-list {
+    padding: 22px 16px calc(30px + env(safe-area-inset-bottom));
+  }
+}
+@keyframes dish-venue-info-backdrop-in {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+  to {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+@keyframes dish-venue-info-sheet-in {
+  from {
+    translate: 0 100%;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .venue-info-overlay,
+  .pocket-dish .venue-info-sheet {
+    animation: none;
+  }
+}
+
+.pocket-dish .my-reservations-groups {
+  display: grid;
+  gap: 32px;
+}
+.pocket-dish .my-reservations-groups h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+.pocket-dish .my-reservations-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.pocket-dish .my-reservation-card {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  height: 224px;
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--dish-card);
+  min-width: 0;
+}
+.pocket-dish .my-reservation-card header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.pocket-dish .my-reservation-card header > div {
+  min-width: 0;
+}
+.pocket-dish .my-reservation-card h3 {
+  font-size: 22px;
+  margin: 0 0 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pocket-dish .my-reservation-card header p {
+  color: var(--dish-secondary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pocket-dish .my-reservation-details-link {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 14px;
+  background: #eeeeee;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .my-reservation-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin: 20px 0 12px;
+  color: var(--dish-secondary);
+  font-size: 14px;
+}
+.pocket-dish .my-reservation-status {
+  padding: 6px 12px;
+  border-radius: 18px;
+  background: #eeeeee;
+  color: var(--dish-text);
+}
+.pocket-dish .my-reservation-status.confirmed,
+.pocket-dish .my-reservation-status.seated {
+  background: #e0f3fd;
+  color: #007fb7;
+}
+.pocket-dish .my-reservation-schedule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: auto;
+  font-size: 14px;
+}
+.pocket-dish .my-reservation-when {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pocket-dish .my-reservation-when > svg,
+.pocket-dish .my-reservation-guests > svg {
+  flex: 0 0 auto;
+}
+.pocket-dish .my-reservation-when time {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  line-height: 1.35;
+}
+.pocket-dish .my-reservation-when time span {
+  color: var(--dish-secondary);
+}
+.pocket-dish .my-reservation-when time strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.pocket-dish .my-reservation-guests {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.pocket-dish .my-reservation-panel {
+  position: fixed;
+  inset: 16px 16px 16px auto;
+  width: min(440px, calc(100vw - 32px));
+  height: calc(100dvh - 32px);
+  max-width: none;
+  max-height: none;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 26px;
+  background: #fff;
+  color: var(--dish-text);
+  box-shadow: none;
+  overflow: hidden;
+}
+.pocket-dish .my-reservation-panel[open] {
+  display: flex;
+  flex-direction: column;
+  animation: desktop-booking-slide 220ms ease-out both;
+}
+.pocket-dish .my-reservation-panel::backdrop {
+  background: rgba(22, 28, 34, 0.45);
+  animation: desktop-booking-fade 180ms ease-out both;
+}
+.pocket-dish .my-reservation-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px 12px;
+}
+.pocket-dish .my-reservation-panel-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.pocket-dish .my-reservation-panel-header button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .my-reservation-panel-scroll {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: 8px 24px 28px;
+}
+.pocket-dish .my-reservation-panel-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 0 28px;
+  text-align: center;
+}
+.pocket-dish .my-reservation-date {
+  display: flex;
+  flex-direction: column;
+  min-width: 68px;
+  overflow: hidden;
+  border-radius: 15px;
+  background: #f5f4f2;
+}
+.pocket-dish .my-reservation-date span {
+  padding: 4px 8px;
+  background: var(--dish-cta);
+  color: #fff;
+  font-size: 13px;
+}
+.pocket-dish .my-reservation-date strong {
+  padding: 4px 12px 8px;
+  font-size: 36px;
+  line-height: 1.2;
+}
+.pocket-dish .my-reservation-panel-summary h3 {
+  margin: 0;
+  font-size: 28px;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .my-reservation-panel-summary p {
+  margin: 0;
+  font-size: 20px;
+}
+.pocket-dish .my-reservation-panel-summary small {
+  color: var(--dish-secondary);
+  line-height: 1.5;
+}
+.pocket-dish .my-reservation-cancellation {
+  margin: 0 0 24px;
+}
+.pocket-dish .my-reservation-cancellation h3 {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+.pocket-dish .my-reservation-cancellation p {
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.pocket-dish .my-reservation-cancellation .button {
+  width: 100%;
+  min-height: 52px;
+  justify-content: center;
+  border-radius: var(--control-radius) !important;
+  font-size: 16px;
+  font-weight: 700;
+}
+.pocket-dish .my-reservation-cancellation .button.danger:not(:disabled) {
+  background: var(--dish-error);
+  color: #fff;
+}
+.pocket-dish .my-reservation-cancellation .button.danger:hover:not(:disabled) {
+  background: #a92d35;
+}
+.pocket-dish .my-reservation-cancellation .button.danger:active:not(:disabled) {
+  background: #8f2630;
+}
+.pocket-dish .my-reservation-cancellation .button svg {
+  flex-shrink: 0;
+}
+.pocket-dish .my-reservation-cancel-actions {
+  display: grid;
+  gap: 10px;
+}
+.pocket-dish .my-reservation-cancellation-unavailable {
+  margin: 0 0 24px;
+  color: var(--dish-secondary);
+  line-height: 1.5;
+}
+.pocket-dish .my-reservation-cancel-success {
+  padding: 14px 16px;
+  margin: 0 0 24px;
+  border-radius: 14px;
+  background: #e0f3fd;
+  color: #007fb7;
+  line-height: 1.5;
+}
+.pocket-dish .my-reservation-cancel-error {
+  color: #b22d25;
+}
+.pocket-dish .my-reservation-preorder-cancelled {
+  color: var(--dish-secondary);
+}
+.pocket-dish .my-reservation-panel-section {
+  padding: 22px 0;
+  border-top: 1px solid var(--dish-divider);
+  overflow-wrap: anywhere;
+}
+.pocket-dish .my-reservation-panel-section h3 {
+  font-size: 22px;
+  margin: 0 0 14px;
+}
+.pocket-dish .my-reservation-panel-section p {
+  margin: 0 0 14px;
+}
+.pocket-dish .my-reservation-panel-section .my-reservation-comment-value {
+  padding: 18px;
+  margin: 0;
+  border-radius: 18px;
+  background: #f5f4f2;
+  white-space: pre-wrap;
+}
+.pocket-dish .my-reservation-contacts {
+  display: grid;
+  gap: 6px;
+}
+.pocket-dish .my-reservation-contacts span {
+  color: var(--dish-secondary);
+}
+.pocket-dish .my-reservation-preorder ul {
+  display: grid;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.pocket-dish .my-reservation-preorder li,
+.pocket-dish .my-reservation-preorder > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.pocket-dish .my-reservation-preorder strong {
+  white-space: nowrap;
+}
+.pocket-dish .my-reservation-preorder > div {
+  margin-top: 20px;
+}
+@media (max-width: 1199px) {
+  .pocket-dish .my-reservations-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 799px) {
+  .pocket-dish .my-reservations-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .pocket-dish .my-reservation-card {
+    height: 236px;
+    padding: 20px;
+    border-radius: 20px;
+  }
+  .pocket-dish .my-reservation-card h3 {
+    font-size: 20px;
+  }
+  .pocket-dish .my-reservation-panel {
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    border-radius: 0;
+  }
+  .pocket-dish .my-reservation-panel-header {
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+  .pocket-dish .my-reservation-panel-scroll {
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .my-reservation-panel[open],
+  .pocket-dish .my-reservation-panel::backdrop {
+    animation: none;
+  }
+}
+
+.pocket-dish .my-reservations-count {
+  margin: 0 0 24px;
+  color: var(--dish-secondary);
+  font-size: 14px;
+}
+
+.pocket-dish .dish-picker-content .dish-filter-group + .dish-filter-group {
+  margin-top: 20px;
+}
+
+/* Hide scrollbars without disabling page, panel, or horizontal content scrolling. */
+html,
+body,
+.pocket-dish,
+.pocket-dish * {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.pocket-dish::-webkit-scrollbar,
+.pocket-dish *::-webkit-scrollbar {
+  display: none;
+}
+
+.pocket-dish .mobile-booking-flow .venue-booking-heading {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  background: #fff;
+}
+.pocket-dish .mobile-booking-back {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #eeeeee;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .mobile-booking-flow .venue-booking-heading h2 {
+  margin: 0;
+  font-size: clamp(14px, 4.5vw, 18px);
+  white-space: nowrap;
+}
+.pocket-dish .mobile-booking-footer {
+  flex-shrink: 0;
+  padding-top: 16px;
+  background: #fff;
+}
+.pocket-dish .mobile-booking-footer .venue-booking-submit {
+  width: 100%;
+  margin: 0;
+}
+.pocket-dish .mobile-preorder-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--dish-card);
+  font-size: 14px;
+}
+.pocket-dish .mobile-preorder-summary strong,
+.pocket-dish .mobile-preorder-summary span {
+  white-space: nowrap;
+}
+.pocket-dish .mobile-preorder-summary span {
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-public-menu-photo {
+  position: relative;
+}
+.pocket-dish .venue-preorder-product-open {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.pocket-dish .venue-preorder-card-control {
+  position: absolute;
+  z-index: 2;
+  right: 8px;
+  bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #fff;
+}
+.pocket-dish .venue-preorder-card-control.has-items {
+  left: 8px;
+}
+.pocket-dish .venue-preorder-card-control button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: transparent;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .venue-preorder-card-control b {
+  min-width: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.pocket-dish .venue-preorder-card-control button {
+  border: 0;
+  border-radius: 50%;
+}
+.pocket-dish .venue-preorder-card-control button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pocket-dish .mobile-booking-back {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  background: #fff;
+}
+.pocket-dish .mobile-booking-back:hover,
+.pocket-dish .venue-mobile-booking-close:hover,
+.pocket-dish .venue-preorder-card-control button:hover {
+  background: #eeeeee;
+}
+.pocket-dish .mobile-booking-flow .mobile-preorder-top .mobile-preorder-categories {
+  position: static;
+  top: auto;
+  z-index: auto;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.pocket-dish .mobile-preorder-menu {
+  padding-top: 24px;
+}
+.pocket-dish .mobile-booking-flow .mobile-preorder-menu .venue-public-menu-category > h2 {
+  font-size: 22px;
+}
+
+.pocket-dish .venue-public-menu-image-label {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.pocket-dish .venue-preorder-product-open {
+  border: 0;
+  border-radius: inherit;
+}
+.pocket-dish .venue-detail-page .venue-preorder-product-open:focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 3px;
+  background: transparent;
+}
+
+/* Use the same blue style only for large progression and booking actions. */
+.pocket-dish
+  .venue-detail-page
+  :is(.venue-booking-submit, .venue-booking-next, .venue-mobile-booking-primary),
+.pocket-dish :is(.venue-booking-submit, .venue-booking-next, .venue-mobile-booking-primary),
+.pocket-dish .venue-booking-card > .button,
+.pocket-dish .venue-mobile-booking-cta .venue-mobile-booking-primary,
+.pocket-dish .venue-preorder-cart-footer button,
+.pocket-dish .venue-preorder-product-action > button {
+  border: 0;
+  border-radius: var(--control-radius) !important;
+  background: var(--dish-cta);
+  color: #fff;
+  transition: background-color 160ms ease;
+}
+.pocket-dish .venue-detail-page :is(.venue-booking-submit, .venue-booking-next),
+.pocket-dish .venue-booking-submit,
+.pocket-dish .venue-booking-card > .button,
+.pocket-dish .venue-mobile-booking-cta .venue-mobile-booking-primary,
+.pocket-dish .venue-preorder-cart-footer button,
+.pocket-dish .venue-preorder-product-action > button {
+  box-sizing: border-box;
+  min-height: var(--dish-action-height);
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+.pocket-dish .mobile-booking-footer {
+  margin-right: -8px;
+  margin-left: -8px;
+}
+.pocket-dish
+  .venue-detail-page
+  :is(.venue-booking-submit, .venue-booking-next, .venue-mobile-booking-primary):hover:not(
+    :disabled
+  ),
+.pocket-dish .venue-booking-card > .button:hover:not(:disabled),
+.pocket-dish .venue-mobile-booking-cta .venue-mobile-booking-primary:hover:not(:disabled),
+.pocket-dish .venue-preorder-cart-footer button:hover:not(:disabled),
+.pocket-dish .venue-preorder-product-action > button:hover:not(:disabled) {
+  background: var(--dish-cta-hover);
+  color: #fff;
+}
+.pocket-dish
+  .venue-detail-page
+  :is(.venue-booking-submit, .venue-booking-next, .venue-mobile-booking-primary):disabled,
+.pocket-dish .venue-booking-card > .button:disabled {
+  background: var(--dish-card);
+  color: var(--dish-disabled);
+  cursor: default;
+}
+.pocket-dish .mobile-preorder-top {
+  flex-shrink: 0;
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  background: #fff;
+}
+.pocket-dish .mobile-booking-flow.preorder-step .mobile-preorder-top {
+  position: relative;
+  z-index: 2;
+}
+.pocket-dish .mobile-booking-flow.preorder-step .mobile-booking-footer {
+  position: relative;
+  z-index: 2;
+}
+.pocket-dish .mobile-preorder-top .mobile-preorder-categories {
+  margin-bottom: 0;
+}
+
+.pocket-dish
+  .venue-public-booking-shell:has(.mobile-booking-flow.preorder-step)
+  > .venue-mobile-booking-close {
+  display: none;
+}
+.pocket-dish .mobile-booking-flow.preorder-step .venue-booking-heading {
+  padding-right: 0;
+}
+.pocket-dish .mobile-booking-flow.preorder-step .venue-booking-heading h2 {
+  flex: 1;
+  min-width: 0;
+}
+.pocket-dish .mobile-booking-inline-close {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .mobile-booking-inline-close:hover {
+  background: #eeeeee;
+}
+
+.pocket-dish .venue-booking-submit.venue-preorder-payment-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--dish-action-height);
+  padding: 14px 20px;
+  text-align: left;
+}
+.pocket-dish .venue-preorder-payment-button strong {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: inherit;
+}
+.pocket-dish .mobile-booking-review {
+  margin-top: 20px;
+  overflow: visible;
+}
+.pocket-dish .mobile-booking-review h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.pocket-dish .mobile-booking-review .desktop-booking-summary {
+  margin-top: 0;
+}
+.pocket-dish .mobile-booking-review .desktop-booking-notes p {
+  margin: 8px 0 0;
+  color: var(--dish-secondary);
+  font-size: 14px;
+}
+
+/* QR entry reuses the venue menu and adds a table-scoped order panel. */
+.pocket-dish .dish-real-venue-detail.venue-table-mode {
+  padding-left: 0;
+}
+.pocket-dish .venue-table-order-panel {
+  min-width: 0;
+  padding: 24px;
+  border-radius: 24px;
+  background: #fff;
+  color: var(--dish-text);
+}
+.pocket-dish .venue-table-order-panel > header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.pocket-dish .venue-table-order-panel h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+.pocket-dish .venue-table-order-panel header p {
+  margin: 0;
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-table-order-panel .venue-table-cart-table {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: var(--dish-card);
+  font-size: 13px;
+}
+.pocket-dish .venue-table-order-panel header button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.pocket-dish .venue-table-cart-empty {
+  display: grid;
+  justify-items: center;
+  padding: 32px 0;
+  color: var(--dish-secondary);
+  text-align: center;
+}
+.pocket-dish .venue-table-cart-items {
+  display: grid;
+  gap: 20px;
+  margin: 24px 0;
+}
+.pocket-dish .venue-table-cart-items article {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+.pocket-dish .venue-table-cart-image {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: var(--dish-card) center / cover;
+}
+.pocket-dish .venue-table-cart-items strong {
+  display: block;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .venue-table-cart-items small {
+  display: block;
+  margin-top: 5px;
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-table-cart-items .venue-preorder-cart-quantity {
+  grid-column: 2;
+  justify-self: end;
+}
+.pocket-dish
+  :is(.venue-table-cart-items, .venue-table-repeat-review)
+  .venue-preorder-cart-quantity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--dish-card);
+}
+.pocket-dish
+  :is(.venue-table-cart-items, .venue-table-repeat-review)
+  .venue-preorder-cart-quantity
+  button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish
+  :is(.venue-table-cart-items, .venue-table-repeat-review)
+  .venue-preorder-cart-quantity
+  button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.pocket-dish
+  :is(.venue-table-cart-items, .venue-table-repeat-review)
+  .venue-preorder-cart-quantity
+  b {
+  min-width: 20px;
+  text-align: center;
+}
+.pocket-dish .venue-table-order-notes {
+  display: grid;
+  gap: 10px;
+  margin: 24px 0;
+  font-weight: 600;
+}
+.pocket-dish .venue-table-order-notes textarea {
+  width: 100%;
+  min-height: 84px;
+  padding: 12px;
+  resize: vertical;
+  border: 0;
+  border-radius: 12px;
+  background: var(--dish-card);
+  font: inherit;
+  font-weight: 400;
+}
+.pocket-dish .venue-table-order-panel footer {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+}
+.pocket-dish .venue-table-cart-footer .button.primary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  background: var(--dish-cta);
+  color: #fff;
+}
+.pocket-dish .venue-table-cart-footer .button.primary:hover:not(:disabled) {
+  background: var(--dish-cta-hover);
+}
+.pocket-dish .venue-table-cart-footer .button.primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.pocket-dish .venue-table-cart-footer .button strong {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: inherit;
+}
+.pocket-dish .venue-table-cart-footer .button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pocket-dish .venue-table-order-panel footer small {
+  text-align: center;
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-table-order-panel .button {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--dish-action-height);
+  padding: 14px 20px;
+  border-radius: var(--control-radius) !important;
+  font-size: 16px;
+  font-weight: 750;
+  line-height: 1.25;
+}
+.pocket-dish .venue-table-order-panel .button.primary:focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 3px;
+  background: var(--dish-cta);
+  color: #fff;
+}
+.pocket-dish .venue-table-order-panel.receipt-view {
+  background: #f5f5f5;
+}
+.pocket-dish .venue-table-order-result {
+  position: relative;
+  padding: 24px 20px 20px;
+  margin: 0 0 24px;
+  border: 1px solid #eceeef;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  background: #fff;
+}
+.pocket-dish .venue-table-order-result::after {
+  position: absolute;
+  right: -1px;
+  bottom: -12px;
+  left: -1px;
+  height: 12px;
+  background: radial-gradient(circle at 6px 12px, transparent 6px, #fff 6.5px) 0 0 / 12px 12px
+    repeat-x;
+  content: "";
+}
+.pocket-dish .venue-table-receipt-status {
+  text-align: center;
+}
+.pocket-dish .venue-table-receipt-status > svg {
+  display: block;
+  margin: 0 auto 12px;
+  color: #28865b;
+}
+.pocket-dish .venue-table-receipt-status.cancelled > svg {
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-table-order-result h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.3;
+}
+.pocket-dish .venue-table-receipt-status p {
+  margin: 8px 0 0;
+  color: var(--dish-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pocket-dish .venue-table-receipt-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 12px;
+  padding: 18px 0;
+  border-bottom: 1px dashed #d9dddf;
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .venue-table-order-result ul {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  margin: 20px 0;
+  list-style: none;
+}
+.pocket-dish .venue-table-order-result li {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+.pocket-dish .venue-table-order-result li span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .venue-table-order-result li small {
+  display: block;
+  margin-top: 5px;
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .venue-table-order-result li strong {
+  white-space: nowrap;
+}
+.pocket-dish .venue-table-receipt-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px dashed #d9dddf;
+  font-size: 16px;
+}
+.pocket-dish .venue-table-receipt-total strong {
+  font-size: 22px;
+  white-space: nowrap;
+}
+.pocket-dish .venue-table-receipt-payment {
+  margin: 16px 0 0;
+  color: var(--dish-secondary);
+  font-size: 12px;
+  text-align: center;
+}
+.pocket-dish .venue-table-order-result-notes {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px dashed #d9dddf;
+  font-size: 12px;
+}
+.pocket-dish .venue-table-order-result-notes p {
+  margin: 8px 0 0;
+  color: var(--dish-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .venue-table-history-trigger {
+  position: fixed;
+  z-index: 40;
+  right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 1px solid #eceeef;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--dish-text);
+  box-shadow: 0 4px 18px rgba(23, 33, 43, 0.15);
+  cursor: pointer;
+}
+.pocket-dish .venue-table-history-trigger:hover {
+  background: var(--dish-card);
+}
+.pocket-dish :is(.venue-table-history-trigger, .venue-table-mobile-cta button):focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 3px;
+}
+.pocket-dish .venue-table-mobile-cta {
+  display: none;
+}
+.pocket-dish .venue-table-history-dialog header > div {
+  flex: 1;
+  min-width: 0;
+}
+.pocket-dish .venue-table-history-dialog h2 {
+  margin: 0;
+  font-size: 22px;
+}
+.pocket-dish .venue-table-history-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pocket-dish .venue-table-history-list button {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 16px;
+  width: 100%;
+  padding: 18px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--dish-card);
+  color: var(--dish-text);
+  text-align: left;
+  cursor: pointer;
+}
+.pocket-dish .venue-table-history-copy,
+.pocket-dish .venue-table-history-amount {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.pocket-dish .venue-table-history-copy strong {
+  font-size: 16px;
+  font-weight: 650;
+}
+.pocket-dish .venue-table-history-copy time {
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .venue-table-history-amount {
+  justify-items: end;
+}
+.pocket-dish .venue-table-history-amount b {
+  font-size: 17px;
+  white-space: nowrap;
+}
+.pocket-dish .venue-table-history-status {
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .venue-table-history-status:is(.completed, .served) {
+  color: var(--dish-success);
+}
+.pocket-dish .venue-table-history-status.cancelled {
+  color: var(--dish-error);
+}
+.pocket-dish .venue-table-history-images {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 7px;
+}
+.pocket-dish .venue-table-history-image {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  background: #fff center / cover no-repeat;
+  color: var(--dish-secondary);
+}
+.pocket-dish .venue-table-history-extra {
+  font-size: 12px;
+  font-weight: 650;
+}
+.pocket-dish .venue-table-history-list button:focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 3px;
+}
+.pocket-dish .venue-table-order-dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  color: var(--dish-text);
+  background: #fff;
+}
+.pocket-dish .venue-table-order-dialog::backdrop {
+  background: rgba(32, 40, 49, 0.45);
+}
+@media (max-width: 760px) {
+  .pocket-dish .venue-table-mode .venue-detail-page > .venue-table-order-panel {
+    display: none;
+  }
+  .pocket-dish .venue-table-mode .venue-mobile-toolbar {
+    justify-content: space-between;
+    padding: 0 12px 0 16px;
+  }
+  .pocket-dish .venue-table-mode .venue-mobile-toolbar-title {
+    left: 50%;
+    max-width: calc(100% - 156px);
+    font-size: 15px;
+    transform: translateX(-50%);
+  }
+  .pocket-dish .venue-table-mobile-cta {
+    position: fixed;
+    z-index: 40;
+    left: 50%;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    display: block;
+    max-width: calc(100vw - 184px);
+    transform: translateX(-50%);
+  }
+  .pocket-dish .venue-table-mobile-cta button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    max-width: 100%;
+    height: 64px;
+    padding: 14px 22px;
+    border: 0;
+    border-radius: 999px !important;
+    background: var(--dish-cta);
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(23, 33, 43, 0.12);
+    font-size: 18px;
+    font-weight: 750;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .pocket-dish .venue-table-mobile-cta strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pocket-dish .venue-table-mobile-cta svg {
+    flex-shrink: 0;
+  }
+  .pocket-dish .venue-table-mobile-cta button:hover {
+    background: var(--dish-cta-hover);
+  }
+  .pocket-dish .venue-table-history-trigger {
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+  .pocket-dish .venue-table-order-dialog {
+    width: 100%;
+    height: 100dvh;
+    max-width: none;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+  }
+  .pocket-dish .venue-table-order-dialog .venue-table-order-panel {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    border-radius: 0;
+  }
+  .pocket-dish .venue-table-order-dialog header {
+    flex-shrink: 0;
+    margin: 0;
+    padding: calc(24px + env(safe-area-inset-top)) 16px 16px;
+  }
+  .pocket-dish .venue-table-order-dialog .venue-table-cart-body {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px calc(24px + env(safe-area-inset-bottom));
+    overscroll-behavior-y: contain;
+  }
+  .pocket-dish .venue-table-order-dialog .receipt-view .venue-table-cart-body {
+    padding-top: 20px;
+  }
+  .pocket-dish .venue-table-order-dialog .receipt-view > header {
+    background: #fff;
+  }
+  .pocket-dish .venue-table-order-dialog .venue-table-cart-items {
+    margin-top: 8px;
+  }
+  .pocket-dish .venue-table-order-dialog .venue-table-cart-items article {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+  .pocket-dish .venue-table-order-dialog .venue-preorder-cart-quantity {
+    grid-column: 3;
+  }
+  .pocket-dish .venue-table-order-dialog footer {
+    flex-shrink: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: #fff;
+    box-shadow: 0 -8px 24px rgba(23, 33, 43, 0.06);
+  }
+  .pocket-dish .venue-table-order-dialog .venue-table-cart-body > .venue-table-cart-footer {
+    padding: 24px 0 0;
+    box-shadow: none;
+  }
+  .pocket-dish .venue-table-order-dialog footer .button {
+    min-height: var(--dish-action-height);
+  }
+}
+@media (max-width: 360px) {
+  .pocket-dish .venue-table-mobile-cta button {
+    gap: 8px;
+    padding-right: 12px;
+    padding-left: 12px;
+    font-size: 16px;
+  }
+  .pocket-dish .venue-table-order-dialog .venue-table-cart-items article {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+  .pocket-dish .venue-table-order-dialog .venue-preorder-cart-quantity {
+    grid-column: 2;
+  }
+}
+
+/* A single confirmation layout for desktop and mobile bookings. */
+.pocket-dish .venue-booking-confirmed.booking-confirmation {
+  gap: 28px;
+  padding: 40px 36px 32px;
+  text-align: center;
+}
+.pocket-dish .booking-confirmation-brand {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+}
+.pocket-dish .booking-confirmation .booking-confirmation-venue {
+  margin: 4px 0 0;
+  font-size: 28px;
+  font-weight: 750;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .booking-confirmation-brand h2 {
+  margin: 0;
+  color: var(--dish-cta);
+  font-size: 15px;
+  font-weight: 600;
+}
+.pocket-dish .booking-confirmation-visit {
+  display: grid;
+  gap: 10px;
+}
+.pocket-dish .booking-confirmation-visit .booking-confirmation-guest {
+  margin-bottom: 8px;
+  color: var(--dish-secondary);
+  font-size: 20px;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .booking-confirmation-date,
+.pocket-dish .booking-confirmation-time {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+.pocket-dish .booking-confirmation-meta {
+  display: grid;
+  gap: 6px;
+  color: var(--dish-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .booking-confirmation-preorder {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 16px;
+  background: #f6f7f8;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pocket-dish .booking-confirmation-preorder h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+.pocket-dish .booking-confirmation-preorder strong {
+  margin-top: 4px;
+  font-size: 18px;
+}
+.pocket-dish .booking-confirmation-payment {
+  color: var(--dish-secondary);
+}
+.pocket-dish .desktop-booking-flow.checkout-open.confirmation-open {
+  overflow-y: auto;
+}
+.pocket-dish .desktop-booking-flow.checkout-open.confirmation-open .booking-confirmation {
+  flex: 0 0 auto;
+  margin: 12px auto;
+  max-height: none;
+}
+.pocket-dish .booking-confirmation .venue-booking-submit {
+  margin-top: 0;
+}
+@media (max-width: 760px) {
+  .pocket-dish .venue-booking-confirmed.booking-confirmation {
+    padding: 28px 8px 20px;
+    gap: 26px;
+  }
+  .pocket-dish .booking-confirmation .booking-confirmation-venue {
+    font-size: 26px;
+  }
+  .pocket-dish .booking-confirmation-date,
+  .pocket-dish .booking-confirmation-time {
+    font-size: 18px;
+  }
+}
+
+.pocket-dish .mobile-booking-flow.confirmation-open {
+  overflow-y: auto;
+}
+.pocket-dish .mobile-booking-flow.confirmation-open .booking-confirmation {
+  flex: 0 0 auto;
+}
+
+/* Venue history and a review step before a repeated order enters the cart. */
+.pocket-dish .venue-table-repeat-review {
+  display: grid;
+  gap: 20px;
+  padding-top: 8px;
+}
+.pocket-dish .venue-table-repeat-review > article {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.pocket-dish .venue-table-repeat-review .venue-table-cart-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+}
+.pocket-dish .venue-table-repeat-copy {
+  min-width: 0;
+}
+.pocket-dish .venue-table-repeat-copy > strong {
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.pocket-dish .venue-table-repeat-price {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.pocket-dish .venue-table-repeat-review small {
+  display: block;
+  margin-top: 6px;
+  color: var(--dish-secondary);
+  font-size: 12px;
+}
+.pocket-dish .venue-table-repeat-notice {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--dish-card);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.pocket-dish .venue-table-repeat-notice p {
+  margin: 6px 0 0;
+}
+.pocket-dish .venue-table-repeat-footer {
+  display: grid;
+  gap: 10px;
+  flex-shrink: 0;
+  padding-top: 18px;
+  background: #fff;
+}
+.pocket-dish .venue-table-repeat-footer .button {
+  width: 100%;
+  min-height: var(--dish-action-height);
+  justify-content: center;
+  border-radius: var(--control-radius);
+}
+.pocket-dish .venue-table-repeat-footer .primary {
+  background: var(--dish-cta);
+  color: #fff;
+}
+.pocket-dish .venue-table-repeat-footer .primary:disabled {
+  background: var(--dish-card);
+  color: var(--dish-disabled);
+}
+.pocket-dish .venue-table-repeat-footer .button.secondary {
+  padding: 14px 20px;
+  border: 0;
+  background: var(--dish-active);
+  color: var(--dish-cta);
+  font-size: 16px;
+  font-weight: 750;
+}
+.pocket-dish .venue-table-repeat-footer .button.secondary:hover:not(:disabled) {
+  background: #d1edfd;
+  color: var(--dish-cta-hover);
+}
+.pocket-dish .venue-table-repeat-footer .button.secondary:focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 3px;
+}
+.pocket-dish .venue-table-repeat-footer .button.secondary:disabled {
+  background: var(--dish-card);
+  color: var(--dish-disabled);
+}
+.pocket-dish .venue-table-repeat-footer small {
+  color: var(--dish-secondary);
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+.pocket-dish .venue-table-history-more {
+  width: 100%;
+  justify-content: center;
+  margin-top: 16px;
+}
+@media (max-width: 360px) {
+  .pocket-dish .venue-table-repeat-review > article {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+  .pocket-dish .venue-table-repeat-review .venue-table-cart-image {
+    width: 64px;
+    height: 64px;
+    grid-row: 1 / 3;
+  }
+  .pocket-dish .venue-table-repeat-review .venue-preorder-cart-quantity {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+/* Inline table-order tips; only the custom amount opens a dialog. */
+.pocket-dish .dish-tip-picker {
+  border: 0;
+  padding: 0;
+  margin: 24px 0 12px;
+  min-width: 0;
+}
+.pocket-dish .dish-tip-input-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.pocket-dish .dish-tip-picker:disabled {
+  opacity: 0.6;
+}
+.pocket-dish .dish-tip-dialog {
+  box-sizing: border-box;
+  width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 24px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 0;
+  border-radius: 28px;
+  background: #fff;
+  color: var(--dish-text);
+  box-shadow: 0 24px 80px rgba(23, 33, 43, 0.12);
+}
+html:has(.pocket-dish .dish-tip-dialog[open]),
+body:has(.pocket-dish .dish-tip-dialog[open]) {
+  overflow: hidden;
+}
+.pocket-dish .dish-tip-dialog[open] {
+  animation: dish-tip-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.pocket-dish .dish-tip-dialog::backdrop {
+  background: rgba(32, 40, 49, 0.32);
+  animation: dish-tip-backdrop-in 0.25s ease-out;
+}
+.pocket-dish .dish-tip-dialog .dish-tip-form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 24px;
+}
+.pocket-dish .dish-tip-form-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.pocket-dish .dish-tip-dialog .dish-tip-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50% !important;
+  background: #f6f7f9;
+  color: #9199a6;
+  cursor: pointer;
+}
+.pocket-dish .dish-tip-custom {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+.pocket-dish .dish-tip-custom > span:not(.dish-tip-input-label) {
+  color: #b4bac5;
+  font-size: 42px;
+  font-weight: 650;
+}
+.pocket-dish .dish-tip-dialog .dish-tip-custom input {
+  box-sizing: border-box;
+  width: 6ch;
+  max-width: calc(100% - 52px);
+  min-height: 68px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--dish-text);
+  caret-color: var(--dish-cta);
+  font-size: 48px;
+  font-weight: 650;
+  line-height: 1.3;
+  text-align: center;
+}
+.pocket-dish .dish-tip-custom input::placeholder {
+  color: #d0d4dc;
+  opacity: 1;
+}
+.pocket-dish .dish-tip-dialog .dish-tip-save {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--dish-action-height);
+  margin: 28px 0 0;
+  padding: 14px 20px;
+  border: 0;
+  border-radius: var(--control-radius) !important;
+  background: var(--dish-cta);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.pocket-dish .dish-tip-dialog .dish-tip-save:hover:not(:disabled) {
+  background: var(--dish-cta-hover);
+}
+.pocket-dish .dish-tip-dialog .dish-tip-save:disabled {
+  background: #aecddd;
+  color: #fff;
+  cursor: default;
+}
+.pocket-dish .dish-tip-dialog button:focus-visible,
+.pocket-dish .dish-tip-picker button:focus-visible {
+  outline: 2px solid var(--dish-cta);
+  outline-offset: 2px;
+}
+.pocket-dish .dish-tip-error {
+  margin: 8px 0;
+  color: #b42318;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.pocket-dish .dish-tip-breakdown {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+  font-size: 14px;
+  color: var(--dish-secondary);
+}
+.pocket-dish .dish-tip-breakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.pocket-dish .dish-tip-breakdown strong {
+  color: var(--dish-text);
+  white-space: nowrap;
+}
+@keyframes dish-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dish-tip-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 380px) {
+  .pocket-dish .dish-tip-dialog {
+    padding: 20px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .dish-tip-dialog[open],
+  .pocket-dish .dish-tip-dialog::backdrop {
+    animation: none;
+  }
+}
+
+/* Table checkout: inline gratuities and deliberate swipe confirmation. */
+.pocket-dish .dish-tip-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.pocket-dish .dish-tip-heading h3 {
+  margin: 0 0 5px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.pocket-dish .dish-tip-heading p {
+  margin: 0;
+  color: var(--dish-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.pocket-dish .dish-tip-options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.pocket-dish .dish-tip-picker .dish-tip-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 10px 4px;
+  border: 0;
+  border-radius: 14px !important;
+  background: var(--dish-card, #f6f7f9);
+  color: var(--dish-text);
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    box-shadow 0.18s;
+}
+.pocket-dish .dish-tip-options strong {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.pocket-dish .dish-tip-options button > span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--dish-secondary);
+  font-size: 11px;
+  line-height: 1.3;
+}
+.pocket-dish .dish-tip-picker .dish-tip-options .dish-tip-other {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  gap: 8px;
+  min-height: 48px;
+}
+.pocket-dish .dish-tip-options .dish-tip-other strong {
+  font-size: 15px;
+  line-height: 1.25;
+}
+.pocket-dish .dish-tip-picker .dish-tip-options button[aria-pressed="true"] {
+  background: #e0f4ff;
+  color: var(--dish-cta);
+  box-shadow: inset 0 0 0 2px var(--dish-cta);
+}
+.pocket-dish .dish-tip-options button:disabled {
+  cursor: default;
+}
+.pocket-dish .venue-table-checkout-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 0 2px 16px;
+  font-size: 21px;
+  font-weight: 700;
+}
+.pocket-dish .venue-table-checkout-total strong {
+  white-space: nowrap;
+}
+.pocket-dish .slide-confirm {
+  --slide-offset: 0px;
+  --slide-progress: 0;
+  position: relative;
+  display: block;
+  isolation: isolate;
+  box-sizing: border-box;
+  width: 100%;
+  height: 72px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px !important;
+  background: var(--dish-cta);
+  color: #fff;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.pocket-dish .slide-confirm:focus-visible {
+  outline: 3px solid var(--dish-cta);
+  outline-offset: 4px;
+}
+.pocket-dish .slide-confirm[data-dragging="true"] {
+  cursor: grabbing;
+}
+.pocket-dish .slide-confirm:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.pocket-dish .slide-confirm[aria-busy="true"] {
+  opacity: 1;
+}
+.pocket-dish .slide-confirm-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(72px + var(--slide-offset));
+  border-radius: inherit;
+  background: var(--dish-cta-hover);
+  pointer-events: none;
+  transition: width 0.22s ease;
+}
+.pocket-dish .slide-confirm-copy {
+  position: absolute;
+  inset: 0 18px 0 74px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  opacity: calc(1 - var(--slide-progress));
+  transition: opacity 0.15s;
+}
+.pocket-dish .slide-confirm-copy strong {
+  max-width: 100%;
+  font-size: 17px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+.pocket-dish .slide-confirm-copy > span {
+  max-width: 100%;
+  font-size: 11px;
+  line-height: 1.25;
+}
+.pocket-dish .slide-confirm-copy[data-busy="true"] {
+  inset: 0 74px 0 18px;
+  opacity: 1;
+}
+.pocket-dish .slide-confirm-copy[data-busy="true"] > span {
+  display: none;
+}
+.pocket-dish .slide-confirm-handle {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  color: var(--dish-cta);
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transform: translateX(var(--slide-offset));
+  transition: transform 0.22s ease;
+  pointer-events: none;
+}
+.pocket-dish .slide-confirm[data-dragging="true"] .slide-confirm-handle,
+.pocket-dish .slide-confirm[data-dragging="true"] .slide-confirm-fill {
+  transition: none;
+}
+.pocket-dish .slide-confirm-a11y {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.pocket-dish .slide-confirm-spinner {
+  animation: slide-confirm-spin 0.8s linear infinite;
+}
+@keyframes slide-confirm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 360px) {
+  .pocket-dish .slide-confirm-copy strong {
+    font-size: 15px;
+  }
+  .pocket-dish .slide-confirm-copy > span {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .slide-confirm-handle,
+  .pocket-dish .slide-confirm-fill,
+  .pocket-dish .slide-confirm-copy,
+  .pocket-dish .dish-tip-options button {
+    transition: none;
+  }
+  .pocket-dish .slide-confirm-spinner {
+    animation: none;
+  }
+}
+
+.pocket-dish .venue-table-repeat-footer .slide-confirm-copy strong {
+  font-size: 14px;
+  text-align: center;
+}
+.pocket-dish .venue-table-cart-footer .button.dish-click-confirm {
+  justify-content: center;
+}
+
+/* Centered venue identity and compact review/information actions. */
+.pocket-dish .dish-real-venue-detail .venue-detail-heading {
+  text-align: center;
+}
+.pocket-dish .dish-real-venue-detail .venue-title-row {
+  justify-content: center;
+}
+.pocket-dish .dish-real-venue-detail .venue-facts {
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+.pocket-dish .dish-real-venue-detail .venue-public-rating {
+  display: inline-flex;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--dish-card);
+  color: var(--dish-text);
+}
+.pocket-dish .dish-real-venue-detail .venue-public-rating b {
+  font-size: 15px;
+}
+.pocket-dish .dish-real-venue-detail .venue-desktop-info-wrap {
+  display: flex;
+}
+.pocket-dish .dish-real-venue-detail .venue-desktop-info-button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--dish-card);
+}
+.pocket-dish .dish-real-venue-detail .venue-public-rating:hover,
+.pocket-dish .dish-real-venue-detail .venue-desktop-info-button:hover {
+  background: var(--dish-active);
+  color: var(--dish-cta);
+}
+@media (max-width: 760px) {
+  .pocket-dish .dish-real-venue-detail .venue-facts {
+    margin-top: 16px;
+    margin-bottom: 10px;
+  }
+}
+
+/* The venue cover frames its identity; controls remain readable on the image. */
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-overview-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 280px;
+  background-color: #26343b;
+  background-image:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 30, 0.12),
+      rgba(15, 23, 30, 0.3) 35%,
+      rgba(15, 23, 30, 0.76)
+    ),
+    var(--venue-cover-image);
+  background-size: cover;
+  background-position: center;
+}
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-overview-block > .venue-public-photo {
+  display: none;
+}
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-summary {
+  min-height: 0;
+  background: transparent;
+}
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-heading h1 {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
+}
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-heading > p {
+  color: rgba(255, 255, 255, 0.9);
+}
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-facts > span {
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--dish-text);
+}
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-public-rating,
+.pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-desktop-info-button {
+  background: #fff;
+  color: var(--dish-text);
+}
+@media (max-width: 760px) {
+  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-overview-block {
+    box-sizing: border-box;
+    min-height: 220px;
+    margin-top: calc(-1 * var(--venue-toolbar-height));
+    padding: var(--venue-toolbar-height) 0 16px;
+  }
+  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-detail-summary {
+    padding: 8px 20px 0;
+  }
+  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-facts {
+    margin-top: 12px;
+    margin-bottom: 0;
+  }
+  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-mobile-toolbar {
+    background: transparent;
+    transition: background-color 0.18s;
+  }
+  .pocket-dish .dish-real-venue-detail.venue-cover-mode .venue-mobile-toolbar.compact {
+    background: #fff;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: none;
+  }
+  .pocket-dish .venue-table-mode .venue-mobile-toolbar-title {
+    max-width: calc(100% - 192px);
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar button svg {
+    width: 21px;
+    height: 21px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar-actions {
+    gap: 8px;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar button:focus-visible {
+    outline: 2px solid var(--dish-cta);
+    outline-offset: 3px;
+  }
+}
+
+@media (max-width: 760px) {
+  .pocket-dish .dish-real-venue-detail {
+    --venue-toolbar-height: calc(72px + env(safe-area-inset-top, 0px));
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar {
+    box-sizing: border-box;
+    height: var(--venue-toolbar-height);
+    min-height: var(--venue-toolbar-height);
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-category-nav {
+    top: var(--venue-toolbar-height);
+    box-shadow: none;
+    transition: box-shadow 0.18s ease;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-category-nav.is-pinned {
+    box-shadow: var(--dish-menu-shadow);
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-menu-category {
+    scroll-margin-top: calc(var(--venue-toolbar-height) + 64px);
+  }
+}
+
+/* Keep dismissal above the sheet content, with a neutral focus treatment. */
+.pocket-dish .venue-info-controls {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 36px;
+  margin-bottom: 16px;
+}
+.pocket-dish .venue-info-controls .venue-info-close {
+  float: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--dish-card);
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .venue-info-controls .venue-info-handle {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%);
+}
+.pocket-dish.pocket-dish button:focus,
+.pocket-dish.pocket-dish button:focus-visible {
+  outline: none !important;
+}
+.pocket-dish button {
+  -webkit-tap-highlight-color: transparent;
+}
+.pocket-dish button:focus-visible {
+  filter: brightness(0.88);
+}
+@media (max-width: 760px) {
+  .pocket-dish .venue-info-controls {
+    padding-top: 12px;
+  }
+  .pocket-dish .venue-info-sheet h2 {
+    margin: 0 0 18px;
+  }
+}
+
+/* Keep table actions visible while the menu and order contents scroll. */
+@media (min-width: 761px) {
+  .pocket-dish .dish-real-venue-detail.venue-table-mode {
+    padding-left: 64px;
+  }
+  .pocket-dish .dish-real-venue-detail > .venue-table-history-trigger {
+    position: sticky;
+    z-index: 20;
+    top: 96px;
+    right: auto;
+    bottom: auto;
+    width: 48px;
+    height: 48px;
+    margin: 0 0 -48px -64px;
+    border: 0;
+    box-shadow: none;
+  }
+  .pocket-dish .venue-table-mode .venue-detail-page {
+    grid-template-columns: minmax(0, 1fr) 390px;
+  }
+  .pocket-dish .venue-table-mode .venue-primary-column {
+    display: grid;
+  }
+  .pocket-dish .venue-table-mode .venue-detail-page > .venue-table-order-panel {
+    position: sticky;
+    top: 96px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: calc(100dvh - 112px);
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  .pocket-dish .venue-table-mode .venue-detail-page > .venue-table-order-panel > header {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 24px 24px 16px;
+  }
+  .pocket-dish
+    .venue-table-mode
+    .venue-detail-page
+    > .venue-table-order-panel
+    > .venue-table-cart-body {
+    flex: 1;
+    min-height: 0;
+    padding: 0 24px 20px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+  .pocket-dish
+    .venue-table-mode
+    .venue-detail-page
+    > .venue-table-order-panel
+    > .venue-table-cart-footer {
+    flex-shrink: 0;
+    padding: 16px 24px 24px;
+    background: #fff;
+  }
+  .pocket-dish .venue-table-mode .venue-table-order-options {
+    flex-shrink: 0;
+    padding: 16px 24px 0;
+  }
+  .pocket-dish .venue-table-mode .venue-table-order-options .venue-table-order-notes {
+    margin: 0 0 18px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-order-options textarea {
+    box-sizing: border-box;
+    height: clamp(48px, 8dvh, 84px);
+    min-height: 48px;
+    max-height: 120px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-cart-items {
+    margin-top: 8px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-cart-items article {
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+  }
+  .pocket-dish .venue-table-mode .venue-table-cart-items .venue-preorder-cart-quantity {
+    grid-column: 3;
+    gap: 2px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-cart-items .venue-preorder-cart-quantity button {
+    width: 26px;
+    height: 32px;
+  }
+  .pocket-dish .venue-table-history-dialog {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(440px, 100vw);
+    height: 100dvh;
+    max-width: 100vw;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    overflow: hidden;
+  }
+  .pocket-dish .venue-table-history-dialog .venue-table-order-panel {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    padding: 0;
+    border-radius: 0;
+  }
+  .pocket-dish .venue-table-history-dialog header {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 24px;
+  }
+  .pocket-dish .venue-table-history-dialog .venue-table-cart-body {
+    flex: 1;
+    min-height: 0;
+    padding: 0 24px 24px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+  .pocket-dish .venue-table-history-dialog .venue-table-repeat-footer {
+    flex-shrink: 0;
+    padding: 16px 24px 24px;
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .pocket-dish .venue-table-mode .venue-detail-page {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    grid-template-areas: none;
+  }
+  .pocket-dish
+    .venue-table-mode
+    .venue-primary-column
+    > :is(.venue-overview-block, .venue-detail-content) {
+    grid-area: auto;
+  }
+  .pocket-dish .venue-table-mode .venue-public-menu-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pocket-dish .venue-table-mode .venue-table-cart-items article {
+    grid-template-columns: 56px minmax(0, 1fr);
+  }
+  .pocket-dish .venue-table-mode .venue-table-cart-image {
+    width: 56px;
+    height: 56px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-cart-items .venue-preorder-cart-quantity {
+    grid-column: 2;
+  }
+}
+@media (min-width: 761px) and (max-height: 760px) {
+  .pocket-dish .venue-table-mode .venue-detail-page > .venue-table-order-panel > header {
+    padding: 16px 24px 12px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-order-options {
+    box-sizing: border-box;
+    max-height: max(120px, calc(100dvh - 440px));
+    padding-top: 12px;
+    overflow-y: auto;
+  }
+  .pocket-dish
+    .venue-table-mode
+    .venue-detail-page
+    > .venue-table-order-panel
+    > .venue-table-cart-body {
+    padding-bottom: 12px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-order-options .venue-table-order-notes {
+    gap: 6px;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-order-options textarea {
+    height: 48px;
+    max-height: 72px;
+  }
+  .pocket-dish .venue-table-mode .dish-tip-heading {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .pocket-dish .venue-table-mode .dish-tip-heading h3 {
+    font-size: 14px;
+  }
+  .pocket-dish .venue-table-mode .dish-tip-heading p {
+    font-size: 11px;
+  }
+  .pocket-dish .venue-table-mode .dish-tip-picker .dish-tip-options button {
+    min-height: 56px;
+  }
+  .pocket-dish .venue-table-mode .venue-table-checkout-total {
+    padding-bottom: 8px;
+    font-size: 18px;
+  }
+  .pocket-dish
+    .venue-table-mode
+    .venue-detail-page
+    > .venue-table-order-panel
+    > .venue-table-cart-footer {
+    padding: 12px 24px 16px;
+  }
+}
+
+/* Mobile venue preferences: language, menu layout and account entry. */
+.pocket-dish .venue-menu-settings {
+  inset: 0;
+  border-radius: 0;
+  overscroll-behavior: contain;
+}
+.pocket-dish .venue-menu-settings .dish-mobile-menu-heading {
+  padding-top: calc(8px + env(safe-area-inset-top, 0px));
+}
+.pocket-dish .venue-menu-settings .dish-back-button {
+  background: transparent;
+}
+.pocket-dish .venue-menu-settings .dish-mobile-settings-card {
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.pocket-dish .venue-menu-settings .dish-mobile-menu-row small {
+  display: block;
+  margin-top: 4px;
+  color: var(--dish-secondary);
+  font-size: 14px;
+}
+@media (max-width: 760px) {
+  .pocket-dish .venue-mobile-toolbar-leading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pocket-dish .dish-real-venue-detail:not(.venue-table-mode) .venue-mobile-toolbar-title {
+    max-width: calc(100% - 192px);
+  }
+  .pocket-dish .venue-public-menu-grid.venue-public-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 112px;
+    gap: 18px;
+    align-items: start;
+    min-height: 118px;
+    padding: 22px 0;
+    border-bottom: 1px solid var(--dish-divider);
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-card:first-child {
+    padding-top: 6px;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-card:last-child {
+    border-bottom: 0;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-photo {
+    grid-column: 2;
+    grid-row: 1;
+    width: 112px;
+    aspect-ratio: 4 / 3;
+    border-radius: 16px;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-copy {
+    grid-column: 1;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-copy h3 {
+    order: 0;
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-copy strong {
+    order: 1;
+    margin-top: 5px;
+    font-size: 17px;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-copy p {
+    order: 2;
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .pocket-dish .venue-public-menu-list .venue-public-menu-copy small {
+    order: 3;
+    margin-top: 6px;
+    color: var(--dish-secondary);
+    font-size: 13px;
+  }
+  .pocket-dish .venue-public-menu-list .venue-preorder-card-control {
+    right: -4px;
+    bottom: -14px;
+    gap: 4px;
+    padding: 3px;
+    background: var(--dish-card);
+    box-shadow: 0 0 0 3px #fff;
+  }
+  .pocket-dish .venue-public-menu-list .venue-preorder-card-control.has-items {
+    left: 0;
+    right: 0;
+    gap: 0;
+  }
+  .pocket-dish .venue-public-menu-list .venue-preorder-card-control.has-items b {
+    flex: 1;
+  }
+  .pocket-dish .venue-public-menu-list .venue-preorder-card-control button {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.pocket-dish .dish-language-control {
+  width: 68px;
+  flex-shrink: 0;
+}
+.pocket-dish .dish-language-trigger {
+  width: auto;
+  min-width: 68px;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 999px !important;
+}
+.pocket-dish .dish-language-code {
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 700;
+}
+@media (max-width: 760px) {
+  .pocket-dish .dish-catalog-header.signed-in .dish-header-inner {
+    grid-template-columns: 52px minmax(0, 1fr) 68px;
+  }
+  .pocket-dish .dish-catalog-header.signed-in .dish-header-actions {
+    width: 68px;
+  }
+}
+
+.pocket-dish .mobile-booking-footer-actions {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.pocket-dish .mobile-booking-footer-actions .venue-booking-submit {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+.pocket-dish .mobile-booking-footer-actions .venue-mobile-menu-view-toggle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 var(--dish-action-height);
+  width: var(--dish-action-height);
+  min-height: var(--dish-action-height);
+  padding: 0;
+  border: 0;
+  border-radius: 16px !important;
+  background: #eee;
+  color: var(--dish-text);
+  cursor: pointer;
+}
+.pocket-dish .mobile-booking-footer-actions .venue-mobile-menu-view-toggle:hover {
+  background: #e0e0e0;
+}
+
+@media (max-width: 760px) {
+  .pocket-dish .mobile-booking-flow.preorder-step .mobile-preorder-top {
+    margin-right: -20px;
+    margin-left: -20px;
+    padding-right: 20px;
+    padding-left: 20px;
+    box-shadow: none;
+    transition: box-shadow 0.18s ease;
+  }
+  .pocket-dish .mobile-booking-flow.preorder-step .mobile-preorder-top.is-scrolled {
+    box-shadow: var(--dish-menu-shadow);
+  }
+  .pocket-dish .mobile-booking-flow.preorder-step .mobile-booking-footer {
+    margin: 0 -20px calc(-20px - env(safe-area-inset-bottom, 0px));
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+    box-shadow: var(--dish-action-shadow);
+  }
+}
+
+/* Search follows scroll intent; the category strip always stays reachable. */
+@media (max-width: 760px) {
+  .pocket-dish .dish-catalog-header {
+    transition:
+      top 0.18s ease,
+      background-color 0.18s ease;
+  }
+  .pocket-dish .dish-catalog-header.scroll-header-hidden:not(:focus-within) {
+    top: -72px;
+    box-shadow: none;
+  }
+  .pocket-dish .dish-category-catalog .dish-category-filters {
+    transition: top 0.18s ease;
+  }
+  .pocket-dish
+    .dish-catalog-header.scroll-header-hidden:not(:focus-within)
+    + .dish-main
+    .dish-category-filters {
+    top: 0;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar {
+    transition:
+      top 0.18s ease,
+      opacity 0.18s ease;
+  }
+  .pocket-dish .dish-real-venue-detail .venue-public-category-nav {
+    transition:
+      top 0.18s ease,
+      box-shadow 0.18s ease;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pocket-dish .dish-catalog-header,
+  .pocket-dish .dish-catalog-header .dish-header-inner,
+  .pocket-dish .dish-catalog-header .dish-header-inner > .dish-header-actions,
+  .pocket-dish .dish-catalog-header .dish-header-inner > .dish-catalog-brand,
+  .pocket-dish .dish-category-catalog .dish-category-filters,
+  .pocket-dish .dish-real-venue-detail .venue-mobile-toolbar,
+  .pocket-dish .dish-real-venue-detail .venue-public-category-nav {
+    transition: none;
+  }
+}
+
+.pocket-dish .comment-character-count {
+  display: block;
+  margin-top: 6px;
+  color: var(--dish-secondary);
+  font-size: 12px;
+  font-weight: 400;
+  text-align: right;
+}
+
+.pocket-dish .dish-menu-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 19px;
+  white-space: nowrap;
+}
+.pocket-dish .dish-menu-brand img {
+  width: 27px;
+  height: 27px;
+  flex-shrink: 0;
+}
+.pocket-dish .service-booking {
+  min-width: 0;
+}
+
+/* Service catalog shares restaurant navigation and booking steps. */
+.pocket-dish .service-catalog {
+  padding-bottom: 110px;
+}
+
+/* Shared restaurant list typography; services have no photo or quantity control. */
+.pocket-dish .service-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pocket-dish .service-menu-list > button.venue-public-menu-card {
+  display: block;
+  width: 100%;
+  padding: 22px 0;
+  min-height: 0;
+  border: 0;
+  border-bottom: 1px solid var(--dish-divider);
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-align: left;
+  background: transparent;
+  color: var(--dish-text);
+  cursor: pointer;
+  font: inherit;
+}
+.pocket-dish .service-menu-list > button:first-child {
+  padding-top: 6px;
+}
+.pocket-dish .service-menu-list > button:last-child {
+  border-bottom: 0;
+}
+.pocket-dish .service-menu-list > button.selected {
+  background: var(--dish-active);
+}
+.pocket-dish .service-menu-list .venue-public-menu-copy {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.pocket-dish .service-menu-list .venue-public-menu-copy h3 {
+  order: 0;
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.pocket-dish .service-menu-list .venue-public-menu-copy strong {
+  order: 1;
+  margin-top: 5px;
+  font-size: 17px;
+}
+.pocket-dish .service-menu-list .venue-public-menu-copy p {
+  order: 2;
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.pocket-dish .service-menu-list .venue-public-menu-copy small {
+  order: 3;
+  margin-top: 6px;
+  color: var(--dish-secondary);
+  font-size: 13px;
+}
+.pocket-dish dialog.service-booking-dialog {
+  padding: 0;
+  border: 0;
+  color: inherit;
+}
+.pocket-dish .service-booking-dialog::backdrop {
+  background: #0008;
+}
+@media (min-width: 761px) {
+  .pocket-dish dialog.service-booking-dialog {
+    display: block;
+    width: 560px;
+    max-height: 92dvh;
+    border-radius: 24px;
+  }
+  .pocket-dish .service-booking-dialog .mobile-booking-flow {
+    display: flex;
+    flex-direction: column;
+    height: 80dvh;
+    padding: 28px 24px 20px;
+    margin: 0;
+  }
+  .pocket-dish .service-booking-dialog .venue-booking-scroll {
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1;
+  }
+  .pocket-dish .service-booking-dialog > .venue-mobile-booking-close {
+    display: grid;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    z-index: 2;
+    background: white;
+    border: 0;
+  }
+  .pocket-dish .service-booking-cta:not(.booking-open) {
+    display: block;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 16px;
+    width: 380px;
+    z-index: 40;
+    background: white;
+  }
+  .pocket-dish .service-booking-cta button {
+    width: 100%;
+    font-weight: 750;
+  }
+}
+@media (max-width: 760px) {
+  .pocket-dish dialog.service-booking-dialog {
+    margin: 0;
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100dvh;
+  }
+}
+
+/* Mobile cart follows the account menu's separate white sections. */
+@media (max-width: 760px) {
+  .pocket-dish .venue-table-cart-dialog .venue-table-order-panel {
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  .pocket-dish .venue-table-cart-dialog .venue-table-cart-body {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .pocket-dish .venue-table-cart-dialog.has-items,
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-panel {
+    background: #f0f1f5;
+  }
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-panel > header {
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 24px 20px;
+    border-radius: 0 0 26px 26px;
+    background: #fff;
+  }
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-cart-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px 0 0;
+  }
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-options {
+    display: contents;
+  }
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-cart-items,
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-notes,
+  .pocket-dish .venue-table-cart-dialog.has-items .dish-tip-picker,
+  .pocket-dish
+    .venue-table-cart-dialog.has-items
+    .venue-table-cart-body
+    > .venue-table-cart-footer {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 24px;
+    border: 0;
+    border-radius: 26px;
+    background: #fff;
+    box-shadow: none;
+  }
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-notes {
+    gap: 12px;
+  }
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-notes textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 96px;
+  }
+  .pocket-dish
+    .venue-table-cart-dialog.has-items
+    .venue-table-cart-body
+    > .venue-table-cart-footer {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    border-radius: 26px 26px 0 0;
+  }
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-cart-body > .form-error {
+    margin: 0;
+    padding: 16px 24px;
+    border-radius: 26px;
+    background: #fff;
+  }
+}
+
+/* Mobile reservation details follow the separate white card layout. */
+@media (max-width: 760px) {
+  .pocket-dish
+    .dish-real-venue-detail
+    .venue-public-booking-shell.open
+    .mobile-booking-flow.details-step {
+    padding: 0;
+    gap: 0;
+    background: #f0f1f5;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-heading {
+    margin: 0;
+    padding: calc(20px + env(safe-area-inset-top, 0px)) 16px 20px 24px;
+    border-radius: 0 0 26px 26px;
+    background: #fff;
+  }
+  .pocket-dish .mobile-booking-flow.details-step > .venue-booking-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0;
+    background: transparent;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .mobile-booking-selection,
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-wishes,
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-contact {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 24px;
+    border: 0;
+    border-radius: 26px;
+    background: #fff;
+    box-shadow: none;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-heading h2 {
+    flex: 1;
+    min-width: 0;
+  }
+  .pocket-dish
+    .venue-public-booking-shell:has(.mobile-booking-flow.details-step)
+    > .venue-mobile-booking-close {
+    display: none;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-scroll > :last-child {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-toolbar {
+    margin: 0 0 24px;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .venue-time-periods {
+    margin-top: 0;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-contact {
+    flex: 1 0 auto;
+    align-content: start;
+  }
+  .pocket-dish .mobile-booking-flow.details-step .venue-booking-contact input {
+    min-height: 44px;
+  }
+  .pocket-dish .mobile-booking-flow.details-step > .mobile-booking-footer {
+    margin: 0;
+    padding: 16px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+  }
+}
+
+/* Bottom action sections join the final card without a grey seam. */
+@media (max-width: 760px) {
+  .pocket-dish .venue-table-cart-dialog.has-items .venue-table-order-options > :last-child {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .pocket-dish
+    .venue-table-cart-dialog.has-items
+    .venue-table-cart-body
+    > .venue-table-cart-footer {
+    margin-top: -6px;
+    border-radius: 0;
+  }
+}

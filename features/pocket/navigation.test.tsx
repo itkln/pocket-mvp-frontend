@@ -5,7 +5,10 @@ import { Sidebar, Topbar } from "./navigation";
 import { type Venue } from "./model";
 
 const replace = vi.fn();
-vi.mock("next/navigation", () => ({ usePathname: () => "/ru/owner/overview", useRouter: () => ({ replace }) }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/ru/owner/overview",
+  useRouter: () => ({ replace }),
+}));
 
 describe("Topbar language menu", () => {
   beforeEach(() => {
@@ -14,24 +17,30 @@ describe("Topbar language menu", () => {
   });
 
   it("switches the whole interface and keeps the selected short code visible", async () => {
-    render(<I18nProvider><Topbar
-      role="owner"
-      screen="overview"
-      navigation={[{ id: "overview", label: "Обзор" }]}
-      venueName="Pocket"
-      cartCount={0}
-      notifications={[]}
-      onMenu={vi.fn()}
-      onCart={vi.fn()}
-      onNavigate={vi.fn()}
-      onNotificationsRead={vi.fn()}
-      onNotificationsClear={vi.fn()}
-    /></I18nProvider>);
+    render(
+      <I18nProvider>
+        <Topbar
+          role="owner"
+          screen="overview"
+          navigation={[{ id: "overview", label: "Обзор" }]}
+          venueName="Pocket"
+          cartCount={0}
+          notifications={[]}
+          onMenu={vi.fn()}
+          onCart={vi.fn()}
+          onNavigate={vi.fn()}
+          onNotificationsRead={vi.fn()}
+          onNotificationsClear={vi.fn()}
+        />
+      </I18nProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Язык интерфейса: RU" }));
     fireEvent.click(screen.getByRole("menuitemradio", { name: "EN English" }));
 
-    await waitFor(() => expect(screen.getByRole("button", { name: "Interface language: EN" })).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Interface language: EN" })).toBeInTheDocument(),
+    );
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     expect(screen.getByText("Overview")).toBeInTheDocument();
     expect(window.localStorage.getItem("pocket:locale")).toBe("en");
@@ -41,19 +50,26 @@ describe("Topbar language menu", () => {
   it("opens quick navigation and the notification history", () => {
     const onNavigate = vi.fn();
     const onNotificationsRead = vi.fn();
-    render(<I18nProvider><Topbar
-      role="owner"
-      screen="overview"
-      navigation={[{ id: "overview", label: "Обзор" }, { id: "menu", label: "Меню" }]}
-      venueName="Pocket"
-      cartCount={0}
-      notifications={[{ id: 1, message: "Изменения сохранены", createdAt: 1, read: false }]}
-      onMenu={vi.fn()}
-      onCart={vi.fn()}
-      onNavigate={onNavigate}
-      onNotificationsRead={onNotificationsRead}
-      onNotificationsClear={vi.fn()}
-    /></I18nProvider>);
+    render(
+      <I18nProvider>
+        <Topbar
+          role="owner"
+          screen="overview"
+          navigation={[
+            { id: "overview", label: "Обзор" },
+            { id: "menu", label: "Меню" },
+          ]}
+          venueName="Pocket"
+          cartCount={0}
+          notifications={[{ id: 1, message: "Изменения сохранены", createdAt: 1, read: false }]}
+          onMenu={vi.fn()}
+          onCart={vi.fn()}
+          onNavigate={onNavigate}
+          onNotificationsRead={onNotificationsRead}
+          onNotificationsClear={vi.fn()}
+        />
+      </I18nProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Поиск" }));
     fireEvent.change(screen.getByPlaceholderText("Найти раздел"), { target: { value: "мен" } });
@@ -111,7 +127,11 @@ describe("Sidebar venue navigation", () => {
 
   it("shows venue creation below a single non-expandable venue", () => {
     const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
-    render(<I18nProvider><Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden]} /></I18nProvider>);
+    render(
+      <I18nProvider>
+        <Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden]} />
+      </I18nProvider>,
+    );
 
     expect(screen.getByRole("button", { name: /Zen Garden/ })).toBeDisabled();
     expect(screen.queryByText("Bratislava")).not.toBeInTheDocument();
@@ -123,7 +143,11 @@ describe("Sidebar venue navigation", () => {
   it("opens venue switching only when multiple venues are available", () => {
     const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
     const northVine = venue("venue-2", "North & Vine", "Kosice");
-    render(<I18nProvider><Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden, northVine]} /></I18nProvider>);
+    render(
+      <I18nProvider>
+        <Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden, northVine]} />
+      </I18nProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: /Zen Garden/ }));
 

@@ -1,23 +1,32 @@
 {
-  "name": "pocket-mvp-frontend",
+  "name": "pocket-frontends",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "npm run dev:vendor",
+    "dev:vendor": "next dev apps/vendor -p 3000",
+    "dev:dish": "next dev apps/dish -p 3001",
+    "build": "npm run build:vendor && npm run build:dish",
+    "build:vendor": "next build apps/vendor",
+    "build:dish": "next build apps/dish",
+    "start": "npm run start:vendor",
+    "start:vendor": "next start apps/vendor -p 3000",
+    "start:dish": "next start apps/dish -p 3001",
     "lint": "eslint .",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
-    "lucide-react": "latest",
-    "next": "latest",
+    "lucide-react": "1.25.0",
+    "next": "16.2.10",
     "qrcode": "^1.5.4",
-    "react": "latest",
-    "react-dom": "latest"
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "overrides": {
     "postcss": "8.5.10"
@@ -25,14 +34,15 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
-    "@types/node": "latest",
+    "@types/node": "26.1.1",
     "@types/qrcode": "^1.5.6",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "eslint": "latest",
-    "eslint-config-next": "latest",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.2.10",
     "jsdom": "^27.0.1",
-    "typescript": "latest",
+    "prettier": "3.8.1",
+    "typescript": "6.0.3",
     "vitest": "^3.2.7"
   }
 }

@@ -1,18 +1,38 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { changePassword, updateProfile, type AuthUser } from "../../../lib/auth-api";
+import {
+  changeEmail,
+  changePassword,
+  updateAvatar,
+  updateProfile,
+  type AuthUser,
+} from "../../../lib/auth-api";
 import { I18nProvider } from "../i18n";
 import { AccountScreen } from "./account";
 
 vi.mock("../../../lib/auth-api", async () => {
-  const actual = await vi.importActual<typeof import("../../../lib/auth-api")>("../../../lib/auth-api");
-  return { ...actual, changePassword: vi.fn(), updateProfile: vi.fn() };
+  const actual =
+    await vi.importActual<typeof import("../../../lib/auth-api")>("../../../lib/auth-api");
+  return {
+    ...actual,
+    changeEmail: vi.fn(),
+    changePassword: vi.fn(),
+    updateAvatar: vi.fn(),
+    updateProfile: vi.fn(),
+  };
 });
-vi.mock("next/navigation", () => ({ usePathname: () => "/ru/owner/account", useRouter: () => ({ replace: vi.fn() }) }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/ru/owner/account",
+  useRouter: () => ({ replace: vi.fn() }),
+}));
 
 const user: AuthUser = {
-  id: "user-1", email: "owner@example.com", first_name: "Denis", last_name: "Itkin",
-  role: "venue_owner", capabilities: ["customer", "owner"],
+  id: "user-1",
+  email: "owner@example.com",
+  first_name: "Denis",
+  last_name: "Itkin",
+  role: "venue_owner",
+  capabilities: ["customer", "owner"],
 };
 
 describe("AccountScreen", () => {
@@ -24,13 +44,24 @@ describe("AccountScreen", () => {
   it("changes the owner password from account settings", async () => {
     vi.mocked(changePassword).mockResolvedValue(undefined);
     const notify = vi.fn();
-    render(<I18nProvider><AccountScreen user={user} notify={notify} onLogout={vi.fn()} onUpdate={vi.fn()} /></I18nProvider>);
+    render(
+      <I18nProvider>
+        <AccountScreen user={user} notify={notify} onLogout={vi.fn()} onUpdate={vi.fn()} />
+      </I18nProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Безопасность" }));
+    expect(screen.queryByText("Текущая сессия")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Изменить пароль" }));
-    fireEvent.change(screen.getByLabelText("Текущий пароль"), { target: { value: "old secure password" } });
-    fireEvent.change(screen.getByLabelText("Новый пароль"), { target: { value: "new secure password" } });
-    fireEvent.change(screen.getByLabelText("Повторите новый пароль"), { target: { value: "new secure password" } });
+    fireEvent.change(screen.getByLabelText("Текущий пароль"), {
+      target: { value: "old secure password" },
+    });
+    fireEvent.change(screen.getByLabelText("Новый пароль"), {
+      target: { value: "new secure password" },
+    });
+    fireEvent.change(screen.getByLabelText("Повторите новый пароль"), {
+      target: { value: "new secure password" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Сохранить пароль" }));
 
     await waitFor(() => {
@@ -39,26 +70,113 @@ describe("AccountScreen", () => {
     });
   });
 
+  it("changes the sign-in email after password confirmation", async () => {
+    const updated = { ...user, email: "new@example.com" };
+    vi.mocked(changeEmail).mockResolvedValue(updated);
+    const notify = vi.fn();
+    const onUpdate = vi.fn();
+    render(
+      <I18nProvider>
+        <AccountScreen user={user} notify={notify} onLogout={vi.fn()} onUpdate={onUpdate} />
+      </I18nProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Безопасность" }));
+    fireEvent.click(screen.getByRole("button", { name: "Изменить e-mail" }));
+    fireEvent.change(screen.getByLabelText("Новый e-mail"), {
+      target: { value: "new@example.com" },
+    });
+    fireEvent.change(screen.getByLabelText("Текущий пароль"), {
+      target: { value: "old secure password" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Сохранить e-mail" }));
+
+    await waitFor(() => {
+      expect(changeEmail).toHaveBeenCalledWith("old secure password", "new@example.com");
+      expect(onUpdate).toHaveBeenCalledWith(updated);
+      expect(notify).toHaveBeenCalledWith("E-mail изменен");
+    });
+  });
+
+  it("uploads a shared profile photo", async () => {
+    const updated = { ...user, avatar_url: "http://localhost:8080/api/v1/auth/me/avatar?v=1" };
+    vi.mocked(updateAvatar).mockResolvedValue(updated);
+    const notify = vi.fn();
+    const onUpdate = vi.fn();
+    render(
+      <I18nProvider>
+        <AccountScreen user={user} notify={notify} onLogout={vi.fn()} onUpdate={onUpdate} />
+      </I18nProvider>,
+    );
+
+    const photo = new File([new Uint8Array([1, 2, 3])], "avatar.png", { type: "image/png" });
+    fireEvent.change(screen.getByLabelText("Изменить фотографию"), { target: { files: [photo] } });
+
+    await waitFor(() => {
+      expect(updateAvatar).toHaveBeenCalledWith(photo);
+      expect(onUpdate).toHaveBeenCalledWith(updated);
+      expect(notify).toHaveBeenCalledWith("Фотография обновлена");
+    });
+  });
+
+  it("keeps sign out in the account header instead of security", () => {
+    const onLogout = vi.fn();
+    render(
+      <I18nProvider>
+        <AccountScreen user={user} notify={vi.fn()} onLogout={onLogout} onUpdate={vi.fn()} />
+      </I18nProvider>,
+    );
+
+    const signOut = screen.getByRole("button", { name: "Выйти из аккаунта" });
+    expect(document.querySelector(".header-actions")).toContainElement(signOut);
+    expect(signOut).toHaveClass("account-header-logout");
+
+    fireEvent.click(signOut);
+    expect(onLogout).toHaveBeenCalledOnce();
+  });
+
+  it("keeps language selection in the global header", () => {
+    render(
+      <I18nProvider>
+        <AccountScreen user={user} notify={vi.fn()} onLogout={vi.fn()} onUpdate={vi.fn()} />
+      </I18nProvider>,
+    );
+
+    expect(screen.queryByRole("button", { name: "Язык" })).not.toBeInTheDocument();
+  });
+
   it("updates the shared profile", async () => {
     const updated = { ...user, first_name: "Denys", phone: "+421 900 123 456" };
     vi.mocked(updateProfile).mockResolvedValue(updated);
     const notify = vi.fn();
     const onUpdate = vi.fn();
-    render(<I18nProvider><AccountScreen user={user} notify={notify} onLogout={vi.fn()} onUpdate={onUpdate} /></I18nProvider>);
+    render(
+      <I18nProvider>
+        <AccountScreen user={user} notify={notify} onLogout={vi.fn()} onUpdate={onUpdate} />
+      </I18nProvider>,
+    );
 
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Denys" } });
     fireEvent.change(screen.getByLabelText("Телефон"), { target: { value: "+421 900 123 456" } });
     fireEvent.click(screen.getByRole("button", { name: "Сохранить изменения" }));
 
     await waitFor(() => {
-      expect(updateProfile).toHaveBeenCalledWith({ first_name: "Denys", last_name: "Itkin", phone: "+421 900 123 456" });
+      expect(updateProfile).toHaveBeenCalledWith({
+        first_name: "Denys",
+        last_name: "Itkin",
+        phone: "+421 900 123 456",
+      });
       expect(onUpdate).toHaveBeenCalledWith(updated);
       expect(notify).toHaveBeenCalledWith("Профиль сохранен");
     });
   });
 
   it("uses the Ukrainian shared-settings labels", async () => {
-    render(<I18nProvider initialLocale="ua"><AccountScreen user={user} notify={vi.fn()} onLogout={vi.fn()} onUpdate={vi.fn()} /></I18nProvider>);
+    render(
+      <I18nProvider initialLocale="ua">
+        <AccountScreen user={user} notify={vi.fn()} onLogout={vi.fn()} onUpdate={vi.fn()} />
+      </I18nProvider>,
+    );
     await waitFor(() => expect(screen.getAllByText("Налаштування").length).toBeGreaterThan(0));
     expect(screen.queryByText("Акаунт Pocket")).not.toBeInTheDocument();
   });

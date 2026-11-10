@@ -1,4 +1,4 @@
-export { OwnerOverview, OrdersScreen } from "./dashboard";
+export { OwnerOverview } from "./dashboard";
 export { MenuManager } from "./menu";
 export { TeamScreen } from "./team";
 export { AnalyticsScreen } from "./analytics";
@@ -7,3 +7,4 @@ export { VenueScreen } from "./venue";
 export { SubscriptionScreen } from "./subscription";
 export { AccountScreen, PaymentsScreen } from "./account";
 
+export { OrdersScreen } from "./orders";

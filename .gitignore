@@ -3,6 +3,7 @@
 .next/
 *.tsbuildinfo
 .idea/
+.DS_Store
 node_modules/
 out/
 npm-debug.log*

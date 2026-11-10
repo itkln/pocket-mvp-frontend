@@ -11,6 +11,8 @@ const errorSourceByCode: Record<string, string> = {
   account_exists: "Аккаунт с таким e-mail уже существует",
   invalid_credentials: "Неверный e-mail или пароль",
   invalid_current_password: "Текущий пароль указан неверно",
+  invalid_avatar: "Используйте JPEG, PNG или WebP",
+  avatar_too_large: "Фотография должна быть меньше 2 МБ",
   invalid_reset_token: "Ссылка недействительна или устарела",
   too_many_attempts: "Слишком много попыток. Попробуйте через 15 минут",
   unauthorized: "Требуется вход в аккаунт",
@@ -20,12 +22,19 @@ const errorSourceByCode: Record<string, string> = {
   request_failed: "Сервер временно недоступен. Попробуйте еще раз",
 };
 
-export function localizedErrorMessage(error: unknown, locale: Locale, fallback = "Не удалось выполнить действие") {
-  const source = error instanceof APIError ? errorSourceByCode[error.code] ?? fallback : fallback;
+export function localizedErrorMessage(
+  error: unknown,
+  locale: Locale,
+  fallback = "Не удалось выполнить действие",
+) {
+  const source = error instanceof APIError ? (errorSourceByCode[error.code] ?? fallback) : fallback;
   return translate(source, locale);
 }
 
 export function useLocalizedError() {
   const { locale } = useI18n();
-  return useCallback((error: unknown, fallback?: string) => localizedErrorMessage(error, locale, fallback), [locale]);
+  return useCallback(
+    (error: unknown, fallback?: string) => localizedErrorMessage(error, locale, fallback),
+    [locale],
+  );
 }

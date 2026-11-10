@@ -4,12 +4,16 @@ import { I18nProvider, translate, useI18n } from "./i18n";
 import { localeFromPathname, replacePathLocale } from "./locales";
 
 function LanguageHarness() {
-  const { setLocale } = useI18n();
-  return <>
-    <button type="button" onClick={() => setLocale("en")}>English</button>
-    <h1>Заказы</h1>
-    <input aria-label="Поиск по команде" placeholder="Поиск по команде" />
-  </>;
+  const { setLocale, t } = useI18n();
+  return (
+    <>
+      <button type="button" onClick={() => setLocale("en")}>
+        English
+      </button>
+      <h1>{t("Заказы")}</h1>
+      <input aria-label={t("Поиск по команде")} placeholder={t("Поиск по команде")} />
+    </>
+  );
 }
 
 describe("global localization", () => {
@@ -17,18 +21,24 @@ describe("global localization", () => {
 
   it("translates static and parameterized interface text", () => {
     expect(translate("Заказы", "en")).toBe("Orders");
-    expect(translate("Удалить стол {id} с плана?", "ua", { id: "12" })).toBe("Видалити стіл 12 з плану?");
+    expect(translate("Удалить стол {id} с плана?", "ua", { id: "12" })).toBe(
+      "Видалити стіл 12 з плану?",
+    );
     expect(translate("Заказы", "sk")).toBe("Objednávky");
     expect(translate("Успешных платежей: 4", "en")).toBe("Successful payments: 4");
     expect(translate("E2E Bistro / Управление", "en")).toBe("E2E Bistro / Management");
     expect(translate("3 отзывов", "sk")).toBe("3 recenzií");
-    expect(translate("Стол 08 · у окна · до 6 гостей", "sk")).toBe("Stôl 08 · pri okne · do 6 hostí");
+    expect(translate("Стол 08 · у окна · до 6 гостей", "sk")).toBe(
+      "Stôl 08 · pri okne · do 6 hostí",
+    );
   });
 
   it("translates static and dynamic action notifications", () => {
     expect(translate("План зала сохранен", "ua")).toBe("План залу збережено");
     expect(translate("QR-код стола 08 скачан", "en")).toBe("Table 08 QR code downloaded");
-    expect(translate("Выбрано заведение North & Vine", "sk")).toBe("Vybraná prevádzka North & Vine");
+    expect(translate("Выбрано заведение North & Vine", "sk")).toBe(
+      "Vybraná prevádzka North & Vine",
+    );
   });
 
   it("keeps owner forms fully localized in Ukrainian and English", () => {
@@ -40,13 +50,22 @@ describe("global localization", () => {
     expect(translate("Создать рабочее пространство", "ua")).toBe("Створити робочий простір");
   });
 
-  it("updates text and accessible field labels across the document", async () => {
-    render(<I18nProvider><LanguageHarness /></I18nProvider>);
+  it("re-renders translated text and field labels when the locale changes", async () => {
+    render(
+      <I18nProvider>
+        <LanguageHarness />
+      </I18nProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "English" }));
 
-    await waitFor(() => expect(screen.getByRole("heading", { name: "Orders" })).toBeInTheDocument());
-    expect(screen.getByPlaceholderText("Search the team")).toHaveAttribute("aria-label", "Search the team");
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Orders" })).toBeInTheDocument(),
+    );
+    expect(screen.getByPlaceholderText("Search the team")).toHaveAttribute(
+      "aria-label",
+      "Search the team",
+    );
     expect(document.documentElement).toHaveAttribute("lang", "en");
     expect(window.localStorage.getItem("pocket:locale")).toBe("en");
   });
