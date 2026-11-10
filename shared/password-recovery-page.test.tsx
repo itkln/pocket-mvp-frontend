@@ -34,7 +34,7 @@ beforeEach(() => {
 describe("PasswordRecoveryPage", () => {
   it("preserves the Spots selection when returning to sign in from password recovery", () => {
     const returnTo = "/ru/venue/casa?from=%2Fru%2Frestaurants";
-    render(<PasswordRecoveryPage mode="request" product="spots" returnTo={returnTo} />);
+    render(<PasswordRecoveryPage mode="request" product="dish" returnTo={returnTo} />);
     const href = screen.getByRole("link", { name: "Вернуться ко входу" }).getAttribute("href")!;
     expect(new URL(href, "https://pocket.local").searchParams.get("returnTo")).toBe(returnTo);
   });
@@ -66,7 +66,7 @@ describe("PasswordRecoveryPage", () => {
     vi.mocked(requestPasswordReset).mockResolvedValue();
     render(
       <I18nProvider initialLocale="en">
-        <PasswordRecoveryPage mode="request" product="spots" />
+        <PasswordRecoveryPage mode="request" product="dish" />
       </I18nProvider>,
     );
     fireEvent.change(await screen.findByLabelText("E-mail"), {
@@ -74,7 +74,7 @@ describe("PasswordRecoveryPage", () => {
     });
     fireEvent.click(await screen.findByRole("button", { name: "Send reset link" }));
     await waitFor(() =>
-      expect(requestPasswordReset).toHaveBeenCalledWith("guest@example.com", "en", "spots"),
+      expect(requestPasswordReset).toHaveBeenCalledWith("guest@example.com", "en", "dish"),
     );
     fireEvent.click(await screen.findByRole("button", { name: "Send again" }));
     expect(await screen.findByRole("link", { name: "Back to sign in" })).toHaveAttribute(
@@ -87,7 +87,7 @@ describe("PasswordRecoveryPage", () => {
     vi.mocked(resetPassword).mockResolvedValue();
     render(
       <I18nProvider initialLocale="ua">
-        <PasswordRecoveryPage mode="reset" product="spots" token="single-use-token" />
+        <PasswordRecoveryPage mode="reset" product="dish" token="single-use-token" />
       </I18nProvider>,
     );
 

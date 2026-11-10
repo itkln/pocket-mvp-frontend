@@ -12,7 +12,7 @@ import { useLocalizedError } from "../features/pocket/error-message";
 import { useI18n } from "../features/pocket/i18n";
 
 type AuthMode = "login" | "register";
-type PocketProduct = "vendor" | "spots" | "dish";
+type PocketProduct = "vendor" | "dish";
 
 export default function AuthPage({
   mode,

@@ -123,14 +123,14 @@ describe("auth API", () => {
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
     vi.stubGlobal("fetch", fetchMock);
 
-    await requestPasswordReset("user@example.com", "sk", "spots");
+    await requestPasswordReset("user@example.com", "sk", "dish");
     await resetPassword("single-use-token", "a new secure password");
 
     expect(fetchMock.mock.calls[0][0]).toMatch(/\/auth\/password-reset\/request$/);
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
       email: "user@example.com",
       locale: "sk",
-      product: "spots",
+      product: "dish",
     });
     expect(fetchMock.mock.calls[1][0]).toMatch(/\/auth\/password-reset\/confirm$/);
     expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({

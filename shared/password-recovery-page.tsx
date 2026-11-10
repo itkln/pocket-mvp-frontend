@@ -19,7 +19,7 @@ export default function PasswordRecoveryPage({
 }: {
   mode: RecoveryMode;
   token?: string;
-  product?: "vendor" | "spots" | "dish";
+  product?: "vendor" | "dish";
   returnTo?: string;
 }) {
   const { locale, t } = useI18n();

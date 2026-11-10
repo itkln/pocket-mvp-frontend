@@ -50,7 +50,7 @@ describe("AuthPage", () => {
       role: "customer",
       capabilities: ["customer"],
     });
-    render(<AuthPage mode="login" product="spots" returnTo={returnTo} />);
+    render(<AuthPage mode="login" product="dish" returnTo={returnTo} />);
     for (const name of ["Зарегистрироваться", "Забыли пароль?"]) {
       const href = screen.getByRole("link", { name }).getAttribute("href")!;
       expect(new URL(href, "https://pocket.local").searchParams.get("returnTo")).toBe(returnTo);
@@ -71,7 +71,7 @@ describe("AuthPage", () => {
       role: "customer",
       capabilities: ["customer"],
     });
-    render(<AuthPage mode="register" product="spots" returnTo={returnTo} />);
+    render(<AuthPage mode="register" product="dish" returnTo={returnTo} />);
     fireEvent.change(screen.getByLabelText("Имя"), { target: { value: "Denis" } });
     fireEvent.change(screen.getByLabelText("Фамилия"), { target: { value: "Itkin" } });
     fireEvent.change(screen.getByLabelText("E-mail"), { target: { value: "user@example.com" } });

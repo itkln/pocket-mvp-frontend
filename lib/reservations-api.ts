@@ -29,7 +29,7 @@ export async function listCustomerReservations(
   signal?: AbortSignal,
 ): Promise<CustomerReservation[]> {
   return (
-    await apiRequest<{ reservations: CustomerReservation[] }>("/spots/me/reservations", {
+    await apiRequest<{ reservations: CustomerReservation[] }>("/customer/reservations", {
       signal,
       cache: "no-store",
     })
@@ -39,7 +39,7 @@ export async function listCustomerReservations(
 export async function cancelCustomerReservation(id: string): Promise<CustomerReservation> {
   return (
     await apiRequest<{ reservation: CustomerReservation }>(
-      `/spots/me/reservations/${encodeURIComponent(id)}/cancel`,
+      `/customer/reservations/${encodeURIComponent(id)}/cancel`,
       {
         method: "POST",
         cache: "no-store",

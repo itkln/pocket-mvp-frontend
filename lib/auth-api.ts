@@ -59,7 +59,7 @@ export async function logout(): Promise<void> {
 export async function requestPasswordReset(
   email: string,
   locale: string,
-  product: "vendor" | "spots" | "dish" = "vendor",
+  product: "vendor" | "dish" = "vendor",
 ): Promise<void> {
   await apiRequest<{ status: string }>("/auth/password-reset/request", {
     method: "POST",
