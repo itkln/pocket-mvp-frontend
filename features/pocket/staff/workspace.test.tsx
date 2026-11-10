@@ -59,7 +59,7 @@ const mount = () =>
 it("loads staff data without owner administration requests and saves expected status", async () => {
   mount();
   const action = await screen.findByRole("button", { name: "Заказ готовится" });
-  expect(loadOrderQueue).toHaveBeenCalledWith("venue", 1, "staff", expect.any(AbortSignal));
+  expect(loadOrderQueue).toHaveBeenCalledWith("venue", 1, expect.any(AbortSignal));
   expect(getOwnerDashboard).not.toHaveBeenCalled();
   vi.mocked(updateOrderStatus).mockResolvedValue({
     ...order,
@@ -68,14 +68,7 @@ it("loads staff data without owner administration requests and saves expected st
   });
   fireEvent.click(action);
   await screen.findByRole("button", { name: "Заказ отдан" });
-  expect(updateOrderStatus).toHaveBeenCalledWith(
-    "venue",
-    "o",
-    "preparing",
-    "new",
-    "staff",
-    undefined,
-  );
+  expect(updateOrderStatus).toHaveBeenCalledWith("venue", "o", "preparing", "new", undefined);
   expect(screen.getByText("Реальный суп")).toBeInTheDocument();
   expect(screen.queryByRole("button", { name: "Отменить заказ" })).not.toBeInTheDocument();
 });

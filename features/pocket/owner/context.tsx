@@ -184,12 +184,7 @@ export function OwnerWorkspaceProvider({
     const revision = ++ordersRevision.current;
     try {
       if (ordersOnly) {
-        const next = await loadOrderQueue(
-          venueID,
-          historyPages.current,
-          "staff",
-          queueScope.current.signal,
-        );
+        const next = await loadOrderQueue(venueID, historyPages.current, queueScope.current.signal);
         if (revision === ordersRevision.current) {
           setOrders(next.orders);
           setHasMoreOrderHistory(next.hasMoreHistory);
@@ -218,7 +213,7 @@ export function OwnerWorkspaceProvider({
         listCategories(venueID),
         listMenuItems(venueID),
         listStaff(venueID),
-        loadOrderQueue(venueID, historyPages.current, "owner", queueScope.current.signal),
+        loadOrderQueue(venueID, historyPages.current, queueScope.current.signal),
         listReviews(venueID),
         listPayments(venueID),
       ]);
@@ -247,13 +242,8 @@ export function OwnerWorkspaceProvider({
     if (!venueID || orderMutationPending.current) return;
     const revision = ++ordersRevision.current;
     const [next, alerts] = await Promise.all([
-      loadOrderQueue(
-        venueID,
-        historyPages.current,
-        ordersOnly ? "staff" : "owner",
-        queueScope.current.signal,
-      ),
-      getOrderAlertSettings(venueID, ordersOnly ? "staff" : "owner"),
+      loadOrderQueue(venueID, historyPages.current, queueScope.current.signal),
+      getOrderAlertSettings(venueID),
     ]);
     if (revision === ordersRevision.current) setOrderAlerts(alerts);
     if (revision === ordersRevision.current) {
@@ -261,7 +251,7 @@ export function OwnerWorkspaceProvider({
       setHasMoreOrderHistory(next.hasMoreHistory);
       return next.orders;
     }
-  }, [venueID, ordersOnly]);
+  }, [venueID]);
 
   const loadMoreOrderHistory = useCallback(async () => {
     historyPages.current += 1;
@@ -279,14 +269,10 @@ export function OwnerWorkspaceProvider({
   }, [refresh]);
 
   const getHistoryPage = useCallback(
-    (query: OrderQuery) =>
-      listOrderPage(venueID!, { ...query, scope: "history" }, ordersOnly ? "staff" : "owner"),
-    [venueID, ordersOnly],
+    (query: OrderQuery) => listOrderPage(venueID!, { ...query, scope: "history" }),
+    [venueID],
   );
-  const getOrderDetails = useCallback(
-    (id: string) => getOrder(venueID!, id, ordersOnly ? "staff" : "owner"),
-    [venueID, ordersOnly],
-  );
+  const getOrderDetails = useCallback((id: string) => getOrder(venueID!, id), [venueID]);
   const value = useMemo<OwnerWorkspace>(
     () => ({
       orderAlerts,
@@ -418,7 +404,6 @@ export function OwnerWorkspaceProvider({
               id,
               status,
               existing.status,
-              ordersOnly ? "staff" : "owner",
               cancellation,
             );
             setOrders((current) => current.map((item) => (item.id === id ? updated : item)));
@@ -454,7 +439,6 @@ export function OwnerWorkspaceProvider({
       loadMoreOrderHistory,
       run,
       venueID,
-      ordersOnly,
     ],
   );
 

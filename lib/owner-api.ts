@@ -186,7 +186,8 @@ export type OwnerSubscription = {
   current_period_ends_at?: string;
 };
 
-const venuePath = (venueID: string, suffix = "") => `/owner/venues/${venueID}${suffix}`;
+// One venue workspace for owner and staff: the venue role, not the URL, decides what is allowed.
+const venuePath = (venueID: string, suffix = "") => `/venues/${venueID}${suffix}`;
 
 export const listStaffVenues = async () =>
   (await apiRequest<{ venues: OwnerVenue[] }>("/staff/venues")).venues;
@@ -257,23 +258,23 @@ export const reorderMenuItems = async (venueID: string, categoryID: string, ids:
     body: JSON.stringify({ category_id: categoryID, ids }),
   });
 export const listStaff = async (id: string) =>
-  (await apiRequest<{ staff: OwnerStaffMember[] }>(venuePath(id, "/staff"))).staff;
+  (await apiRequest<{ staff: OwnerStaffMember[] }>(venuePath(id, "/team"))).staff;
 export const createStaff = async (id: string, input: StaffInput) =>
   (
-    await apiRequest<{ staff_member: OwnerStaffMember }>(venuePath(id, "/staff"), {
+    await apiRequest<{ staff_member: OwnerStaffMember }>(venuePath(id, "/team"), {
       method: "POST",
       body: JSON.stringify(input),
     })
   ).staff_member;
 export const updateStaff = async (venueID: string, id: string, input: StaffInput) =>
   (
-    await apiRequest<{ staff_member: OwnerStaffMember }>(venuePath(venueID, `/staff/${id}`), {
+    await apiRequest<{ staff_member: OwnerStaffMember }>(venuePath(venueID, `/team/${id}`), {
       method: "PATCH",
       body: JSON.stringify(input),
     })
   ).staff_member;
 export const deleteStaff = async (venueID: string, id: string) =>
-  apiRequest<void>(venuePath(venueID, `/staff/${id}`), { method: "DELETE" });
+  apiRequest<void>(venuePath(venueID, `/team/${id}`), { method: "DELETE" });
 export type OrderPage = { orders: OwnerOrder[]; has_more: boolean; next_cursor?: string };
 export type OrderQuery = {
   number?: string;
@@ -287,45 +288,25 @@ export type OrderQuery = {
   limit?: number;
   cursor?: string;
 };
-export const listOrderPage = (
-  venueID: string,
-  query: OrderQuery = {},
-  audience: "owner" | "staff" = "owner",
-  signal?: AbortSignal,
-) => {
+export const listOrderPage = (venueID: string, query: OrderQuery = {}, signal?: AbortSignal) => {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query))
     if (value !== undefined)
       params.set(key, Array.isArray(value) ? value.join(",") : String(value));
-  return apiRequest<OrderPage>(`/${audience}/venues/${venueID}/orders?${params}`, { signal });
+  return apiRequest<OrderPage>(venuePath(venueID, `/orders?${params}`), { signal });
 };
-export const getOrder = async (
-  venueID: string,
-  orderID: string,
-  audience: "owner" | "staff" = "owner",
-) =>
-  (await apiRequest<{ order: OwnerOrder }>(`/${audience}/venues/${venueID}/orders/${orderID}`))
-    .order;
+export const getOrder = async (venueID: string, orderID: string) =>
+  (await apiRequest<{ order: OwnerOrder }>(venuePath(venueID, `/orders/${orderID}`))).order;
 
 // Refresh the complete active queue; history grows only when the operator asks for more.
-export async function loadOrderQueue(
-  venueID: string,
-  historyPages = 1,
-  audience: "owner" | "staff" = "owner",
-  signal?: AbortSignal,
-) {
+export async function loadOrderQueue(venueID: string, historyPages = 1, signal?: AbortSignal) {
   const timeout = AbortSignal.timeout(12000);
   const requestSignal = signal ? AbortSignal.any([signal, timeout]) : timeout;
   const read = async (scope: "active" | "history", maxPages: number) => {
     const orders = new Map<string, OwnerOrder>();
     let cursor: string | undefined;
     for (let i = 0; i < maxPages; i++) {
-      const page = await listOrderPage(
-        venueID,
-        { scope, limit: 100, cursor },
-        audience,
-        requestSignal,
-      );
+      const page = await listOrderPage(venueID, { scope, limit: 100, cursor }, requestSignal);
       for (const order of page.orders) orders.set(order.id, order);
       cursor = page.has_more ? page.next_cursor : undefined;
       if (!cursor) break;
@@ -347,11 +328,10 @@ export const updateOrderStatus = async (
   id: string,
   status: OwnerOrder["status"],
   expectedStatus: OwnerOrder["status"],
-  audience: "owner" | "staff" = "owner",
   cancellation?: OrderCancellation,
 ) =>
   (
-    await apiRequest<{ order: OwnerOrder }>(`/${audience}/venues/${venueID}/orders/${id}`, {
+    await apiRequest<{ order: OwnerOrder }>(venuePath(venueID, `/orders/${id}`), {
       method: "PATCH",
       body: JSON.stringify({ status, expected_status: expectedStatus, ...cancellation }),
     })
@@ -391,7 +371,7 @@ export const updateSubscription = async (
   ).subscription;
 
 export const resendStaffInvitation = (venueID: string, staffID: string) =>
-  apiRequest<void>(venuePath(venueID, `/staff/${staffID}/invite`), { method: "POST" });
+  apiRequest<void>(venuePath(venueID, `/team/${staffID}/invite`), { method: "POST" });
 
 export type OrderAlertSettings = {
   warning_minutes: number;
@@ -401,10 +381,10 @@ export type OrderAlertSettings = {
   preorder_lead_minutes: number;
   can_edit: boolean;
 };
-export const getOrderAlertSettings = (venueID: string, audience: "owner" | "staff" = "owner") =>
-  apiRequest<OrderAlertSettings>(`/${audience}/venues/${venueID}/order-alert-settings`);
+export const getOrderAlertSettings = (venueID: string) =>
+  apiRequest<OrderAlertSettings>(venuePath(venueID, "/order-alert-settings"));
 export const saveOrderAlertSettings = (venueID: string, settings: OrderAlertSettings) =>
-  apiRequest<OrderAlertSettings>(`/owner/venues/${venueID}/order-alert-settings`, {
+  apiRequest<OrderAlertSettings>(venuePath(venueID, "/order-alert-settings"), {
     method: "PUT",
     body: JSON.stringify(settings),
   });

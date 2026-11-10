@@ -23,7 +23,7 @@ export function PublicPageSettings({
   useEffect(() => {
     const controller = new AbortController();
     apiRequest<{ url: string; published: boolean }>(
-      `/owner/venues/${venue.id}/public-page?locale=${locale}`,
+      `/venues/${venue.id}/public-page?locale=${locale}`,
       { signal: controller.signal, cache: "no-store" },
     )
       .then(async (result) => {

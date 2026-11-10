@@ -64,7 +64,7 @@ it("encodes filters and detail paths", async () => {
   expect(request.mock.calls[1][0]).toMatch(/venues\/venue\/orders\/id$/);
 });
 
-it("uses staff endpoints for queue, history, workplaces and expected-status writes", async () => {
+it("uses the shared venue endpoints for queue, history and expected-status writes", async () => {
   const { listStaffVenues, updateOrderStatus } = await import("./owner-api");
   request.mockResolvedValue({
     venues: [],
@@ -73,13 +73,13 @@ it("uses staff endpoints for queue, history, workplaces and expected-status writ
     order: order("id", "preparing"),
   });
   await listStaffVenues();
-  await loadOrderQueue("venue", 1, "staff");
-  await updateOrderStatus("venue", "id", "preparing", "new", "staff");
+  await loadOrderQueue("venue", 1);
+  await updateOrderStatus("venue", "id", "preparing", "new");
   expect(request.mock.calls.map((call) => call[0])).toEqual([
     "/staff/venues",
-    "/staff/venues/venue/orders?scope=active&limit=100",
-    "/staff/venues/venue/orders?scope=history&limit=100",
-    "/staff/venues/venue/orders/id",
+    "/venues/venue/orders?scope=active&limit=100",
+    "/venues/venue/orders?scope=history&limit=100",
+    "/venues/venue/orders/id",
   ]);
   expect(JSON.parse(request.mock.calls[3][1]!.body as string)).toEqual({
     status: "preparing",
@@ -90,7 +90,7 @@ it("uses staff endpoints for queue, history, workplaces and expected-status writ
 it("sends the cancellation reason and comment and reads staff detail", async () => {
   const { updateOrderStatus } = await import("./owner-api");
   request.mockResolvedValue({ order: order("id", "cancelled") });
-  await updateOrderStatus("venue", "id", "cancelled", "new", "staff", {
+  await updateOrderStatus("venue", "id", "cancelled", "new", {
     reason: "other",
     comment: "Guest left",
   });
@@ -100,6 +100,6 @@ it("sends the cancellation reason and comment and reads staff detail", async () 
     reason: "other",
     comment: "Guest left",
   });
-  await getOrder("venue", "id", "staff");
-  expect(request.mock.calls[1][0]).toBe("/staff/venues/venue/orders/id");
+  await getOrder("venue", "id");
+  expect(request.mock.calls[1][0]).toBe("/venues/venue/orders/id");
 });

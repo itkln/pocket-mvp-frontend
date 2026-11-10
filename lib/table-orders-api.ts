@@ -68,7 +68,7 @@ export const getTableBill = async (token: string, signal?: AbortSignal) =>
   (await post<{ bill: TableBill | null }>("/public/table-bill", { token }, signal)).bill;
 export const issueTableQR = async (venueID: string, identifier: string, rotate = false) =>
   (
-    await post<{ qr: TableQRCode }>(`/owner/venues/${encodeURIComponent(venueID)}/table-qr`, {
+    await post<{ qr: TableQRCode }>(`/venues/${encodeURIComponent(venueID)}/table-qr`, {
       table_identifier: identifier,
       rotate,
     })
