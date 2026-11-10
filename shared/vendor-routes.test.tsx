@@ -10,6 +10,7 @@ import OwnerMenuPage from "../apps/vendor/app/[locale]/(workspace)/owner/menu/pa
 import OwnerAccountPage from "../apps/vendor/app/[locale]/(workspace)/owner/account/page";
 import StaffServicePage from "../apps/vendor/app/[locale]/(workspace)/staff/service/page";
 import StaffAccountPage from "../apps/vendor/app/[locale]/(workspace)/staff/account/page";
+import StaffVenuePage from "../apps/vendor/app/[locale]/(workspace)/staff/venue/page";
 import nextConfig from "../apps/vendor/next.config";
 import VendorApp, { resolveScreen } from "./vendor-app";
 import * as screens from "./vendor-screens";
@@ -50,7 +51,7 @@ it("serves the workspace screens of each role and the sign-in routes", () => {
     "subscription",
     "account",
   ];
-  const staff = ["service", "menu", "floor", "staff-floor", "account"];
+  const staff = ["service", "menu", "floor", "staff-floor", "venue", "account"];
   expect(pageRoutes(appDir).sort()).toEqual(
     [
       "/",
@@ -76,6 +77,7 @@ it("renders every workspace page inside the Vendor shell", () => {
   expect(OwnerAccountPage).toBe(screens.AccountPage);
   expect(StaffServicePage).toBe(screens.ServicePage);
   expect(StaffAccountPage).toBe(screens.AccountPage);
+  expect(StaffVenuePage).toBe(screens.StaffVenuePage);
 });
 
 it("opens the screen the account may use", () => {
@@ -87,11 +89,13 @@ it("opens the screen the account may use", () => {
   expect(resolveScreen("staff", "kitchen", venue("manager"))).toBe("service");
   expect(resolveScreen("staff", "staff-floor", venue("manager"))).toBe("service");
   expect(resolveScreen("staff", "account", venue("waiter"))).toBe("account");
-  // Managers also run the menu and the floor plan (V-BE-02); waiters do not.
+  // Managers also run the menu, the floor plan and the venue settings (V-BE-02); waiters do not.
   expect(resolveScreen("staff", "menu", venue("manager"))).toBe("menu");
   expect(resolveScreen("staff", "floor", venue("manager"))).toBe("floor");
+  expect(resolveScreen("staff", "venue", venue("manager"))).toBe("venue");
   expect(resolveScreen("staff", "menu", venue("waiter"))).toBe("service");
   expect(resolveScreen("staff", "floor", venue("waiter"))).toBe("service");
+  expect(resolveScreen("staff", "venue", venue("waiter"))).toBe("service");
   expect(resolveScreen("staff", "menu", null)).toBe("service");
 });
 

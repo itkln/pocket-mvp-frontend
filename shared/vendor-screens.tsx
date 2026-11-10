@@ -37,8 +37,8 @@ export function OrdersPage() {
   return <OrdersScreen request={page.request} />;
 }
 
-export function MenuPage() {
-  const page = useVenuePage("owner", "menu");
+function MenuScreen({ role }: { role: VendorRole }) {
+  const page = useVenuePage(role, "menu");
   if (!page) return null;
   return (
     <MenuManager
@@ -49,6 +49,10 @@ export function MenuPage() {
       notify={page.notify}
     />
   );
+}
+
+export function MenuPage() {
+  return <MenuScreen role="owner" />;
 }
 
 export function TeamPage() {
@@ -101,17 +105,21 @@ export function ServicePage() {
   return <ServiceBoard request={page.request} />;
 }
 
-// Managers run the menu and the floor plan (V-BE-02); the venue cover stays with the owner.
+// Managers run the menu, the floor plan and the venue settings (V-BE-02); removing the venue stays
+// with the owner.
 export function StaffMenuPage() {
-  const page = useVenuePage("staff", "menu");
+  return <MenuScreen role="staff" />;
+}
+
+export function StaffVenuePage() {
+  const page = useVenuePage("staff", "venue");
   if (!page) return null;
   return (
-    <MenuManager
+    <VenueScreen
       key={page.venue.id}
-      venueName={page.venue.name}
       venue={page.venue}
       notify={page.notify}
-      canEditCover={false}
+      onUpdate={page.updateVenue}
     />
   );
 }

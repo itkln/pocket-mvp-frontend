@@ -55,9 +55,11 @@ export const staffNavigation = [
   { id: "menu", label: "Меню", icon: UtensilsCrossed },
   { id: "floor", label: "План зала", icon: PanelsTopLeft },
   { id: "staff-floor", label: "Столы", icon: Table2 },
+  { id: "venue", label: "Заведение", icon: Store },
 ];
-// Staff screens beyond the service desk, by venue role (V-BE-02: managers run the menu and floor).
-export const managerScreens = ["menu", "floor"];
+// Staff screens beyond the service desk, by venue role (V-BE-02: managers run the menu, the floor
+// and the venue settings).
+export const managerScreens = ["menu", "floor", "venue"];
 export const canManageVenueSpace = (venue?: { access_role?: string } | null) =>
   venue?.access_role === "manager" || venue?.access_role === "owner";
 
@@ -78,5 +80,8 @@ export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> 
     { label: "Главное", ids: ["discover", "browse-menu"] },
     { label: "Мои действия", ids: ["reservation", "history"] },
   ],
-  staff: [{ label: "Смена", ids: ["service", "menu", "floor", "staff-floor"] }],
+  staff: [
+    { label: "Смена", ids: ["service", "menu", "floor", "staff-floor"] },
+    { label: "Настройки", ids: ["venue"] },
+  ],
 };

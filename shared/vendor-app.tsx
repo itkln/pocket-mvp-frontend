@@ -169,10 +169,13 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
     shell.notify(`Выбрано заведение ${nextVenue.name}`);
   };
 
+  // The saved venue comes back without the user's access role: keep the one already known.
   const updateVenueState = (updatedVenue: Venue) => {
-    setVenue(updatedVenue);
+    setVenue((current) =>
+      current?.id === updatedVenue.id ? { ...current, ...updatedVenue } : updatedVenue,
+    );
     setAvailableVenues((current) =>
-      current.map((item) => (item.id === updatedVenue.id ? updatedVenue : item)),
+      current.map((item) => (item.id === updatedVenue.id ? { ...item, ...updatedVenue } : item)),
     );
   };
 
