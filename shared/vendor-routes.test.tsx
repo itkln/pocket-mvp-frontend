@@ -15,6 +15,7 @@ import VendorApp, { resolveScreen } from "./vendor-app";
 import * as screens from "./vendor-screens";
 import AuthPage from "./auth-page";
 import StaffInvitationPage from "./staff-invitation-page";
+import type { Venue } from "../features/pocket/model";
 vi.mock("next/navigation", () => ({
   redirect: vi.fn(),
   notFound: vi.fn(() => {
@@ -49,7 +50,7 @@ it("serves the workspace screens of each role and the sign-in routes", () => {
     "subscription",
     "account",
   ];
-  const staff = ["service", "staff-floor", "account"];
+  const staff = ["service", "menu", "floor", "staff-floor", "account"];
   expect(pageRoutes(appDir).sort()).toEqual(
     [
       "/",
@@ -78,13 +79,20 @@ it("renders every workspace page inside the Vendor shell", () => {
 });
 
 it("opens the screen the account may use", () => {
-  expect(resolveScreen("owner", undefined)).toBe("overview");
-  expect(resolveScreen("owner", "menu")).toBe("menu");
+  const venue = (access_role?: Venue["access_role"]) => ({ access_role }) as Venue;
+  expect(resolveScreen("owner", undefined, venue("owner"))).toBe("overview");
+  expect(resolveScreen("owner", "menu", venue("owner"))).toBe("menu");
   // Staff work on the service screen; the kitchen screen no longer exists.
-  expect(resolveScreen("staff", undefined)).toBe("service");
-  expect(resolveScreen("staff", "kitchen")).toBe("service");
-  expect(resolveScreen("staff", "staff-floor")).toBe("service");
-  expect(resolveScreen("staff", "account")).toBe("account");
+  expect(resolveScreen("staff", undefined, venue("waiter"))).toBe("service");
+  expect(resolveScreen("staff", "kitchen", venue("manager"))).toBe("service");
+  expect(resolveScreen("staff", "staff-floor", venue("manager"))).toBe("service");
+  expect(resolveScreen("staff", "account", venue("waiter"))).toBe("account");
+  // Managers also run the menu and the floor plan (V-BE-02); waiters do not.
+  expect(resolveScreen("staff", "menu", venue("manager"))).toBe("menu");
+  expect(resolveScreen("staff", "floor", venue("manager"))).toBe("floor");
+  expect(resolveScreen("staff", "menu", venue("waiter"))).toBe("service");
+  expect(resolveScreen("staff", "floor", venue("waiter"))).toBe("service");
+  expect(resolveScreen("staff", "menu", null)).toBe("service");
 });
 
 it("checks the locale, keeps sign-in addresses and redirects the old Ukrainian prefix", async () => {

@@ -120,11 +120,14 @@ export function OwnerWorkspaceProvider({
   onArrivals,
   readScope,
   ordersOnly = false,
+  withMenu = false,
 }: {
   venueTimezone?: string;
   readScope?: string;
   onArrivals?: (orders: OwnerOrder[]) => void;
   ordersOnly?: boolean;
+  // Staff who manage the menu (managers) also load categories and items.
+  withMenu?: boolean;
   venueID?: string;
   children: ReactNode;
   onError: (message: string) => void;
@@ -191,6 +194,14 @@ export function OwnerWorkspaceProvider({
           setOrders(next.orders);
           setHasMoreOrderHistory(next.hasMoreHistory);
         }
+        if (withMenu) {
+          const [nextCategories, nextItems] = await Promise.all([
+            listCategories(venueID),
+            listMenuItems(venueID),
+          ]);
+          setCategories(nextCategories);
+          setItems(nextItems);
+        }
         setError("");
         return;
       }
@@ -230,7 +241,7 @@ export function OwnerWorkspaceProvider({
     } finally {
       setLoading(false);
     }
-  }, [errorMessage, venueID, onError, ordersOnly]);
+  }, [errorMessage, venueID, onError, ordersOnly, withMenu]);
 
   const refreshOrders = useCallback(async () => {
     if (!venueID || orderMutationPending.current) return;

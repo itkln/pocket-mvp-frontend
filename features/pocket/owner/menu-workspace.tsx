@@ -71,7 +71,10 @@ export function MenuManager({
   venue,
   onVenueUpdate,
   notify,
+  canEditCover = true,
 }: {
+  // The venue cover is a venue setting: only the owner changes it.
+  canEditCover?: boolean;
   venueName: string;
   venue?: OwnerVenue;
   onVenueUpdate?: (venue: OwnerVenue) => void;
@@ -288,7 +291,7 @@ export function MenuManager({
               })}
             </small>
           </button>
-          {venue && (
+          {venue && canEditCover && (
             <button className="vendor-cover-summary" onClick={() => setCoverOpen(true)}>
               <span className="vendor-stat-heading">
                 {t("Титульное фото")}

@@ -8,6 +8,7 @@ import {
   ReceiptText,
   Sparkles,
   Store,
+  PanelsTopLeft,
   Table2,
   Users,
   UtensilsCrossed,
@@ -51,13 +52,19 @@ export const ownerNavigation = [
 
 export const staffNavigation = [
   { id: "service", label: "Сервис", icon: Activity },
+  { id: "menu", label: "Меню", icon: UtensilsCrossed },
+  { id: "floor", label: "План зала", icon: PanelsTopLeft },
   { id: "staff-floor", label: "Столы", icon: Table2 },
 ];
+// Staff screens beyond the service desk, by venue role (V-BE-02: managers run the menu and floor).
+export const managerScreens = ["menu", "floor"];
+export const canManageVenueSpace = (venue?: { access_role?: string } | null) =>
+  venue?.access_role === "manager" || venue?.access_role === "owner";
 
 export const mobilePrimaryNavigation: Record<Role, string[]> = {
   owner: ["overview", "orders", "menu"],
   customer: ["discover", "browse-menu", "reservation", "history"],
-  staff: ["service", "staff-floor"],
+  staff: ["service", "menu", "floor"],
 };
 
 export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> = {
@@ -71,5 +78,5 @@ export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> 
     { label: "Главное", ids: ["discover", "browse-menu"] },
     { label: "Мои действия", ids: ["reservation", "history"] },
   ],
-  staff: [{ label: "Смена", ids: ["service", "staff-floor"] }],
+  staff: [{ label: "Смена", ids: ["service", "menu", "floor", "staff-floor"] }],
 };

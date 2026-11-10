@@ -101,6 +101,35 @@ export function ServicePage() {
   return <ServiceBoard request={page.request} />;
 }
 
+// Managers run the menu and the floor plan (V-BE-02); the venue cover stays with the owner.
+export function StaffMenuPage() {
+  const page = useVenuePage("staff", "menu");
+  if (!page) return null;
+  return (
+    <MenuManager
+      key={page.venue.id}
+      venueName={page.venue.name}
+      venue={page.venue}
+      notify={page.notify}
+      canEditCover={false}
+    />
+  );
+}
+
+export function StaffFloorEditorPage() {
+  const page = useVenuePage("staff", "floor");
+  if (!page) return null;
+  return (
+    <FloorPlan
+      key={page.venue.id}
+      mode="owner"
+      venueID={page.venue.id}
+      venueName={page.venue.name}
+      notify={page.notify}
+    />
+  );
+}
+
 export function StaffFloorPage() {
   const page = useVenuePage("staff", "staff-floor");
   if (!page) return null;

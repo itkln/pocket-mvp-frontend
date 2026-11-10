@@ -12,6 +12,8 @@ import {
   type VenueInput,
 } from "../lib/owner-api";
 import {
+  canManageVenueSpace,
+  managerScreens,
   ownerNavigation,
   selectedVenueKey,
   staffNavigation,
@@ -39,9 +41,15 @@ const vendorPath = (locale: Locale, role: VendorRole, screen: string) =>
   `/${locale}/${role}/${screen}`;
 
 // The screen an account opens for a URL. Staff work on the service screen: waiters take every
-// order there and pass it to the kitchen outside Pocket.
-export function resolveScreen(role: VendorRole, routeScreen: string | undefined) {
+// order there and pass it to the kitchen outside Pocket; managers also run the menu and the floor.
+export function resolveScreen(
+  role: VendorRole,
+  routeScreen: string | undefined,
+  venue: Venue | null,
+) {
   if (role !== "staff" || routeScreen === "account") return screenForRole(role, routeScreen);
+  if (routeScreen && managerScreens.includes(routeScreen) && canManageVenueSpace(venue))
+    return routeScreen;
   return "service";
 }
 
@@ -59,7 +67,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
   const [venue, setVenue] = useState<Venue | null>(null);
   const authReady = session?.forRole === routeRole;
   const role = session?.role ?? routeRole;
-  const screen = resolveScreen(role, routeScreen);
+  const screen = resolveScreen(role, routeScreen, venue);
   const shell = useAppShell(`${currentUser?.id}:${venue?.id}:${role}`);
   const [orderRequest, setOrderRequest] = useState<{ id: string; scope: string }>();
   const scope = `${role}:${venue?.id}`;
@@ -189,7 +197,13 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
     );
 
   const navigation =
-    role === "owner" ? ownerNavigation : staffNavigation.filter((item) => item.id === "service");
+    role === "owner"
+      ? ownerNavigation
+      : staffNavigation.filter(
+          (item) =>
+            item.id === "service" ||
+            (managerScreens.includes(item.id) && canManageVenueSpace(venue)),
+        );
   const availableRoles: Role[] = currentUser.capabilities.includes("owner")
     ? ["owner", "staff"]
     : currentUser.capabilities.includes("staff")
@@ -226,6 +240,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
         readScope={`${currentUser.id}:${venue?.id}`}
         venueTimezone={venue?.timezone}
         ordersOnly={role === "staff"}
+        withMenu={role === "staff" && canManageVenueSpace(venue)}
         venueID={venue?.id}
         onError={shell.notify}
         onArrivals={shell.notifyOrders}
