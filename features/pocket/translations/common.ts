@@ -68,7 +68,6 @@ export const commonTranslations: TranslationRow[] = [
   ["Проверяем сессию...", "Checking session...", "Перевіряємо сесію...", "Kontrolujeme reláciu..."],
   ["Уведомления", "Notifications", "Сповіщення", "Upozornenia"],
   ["Очистить", "Clear", "Очистити", "Vymazať"],
-  ["Заказ принят", "Order accepted", "Замовлення прийнято", "Objednávka bola prijatá"],
   ["Новый", "New", "Нове", "Nová"],
   ["Готовится", "Preparing", "Готується", "Pripravuje sa"],
   ["Готов", "Ready", "Готове", "Pripravená"],

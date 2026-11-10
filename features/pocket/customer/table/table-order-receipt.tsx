@@ -6,11 +6,10 @@ import type { TableOrder } from "../../../../lib/table-orders-api";
 import { localeTags, useI18n } from "../../i18n";
 import { TipBreakdown } from "../tip-picker";
 
+// The waiter takes the order new -> preparing -> served -> completed (no accepted or ready step).
 export const statusLabels: Record<string, string> = {
   new: "Заказ отправлен",
-  accepted: "Заказ принят",
   preparing: "Готовится",
-  ready: "Готов",
   served: "Подано",
   completed: "Завершен",
   cancelled: "Отменен",
