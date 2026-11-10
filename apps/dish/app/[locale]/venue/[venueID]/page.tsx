@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import type { DishSearchParams } from "@pocket/lib/dish-links";
+import type { SearchParams } from "@pocket/lib/route-params";
 
 // Printed QR codes and old venue links point at /venue/[id]; the restaurant page is /r/[id].
 export default async function LegacyVenuePage({
@@ -7,7 +7,7 @@ export default async function LegacyVenuePage({
   searchParams,
 }: {
   params: Promise<{ locale: string; venueID: string }>;
-  searchParams: DishSearchParams;
+  searchParams: SearchParams;
 }) {
   const [{ locale, venueID }, query] = await Promise.all([params, searchParams]);
   const next = new URLSearchParams();

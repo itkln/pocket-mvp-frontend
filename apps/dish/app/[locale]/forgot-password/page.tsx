@@ -1,11 +1,7 @@
 import PasswordRecoveryPage from "@pocket/shared/password-recovery-page";
-import { queryValue, type DishSearchParams } from "@pocket/lib/dish-links";
+import { queryValue, type SearchParams } from "@pocket/lib/route-params";
 
-export default async function ForgotPasswordPage({
-  searchParams,
-}: {
-  searchParams: DishSearchParams;
-}) {
+export default async function ForgotPasswordPage({ searchParams }: { searchParams: SearchParams }) {
   const query = await searchParams;
   return (
     <PasswordRecoveryPage

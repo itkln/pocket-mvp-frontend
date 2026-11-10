@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
+import { useRouter, useSelectedLayoutSegments } from "next/navigation";
 import { BellRing, CheckCircle2, Plus, Store, X } from "lucide-react";
 import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth-api";
 import {
@@ -19,29 +19,14 @@ import {
   type Venue,
 } from "../features/pocket/model";
 import { MobileBottomNavigation, Sidebar, Topbar } from "../features/pocket/navigation";
-import {
-  AccountScreen,
-  AnalyticsScreen,
-  MenuManager,
-  OrdersScreen,
-  OwnerOverview,
-  PaymentsScreen,
-  ReviewsScreen,
-  SubscriptionScreen,
-  TeamScreen,
-  VenueScreen,
-} from "../features/pocket/owner";
 import { OwnerWorkspaceProvider } from "../features/pocket/owner/context";
-import { KitchenScreen, ServiceBoard } from "../features/pocket/staff";
-import { FloorPlan } from "../features/pocket/floor-plan";
 import { Modal, NewVenueModal } from "../features/pocket/dialogs";
 import { Button } from "../features/pocket/ui";
 import { useI18n } from "../features/pocket/i18n";
 import { useLocalizedError } from "../features/pocket/error-message";
 import { localeFromPathname, type Locale } from "../features/pocket/locales";
 import { useAppShell } from "./use-app-shell";
-
-type VendorRole = Extract<Role, "owner" | "staff">;
+import { VendorShellContext, type VendorModal, type VendorRole } from "./vendor-shell-context";
 
 const defaultScreen: Record<VendorRole, string> = { owner: "overview", staff: "service" };
 const roleScreens: Record<VendorRole, string[]> = {
@@ -53,33 +38,39 @@ const screenForRole = (role: VendorRole, screen?: string) =>
 const vendorPath = (locale: Locale, role: VendorRole, screen: string) =>
   `/${locale}/${role}/${screen}`;
 
-export default function VendorApp({
-  initialRole = "owner",
-  initialScreen,
-}: {
-  initialRole?: VendorRole;
-  initialScreen?: string;
-}) {
+// The screen an account opens for a URL. Staff land on service or kitchen by their venue role;
+// only owners and managers may pick between the two.
+export function resolveScreen(
+  role: VendorRole,
+  routeScreen: string | undefined,
+  venue: Venue | null,
+) {
+  if (role !== "staff" || routeScreen === "account") return screenForRole(role, routeScreen);
+  const canUseBoth = ["owner", "manager"].includes(venue?.access_role ?? "");
+  if (canUseBoth && (routeScreen === "service" || routeScreen === "kitchen")) return routeScreen;
+  return venue?.access_role === "kitchen" ? "kitchen" : "service";
+}
+
+// Layout shell of the Vendor workspace: /[locale], /owner/[screen] and /staff/[screen].
+export default function VendorApp({ children }: { children?: ReactNode }) {
   const router = useRouter();
   const { locale, t } = useI18n();
   const errorMessage = useLocalizedError();
-  const [authReady, setAuthReady] = useState(false);
+  const [routeRoleSegment, routeScreen] = useSelectedLayoutSegments();
+  const routeRole: VendorRole = routeRoleSegment === "staff" ? "staff" : "owner";
+  // The account and venues are loaded for the role in the URL; switching roles loads them again.
+  const [session, setSession] = useState<{ forRole: VendorRole; role: VendorRole } | null>(null);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
-  const [role, setRole] = useState<VendorRole>(initialRole);
-  const [screen, setScreen] = useState(screenForRole(initialRole, initialScreen));
   const [availableVenues, setAvailableVenues] = useState<Venue[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
+  const authReady = session?.forRole === routeRole;
+  const role = session?.role ?? routeRole;
+  const screen = resolveScreen(role, routeScreen, venue);
   const shell = useAppShell(`${currentUser?.id}:${venue?.id}:${role}`);
   const [orderRequest, setOrderRequest] = useState<{ id: string; scope: string }>();
   const scope = `${role}:${venue?.id}`;
   const request = orderRequest?.scope === scope ? orderRequest : undefined;
-  const [modal, setModal] = useState<"item" | "invite" | "order" | "venue" | null>(null);
-  // A new route (role/screen) reloads the account and venues; hide the shell until then.
-  const [authRoute, setAuthRoute] = useState(`${initialRole}/${initialScreen}`);
-  if (authRoute !== `${initialRole}/${initialScreen}`) {
-    setAuthRoute(`${initialRole}/${initialScreen}`);
-    setAuthReady(false);
-  }
+  const [modal, setModal] = useState<VendorModal | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -87,7 +78,7 @@ export default function VendorApp({
       .then(async (user) => {
         const isStaff = user.capabilities.includes("staff");
         const nextRole: VendorRole =
-          (initialRole === "staff" && (isStaff || user.capabilities.includes("owner"))) ||
+          (routeRole === "staff" && (isStaff || user.capabilities.includes("owner"))) ||
           (isStaff && !user.capabilities.includes("owner"))
             ? "staff"
             : "owner";
@@ -98,24 +89,10 @@ export default function VendorApp({
         if (!active) return;
         const selectedID = window.localStorage.getItem(selectedVenueKey(user.id));
         const selectedVenue = venues.find((item) => item.id === selectedID) ?? venues[0] ?? null;
-        const staffScreen = selectedVenue?.access_role === "kitchen" ? "kitchen" : "service";
-        const canUseBoth = ["owner", "manager"].includes(selectedVenue?.access_role ?? "");
-        const nextScreen =
-          nextRole === "staff" && initialScreen !== "account"
-            ? canUseBoth && ["service", "kitchen"].includes(initialScreen ?? "")
-              ? initialScreen!
-              : staffScreen
-            : screenForRole(nextRole, initialScreen);
-        setRole(nextRole);
-        setScreen(nextScreen);
         setCurrentUser(user);
         setAvailableVenues(venues);
         setVenue(selectedVenue);
-        setAuthReady(true);
-        if (initialRole !== nextRole || initialScreen !== nextScreen) {
-          const routeLocale = localeFromPathname(window.location.pathname) ?? "ru";
-          router.replace(vendorPath(routeLocale, nextRole, nextScreen));
-        }
+        setSession({ forRole: routeRole, role: nextRole });
       })
       .catch((error) => {
         if (!active) return;
@@ -129,7 +106,13 @@ export default function VendorApp({
     return () => {
       active = false;
     };
-  }, [initialRole, initialScreen, router]);
+  }, [routeRole, router]);
+
+  // Keep the URL on the role and screen the account can actually open.
+  useEffect(() => {
+    if (authReady && (role !== routeRole || screen !== routeScreen))
+      router.replace(vendorPath(locale, role, screen));
+  }, [authReady, locale, role, routeRole, routeScreen, router, screen]);
 
   const signOut = async () => {
     try {
@@ -142,17 +125,13 @@ export default function VendorApp({
 
   const changeRole = (next: Role) => {
     if (next === "customer") return;
-    const nextScreen = defaultScreen[next];
-    setRole(next);
-    setScreen(nextScreen);
-    router.push(vendorPath(locale, next, nextScreen));
+    router.push(vendorPath(locale, next, defaultScreen[next]));
     shell.setMobileNav(false);
     window.scrollTo(0, 0);
   };
 
   const navigate = (next: string) => {
     setOrderRequest(undefined);
-    setScreen(next);
     router.push(vendorPath(locale, role, next));
     shell.setMobileNav(false);
     window.scrollTo(0, 0);
@@ -170,8 +149,6 @@ export default function VendorApp({
       );
       window.localStorage.setItem(selectedVenueKey(currentUser.id), newVenue.id);
       setVenue(newVenue);
-      setRole("owner");
-      setScreen("venue");
       router.push(vendorPath(locale, "owner", "venue"));
       setModal(null);
       shell.setMobileNav(false);
@@ -187,7 +164,6 @@ export default function VendorApp({
     setVenue(nextVenue);
     if (role === "staff") {
       const nextScreen = nextVenue.access_role === "kitchen" ? "kitchen" : "service";
-      setScreen(nextScreen);
       router.push(vendorPath(locale, role, nextScreen));
     }
     window.localStorage.setItem(selectedVenueKey(currentUser.id), nextVenue.id);
@@ -210,7 +186,6 @@ export default function VendorApp({
     setVenue(nextVenue);
     if (nextVenue) window.localStorage.setItem(selectedVenueKey(currentUser.id), nextVenue.id);
     else window.localStorage.removeItem(selectedVenueKey(currentUser.id));
-    setScreen("overview");
     router.push(vendorPath(locale, "owner", "overview"));
     shell.notify("Заведение удалено");
   };
@@ -249,177 +224,146 @@ export default function VendorApp({
   const banner = shell.orderBanner;
 
   return (
-    <OwnerWorkspaceProvider
-      key={`${currentUser.id}:${scope}`}
-      readScope={`${currentUser.id}:${venue?.id}`}
-      venueTimezone={venue?.timezone}
-      ordersOnly={role === "staff"}
-      venueID={venue?.id}
-      onError={shell.notify}
-      onArrivals={shell.notifyOrders}
+    <VendorShellContext.Provider
+      value={{
+        role,
+        screen,
+        user: currentUser,
+        setUser: setCurrentUser,
+        venue,
+        venueCount: availableVenues.length,
+        request,
+        notify: shell.notify,
+        navigate,
+        openModal: setModal,
+        updateVenue: updateVenueState,
+        removeVenue: removeCurrentVenue,
+        signOut,
+      }}
     >
-      <div
-        data-screen={
-          role === "staff" && ["service", "kitchen"].includes(screen) ? "orders" : screen
-        }
-        className={`app-shell vendor-shell ${shell.sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+      <OwnerWorkspaceProvider
+        key={`${currentUser.id}:${scope}`}
+        readScope={`${currentUser.id}:${venue?.id}`}
+        venueTimezone={venue?.timezone}
+        ordersOnly={role === "staff"}
+        venueID={venue?.id}
+        onError={shell.notify}
+        onArrivals={shell.notifyOrders}
       >
-        <Sidebar
-          user={currentUser}
-          role={role}
-          availableRoles={availableRoles}
-          brand="Pocket Vendor"
-          screen={screen}
-          navigation={navigation}
-          venue={venue}
-          venues={availableVenues}
-          mobileNav={shell.mobileNav}
-          collapsed={shell.sidebarCollapsed}
-          onNavigate={navigate}
-          onRole={changeRole}
-          onVenue={selectVenue}
-          onAddVenue={() => setModal("venue")}
-          onClose={() => shell.setMobileNav(false)}
-          onToggleCollapsed={shell.toggleSidebar}
-        />
-        <main className="main-shell">
-          <Topbar
+        <div
+          data-screen={
+            role === "staff" && ["service", "kitchen"].includes(screen) ? "orders" : screen
+          }
+          className={`app-shell vendor-shell ${shell.sidebarCollapsed ? "sidebar-collapsed" : ""}`}
+        >
+          <Sidebar
+            user={currentUser}
+            role={role}
+            availableRoles={availableRoles}
+            brand="Pocket Vendor"
+            screen={screen}
+            navigation={navigation}
+            venue={venue}
+            venues={availableVenues}
+            mobileNav={shell.mobileNav}
+            collapsed={shell.sidebarCollapsed}
+            onNavigate={navigate}
+            onRole={changeRole}
+            onVenue={selectVenue}
+            onAddVenue={() => setModal("venue")}
+            onClose={() => shell.setMobileNav(false)}
+            onToggleCollapsed={shell.toggleSidebar}
+          />
+          <main className="main-shell">
+            <Topbar
+              role={role}
+              screen={screen}
+              navigation={navigation}
+              venueName={venue?.name ?? "Мои заведения"}
+              cartCount={0}
+              notifications={shell.notifications}
+              onOpenOrder={openOrder}
+              onMenu={() => shell.setMobileNav(true)}
+              onCart={() => undefined}
+              onNavigate={navigate}
+              onNotificationsRead={shell.markNotificationsRead}
+              onNotificationsClear={shell.clearNotifications}
+            />
+            <div className="page-area">
+              {role === "staff" && !venue && screen !== "account" && (
+                <p role="status">{t("Нет доступных заведений")}</p>
+              )}
+              {role === "owner" && !venue && screen !== "account" && (
+                <section className="owner-onboarding">
+                  <span>
+                    <Store size={28} />
+                  </span>
+                  <h1>{t("Добавьте первое заведение")}</h1>
+                  <p>{t("После создания откроются меню, команда, заказы и аналитика.")}</p>
+                  <Button icon={Plus} onClick={() => setModal("venue")}>
+                    {t("Добавить заведение")}
+                  </Button>
+                </section>
+              )}
+              {(venue || screen === "account") && children}
+            </div>
+          </main>
+          <MobileBottomNavigation
             role={role}
             screen={screen}
             navigation={navigation}
-            venueName={venue?.name ?? "Мои заведения"}
-            cartCount={0}
-            notifications={shell.notifications}
-            onOpenOrder={openOrder}
-            onMenu={() => shell.setMobileNav(true)}
-            onCart={() => undefined}
             onNavigate={navigate}
-            onNotificationsRead={shell.markNotificationsRead}
-            onNotificationsClear={shell.clearNotifications}
           />
-          <div className="page-area">
-            {role === "staff" && !venue && screen !== "account" && (
-              <p role="status">{t("Нет доступных заведений")}</p>
-            )}
-            {role === "owner" && !venue && screen !== "account" && (
-              <section className="owner-onboarding">
-                <span>
-                  <Store size={28} />
+          {banner?.orderID && (
+            <aside className="vendor-order-banner" key={banner.id}>
+              <button
+                type="button"
+                className="vendor-order-banner-body"
+                onClick={() => {
+                  shell.dismissOrderBanner(banner.id);
+                  openOrder(banner.orderID!);
+                }}
+              >
+                <BellRing size={23} aria-hidden="true" />
+                <span role="status">
+                  <strong>
+                    {t(banner.message)} № {banner.orderNumber}
+                  </strong>
+                  {banner.source && <small>{t(banner.source)}</small>}
                 </span>
-                <h1>{t("Добавьте первое заведение")}</h1>
-                <p>{t("После создания откроются меню, команда, заказы и аналитика.")}</p>
-                <Button icon={Plus} onClick={() => setModal("venue")}>
-                  {t("Добавить заведение")}
-                </Button>
-              </section>
-            )}
-            {role === "owner" && venue && screen === "overview" && (
-              <OwnerOverview ownerName={currentUser.first_name} onNavigate={navigate} />
-            )}
-            {role === "owner" && venue && screen === "orders" && <OrdersScreen request={request} />}
-            {role === "owner" && venue && screen === "menu" && (
-              <MenuManager
-                key={venue.id}
-                venueName={venue.name}
-                venue={venue}
-                onVenueUpdate={updateVenueState}
-                notify={shell.notify}
-              />
-            )}
-            {role === "owner" && venue && screen === "team" && (
-              <TeamScreen onInvite={() => setModal("invite")} notify={shell.notify} />
-            )}
-            {role === "owner" && venue && screen === "analytics" && <AnalyticsScreen />}
-            {role === "owner" && venue && screen === "reviews" && (
-              <ReviewsScreen notify={shell.notify} />
-            )}
-            {role === "owner" && venue && screen === "venue" && (
-              <VenueScreen
-                key={venue.id}
-                venue={venue}
-                notify={shell.notify}
-                onUpdate={updateVenueState}
-                onDelete={removeCurrentVenue}
-              />
-            )}
-            {role === "owner" && venue && screen === "payments" && <PaymentsScreen />}
-            {role === "owner" && venue && screen === "subscription" && (
-              <SubscriptionScreen venueCount={availableVenues.length} notify={shell.notify} />
-            )}
-            {role === "staff" && venue && screen === "service" && (
-              <ServiceBoard request={request} />
-            )}
-            {role === "staff" && venue && screen === "kitchen" && (
-              <KitchenScreen request={request} />
-            )}
-            {role === "staff" && venue && screen === "staff-floor" && (
-              <FloorPlan mode="staff" venueName={venue.name} notify={shell.notify} />
-            )}
-            {screen === "account" && (
-              <AccountScreen
-                user={currentUser}
-                notify={shell.notify}
-                onLogout={signOut}
-                onUpdate={setCurrentUser}
-              />
-            )}
-          </div>
-        </main>
-        <MobileBottomNavigation
-          role={role}
-          screen={screen}
-          navigation={navigation}
-          onNavigate={navigate}
-        />
-        {banner?.orderID && (
-          <aside className="vendor-order-banner" key={banner.id}>
-            <button
-              type="button"
-              className="vendor-order-banner-body"
-              onClick={() => {
-                shell.dismissOrderBanner(banner.id);
-                openOrder(banner.orderID!);
+              </button>
+              <button
+                type="button"
+                className="vendor-order-banner-close"
+                aria-label={t("Закрыть")}
+                onClick={() => shell.dismissOrderBanner(banner.id)}
+              >
+                <X size={18} />
+              </button>
+            </aside>
+          )}
+          {shell.toast && (
+            <div className="toast">
+              <CheckCircle2 size={18} />
+              {t(shell.toast)}
+            </div>
+          )}
+          {modal === "venue" && (
+            <NewVenueModal onClose={() => setModal(null)} onCreate={createVenue} />
+          )}
+          {modal && modal !== "venue" && (
+            <Modal
+              type={modal}
+              currency={venue?.currency}
+              onClose={() => setModal(null)}
+              notify={(message) => {
+                setModal(null);
+                shell.notify(message);
               }}
-            >
-              <BellRing size={23} aria-hidden="true" />
-              <span role="status">
-                <strong>
-                  {t(banner.message)} № {banner.orderNumber}
-                </strong>
-                {banner.source && <small>{t(banner.source)}</small>}
-              </span>
-            </button>
-            <button
-              type="button"
-              className="vendor-order-banner-close"
-              aria-label={t("Закрыть")}
-              onClick={() => shell.dismissOrderBanner(banner.id)}
-            >
-              <X size={18} />
-            </button>
-          </aside>
-        )}
-        {shell.toast && (
-          <div className="toast">
-            <CheckCircle2 size={18} />
-            {t(shell.toast)}
-          </div>
-        )}
-        {modal === "venue" && (
-          <NewVenueModal onClose={() => setModal(null)} onCreate={createVenue} />
-        )}
-        {modal && modal !== "venue" && (
-          <Modal
-            type={modal}
-            currency={venue?.currency}
-            onClose={() => setModal(null)}
-            notify={(message) => {
-              setModal(null);
-              shell.notify(message);
-            }}
-          />
-        )}
-      </div>
-    </OwnerWorkspaceProvider>
+            />
+          )}
+        </div>
+      </OwnerWorkspaceProvider>
+    </VendorShellContext.Provider>
   );
 }
