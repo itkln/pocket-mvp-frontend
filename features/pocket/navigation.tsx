@@ -6,11 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { type AuthUser } from "../../lib/auth-api";
 import {
   ArrowRight,
-  BadgeCheck,
   Bell,
   BellOff,
   Check,
   ChevronDown,
+  LogOut,
   Menu as MenuIcon,
   PanelLeftClose,
   PanelLeftOpen,
@@ -19,7 +19,6 @@ import {
   Settings,
   ShoppingBag,
   Store,
-  UserRound,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -30,15 +29,18 @@ import {
   venueInitials,
   mobilePrimaryNavigation,
   navigationGroups,
+  sidebarFooterNavigation,
+  venueRoleLabels,
 } from "./model";
 import { IconButton } from "./ui";
 import { localeOptions, localeTags, useI18n } from "./i18n";
 import { replacePathLocale } from "./locales";
 
+// The Vendor sidebar. The selected venue decides the workspace: own venues open the owner's
+// screens, venues where the user works open the staff screens, so there is no role switch.
 export function Sidebar({
   user,
   role,
-  availableRoles,
   brand = "Pocket",
   screen,
   navigation,
@@ -47,15 +49,14 @@ export function Sidebar({
   mobileNav,
   collapsed,
   onNavigate,
-  onRole,
   onVenue,
   onAddVenue,
+  onSignOut,
   onClose,
   onToggleCollapsed,
 }: {
   user: AuthUser;
   role: Role;
-  availableRoles?: Role[];
   brand?: string;
   screen: string;
   navigation: { id: string; label: string; icon: LucideIcon; count?: number }[];
@@ -64,42 +65,85 @@ export function Sidebar({
   mobileNav: boolean;
   collapsed: boolean;
   onNavigate: (id: string) => void;
-  onRole: (role: Role) => void;
   onVenue: (venue: Venue) => void;
   onAddVenue: () => void;
+  onSignOut: () => void;
   onClose: () => void;
   onToggleCollapsed: () => void;
 }) {
   const { t } = useI18n();
-  const [roleMenuOpen, setRoleMenuOpen] = useState(false);
   const [venueMenuOpen, setVenueMenuOpen] = useState(false);
-  const canSwitchVenue = availableVenues.length > 1;
-  const selectableRoles =
-    availableRoles ??
-    ([
-      "owner",
-      ...(user.capabilities.includes("staff") ? ["staff" as const] : []),
-      "customer",
-    ] satisfies Role[]);
-  const roleMeta =
-    role === "owner"
-      ? { label: "Владелец", icon: Store }
-      : role === "staff"
-        ? { label: "Сотрудник", icon: BadgeCheck }
-        : { label: "Гость", icon: UserRound };
-  const CurrentRoleIcon = roleMeta.icon;
-  const selectRole = (nextRole: Role) => {
-    onRole(nextRole);
-    setRoleMenuOpen(false);
-  };
-  const startVenueCreation = () => {
-    setVenueMenuOpen(false);
-    onAddVenue();
-  };
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const venueMenu = useRef<HTMLDivElement>(null);
+  const profileMenu = useRef<HTMLDivElement>(null);
+  const ownVenues = availableVenues.filter((item) => item.access_role === "owner");
+  const workplaces = availableVenues.filter((item) => item.access_role !== "owner");
+  const venueRole = venue?.access_role ? t(venueRoleLabels[venue.access_role] ?? "") : "";
+
+  useEffect(() => {
+    if (!venueMenuOpen && !profileMenuOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!venueMenu.current?.contains(target)) setVenueMenuOpen(false);
+      if (!profileMenu.current?.contains(target)) setProfileMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setVenueMenuOpen(false);
+      setProfileMenuOpen(false);
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [venueMenuOpen, profileMenuOpen]);
+
   const toggleNavigation = () => {
     if (window.matchMedia("(min-width: 901px)").matches) onToggleCollapsed();
     else onClose();
   };
+  const chooseVenue = (item: Venue) => {
+    setVenueMenuOpen(false);
+    if (item.id !== venue?.id) onVenue(item);
+  };
+  const navButton = ({ id, label, icon: Icon, count }: (typeof navigation)[number]) => (
+    <button
+      key={id}
+      className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""} collapsed-tooltip`}
+      data-tooltip={collapsed ? t(label) : undefined}
+      onClick={() => onNavigate(id)}
+      aria-label={collapsed ? `${t(label)}${count ? `, ${count}` : ""}` : undefined}
+    >
+      <Icon size={20} strokeWidth={1.9} />
+      <span>{t(label)}</span>
+      {count ? <b>{count}</b> : null}
+    </button>
+  );
+  const venueOption = (item: Venue, withRole: boolean) => (
+    <button
+      key={item.id}
+      type="button"
+      role="menuitemradio"
+      aria-checked={item.id === venue?.id}
+      className={item.id === venue?.id ? "active" : ""}
+      onClick={() => chooseVenue(item)}
+    >
+      <span className="venue-avatar">{venueInitials(item)}</span>
+      <span>
+        <strong>{item.name}</strong>
+        {withRole && item.access_role && (
+          <small>{t(venueRoleLabels[item.access_role] ?? "")}</small>
+        )}
+      </span>
+      {item.id === venue?.id && <Check size={16} />}
+    </button>
+  );
+  const footer = sidebarFooterNavigation[role]
+    .map((id) => navigation.find((item) => item.id === id))
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
   return (
     <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
       <div className="brand-row">
@@ -128,185 +172,134 @@ export function Sidebar({
           className="mobile-sidebar-close"
         />
       </div>
-      {role === "customer" ? (
-        <div
-          className="venue-switcher personal-context collapsed-tooltip"
-          data-tooltip={collapsed ? t("Все заведения") : undefined}
+      <div className="venue-menu" ref={venueMenu}>
+        <button
+          type="button"
+          className="venue-switcher can-switch collapsed-tooltip"
+          data-tooltip={collapsed ? (venue?.name ?? t("Заведения")) : undefined}
+          onClick={() => setVenueMenuOpen((open) => !open)}
+          aria-expanded={venueMenuOpen}
+          aria-haspopup="menu"
+          aria-label={collapsed ? `${t("Заведение")}: ${venue?.name ?? t("Заведения")}` : undefined}
         >
-          <span className="venue-avatar">P</span>
+          <span className="venue-avatar">{venue ? venueInitials(venue) : <Store size={18} />}</span>
           <div>
-            <strong>{t("Все заведения")}</strong>
+            <strong>{venue?.name ?? t("Заведения")}</strong>
+            {venueRole && <small>{venueRole}</small>}
           </div>
-          <Search size={16} />
-        </div>
-      ) : (
-        <div className="venue-menu">
-          <button
-            type="button"
-            className={`venue-switcher collapsed-tooltip ${canSwitchVenue ? "can-switch" : ""}`}
-            data-tooltip={collapsed ? (venue?.name ?? t("Заведения")) : undefined}
-            disabled={!canSwitchVenue}
-            onClick={() => setVenueMenuOpen((open) => !open)}
-            aria-expanded={canSwitchVenue ? venueMenuOpen : undefined}
-            aria-label={
-              collapsed ? `${t("Заведение")}: ${venue?.name ?? t("Заведения")}` : undefined
-            }
-          >
-            <span className="venue-avatar">
-              {venue ? venueInitials(venue) : <Store size={18} />}
-            </span>
-            <div>
-              <strong>{venue?.name ?? t("Заведения")}</strong>
-            </div>
-            {canSwitchVenue && <ChevronDown className="venue-switcher-chevron" size={16} />}
-          </button>
-          {canSwitchVenue && venueMenuOpen && (
-            <div className="venue-menu-popover">
-              <p className="venue-menu-label">{t("Мои заведения")}</p>
-              {availableVenues.map((item) => (
-                <button
-                  key={item.id}
-                  className={item.id === venue?.id ? "active" : ""}
-                  onClick={() => {
-                    onVenue(item);
-                    setVenueMenuOpen(false);
-                  }}
-                >
-                  <span className="venue-avatar">{venueInitials(item)}</span>
-                  <span>
-                    <strong>{item.name}</strong>
-                  </span>
-                  {item.id === venue?.id && <Check size={16} />}
-                </button>
-              ))}
-            </div>
-          )}
-          {role === "owner" && (
+          <ChevronDown className="venue-switcher-chevron" size={16} />
+        </button>
+        {venueMenuOpen && (
+          <div className="venue-menu-popover" role="menu">
+            {ownVenues.length > 0 && (
+              <>
+                <p className="venue-menu-label">{t("Мои заведения")}</p>
+                {ownVenues.map((item) => venueOption(item, false))}
+              </>
+            )}
+            {workplaces.length > 0 && (
+              <>
+                <p className="venue-menu-label">{t("Где я работаю")}</p>
+                {workplaces.map((item) => venueOption(item, true))}
+              </>
+            )}
             <button
               type="button"
-              className="sidebar-add-venue collapsed-tooltip"
-              data-tooltip={collapsed ? t("Добавить заведение") : undefined}
-              onClick={startVenueCreation}
+              role="menuitem"
+              className="venue-menu-add"
+              onClick={() => {
+                setVenueMenuOpen(false);
+                onAddVenue();
+              }}
             >
-              <Plus size={20} strokeWidth={1.9} />
-              <span>{t("Добавить заведение")}</span>
+              <span className="venue-avatar">
+                <Plus size={18} />
+              </span>
+              <span>
+                <strong>{t("Добавить заведение")}</strong>
+              </span>
             </button>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
       <nav className="side-nav">
         {navigationGroups[role].map((group) => {
           const items = group.ids
             .map((id) => navigation.find((item) => item.id === id))
             .filter((item): item is NonNullable<typeof item> => Boolean(item));
+          if (!items.length) return null;
           const mobilePrimaryGroup = items.every((item) =>
             mobilePrimaryNavigation[role].includes(item.id),
           );
-
           return (
             <div
               className={`nav-group ${mobilePrimaryGroup ? "mobile-primary-group" : ""}`}
-              key={group.label}
+              key={group.label || "main"}
             >
-              <p className="nav-label">{t(group.label)}</p>
-              {items.map(({ id, label, icon: Icon, count }) => (
-                <button
-                  key={id}
-                  className={`${screen === id ? "active" : ""} ${mobilePrimaryNavigation[role].includes(id) ? "mobile-primary-link" : ""} collapsed-tooltip`}
-                  data-tooltip={collapsed ? t(label) : undefined}
-                  onClick={() => onNavigate(id)}
-                  aria-label={collapsed ? `${t(label)}${count ? `, ${count}` : ""}` : undefined}
-                >
-                  <Icon size={20} strokeWidth={1.9} />
-                  <span>{t(label)}</span>
-                  {count && <b>{count}</b>}
-                </button>
-              ))}
+              {group.label && <p className="nav-label">{t(group.label)}</p>}
+              {items.map(navButton)}
             </div>
           );
         })}
       </nav>
-      <div className={`sidebar-bottom ${selectableRoles.length === 1 ? "single-role" : ""}`}>
-        {selectableRoles.length > 1 && (
-          <>
-            <p className="nav-label">{t("Текущая роль")}</p>
-            <div className="role-menu">
-              <button
-                className="role-menu-trigger collapsed-tooltip"
-                data-tooltip={collapsed ? t("Сменить роль") : undefined}
-                onClick={() => setRoleMenuOpen((open) => !open)}
-                aria-expanded={roleMenuOpen}
-              >
-                <span>
-                  <CurrentRoleIcon size={20} strokeWidth={1.9} />
-                </span>
-                <div>
-                  <strong>{t(roleMeta.label)}</strong>
-                </div>
-                <ChevronDown size={16} strokeWidth={1.9} />
-              </button>
-              {roleMenuOpen && (
-                <div className="role-menu-popover">
-                  {selectableRoles.includes("owner") && (
-                    <button
-                      className={role === "owner" ? "active" : ""}
-                      onClick={() => selectRole("owner")}
-                    >
-                      <Store size={20} strokeWidth={1.9} />
-                      <span>
-                        <strong>{t("Владелец")}</strong>
-                      </span>
-                      {role === "owner" && <Check size={16} />}
-                    </button>
-                  )}
-                  {selectableRoles.includes("staff") && (
-                    <button
-                      className={role === "staff" ? "active" : ""}
-                      onClick={() => selectRole("staff")}
-                    >
-                      <BadgeCheck size={20} strokeWidth={1.9} />
-                      <span>
-                        <strong>{t("Сотрудник")}</strong>
-                      </span>
-                      {role === "staff" && <Check size={16} />}
-                    </button>
-                  )}
-                  {selectableRoles.includes("customer") && (
-                    <button
-                      className={role === "customer" ? "active" : ""}
-                      onClick={() => selectRole("customer")}
-                    >
-                      <UserRound size={20} strokeWidth={1.9} />
-                      <span>
-                        <strong>{t("Гость")}</strong>
-                      </span>
-                      {role === "customer" && <Check size={16} />}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </>
+      <div className="sidebar-bottom">
+        {footer.length > 0 && (
+          <nav className="side-nav sidebar-footer-nav" aria-label={t("Настройки")}>
+            {footer.map(navButton)}
+          </nav>
         )}
-        <button
-          className={`user-chip collapsed-tooltip ${screen === (role === "customer" ? "profile" : "account") ? "active" : ""}`}
-          data-tooltip={collapsed ? t("Управление аккаунтом") : undefined}
-          onClick={() => onNavigate(role === "customer" ? "profile" : "account")}
-          aria-label={collapsed ? t("Управление аккаунтом") : undefined}
-        >
-          <span
-            className={user.avatar_url ? "has-photo" : ""}
-            style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}
+        <div className="profile-menu" ref={profileMenu}>
+          <button
+            type="button"
+            className={`user-chip collapsed-tooltip ${screen === "account" ? "active" : ""}`}
+            data-tooltip={collapsed ? t("Управление аккаунтом") : undefined}
+            onClick={() => setProfileMenuOpen((open) => !open)}
+            aria-expanded={profileMenuOpen}
+            aria-haspopup="menu"
+            aria-label={collapsed ? t("Управление аккаунтом") : undefined}
           >
-            {user.avatar_url ? "" : userInitials(user)}
-          </span>
-          <div>
-            <strong>
-              {user.first_name} {user.last_name}
-            </strong>
-          </div>
-          <Settings size={20} strokeWidth={1.9} />
-        </button>
+            <span
+              className={user.avatar_url ? "has-photo" : ""}
+              style={user.avatar_url ? { backgroundImage: `url("${user.avatar_url}")` } : undefined}
+            >
+              {user.avatar_url ? "" : userInitials(user)}
+            </span>
+            <div>
+              <strong>
+                {user.first_name} {user.last_name}
+              </strong>
+              <small>{user.email}</small>
+            </div>
+            <ChevronDown size={16} strokeWidth={1.9} />
+          </button>
+          {profileMenuOpen && (
+            <div className="profile-menu-popover" role="menu">
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  onNavigate("account");
+                }}
+              >
+                <Settings size={18} />
+                {t("Настройки аккаунта")}
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="danger"
+                onClick={() => {
+                  setProfileMenuOpen(false);
+                  onSignOut();
+                }}
+              >
+                <LogOut size={18} />
+                {t("Выйти из аккаунта")}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </aside>
   );

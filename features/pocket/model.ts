@@ -46,7 +46,7 @@ export const ownerNavigation = [
   { id: "team", label: "Команда", icon: Users },
   { id: "analytics", label: "Аналитика", icon: BarChart3 },
   { id: "reviews", label: "Отзывы", icon: MessageSquareText },
-  { id: "venue", label: "Заведение", icon: Store },
+  { id: "venue", label: "Настройки заведения", icon: Store },
   { id: "payments", label: "Платежи", icon: WalletCards },
   { id: "subscription", label: "Подписка", icon: Sparkles },
 ];
@@ -56,7 +56,7 @@ export const staffNavigation = [
   { id: "menu", label: "Меню", icon: UtensilsCrossed },
   { id: "floor", label: "План зала", icon: PanelsTopLeft },
   { id: "staff-floor", label: "Столы", icon: Table2 },
-  { id: "venue", label: "Заведение", icon: Store },
+  { id: "venue", label: "Настройки заведения", icon: Store },
 ];
 // Staff screens beyond the service desk, by venue role (V-BE-02: managers run the menu, the floor
 // and the venue settings).
@@ -70,19 +70,34 @@ export const mobilePrimaryNavigation: Record<Role, string[]> = {
   staff: ["service", "menu", "floor"],
 };
 
+// Sidebar groups. The first group has no title; settings sit at the bottom next to the profile.
 export const navigationGroups: Record<Role, { label: string; ids: string[] }[]> = {
   owner: [
-    { label: "Сегодня", ids: ["overview", "orders"] },
-    { label: "Операции", ids: ["menu", "floor", "team"] },
-    { label: "Контроль", ids: ["analytics", "reviews", "payments"] },
-    { label: "Настройки", ids: ["venue", "subscription"] },
+    { label: "", ids: ["overview", "orders"] },
+    { label: "Заведение", ids: ["menu", "floor", "team", "reviews"] },
+    { label: "Бизнес", ids: ["analytics", "payments"] },
   ],
   customer: [
     { label: "Главное", ids: ["discover", "browse-menu"] },
     { label: "Мои действия", ids: ["reservation", "history"] },
   ],
   staff: [
-    { label: "Смена", ids: ["service", "menu", "floor", "staff-floor"] },
-    { label: "Настройки", ids: ["venue"] },
+    { label: "", ids: ["service", "staff-floor"] },
+    { label: "Заведение", ids: ["menu", "floor"] },
   ],
+};
+export const sidebarFooterNavigation: Record<Role, string[]> = {
+  owner: ["venue", "subscription"],
+  customer: [],
+  staff: ["venue"],
+};
+
+// The role a venue opens in: the owner's workspace for own venues, the staff one elsewhere.
+export const roleForVenue = (venue: { access_role?: string }) =>
+  venue.access_role === "owner" ? ("owner" as const) : ("staff" as const);
+
+export const venueRoleLabels: Record<string, string> = {
+  owner: "Владелец",
+  manager: "Менеджер",
+  waiter: "Официант",
 };

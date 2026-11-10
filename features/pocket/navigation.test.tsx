@@ -91,7 +91,12 @@ const owner = {
   capabilities: ["customer", "owner"] as ("customer" | "owner")[],
 };
 
-const venue = (id: string, name: string, city: string): Venue => ({
+const venue = (
+  id: string,
+  name: string,
+  city: string,
+  access_role: Venue["access_role"] = "owner",
+): Venue => ({
   id,
   name,
   slug: name.toLowerCase().replaceAll(" ", "-"),
@@ -103,6 +108,7 @@ const venue = (id: string, name: string, city: string): Venue => ({
   status: "active",
   settings: {},
   created_at: "2026-01-01T00:00:00Z",
+  access_role,
 });
 
 const sidebarProps = {
@@ -113,9 +119,9 @@ const sidebarProps = {
   mobileNav: false,
   collapsed: false,
   onNavigate: vi.fn(),
-  onRole: vi.fn(),
   onVenue: vi.fn(),
   onAddVenue: vi.fn(),
+  onSignOut: vi.fn(),
   onClose: vi.fn(),
   onToggleCollapsed: vi.fn(),
 };
@@ -125,7 +131,7 @@ describe("Sidebar venue navigation", () => {
     vi.clearAllMocks();
   });
 
-  it("shows venue creation below a single non-expandable venue", () => {
+  it("adds a venue from the venue menu, even with a single venue", () => {
     const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
     render(
       <I18nProvider>
@@ -133,25 +139,45 @@ describe("Sidebar venue navigation", () => {
       </I18nProvider>,
     );
 
-    expect(screen.getByRole("button", { name: /Zen Garden/ })).toBeDisabled();
     expect(screen.queryByText("Bratislava")).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Добавить заведение" }));
+    expect(screen.queryByRole("menuitem", { name: "Добавить заведение" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Zen Garden/ }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Добавить заведение" }));
     expect(sidebarProps.onAddVenue).toHaveBeenCalledOnce();
   });
 
-  it("opens venue switching only when multiple venues are available", () => {
+  it("groups own venues and workplaces and has no role switch", () => {
     const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
-    const northVine = venue("venue-2", "North & Vine", "Kosice");
+    const northVine = venue("venue-2", "North & Vine", "Kosice", "manager");
     render(
       <I18nProvider>
         <Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden, northVine]} />
       </I18nProvider>,
     );
 
+    expect(screen.queryByText("Текущая роль")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Zen Garden/ }));
+    expect(screen.getByText("Мои заведения")).toBeInTheDocument();
+    expect(screen.getByText("Где я работаю")).toBeInTheDocument();
+    const workplace = screen.getByRole("menuitemradio", { name: /North & Vine/ });
+    expect(workplace).toHaveTextContent("Менеджер");
+    fireEvent.click(workplace);
+    expect(sidebarProps.onVenue).toHaveBeenCalledWith(northVine);
+  });
 
-    expect(screen.getByText("North & Vine")).toBeInTheDocument();
-    expect(screen.queryByText("Kosice")).not.toBeInTheDocument();
+  it("keeps account settings and sign-out in the profile menu", () => {
+    const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
+    render(
+      <I18nProvider>
+        <Sidebar {...sidebarProps} venue={zenGarden} venues={[zenGarden]} />
+      </I18nProvider>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /Denys Itkin/ }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Настройки аккаунта" }));
+    expect(sidebarProps.onNavigate).toHaveBeenCalledWith("account");
+    fireEvent.click(screen.getByRole("button", { name: /Denys Itkin/ }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Выйти из аккаунта" }));
+    expect(sidebarProps.onSignOut).toHaveBeenCalledOnce();
   });
 });

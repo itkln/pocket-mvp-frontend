@@ -25,7 +25,7 @@
 }
 .overview-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 20px;
   align-items: start;
 }
@@ -145,8 +145,8 @@ button.overview-rating:hover {
 .overview-rating-bars .vendor-stat-track i {
   background: #e3a008;
 }
-.overview-order-table td:first-child {
-  width: 34%;
+.overview-order-table :is(th, td) {
+  padding-inline: 10px;
 }
 @media (max-width: 1200px) {
   .overview-grid {

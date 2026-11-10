@@ -1462,4 +1462,9 @@ export const vendorTranslations: TranslationRow[] = [
     "Úspešné platby: {count}",
   ],
   ["бронь на {time}", "booking at {time}", "бронювання на {time}", "rezervácia na {time}"],
+  // Sidebar without a role switch.
+  ["Настройки заведения", "Venue settings", "Налаштування закладу", "Nastavenia prevádzky"],
+  ["Где я работаю", "Where I work", "Де я працюю", "Kde pracujem"],
+  ["Бизнес", "Business", "Бізнес", "Podnikanie"],
+  ["Настройки аккаунта", "Account settings", "Налаштування акаунта", "Nastavenia účtu"],
 ];

@@ -7,7 +7,6 @@ import { AuthAPIError, getCurrentUser, logout, type AuthUser } from "../lib/auth
 import {
   createOwnerVenue,
   deleteOwnerVenue,
-  listOwnerVenues,
   listStaffVenues,
   type VenueInput,
 } from "../lib/owner-api";
@@ -15,13 +14,13 @@ import {
   canManageVenueSpace,
   managerScreens,
   ownerNavigation,
+  roleForVenue,
   selectedVenueKey,
   staffNavigation,
-  type Role,
   type Venue,
 } from "../features/pocket/model";
 import { MobileBottomNavigation, Sidebar, Topbar } from "../features/pocket/navigation";
-import { OwnerWorkspaceProvider } from "../features/pocket/owner/context";
+import { OwnerWorkspaceProvider, useOwnerWorkspace } from "../features/pocket/owner/context";
 import { Modal, NewVenueModal } from "../features/pocket/dialogs";
 import { Button } from "../features/pocket/ui";
 import { useI18n } from "../features/pocket/i18n";
@@ -54,19 +53,24 @@ export function resolveScreen(
 }
 
 // Layout shell of the Vendor workspace: /[locale], /owner/[screen] and /staff/[screen].
+// There is no role switch: the selected venue decides the workspace. Own venues open the owner's
+// screens, venues where the user works open the staff screens for their venue role.
 export default function VendorApp({ children }: { children?: ReactNode }) {
   const router = useRouter();
   const { locale, t } = useI18n();
   const errorMessage = useLocalizedError();
   const [routeRoleSegment, routeScreen] = useSelectedLayoutSegments();
   const routeRole: VendorRole = routeRoleSegment === "staff" ? "staff" : "owner";
-  // The account and venues are loaded for the role in the URL; switching roles loads them again.
-  const [session, setSession] = useState<{ forRole: VendorRole; role: VendorRole } | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [availableVenues, setAvailableVenues] = useState<Venue[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
-  const authReady = session?.forRole === routeRole;
-  const role = session?.role ?? routeRole;
+  // Without a venue an owner sees onboarding; a staff-only account waits for an invitation.
+  const role: VendorRole = venue
+    ? roleForVenue(venue)
+    : currentUser?.capabilities.includes("staff") && !currentUser.capabilities.includes("owner")
+      ? "staff"
+      : "owner";
   const screen = resolveScreen(role, routeScreen, venue);
   const shell = useAppShell(`${currentUser?.id}:${venue?.id}:${role}`);
   const [orderRequest, setOrderRequest] = useState<{ id: string; scope: string }>();
@@ -76,25 +80,21 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    getCurrentUser()
-      .then(async (user) => {
-        const isStaff = user.capabilities.includes("staff");
-        const nextRole: VendorRole =
-          (routeRole === "staff" && (isStaff || user.capabilities.includes("owner"))) ||
-          (isStaff && !user.capabilities.includes("owner"))
-            ? "staff"
-            : "owner";
-        const venues = await (nextRole === "staff" ? listStaffVenues() : listOwnerVenues());
-        return { user, venues, nextRole };
-      })
-      .then(({ user, venues, nextRole }) => {
+    // Every venue the account owns or works at, with its venue role.
+    Promise.all([getCurrentUser(), listStaffVenues()])
+      .then(([user, venues]) => {
         if (!active) return;
         const selectedID = window.localStorage.getItem(selectedVenueKey(user.id));
-        const selectedVenue = venues.find((item) => item.id === selectedID) ?? venues[0] ?? null;
+        const initialRole = window.location.pathname.includes("/staff") ? "staff" : "owner";
+        const selectedVenue =
+          venues.find((item) => item.id === selectedID) ??
+          venues.find((item) => roleForVenue(item) === initialRole) ??
+          venues[0] ??
+          null;
         setCurrentUser(user);
         setAvailableVenues(venues);
         setVenue(selectedVenue);
-        setSession({ forRole: routeRole, role: nextRole });
+        setAuthReady(true);
       })
       .catch((error) => {
         if (!active) return;
@@ -108,7 +108,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
     return () => {
       active = false;
     };
-  }, [routeRole, router]);
+  }, [router]);
 
   // Keep the URL on the role and screen the account can actually open.
   useEffect(() => {
@@ -125,13 +125,6 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
     }
   };
 
-  const changeRole = (next: Role) => {
-    if (next === "customer") return;
-    router.push(vendorPath(locale, next, defaultScreen[next]));
-    shell.setMobileNav(false);
-    window.scrollTo(0, 0);
-  };
-
   const navigate = (next: string) => {
     setOrderRequest(undefined);
     router.push(vendorPath(locale, role, next));
@@ -142,7 +135,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
   const createVenue = async (input: VenueInput) => {
     if (!currentUser) return;
     try {
-      const newVenue = await createOwnerVenue(input);
+      const newVenue: Venue = { ...(await createOwnerVenue(input)), access_role: "owner" };
       setAvailableVenues((current) => [...current, newVenue]);
       setCurrentUser((current) =>
         current
@@ -161,10 +154,14 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
     }
   };
 
+  // Switching venues may switch the workspace; the current screen stays when the new one has it.
   const selectVenue = (nextVenue: Venue) => {
     if (!currentUser) return;
+    const nextRole = roleForVenue(nextVenue);
     setVenue(nextVenue);
-    if (role === "staff") router.push(vendorPath(locale, role, "service"));
+    setOrderRequest(undefined);
+    router.push(vendorPath(locale, nextRole, resolveScreen(nextRole, screen, nextVenue)));
+    shell.setMobileNav(false);
     window.localStorage.setItem(selectedVenueKey(currentUser.id), nextVenue.id);
     shell.notify(`Выбрано заведение ${nextVenue.name}`);
   };
@@ -188,7 +185,8 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
     setVenue(nextVenue);
     if (nextVenue) window.localStorage.setItem(selectedVenueKey(currentUser.id), nextVenue.id);
     else window.localStorage.removeItem(selectedVenueKey(currentUser.id));
-    router.push(vendorPath(locale, "owner", "overview"));
+    const nextRole = nextVenue ? roleForVenue(nextVenue) : "owner";
+    router.push(vendorPath(locale, nextRole, defaultScreen[nextRole]));
     shell.notify("Заведение удалено");
   };
 
@@ -207,11 +205,6 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
             item.id === "service" ||
             (managerScreens.includes(item.id) && canManageVenueSpace(venue)),
         );
-  const availableRoles: Role[] = currentUser.capabilities.includes("owner")
-    ? ["owner", "staff"]
-    : currentUser.capabilities.includes("staff")
-      ? ["staff"]
-      : ["owner"];
 
   const openOrder = (id: string) => {
     const target = role === "owner" ? "orders" : "service";
@@ -252,10 +245,9 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
           data-screen={role === "staff" && screen === "service" ? "orders" : screen}
           className={`app-shell vendor-shell ${shell.sidebarCollapsed ? "sidebar-collapsed" : ""}`}
         >
-          <Sidebar
+          <VendorSidebar
             user={currentUser}
             role={role}
-            availableRoles={availableRoles}
             brand="Pocket Vendor"
             screen={screen}
             navigation={navigation}
@@ -264,7 +256,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
             mobileNav={shell.mobileNav}
             collapsed={shell.sidebarCollapsed}
             onNavigate={navigate}
-            onRole={changeRole}
+            onSignOut={() => void signOut()}
             onVenue={selectVenue}
             onAddVenue={() => setModal("venue")}
             onClose={() => shell.setMobileNav(false)}
@@ -362,4 +354,20 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
       </OwnerWorkspaceProvider>
     </VendorShellContext.Provider>
   );
+}
+
+// The sidebar with attention counters: new orders and reviews waiting for a reply.
+function VendorSidebar(props: Parameters<typeof Sidebar>[0]) {
+  const { orders, reviews } = useOwnerWorkspace();
+  const newOrders = orders.filter((order) => order.status === "new").length;
+  const unanswered = reviews.filter((review) => !review.owner_reply).length;
+  const counts: Record<string, number> = {
+    orders: newOrders,
+    service: newOrders,
+    reviews: unanswered,
+  };
+  const navigation = props.navigation.map((item) =>
+    counts[item.id] ? { ...item, count: counts[item.id] } : item,
+  );
+  return <Sidebar {...props} navigation={navigation} />;
 }
