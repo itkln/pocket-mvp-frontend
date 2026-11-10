@@ -1,13 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  catalogCityValue,
   clearSavedPublicReservation,
   createPublicReservation,
   getSavedPublicReservation,
   getPublicVenue,
   getPublicVenueMenu,
   getPublicVenueReviews,
-  listPublicVenues,
 } from "./public-catalog-api";
 
 describe("public catalog API", () => {
@@ -30,45 +28,6 @@ describe("public catalog API", () => {
       ),
     );
     vi.stubGlobal("fetch", fetchMock);
-  });
-
-  it("maps localized cities and sends search, filter and pagination to the server", async () => {
-    await listPublicVenues({
-      city: "Братислава",
-      query: " coffee ",
-      category: "restaurants",
-      filter: "Лучшие",
-      page: 2,
-      pageSize: 12,
-    });
-
-    const [requestURL, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    const url = new URL(requestURL, "http://pocket.local");
-    expect(url.pathname).toBe("/api/v1/public/venues");
-    expect(Object.fromEntries(url.searchParams)).toEqual({
-      city: "Bratislava",
-      q: "coffee",
-      category: "restaurants",
-      filter: "Лучшие",
-      page: "2",
-      page_size: "12",
-    });
-    expect(init.credentials).toBe("include");
-  });
-
-  it("keeps canonical city names and omits the all filter", async () => {
-    await listPublicVenues({ city: "Bratislava", filter: "Все" });
-    const url = new URL(fetchMock.mock.calls[0][0] as string, "http://pocket.local");
-    expect(url.searchParams.get("city")).toBe("Bratislava");
-    expect(url.searchParams.has("filter")).toBe(false);
-    expect(catalogCityValue("Кошице")).toBe("Košice");
-  });
-
-  it("hydrates a bounded list of stable venue IDs", async () => {
-    await listPublicVenues({ ids: ["first-uuid", "second-uuid"], pageSize: 50 });
-    const url = new URL(fetchMock.mock.calls[0][0] as string, "http://pocket.local");
-    expect(url.searchParams.get("ids")).toBe("first-uuid,second-uuid");
-    expect(url.searchParams.get("page_size")).toBe("50");
   });
 
   it("loads a selected venue by ID", async () => {

@@ -15,7 +15,7 @@ import {
 import { useMenuView } from "./menu-view";
 import { PublicMenuCards } from "./public-menu-cards";
 import { PublicMenuItemDialog } from "./public-menu-item-dialog";
-import { apiRequest, APIError } from "../../../lib/api-client";
+import { APIError } from "../../../lib/api-client";
 import { createReservationKey } from "../../../lib/reservation-key";
 import {
   createPublicReservation,
@@ -47,17 +47,7 @@ const wishOptions = [
   { id: "children", icon: "🧸", label: "С детьми" },
 ] as const;
 
-export type BookingService = {
-  id: string;
-  name: string;
-  category_name?: string;
-  duration_minutes: number;
-  price_minor: number;
-  currency: string;
-};
-
 export function BookingPicker({
-  service,
   venueID,
   menu = [],
   preorderEnabled = false,
@@ -65,7 +55,6 @@ export function BookingPicker({
   venueName,
   venueLogoURL,
 }: {
-  service?: BookingService;
   venueID: string;
   venueName?: string;
   venueLogoURL?: string;
@@ -136,7 +125,6 @@ export function BookingPicker({
   const submissionKey = useRef("");
 
   useEffect(() => {
-    if (service) return;
     let active = true;
     void getSavedPublicReservation(venueID).then((saved) => {
       if (active && saved) setConfirmed(saved);
@@ -144,7 +132,7 @@ export function BookingPicker({
     return () => {
       active = false;
     };
-  }, [venueID, service]);
+  }, [venueID]);
   const calendarRef = useRef<HTMLDivElement>(null);
   const formatter = new Intl.DateTimeFormat(localeTags[locale], {
     day: "numeric",
@@ -161,13 +149,7 @@ export function BookingPicker({
 
   useEffect(() => {
     const controller = new AbortController();
-    (service
-      ? apiRequest<VenueAvailability>(
-          `/public/venues/${venueID}/service-availability?${new URLSearchParams({ service_id: service.id, ...(date ? { date } : {}) })}`,
-          { signal: controller.signal, cache: "no-store" },
-        )
-      : getVenueAvailability(venueID, date, guests, controller.signal)
-    )
+    getVenueAvailability(venueID, date, guests, controller.signal)
       .then((result) => {
         if (controller.signal.aborted) return;
         setAvailability(result);
@@ -185,7 +167,7 @@ export function BookingPicker({
         }
       });
     return () => controller.abort();
-  }, [venueID, date, guests, revision, service]);
+  }, [venueID, date, guests, revision]);
 
   useEffect(() => {
     const refresh = () => setRevision((value) => value + 1);
@@ -289,53 +271,30 @@ export function BookingPicker({
     setSubmitting(true);
     setSubmitError("");
     try {
-      const reservation = service
-        ? (
-            await apiRequest<{ reservation: CreatedReservation }>(
-              `/public/venues/${venueID}/appointments`,
-              {
-                method: "POST",
-                body: JSON.stringify({
-                  service_id: service.id,
-                  starts_at: selectedSlot.starts_at,
-                  guest_name: guestName.trim(),
-                  guest_phone: guestPhone.trim(),
-                  notes: comment.trim(),
-                  expected_price_minor: service.price_minor,
-                  idempotency_key: submissionKey.current,
-                }),
-              },
-            )
-          ).reservation
-        : await createPublicReservation(venueID, {
-            starts_at: selectedSlot.starts_at,
-            guests,
-            guest_name: guestName.trim(),
-            guest_phone: guestPhone.trim(),
-            guest_email: guestEmail.trim(),
-            notes: [
-              wishes
-                .map((id) => wishOptions.find((wish) => wish.id === id)?.label)
-                .filter(Boolean)
-                .join(", "),
-              comment.trim(),
-            ]
-              .filter(Boolean)
-              .join(" · "),
-            items: selectedItems.flatMap(({ item, quantity }) =>
-              item
-                ? [{ menu_item_id: item.id, quantity, expected_price_minor: item.price_minor }]
-                : [],
-            ),
-            expected_total_minor: preorderTotal,
-            idempotency_key: submissionKey.current,
-          });
+      const reservation = await createPublicReservation(venueID, {
+        starts_at: selectedSlot.starts_at,
+        guests,
+        guest_name: guestName.trim(),
+        guest_phone: guestPhone.trim(),
+        guest_email: guestEmail.trim(),
+        notes: [
+          wishes
+            .map((id) => wishOptions.find((wish) => wish.id === id)?.label)
+            .filter(Boolean)
+            .join(", "),
+          comment.trim(),
+        ]
+          .filter(Boolean)
+          .join(" · "),
+        items: selectedItems.flatMap(({ item, quantity }) =>
+          item ? [{ menu_item_id: item.id, quantity, expected_price_minor: item.price_minor }] : [],
+        ),
+        expected_total_minor: preorderTotal,
+        idempotency_key: submissionKey.current,
+      });
       setConfirmed(reservation);
     } catch (caught) {
-      if (service && caught instanceof APIError && caught.code === "price_changed") {
-        setSubmitError(t("Условия записи изменились. Выберите время ещё раз."));
-        onClose?.();
-      } else if (
+      if (
         caught instanceof APIError &&
         (caught.code === "price_changed" || caught.code === "item_unavailable")
       ) {
@@ -414,7 +373,7 @@ export function BookingPicker({
           className="mobile-booking-back"
           aria-label={t("Назад")}
           disabled={submitting}
-          onClick={() => changeStep(step === "checkout" && !service ? "preorder" : "details")}
+          onClick={() => changeStep(step === "checkout" ? "preorder" : "details")}
         >
           <ArrowLeft size={22} />
         </button>
@@ -450,7 +409,6 @@ export function BookingPicker({
       {!confirmed && step !== "details" && heading}
       {confirmed ? (
         <BookingConfirmation
-          service={service}
           venueID={venueID}
           venueName={venueName ?? "Pocket"}
           venueLogoURL={venueLogoURL}
@@ -544,47 +502,31 @@ export function BookingPicker({
                         />
                       )}
                     </div>
-                    {!service && (
-                      <div className="venue-guests">
-                        <button
-                          type="button"
-                          aria-label={t("Уменьшить количество гостей")}
-                          disabled={guests === 1}
-                          onClick={() => changeGuests(guests - 1)}
-                        >
-                          <Minus size={16} />
-                        </button>
-                        <strong>{t("Гостей: {count}", { count: guests })}</strong>
-                        <button
-                          type="button"
-                          aria-label={t("Увеличить количество гостей")}
-                          disabled={guests === 20}
-                          onClick={() => changeGuests(guests + 1)}
-                        >
-                          <Plus size={16} />
-                        </button>
-                      </div>
-                    )}
+                    <div className="venue-guests">
+                      <button
+                        type="button"
+                        aria-label={t("Уменьшить количество гостей")}
+                        disabled={guests === 1}
+                        onClick={() => changeGuests(guests - 1)}
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <strong>{t("Гостей: {count}", { count: guests })}</strong>
+                      <button
+                        type="button"
+                        aria-label={t("Увеличить количество гостей")}
+                        disabled={guests === 20}
+                        onClick={() => changeGuests(guests + 1)}
+                      >
+                        <Plus size={16} />
+                      </button>
+                    </div>
                   </div>
-                  {service && (
-                    <p>
-                      <strong>{service.category_name}</strong>
-                      <br />
-                      {service.name} · {formatMoney(service.price_minor, service.currency)} ·{" "}
-                      {service.duration_minutes} {t("мин")}
-                    </p>
-                  )}
                   {loading ? (
-                    <p role="status">{t(service ? "Загрузка..." : "Ищем свободные столы...")}</p>
+                    <p role="status">{t("Ищем свободные столы...")}</p>
                   ) : error ? (
                     <div role="alert">
-                      <p>
-                        {t(
-                          service
-                            ? "Не удалось загрузить свободное время"
-                            : "Не удалось проверить свободные столы",
-                        )}
-                      </p>
+                      <p>{t("Не удалось проверить свободные столы")}</p>
                       <button
                         type="button"
                         onClick={() => {
@@ -610,13 +552,7 @@ export function BookingPicker({
                   ) : (
                     <>
                       <p className="venue-booking-label">{t("Свободное время")}</p>
-                      <p role="status">
-                        {t(
-                          service
-                            ? "Нет свободного времени. Выберите другую дату."
-                            : "На эту дату свободных столов нет",
-                        )}
-                      </p>
+                      <p role="status">{t("На эту дату свободных столов нет")}</p>
                     </>
                   )}
                 </section>
@@ -625,25 +561,23 @@ export function BookingPicker({
                     {selectedSlot && (
                       <div className="venue-booking-wishes">
                         <h3>{t("Пожелания к брони")}</h3>
-                        {!service && (
-                          <div className="venue-wish-options">
-                            {wishOptions.map((wish) => (
-                              <button
-                                type="button"
-                                key={wish.id}
-                                className={wishes.includes(wish.id) ? "active" : ""}
-                                aria-pressed={wishes.includes(wish.id)}
-                                onClick={() => toggleWish(wish.id)}
-                              >
-                                <span aria-hidden="true">{wish.icon}</span>
-                                {t(wish.label)}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                        <div className="venue-wish-options">
+                          {wishOptions.map((wish) => (
+                            <button
+                              type="button"
+                              key={wish.id}
+                              className={wishes.includes(wish.id) ? "active" : ""}
+                              aria-pressed={wishes.includes(wish.id)}
+                              onClick={() => toggleWish(wish.id)}
+                            >
+                              <span aria-hidden="true">{wish.icon}</span>
+                              {t(wish.label)}
+                            </button>
+                          ))}
+                        </div>
                         <textarea
-                          aria-label={t(service ? "Комментарий" : "Комментарий к ресторану")}
-                          placeholder={t(service ? "Комментарий" : "Комментарий к ресторану")}
+                          aria-label={t("Комментарий к ресторану")}
+                          placeholder={t("Комментарий к ресторану")}
                           value={comment}
                           maxLength={500}
                           onChange={(event) => setComment(event.target.value.slice(0, 500))}
@@ -673,18 +607,16 @@ export function BookingPicker({
                           onChange={(event) => setGuestPhone(event.target.value)}
                         />
                       </label>
-                      {!service && (
-                        <label>
-                          {t("Эл. почта (необязательно)")}
-                          <input
-                            value={guestEmail}
-                            maxLength={254}
-                            type="email"
-                            autoComplete="email"
-                            onChange={(event) => setGuestEmail(event.target.value)}
-                          />
-                        </label>
-                      )}
+                      <label>
+                        {t("Эл. почта (необязательно)")}
+                        <input
+                          value={guestEmail}
+                          maxLength={254}
+                          type="email"
+                          autoComplete="email"
+                          onChange={(event) => setGuestEmail(event.target.value)}
+                        />
+                      </label>
                     </div>
                   </>
                 )}
@@ -734,20 +666,11 @@ export function BookingPicker({
                 <div className="desktop-booking-summary">
                   <strong>{venueName ?? t("Бронирование")}</strong>
                   <span>
-                    {date ? longFormatter.format(asDay(date)) : ""} · {time}{" "}
-                    {!service && <>· {t("Гостей: {count}", { count: guests })}</>}
+                    {date ? longFormatter.format(asDay(date)) : ""} · {time} ·{" "}
+                    {t("Гостей: {count}", { count: guests })}
                   </span>
                 </div>
-                {service ? (
-                  <>
-                    <h3>{service.category_name}</h3>
-                    <p>
-                      {service.name} · {service.duration_minutes} {t("мин")}
-                    </p>
-                  </>
-                ) : (
-                  <h3>{t("Ваш предзаказ")}</h3>
-                )}
+                <h3>{t("Ваш предзаказ")}</h3>
                 <div className="desktop-booking-review-items">
                   {selectedItems.map(({ id, quantity, item }) => (
                     <article key={id}>
@@ -774,11 +697,7 @@ export function BookingPicker({
                 </div>
                 <div className="desktop-booking-total">
                   <span>{t("Итого к оплате")}</span>
-                  <strong>
-                    {service
-                      ? formatMoney(service.price_minor, service.currency)
-                      : formatMoney(preorderTotal)}
-                  </strong>
+                  <strong>{formatMoney(preorderTotal)}</strong>
                 </div>
                 <div className="desktop-booking-account">
                   <h3>{t("Контакты")}</h3>
@@ -788,7 +707,7 @@ export function BookingPicker({
                 </div>
                 {(comment.trim() || wishes.length > 0) && (
                   <div className="desktop-booking-notes">
-                    <h3>{t(service ? "Комментарий" : "Комментарий к ресторану")}</h3>
+                    <h3>{t("Комментарий к ресторану")}</h3>
                     <p>
                       {[
                         wishes
@@ -801,15 +720,11 @@ export function BookingPicker({
                     </p>
                   </div>
                 )}
-                {!service && (
-                  <div className="desktop-booking-payment">
-                    <h3>{t("Оплата предзаказа")}</h3>
-                    <strong>{t("Оплата в заведении")}</strong>
-                    <p>
-                      {t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}
-                    </p>
-                  </div>
-                )}
+                <div className="desktop-booking-payment">
+                  <h3>{t("Оплата предзаказа")}</h3>
+                  <strong>{t("Оплата в заведении")}</strong>
+                  <p>{t("Онлайн-оплата пока недоступна. Предзаказ сохранится вместе с бронью.")}</p>
+                </div>
               </div>
             )}
           </div>
@@ -831,9 +746,7 @@ export function BookingPicker({
                   (step !== "details" && missingItems)
                 }
                 onClick={() => {
-                  if (step === "details" && service) {
-                    changeStep("checkout");
-                  } else if (step === "details" && preorderEnabled) {
+                  if (step === "details" && preorderEnabled) {
                     setCalendarOpen(false);
                     setActiveCategory("");
                     changeStep("preorder");
@@ -846,7 +759,7 @@ export function BookingPicker({
                 <span>
                   {submitting
                     ? t("Сохраняем бронь...")
-                    : step === "details" && (preorderEnabled || service)
+                    : step === "details" && preorderEnabled
                       ? t("Продолжить")
                       : step === "preorder" && selectedItems.length > 0
                         ? t("Продолжить к оплате")

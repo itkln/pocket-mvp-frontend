@@ -6,7 +6,6 @@ import { TipBreakdown } from "./tip-picker";
 import { VenueLogo } from "../venue-logo";
 
 type Props = {
-  service?: { name: string; category_name?: string; price_minor: number; currency: string };
   venueID: string;
   venueName: string;
   venueLogoURL?: string;
@@ -20,7 +19,6 @@ type Props = {
 };
 
 export function BookingConfirmation({
-  service,
   venueID,
   venueName,
   venueLogoURL,
@@ -59,8 +57,7 @@ export function BookingConfirmation({
         {guestName?.trim() && <p className="booking-confirmation-guest">{guestName.trim()}</p>}
         <p className="booking-confirmation-date">{date}</p>
         <p className="booking-confirmation-time">
-          {!service && <>{t("Гостей: {count}", { count: reservation.guest_count })} · </>}
-          {time}
+          {t("Гостей: {count}", { count: reservation.guest_count })} · {time}
         </p>
       </div>
       <div className="booking-confirmation-meta">
@@ -74,19 +71,6 @@ export function BookingConfirmation({
           </p>
         ) : null}
       </div>
-      {service && (
-        <div className="booking-confirmation-preorder">
-          <h3>{service.category_name}</h3>
-          <p>{service.name}</p>
-          <strong>
-            {new Intl.NumberFormat(localeTags[locale], {
-              style: "currency",
-              currency: service.currency,
-            }).format(service.price_minor / 100)}
-          </strong>
-          <p>{t("Оплата в заведении")}</p>
-        </div>
-      )}
       {reservation.preorder_total_minor > 0 && (
         <div className="booking-confirmation-preorder">
           <h3>{t("Предзаказ")}</h3>
