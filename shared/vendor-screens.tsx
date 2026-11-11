@@ -76,7 +76,7 @@ export function AnalyticsPage() {
 export function ReviewsPage() {
   const page = useVenuePage("owner", "reviews");
   if (!page) return null;
-  return <ReviewsScreen notify={page.notify} />;
+  return <ReviewsScreen venueName={page.venue.name} notify={page.notify} />;
 }
 
 export function VenuePage() {

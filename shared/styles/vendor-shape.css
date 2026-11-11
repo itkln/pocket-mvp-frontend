@@ -14,10 +14,6 @@
   .settings-form,
   .payment-banner,
   .payment-table-panel,
-  .review-card,
-  .review-score,
-  .review-stat,
-  .reviews-toolbar,
   .subscription-plan,
   .subscription-status,
   .subscription-summary,
@@ -73,8 +69,6 @@
   .permission-note,
   .orders-load-error,
   .orders-actions > p[role="alert"],
-  .review-table-filter,
-  .review-reply-editor textarea,
   .role-menu-popover,
   .venue-menu-popover,
   .item-actions-menu,
@@ -109,8 +103,7 @@
 }
 .vendor-orders .orders-status,
 .orders-channel,
-.status,
-.review-table {
+.status {
   border-radius: var(--vendor-radius-badge);
 }
 

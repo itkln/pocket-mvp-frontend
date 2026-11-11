@@ -1482,4 +1482,14 @@ export const vendorTranslations: TranslationRow[] = [
     "Створіть акаунт для керування закладом.",
     "Vytvorte si účet na správu prevádzky.",
   ],
+  // Reviews screen.
+  ["Оценка", "Rating", "Оцінка", "Hodnotenie"],
+  [
+    "Оценка: {value} из 5",
+    "Rating: {value} of 5",
+    "Оцінка: {value} з 5",
+    "Hodnotenie: {value} z 5",
+  ],
+  ["Ответ гостю", "Reply to the guest", "Відповідь гостю", "Odpoveď hosťovi"],
+  ["Поиск по отзывам", "Search reviews", "Пошук у відгуках", "Hľadať v recenziách"],
 ];

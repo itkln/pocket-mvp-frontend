@@ -254,43 +254,143 @@ button.overview-rating:hover {
   font-weight: 500;
 }
 
-/* Reviews */
-.review-score-value {
+/* Reviews: filters on top of one block, then a feed of reviews separated by lines. */
+.reviews-average {
   display: inline-flex;
   align-items: center;
   gap: 8px;
 }
-.review-score-value svg {
+.reviews-average svg,
+.rating-stars {
   color: #e3a008;
 }
-.vendor-shell .reviews-list .review-card {
-  border: 0;
-  box-shadow: none;
+.reviews-block > .reviews-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
 }
-
-/* Overview orders on a phone: number and total, guest and status, then time. */
+.reviews-toolbar-end {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.reviews-toolbar-end .vendor-search {
+  width: 280px;
+}
+.reviews-feed {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.review-item {
+  display: grid;
+  gap: 14px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+}
+.review-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 4px;
+}
+.review-item > header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+.review-avatar {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+.review-author strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+}
+.review-author small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.rating-stars {
+  display: inline-flex;
+  gap: 2px;
+}
+.review-body {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.review-reply {
+  padding: 14px 18px;
+  border-radius: var(--vendor-radius-control);
+  background: #f6f7f9;
+}
+.review-reply strong {
+  display: block;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+}
+.review-reply p {
+  margin: 4px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.review-actions {
+  display: flex;
+}
+.review-editor {
+  display: grid;
+  gap: 12px;
+}
+.review-editor textarea {
+  min-height: 112px;
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--vendor-radius-control);
+  font: inherit;
+  font-size: 16px;
+  resize: vertical;
+}
+.review-editor textarea:focus {
+  border-color: var(--accent);
+  outline: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.review-editor > div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
 @media (max-width: 760px) {
-  .overview-order-table tr {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .reviews-toolbar-end,
+  .reviews-toolbar-end :is(.vendor-search, .vendor-select) {
+    width: 100%;
   }
-  .overview-order-table td:nth-child(1) {
-    grid-area: 1 / 1;
+  .reviews-block > .reviews-toolbar .vendor-segmented {
+    width: 100%;
   }
-  .overview-order-table td:nth-child(3) {
-    grid-area: 1 / 2;
+  .review-item > header {
+    grid-template-columns: 40px minmax(0, 1fr);
   }
-  .overview-order-table td:nth-child(2) {
-    grid-area: 2 / 1;
+  .review-item > header .rating-stars {
+    grid-column: 2;
   }
-  .overview-order-table td:nth-child(4) {
-    grid-area: 2 / 2;
-    justify-self: end;
-  }
-  .overview-order-table td:nth-child(5) {
-    display: none;
-  }
-  .overview-orders > header p {
-    display: none;
+  .review-avatar {
+    width: 40px;
+    height: 40px;
   }
 }
 
