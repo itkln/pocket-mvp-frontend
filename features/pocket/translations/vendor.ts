@@ -1467,4 +1467,7 @@ export const vendorTranslations: TranslationRow[] = [
   ["Где я работаю", "Where I work", "Де я працюю", "Kde pracujem"],
   ["Бизнес", "Business", "Бізнес", "Podnikanie"],
   ["Настройки аккаунта", "Account settings", "Налаштування акаунта", "Nastavenia účtu"],
+  // Vendor sign-in.
+  ["Вход в аккаунт", "Sign in", "Вхід в акаунт", "Prihlásenie"],
+  ["Регистрация", "Sign up", "Реєстрація", "Registrácia"],
 ];

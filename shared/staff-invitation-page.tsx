@@ -71,7 +71,7 @@ export default function StaffInvitationPage({ token }: { token: string }) {
     }
   };
   return (
-    <main className="auth-screen">
+    <main className="auth-screen vendor-auth">
       <section className="auth-screen-content">
         <Link className="auth-brand" href={`/${locale}`}>
           <img src="/logo.svg" alt="" width={30} height={30} />

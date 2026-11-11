@@ -5503,15 +5503,6 @@
   }
 }
 /* Vendor order desk: queue and selected ticket share the same canvas. */
-.vendor-shell[data-screen="orders"] > .main-shell > .topbar {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-}
-.vendor-shell[data-screen="orders"] .page-area {
-  width: min(1560px, 100%);
-  padding-top: 12px;
-}
 .vendor-orders {
   min-width: 0;
 }
@@ -5911,16 +5902,6 @@
 .orders-mobile-back {
   display: none;
 }
-@media (min-width: 901px) {
-  .vendor-shell[data-screen="orders"] > .main-shell > .topbar {
-    height: 56px;
-    position: relative;
-    justify-content: flex-end;
-  }
-  .vendor-shell[data-screen="orders"] .topbar-title {
-    display: none;
-  }
-}
 @media (min-width: 761px) and (max-width: 1150px) {
   .orders-workspace {
     grid-template-columns: 260px minmax(0, 1fr);
@@ -6020,11 +6001,6 @@
 @media (prefers-reduced-motion: reduce) {
   .orders-refresh.spinning svg {
     animation: none;
-  }
-}
-@media (max-width: 900px) {
-  .vendor-shell[data-screen="orders"] .topbar-title > div {
-    display: none;
   }
 }
 /* The queue keeps its own scroll position while live groups change. */

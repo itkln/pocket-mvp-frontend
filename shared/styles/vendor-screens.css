@@ -313,3 +313,102 @@ button.overview-rating:hover {
 .vendor-shell .venue-public-page-settings a.button {
   text-decoration: none;
 }
+
+/* Sign-in, sign-up, password recovery and invitations: the Vendor canvas with one white card,
+   soft grey fields and the large controls of the workspace. */
+.vendor-auth {
+  background: var(--canvas, #f5f7f9);
+}
+.vendor-auth .auth-screen-content {
+  width: min(100%, 440px);
+  padding: 40px;
+  border-radius: var(--vendor-radius-block);
+  background: #fff;
+}
+.vendor-auth .auth-brand {
+  margin: 0 0 32px;
+}
+.vendor-auth .auth-brand strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+.vendor-auth .auth-heading {
+  margin-bottom: 28px;
+  text-align: left;
+}
+.vendor-auth .auth-heading h1 {
+  font-size: 30px;
+  font-weight: 600;
+}
+.vendor-auth .auth-heading p {
+  margin: 8px 0 0;
+  font-size: 16px;
+}
+.vendor-auth .auth-form {
+  gap: 20px;
+}
+.vendor-auth .auth-field > span:first-child {
+  font-size: 15px;
+  font-weight: 500;
+}
+.vendor-auth .auth-field > input,
+.vendor-auth .auth-password {
+  min-height: 52px;
+  border: 1px solid transparent;
+  border-radius: var(--vendor-radius-control);
+  background: #f3f4f6;
+  font-size: 16px;
+}
+.vendor-auth .auth-field > input {
+  padding: 0 16px;
+}
+.vendor-auth .auth-password input {
+  background: transparent;
+  font-size: 16px;
+}
+.vendor-auth .auth-field > input:focus,
+.vendor-auth .auth-password:focus-within {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.vendor-auth .auth-options {
+  justify-content: flex-end;
+  margin-top: -6px;
+}
+.vendor-auth .auth-options a,
+.vendor-auth .auth-switch a {
+  font-size: 15px;
+  font-weight: 500;
+}
+.vendor-auth .auth-consent {
+  font-size: 15px;
+}
+.vendor-auth .auth-submit {
+  background: var(--accent);
+  min-height: 52px;
+  border-radius: var(--vendor-radius-control);
+  font-size: 16px;
+  font-weight: 600;
+}
+.vendor-auth .auth-switch {
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 15px;
+  text-align: center;
+}
+.vendor-auth .auth-submit:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+@media (max-width: 520px) {
+  .vendor-auth {
+    padding: 16px;
+  }
+  .vendor-auth .auth-screen-content {
+    padding: 28px 20px;
+  }
+  .vendor-auth .auth-heading h1 {
+    font-size: 26px;
+  }
+}

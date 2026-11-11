@@ -76,7 +76,7 @@ export default function PasswordRecoveryPage({
       : "Придумайте новый пароль длиной от 12 до 128 символов.";
 
   return (
-    <main className="auth-screen">
+    <main className={`auth-screen ${product === "vendor" ? "vendor-auth" : ""}`}>
       <section className="auth-screen-content">
         <Link
           className="auth-brand"

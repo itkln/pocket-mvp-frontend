@@ -70,7 +70,7 @@ export default function AuthPage({
   };
 
   return (
-    <main className="auth-screen">
+    <main className={`auth-screen ${product === "vendor" ? "vendor-auth" : ""}`}>
       <section className="auth-screen-content">
         <Link
           className="auth-brand"
@@ -82,19 +82,24 @@ export default function AuthPage({
           </span>
           <strong>{productName}</strong>
         </Link>
+        {/* Vendor shows the brand once, so the heading is short and has no tagline. */}
         <header className="auth-heading">
           <h1>
-            {isLogin ? t("Войти в {product}", { product: productName }) : t("Создать аккаунт")}
-          </h1>
-          <p>
             {product === "vendor"
               ? isLogin
-                ? t("Управляйте заведением и работой команды.")
-                : t("Аккаунт для управления заведениями и сотрудниками.")
+                ? t("Вход в аккаунт")
+                : t("Регистрация")
               : isLogin
+                ? t("Войти в {product}", { product: productName })
+                : t("Создать аккаунт")}
+          </h1>
+          {product !== "vendor" && (
+            <p>
+              {isLogin
                 ? t("Бронируйте столики и оформляйте предзаказ.")
                 : t("Аккаунт для бронирований и предзаказов в заведениях.")}
-          </p>
+            </p>
+          )}
         </header>
 
         <form className="auth-form" onSubmit={submit}>
@@ -182,10 +187,12 @@ export default function AuthPage({
 
           {isLogin ? (
             <div className="auth-options">
-              <label>
-                <input type="checkbox" name="remember" />
-                {t("Запомнить меня")}
-              </label>
+              {product !== "vendor" && (
+                <label>
+                  <input type="checkbox" name="remember" />
+                  {t("Запомнить меня")}
+                </label>
+              )}
               <Link href={authPath("forgot-password")}>{t("Забыли пароль?")}</Link>
             </div>
           ) : (

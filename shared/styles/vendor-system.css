@@ -397,6 +397,11 @@ button.vendor-stat-card:hover,
   font-size: 13px;
 }
 .vendor-shell .profile-menu-popover {
+  padding: 8px;
+  border: 0;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(23, 33, 43, 0.16);
   position: absolute;
   z-index: 50;
   right: 0;
