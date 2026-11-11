@@ -188,7 +188,9 @@ export default function PasswordRecoveryPage({
         )}
 
         <p className="auth-switch">
-          {complete && requestMode ? t("Не получили письмо?") : t("Вспомнили пароль?")}{" "}
+          <span className="auth-switch-text">
+            {complete && requestMode ? t("Не получили письмо?") : t("Вспомнили пароль?")}
+          </span>{" "}
           {complete && requestMode ? (
             <button type="button" className="auth-link-button" onClick={() => setComplete(false)}>
               {t("Отправить еще раз")}

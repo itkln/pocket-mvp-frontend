@@ -1470,4 +1470,16 @@ export const vendorTranslations: TranslationRow[] = [
   // Vendor sign-in.
   ["Вход в аккаунт", "Sign in", "Вхід в акаунт", "Prihlásenie"],
   ["Регистрация", "Sign up", "Реєстрація", "Registrácia"],
+  [
+    "Войдите по e-mail и паролю.",
+    "Sign in with your e-mail and password.",
+    "Увійдіть за e-mail і паролем.",
+    "Prihláste sa e-mailom a heslom.",
+  ],
+  [
+    "Создайте аккаунт для управления заведением.",
+    "Create an account to run your venue.",
+    "Створіть акаунт для керування закладом.",
+    "Vytvorte si účet na správu prevádzky.",
+  ],
 ];

@@ -87,19 +87,21 @@ export default function AuthPage({
           <h1>
             {product === "vendor"
               ? isLogin
-                ? t("Вход в аккаунт")
+                ? productName
                 : t("Регистрация")
               : isLogin
                 ? t("Войти в {product}", { product: productName })
                 : t("Создать аккаунт")}
           </h1>
-          {product !== "vendor" && (
-            <p>
-              {isLogin
+          <p>
+            {product === "vendor"
+              ? isLogin
+                ? t("Войдите по e-mail и паролю.")
+                : t("Создайте аккаунт для управления заведением.")
+              : isLogin
                 ? t("Бронируйте столики и оформляйте предзаказ.")
                 : t("Аккаунт для бронирований и предзаказов в заведениях.")}
-            </p>
-          )}
+          </p>
         </header>
 
         <form className="auth-form" onSubmit={submit}>
@@ -218,7 +220,9 @@ export default function AuthPage({
         </form>
 
         <p className="auth-switch">
-          {isLogin ? t("Нет аккаунта?") : t("Уже есть аккаунт?")}{" "}
+          <span className="auth-switch-text">
+            {isLogin ? t("Нет аккаунта?") : t("Уже есть аккаунт?")}
+          </span>{" "}
           <Link href={authPath(isLogin ? "register" : "login")}>
             {isLogin ? t("Зарегистрироваться") : t("Войти")}
           </Link>
