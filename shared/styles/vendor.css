@@ -5439,12 +5439,6 @@
     margin-left: 100px;
   }
 }
-/* Menu has one heading; utility actions share the page canvas. */
-.vendor-shell[data-screen="menu"] > .main-shell > .topbar {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-}
 .vendor-menu-heading {
   display: flex;
   align-items: center;
@@ -5494,25 +5488,6 @@
   flex: 1;
   overflow-y: auto;
   scrollbar-gutter: stable;
-}
-@media (min-width: 901px) {
-  .vendor-shell[data-screen="menu"] > .main-shell > .topbar {
-    position: relative;
-    top: auto;
-    height: 56px;
-    justify-content: flex-end;
-  }
-  .vendor-shell[data-screen="menu"] .topbar-title {
-    display: none;
-  }
-  .vendor-shell[data-screen="menu"] .page-area {
-    padding-top: 12px;
-  }
-}
-@media (max-width: 900px) {
-  .vendor-shell[data-screen="menu"] .topbar-title > div {
-    display: none;
-  }
 }
 @media (max-width: 760px) {
   .vendor-menu-header > .vendor-menu-search {

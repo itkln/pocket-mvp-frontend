@@ -10,6 +10,7 @@ import {
   BellOff,
   Check,
   ChevronDown,
+  Store,
   LogOut,
   Menu as MenuIcon,
   PanelLeftClose,
@@ -25,7 +26,6 @@ import {
   type Role,
   type Venue,
   userInitials,
-  venueInitials,
   mobilePrimaryNavigation,
   navigationGroups,
   sidebarFooterNavigation,
@@ -88,7 +88,7 @@ export function VenueSwitcher({
         if (item.id !== venue.id) onVenue(item);
       }}
     >
-      <span className="venue-avatar">{venueInitials(item)}</span>
+      <Store className="venue-switcher-icon" size={18} strokeWidth={1.9} aria-hidden="true" />
       <span>
         <strong>{item.name}</strong>
         {withRole && <small>{roleLabel(item)}</small>}
@@ -106,11 +106,8 @@ export function VenueSwitcher({
         aria-expanded={canSwitch ? open : undefined}
         aria-haspopup={canSwitch ? "menu" : undefined}
       >
-        <span className="venue-avatar">{venueInitials(venue)}</span>
-        <div>
-          <strong>{venue.name}</strong>
-          <small>{roleLabel(venue)}</small>
-        </div>
+        <Store className="venue-switcher-icon" size={20} strokeWidth={1.9} aria-hidden="true" />
+        <strong>{venue.name}</strong>
         {canSwitch && <ChevronDown className="venue-switcher-chevron" size={16} />}
       </button>
       {open && (

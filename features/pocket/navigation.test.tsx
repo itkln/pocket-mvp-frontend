@@ -142,7 +142,7 @@ describe("Vendor venue and profile navigation", () => {
     expect(sidebarProps.onAddVenue).toHaveBeenCalledOnce();
   });
 
-  it("shows the venue and the user's role there; one venue cannot be switched", () => {
+  it("shows the venue by name only; one venue cannot be switched", () => {
     const zenGarden = venue("venue-1", "Zen Garden", "Bratislava");
     render(
       <I18nProvider>
@@ -151,7 +151,8 @@ describe("Vendor venue and profile navigation", () => {
     );
 
     const switcher = screen.getByRole("button", { name: /Zen Garden/ });
-    expect(switcher).toHaveTextContent("Владелец");
+    expect(switcher).not.toHaveTextContent("Владелец");
+    expect(switcher).not.toHaveTextContent("ZG");
     expect(switcher).toBeDisabled();
     expect(screen.queryByText("Bratislava")).not.toBeInTheDocument();
   });

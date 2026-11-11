@@ -441,7 +441,14 @@ button.vendor-stat-card:hover,
   width: 240px;
 }
 
-/* Venue switcher at the top of the page, above the content. */
+/* Venue switcher at the top of the page, above the content: a soft grey pill with a venue
+   icon and the name. The top bar shares the page width so it lines up with the content. */
+.vendor-shell > .main-shell > .topbar {
+  width: 100%;
+  max-width: 1680px;
+  margin: 0 auto;
+  padding-inline: 40px;
+}
 .vendor-shell .topbar-start {
   min-width: 0;
 }
@@ -449,60 +456,50 @@ button.vendor-stat-card:hover,
   position: relative;
 }
 .vendor-shell .topbar-venue > .venue-switcher {
-  display: grid;
-  grid-template-columns: 40px minmax(0, auto) 16px;
+  display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: auto;
   max-width: 360px;
-  min-height: 56px;
+  min-height: 48px;
   margin: 0;
-  padding: 8px 16px 8px 8px;
+  padding: 0 14px 0 16px;
   border: 0;
-  border-radius: 18px;
-  background: #fff;
+  border-radius: var(--vendor-radius-control);
+  background: #eceef1;
   color: var(--ink);
   font: inherit;
   text-align: left;
 }
 .vendor-shell .topbar-venue > .venue-switcher:disabled {
-  grid-template-columns: 40px minmax(0, auto);
   cursor: default;
   opacity: 1;
 }
 .vendor-shell .topbar-venue > .venue-switcher.can-switch:hover,
 .vendor-shell .topbar-venue > .venue-switcher[aria-expanded="true"] {
-  background: #eef0f3;
+  background: #e3e6ea;
 }
-.vendor-shell .topbar-venue .venue-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-size: 15px;
+.vendor-shell .topbar-venue .venue-switcher-icon {
+  flex-shrink: 0;
+  color: var(--muted);
 }
-.vendor-shell .topbar-venue > .venue-switcher strong,
-.vendor-shell .topbar-venue > .venue-switcher small {
-  display: block;
+.vendor-shell .topbar-venue > .venue-switcher > strong {
+  min-width: 0;
   overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.vendor-shell .topbar-venue > .venue-switcher strong {
-  font-size: 16px;
-  font-weight: 600;
-}
-.vendor-shell .topbar-venue > .venue-switcher small {
-  margin-top: 2px;
+.vendor-shell .topbar-venue > .venue-switcher > .venue-switcher-chevron {
+  flex-shrink: 0;
   color: var(--muted);
-  font-size: 14px;
 }
 .vendor-shell .topbar-venue .venue-menu-popover {
   top: calc(100% + 8px);
   right: auto;
   left: 0;
-  width: 340px;
+  width: 320px;
   max-height: min(70dvh, 520px);
   overflow-y: auto;
   padding: 8px;
@@ -515,11 +512,14 @@ button.vendor-stat-card:hover,
   font-size: 13px;
 }
 .vendor-shell .topbar-venue .venue-menu-popover > button {
-  grid-template-columns: 40px minmax(0, 1fr) 18px;
+  grid-template-columns: 24px minmax(0, 1fr) 18px;
   gap: 12px;
-  min-height: 56px;
-  padding: 8px 10px;
+  min-height: 52px;
+  padding: 8px 12px;
   border-radius: 14px;
+}
+.vendor-shell .topbar-venue .venue-menu-popover > button .venue-switcher-icon {
+  color: var(--muted);
 }
 .vendor-shell .topbar-venue .venue-menu-popover strong {
   font-size: 16px;
@@ -530,12 +530,13 @@ button.vendor-stat-card:hover,
 .vendor-shell .topbar-venue .venue-menu-popover > button.active {
   background: var(--accent-soft);
 }
-.vendor-shell .topbar-venue .venue-menu-popover > button.active > svg {
+.vendor-shell .topbar-venue .venue-menu-popover > button.active :is(svg, strong) {
   color: var(--accent);
 }
 @media (max-width: 900px) {
   .vendor-shell > .main-shell > .topbar {
     gap: 8px;
+    padding-inline: 16px;
   }
   .vendor-shell .topbar-start {
     flex: 1;
@@ -560,17 +561,12 @@ button.vendor-stat-card:hover,
     min-width: 36px;
   }
   .vendor-shell .topbar-venue > .venue-switcher {
-    min-height: 48px;
+    min-height: 44px;
     max-width: 100%;
-    padding: 6px 12px 6px 6px;
-    grid-template-columns: 36px minmax(0, 1fr) 16px;
+    padding: 0 12px;
   }
-  .vendor-shell .topbar-venue .venue-avatar {
-    width: 36px;
-    height: 36px;
-  }
-  .vendor-shell .topbar-venue > .venue-switcher small {
-    display: none;
+  .vendor-shell .topbar-venue > .venue-switcher > .venue-switcher-chevron {
+    margin-left: auto;
   }
   .vendor-shell .topbar-venue .venue-menu-popover {
     position: fixed;
