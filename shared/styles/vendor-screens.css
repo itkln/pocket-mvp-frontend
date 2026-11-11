@@ -630,3 +630,21 @@ button.overview-rating:hover {
     font-size: 28px;
   }
 }
+
+/* New venue dialog */
+.venue-create-modal {
+  width: min(520px, 100%);
+}
+.venue-create-location {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 520px) {
+  .venue-create-location {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .venue-create-modal footer .button {
+    flex: 1;
+  }
+}

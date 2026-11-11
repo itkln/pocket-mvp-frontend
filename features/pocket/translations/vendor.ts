@@ -1492,4 +1492,14 @@ export const vendorTranslations: TranslationRow[] = [
   ],
   ["Ответ гостю", "Reply to the guest", "Відповідь гостю", "Odpoveď hosťovi"],
   ["Поиск по отзывам", "Search reviews", "Пошук у відгуках", "Hľadať v recenziách"],
+  // New venue dialog.
+  ["Новое заведение", "New venue", "Новий заклад", "Nová prevádzka"],
+  [
+    "Меню, расписание и команду добавите позже.",
+    "You can add the menu, schedule and team later.",
+    "Меню, розклад і команду додасте пізніше.",
+    "Menu, rozvrh a tím pridáte neskôr.",
+  ],
+  ["Создаем...", "Creating...", "Створюємо...", "Vytvárame..."],
+  ["Создать заведение", "Create venue", "Створити заклад", "Vytvoriť prevádzku"],
 ];

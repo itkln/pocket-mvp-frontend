@@ -1383,85 +1383,6 @@
   color: #737373;
   font-size: 12px;
 }
-.venue-create-modal {
-  width: min(500px, 100%);
-  overflow: hidden;
-}
-.venue-create-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.venue-create-heading > span {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-.venue-create-heading .eyebrow {
-  margin-bottom: 3px;
-}
-.venue-create-form > .modal-body {
-  padding-top: 16px;
-}
-.venue-create-intro {
-  margin: 0 0 20px;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
-}
-.venue-create-location {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 14px;
-}
-.venue-create-preview {
-  min-height: 64px;
-  display: grid;
-  grid-template-columns: 42px 1fr;
-  align-items: center;
-  gap: 12px;
-  margin-top: 20px;
-  padding: 11px 13px;
-  border-radius: 14px;
-  background: #f4f8fb;
-}
-.venue-create-preview > span {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: var(--accent);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-}
-.venue-create-preview strong,
-.venue-create-preview small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.venue-create-preview strong {
-  font-size: 14px;
-}
-.venue-create-preview small {
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.venue-create-form > footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 14px 20px 20px;
-}
 .user-chip {
   width: 100%;
   color: inherit;
@@ -1507,25 +1428,6 @@
     top: 82px;
     right: 12px;
     left: 12px;
-  }
-  .venue-create-modal {
-    align-self: end;
-    width: 100%;
-    border-radius: 18px 18px 0 0;
-  }
-  .venue-create-location {
-    grid-template-columns: 1fr;
-  }
-  .venue-create-form > footer {
-    display: grid;
-    grid-template-columns: 1fr;
-    padding: 10px 16px calc(16px + env(safe-area-inset-bottom));
-  }
-  .venue-create-form > footer .button {
-    width: 100%;
-  }
-  .venue-create-form > footer .button.primary {
-    grid-row: 1;
   }
 }
 .subscription-status {

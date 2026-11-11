@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Clock3, Plus, ShieldCheck, Store, Table2, X } from "lucide-react";
+import { Clock3, ShieldCheck, Table2, X } from "lucide-react";
 import { type VenueInput } from "../../lib/owner-api";
 import { useOwnerWorkspace } from "./owner/context";
 import { MenuImageField } from "./menu-image-field";
@@ -10,6 +10,7 @@ import { readMenuNutrition } from "../../lib/menu-nutrition";
 import { Button, IconButton, StatusPill, Field, money } from "./ui";
 import { localeTags, useI18n } from "./i18n";
 
+// Creating a venue asks only for what the public page needs first; the rest lives in settings.
 export function NewVenueModal({
   onClose,
   onCreate,
@@ -22,21 +23,15 @@ export function NewVenueModal({
   const [city, setCity] = useState("Братислава");
   const [address, setAddress] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const cleanName = name.trim();
-  const initials = cleanName
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part.at(0))
-    .join("")
-    .toUpperCase();
+  const ready = Boolean(name.trim() && city.trim()) && !submitting;
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!cleanName || !city.trim()) return;
+    if (!ready) return;
     setSubmitting(true);
     try {
       await onCreate({
-        name: cleanName,
+        name: name.trim(),
         city: city.trim(),
         address: address.trim() || "Адрес не указан",
         country_code: "SK",
@@ -53,25 +48,20 @@ export function NewVenueModal({
     <div className="modal-backdrop" onMouseDown={onClose}>
       <section
         className="modal venue-create-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="venue-create-title"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <header>
-          <div className="venue-create-heading">
-            <span>
-              <Store size={21} />
-            </span>
-            <div>
-              <p className="eyebrow">{t("НОВОЕ ПРОСТРАНСТВО")}</p>
-              <h2>{t("Добавить заведение")}</h2>
-            </div>
+          <div>
+            <h2 id="venue-create-title">{t("Новое заведение")}</h2>
+            <p>{t("Меню, расписание и команду добавите позже.")}</p>
           </div>
-          <IconButton icon={X} label={t("Закрыть")} onClick={onClose} />
+          <IconButton icon={X} label={t("Закрыть")} onClick={onClose} className="modal-close" />
         </header>
         <form className="venue-create-form" onSubmit={submit}>
           <div className="modal-body">
-            <p className="venue-create-intro">
-              {t("Начните с основного. Меню, расписание и команду можно добавить позже.")}
-            </p>
             <Field label={t("Название")} wide>
               <input
                 autoFocus
@@ -101,22 +91,13 @@ export function NewVenueModal({
                 />
               </Field>
             </div>
-            <div className="venue-create-preview" aria-live="polite">
-              <span>{initials || <Store size={18} />}</span>
-              <div>
-                <strong>{cleanName || t("Название заведения")}</strong>
-                <small>
-                  {[city.trim(), address.trim()].filter(Boolean).join(" · ") || t("Местоположение")}
-                </small>
-              </div>
-            </div>
           </div>
           <footer>
-            <Button kind="quiet" onClick={onClose}>
+            <Button kind="secondary" onClick={onClose}>
               {t("Отмена")}
             </Button>
-            <Button type="submit" icon={Plus} disabled={!cleanName || !city.trim() || submitting}>
-              {submitting ? t("Добавляем...") : t("Добавить заведение")}
+            <Button type="submit" disabled={!ready}>
+              {submitting ? t("Создаем...") : t("Создать заведение")}
             </Button>
           </footer>
         </form>

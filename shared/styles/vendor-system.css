@@ -156,27 +156,27 @@ button.vendor-stat-card:hover,
   font-size: 16px;
   font-weight: 600;
 }
-.vendor-shell .page-area .button.secondary {
+.vendor-shell :is(.page-area, .modal) .button.secondary {
   border-color: transparent;
   background: #f3f4f5;
 }
-.vendor-shell .page-area .button.secondary:hover {
+.vendor-shell :is(.page-area, .modal) .button.secondary:hover {
   background: #e9ebee;
 }
 .vendor-shell .page-area .button svg {
   width: 19px;
   height: 19px;
 }
-.vendor-shell .page-area .field > span {
+.vendor-shell :is(.page-area, .modal) .field > span {
   font-size: 15px;
 }
-.vendor-shell .page-area .field :is(input, select) {
+.vendor-shell :is(.page-area, .modal) .field :is(input, select) {
   min-height: 52px;
   padding: 0 16px;
   border-radius: var(--vendor-radius-control);
   font-size: 16px;
 }
-.vendor-shell .page-area .field textarea {
+.vendor-shell :is(.page-area, .modal) .field textarea {
   padding: 14px 16px;
   border-radius: var(--vendor-radius-control);
   font-size: 16px;
@@ -807,4 +807,68 @@ button.vendor-stat-card:hover,
 .vendor-select:focus {
   outline: 0;
   box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+/* Dialogs: a white 28px sheet without separators; the title and a short hint on top, a round
+   close button, actions at the bottom right. */
+.vendor-shell .modal-backdrop {
+  background: rgba(23, 33, 43, 0.4);
+  backdrop-filter: blur(4px);
+}
+.vendor-shell .modal {
+  border-radius: var(--vendor-radius-block);
+  box-shadow: 0 24px 64px rgba(23, 33, 43, 0.2);
+}
+.vendor-shell .modal > header {
+  align-items: flex-start;
+  gap: 16px;
+  padding: 28px 28px 4px;
+  border-bottom: 0;
+}
+.vendor-shell .modal > header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.vendor-shell .modal > header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+.vendor-shell .modal > header .icon-button {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #f2f3f5;
+  color: var(--muted);
+}
+.vendor-shell .modal > header .icon-button:hover {
+  background: #e7e9ec;
+  color: var(--ink);
+}
+.vendor-shell .modal-body {
+  display: grid;
+  gap: 16px;
+  padding: 20px 28px;
+}
+.vendor-shell .modal > footer,
+.vendor-shell .modal form > footer {
+  gap: 12px;
+  padding: 8px 28px 28px;
+  border-top: 0;
+  background: transparent;
+}
+@media (max-width: 640px) {
+  .vendor-shell .modal > header {
+    padding: 24px 20px 4px;
+  }
+  .vendor-shell .modal-body {
+    padding: 16px 20px;
+  }
+  .vendor-shell .modal > footer,
+  .vendor-shell .modal form > footer {
+    padding: 8px 20px 24px;
+  }
 }
