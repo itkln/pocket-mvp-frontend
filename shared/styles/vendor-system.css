@@ -1020,3 +1020,79 @@ button.vendor-stat-card:hover,
     bottom: calc(76px + env(safe-area-inset-bottom));
   }
 }
+
+/* Weekly opening hours on the venue schedule tab. */
+.vendor-shell .opening-hours {
+  display: grid;
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.vendor-shell .opening-hours-heading {
+  padding: 20px 0 8px;
+}
+.vendor-shell .opening-hours-heading strong {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+}
+.vendor-shell .opening-hours-heading p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+.vendor-shell .opening-hours-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 160px) auto 1fr;
+  align-items: center;
+  gap: 8px 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.vendor-shell .opening-hours-row:last-child {
+  border-bottom: 0;
+}
+.vendor-shell .opening-hours-day {
+  font-size: 16px;
+  font-weight: 600;
+}
+.vendor-shell .opening-hours-times {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+.vendor-shell .opening-hours-times input {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--vendor-radius-control);
+  background: #f2f3f5;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+.vendor-shell .opening-hours-times input:focus {
+  outline: 0;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.vendor-shell .opening-hours-closed {
+  color: var(--muted);
+  font-size: 16px;
+}
+.vendor-shell .opening-hours-row small {
+  grid-column: 1 / -1;
+  color: #c0392b;
+  font-size: 14px;
+}
+.vendor-shell .opening-hours-row.invalid .opening-hours-times input {
+  box-shadow: inset 0 0 0 1px #c0392b;
+}
+@media (max-width: 640px) {
+  .vendor-shell .opening-hours-row {
+    grid-template-columns: 1fr auto;
+  }
+  .vendor-shell .opening-hours-times,
+  .vendor-shell .opening-hours-closed {
+    grid-column: 1 / -1;
+  }
+}

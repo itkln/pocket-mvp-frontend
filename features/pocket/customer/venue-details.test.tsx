@@ -78,6 +78,30 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("VenueDetailsScreen preorder categories", () => {
+  it("closes online booking when the venue switched it off in Vendor", async () => {
+    vi.mocked(getPublicVenue).mockResolvedValueOnce({
+      id: "venue-a",
+      name: "Demo Bistro",
+      category_slug: "restaurants",
+      address: "Main 1",
+      city: "Bratislava",
+      tags: [],
+      filters: [],
+      preorder_enabled: true,
+      booking_enabled: false,
+    } as unknown as PublicVenue);
+    render(
+      <I18nProvider initialLocale="ru">
+        <VenueDetailsScreen venueID="venue-a" onBack={vi.fn()} saved={false} />
+      </I18nProvider>,
+    );
+    expect(
+      await screen.findByText("Онлайн-бронирование этого заведения пока недоступно"),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Забронировать онлайн" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Забронировать" })).toBeDisabled();
+    expect(getVenueAvailability).not.toHaveBeenCalled();
+  });
   it("switches mobile menu layout beside the booking button without a burger", async () => {
     localStorage.clear();
     vi.stubGlobal(

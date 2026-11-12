@@ -9,7 +9,8 @@ import {
   type TouchEvent,
 } from "react";
 import Image from "next/image";
-import { Check, MapPin, X } from "lucide-react";
+import { Check, Clock3, Mail, MapPin, Phone, X } from "lucide-react";
+import { openingDayNames, openingDays } from "../../../../lib/opening-hours";
 import type { PublicVenue } from "../../../../lib/public-catalog-api";
 import { useI18n } from "../../i18n";
 
@@ -119,7 +120,38 @@ export function VenueInfoSheet({
             <MapPin size={18} />
             {venue.address}, {venue.city}, {venue.country_code}
           </p>
+          {venue.phone && (
+            <p>
+              <Phone size={18} />
+              <a href={`tel:${venue.phone.replace(/[^\d+]/g, "")}`}>{venue.phone}</a>
+            </p>
+          )}
+          {venue.email && (
+            <p>
+              <Mail size={18} />
+              <a href={`mailto:${venue.email}`}>{venue.email}</a>
+            </p>
+          )}
         </div>
+        {venue.opening_hours && (
+          <div className="venue-info-group">
+            <strong>{t("Часы работы")}</strong>
+            <dl className="venue-opening-hours">
+              {openingDays.map((day) => {
+                const hours = venue.opening_hours?.[day];
+                return (
+                  <div key={day}>
+                    <dt>
+                      <Clock3 size={16} aria-hidden="true" />
+                      {t(openingDayNames[day])}
+                    </dt>
+                    <dd>{hours ? `${hours.open}–${hours.close}` : t("Выходной")}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+          </div>
+        )}
         <div className="venue-info-group">
           <strong>{t("О месте")}</strong>
           <p>{venue.description || t("Описание заведения пока не добавлено")}</p>

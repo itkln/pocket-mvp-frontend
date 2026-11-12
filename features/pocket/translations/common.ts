@@ -346,4 +346,13 @@ export const commonTranslations: TranslationRow[] = [
     "Prihlásiť sa do iného účtu",
   ],
   ["Проверить снова", "Check again", "Перевірити знову", "Skontrolovať znova"],
+  // Opening hours: Vendor schedule and the Dish venue info.
+  ["Понедельник", "Monday", "Понеділок", "Pondelok"],
+  ["Вторник", "Tuesday", "Вівторок", "Utorok"],
+  ["Среда", "Wednesday", "Середа", "Streda"],
+  ["Четверг", "Thursday", "Четвер", "Štvrtok"],
+  ["Пятница", "Friday", "П’ятниця", "Piatok"],
+  ["Суббота", "Saturday", "Субота", "Sobota"],
+  ["Воскресенье", "Sunday", "Неділя", "Nedeľa"],
+  ["Выходной", "Closed", "Вихідний", "Zatvorené"],
 ];

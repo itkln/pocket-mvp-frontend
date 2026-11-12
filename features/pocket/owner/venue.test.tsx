@@ -129,4 +129,45 @@ describe("VenueScreen", () => {
 
     await waitFor(() => expect(onDelete).toHaveBeenCalledOnce());
   });
+
+  it("edits weekly opening hours and saves the preorder switch under the key Dish reads", async () => {
+    vi.mocked(updateOwnerVenue).mockImplementation(
+      async (_id, input) => ({ ...venue, ...input, settings: input.settings ?? {} }) as OwnerVenue,
+    );
+    vi.mocked(updateOwnerVenue).mockClear();
+    const notify = vi.fn();
+    render(<VenueScreen venue={venue} notify={notify} />);
+    fireEvent.click(screen.getByRole("button", { name: "Расписание" }));
+    fireEvent.click(screen.getByLabelText("Воскресенье: открыто"));
+    expect(screen.getAllByText("Выходной").length).toBeGreaterThan(0);
+    fireEvent.change(screen.getByLabelText("Суббота: закрытие"), { target: { value: "08:00" } });
+    expect(screen.getByRole("alert")).toHaveTextContent("Закрытие должно быть позже открытия");
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить" })[0]);
+    expect(notify).toHaveBeenCalledWith(
+      "Проверьте часы работы: закрытие должно быть позже открытия",
+    );
+    expect(updateOwnerVenue).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText("Суббота: закрытие"), { target: { value: "00:00" } });
+    fireEvent.click(screen.getByRole("button", { name: "Заказы" }));
+    // The second switch on the orders tab: "Предзаказ при бронировании".
+    fireEvent.click(screen.getAllByRole("checkbox")[1]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Сохранить" })[0]);
+    await waitFor(() =>
+      expect(updateOwnerVenue).toHaveBeenCalledWith(
+        "venue-1",
+        expect.objectContaining({
+          settings: expect.objectContaining({
+            preorder_enabled: false,
+            opening_hours: expect.objectContaining({
+              sun: null,
+              sat: { open: "09:00", close: "24:00" },
+              mon: { open: "09:00", close: "22:00" },
+            }),
+          }),
+        }),
+      ),
+    );
+    expect(vi.mocked(updateOwnerVenue).mock.calls[0][1].settings).not.toHaveProperty("preorder");
+  });
 });

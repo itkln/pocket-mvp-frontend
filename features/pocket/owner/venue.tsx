@@ -12,6 +12,18 @@ import {
   Trash2,
 } from "lucide-react";
 import { updateOwnerVenue, type OwnerVenue, type VenueInput } from "../../../lib/owner-api";
+import {
+  closeFromInput,
+  defaultDayHours,
+  normalizeOpeningHours,
+  openingDayNames,
+  openingDays,
+  timeInputValue,
+  validDayHours,
+  validOpeningHours,
+  type OpeningDay,
+  type OpeningHours,
+} from "../../../lib/opening-hours";
 import { useConfirm } from "../confirm-dialog";
 import { useI18n } from "../i18n";
 import { useLocalizedError } from "../error-message";
@@ -122,6 +134,14 @@ export function VenueScreen({ venue, notify, onUpdate, onDelete }: VenueScreenPr
       updateSettingValue("logo_image_url", "");
   };
   const save = async () => {
+    if (
+      draft.settings?.opening_hours !== undefined &&
+      !validOpeningHours(normalizeOpeningHours(draft.settings.opening_hours))
+    ) {
+      notify("Проверьте часы работы: закрытие должно быть позже открытия");
+      setTab("Расписание");
+      return;
+    }
     setSaving(true);
     try {
       const updated = await updateOwnerVenue(venue.id, draft);
@@ -492,8 +512,10 @@ function ScheduleSettings({ draft, setDraft }: SettingsProps) {
       <PanelTitle title={t("Часы работы")} subtitle={t("Доступность бронирований и заказов.")} />
       <div className="setting-toggles">
         <SettingToggle
-          title={t("Заведение открыто по расписанию")}
-          text={t("Принимать брони только в рабочие часы.")}
+          title={t("Онлайн-бронирование")}
+          text={t(
+            "Гости бронируют стол в Dish в рабочие часы. Выключите, чтобы закрыть онлайн-брони.",
+          )}
           checked={settingsValue(draft, "schedule_enabled", true)}
           onChange={(value) => updateSetting(setDraft, "schedule_enabled", value)}
         />
@@ -504,7 +526,73 @@ function ScheduleSettings({ draft, setDraft }: SettingsProps) {
           onChange={(value) => updateSetting(setDraft, "same_day_booking", value)}
         />
       </div>
+      <OpeningHoursEditor draft={draft} setDraft={setDraft} />
     </>
+  );
+}
+
+// The weekly hours guests see in Dish; bookings are offered only inside them.
+function OpeningHoursEditor({ draft, setDraft }: SettingsProps) {
+  const { t } = useI18n();
+  const hours = normalizeOpeningHours(draft.settings?.opening_hours);
+  const change = (day: OpeningDay, value: OpeningHours[OpeningDay]) =>
+    setDraft((current) => ({
+      ...current,
+      settings: {
+        ...current.settings,
+        opening_hours: { ...normalizeOpeningHours(current.settings?.opening_hours), [day]: value },
+      },
+    }));
+  return (
+    <div className="opening-hours">
+      <div className="opening-hours-heading">
+        <strong>{t("Расписание по дням")}</strong>
+        <p>{t("Гости видят его на странице заведения, брони принимаются только в эти часы.")}</p>
+      </div>
+      {openingDays.map((day) => {
+        const value = hours[day];
+        const invalid = value !== null && !validDayHours(value);
+        const dayName = t(openingDayNames[day]);
+        return (
+          <div key={day} className={`opening-hours-row ${invalid ? "invalid" : ""}`}>
+            <span className="opening-hours-day">{dayName}</span>
+            <label className="switch" title={t(value ? "Открыто" : "Выходной")}>
+              <input
+                type="checkbox"
+                aria-label={t("{day}: открыто", { day: dayName })}
+                checked={value !== null}
+                onChange={(event) =>
+                  change(day, event.target.checked ? { ...defaultDayHours } : null)
+                }
+              />
+              <span />
+            </label>
+            {value ? (
+              <span className="opening-hours-times">
+                <input
+                  type="time"
+                  aria-label={t("{day}: открытие", { day: dayName })}
+                  value={timeInputValue(value.open)}
+                  onChange={(event) => change(day, { ...value, open: event.target.value })}
+                />
+                <span aria-hidden="true">–</span>
+                <input
+                  type="time"
+                  aria-label={t("{day}: закрытие", { day: dayName })}
+                  value={timeInputValue(value.close)}
+                  onChange={(event) =>
+                    change(day, { ...value, close: closeFromInput(event.target.value) })
+                  }
+                />
+              </span>
+            ) : (
+              <span className="opening-hours-closed">{t("Выходной")}</span>
+            )}
+            {invalid && <small role="alert">{t("Закрытие должно быть позже открытия")}</small>}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 function OrderSettings({ draft, setDraft }: SettingsProps) {
@@ -522,8 +610,8 @@ function OrderSettings({ draft, setDraft }: SettingsProps) {
         <SettingToggle
           title={t("Предзаказ при бронировании")}
           text={t("Выбор блюд до визита.")}
-          checked={settingsValue(draft, "preorder", true)}
-          onChange={(value) => updateSetting(setDraft, "preorder", value)}
+          checked={settingsValue(draft, "preorder_enabled", settingsValue(draft, "preorder", true))}
+          onChange={(value) => updateSetting(setDraft, "preorder_enabled", value)}
         />
       </div>
     </>

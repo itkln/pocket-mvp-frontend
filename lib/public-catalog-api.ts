@@ -1,6 +1,7 @@
 import type { TipSelection } from "./gratuity";
 import type { MenuNutrition } from "./menu-nutrition";
 import { APIError, apiRequest } from "./api-client";
+import type { OpeningHours } from "./opening-hours";
 
 export type PublicVenue = {
   id: string;
@@ -12,6 +13,11 @@ export type PublicVenue = {
   address: string;
   city: string;
   country_code: string;
+  phone?: string;
+  email?: string;
+  timezone?: string;
+  // Every day of the week, null when closed; absent from older API responses.
+  opening_hours?: OpeningHours;
   image_url?: string;
   logo_url?: string;
   rating: number;
@@ -19,6 +25,8 @@ export type PublicVenue = {
   tags: string[];
   filters: string[];
   preorder_enabled: boolean;
+  // The venue takes online bookings (Vendor: "Онлайн-бронирование"); absent means it does.
+  booking_enabled?: boolean;
   created_at: string;
 };
 

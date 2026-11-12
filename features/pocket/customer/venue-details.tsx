@@ -354,6 +354,8 @@ export function VenueDetailsScreen({
         .filter(Boolean)
         .join(" · ")
     : "";
+  // Online booking: restaurants only, unless the venue switched it off in Vendor.
+  const bookable = venue?.category_slug === "restaurants" && venue.booking_enabled !== false;
   const desktopSearchActive = !mobileBooking && Boolean(desktopMenuQuery.trim());
   const normalizedQuery = (mobileBooking ? menuQuery : desktopMenuQuery)
     .trim()
@@ -486,7 +488,7 @@ export function VenueDetailsScreen({
           searching={Boolean(normalizedQuery)}
           menu={menuState}
           results={searchResults.length ? menuCards(searchResults) : null}
-          bookingUnavailable={!tableOrder && venue?.category_slug !== "restaurants"}
+          bookingUnavailable={!tableOrder && !bookable}
         />
       )}
       {tableOrder?.historyButton}
@@ -738,7 +740,7 @@ export function VenueDetailsScreen({
           </div>
           {tableOrder ? (
             tableOrder.panel
-          ) : venue.category_slug === "restaurants" ? (
+          ) : bookable ? (
             standalone && !reservationPage && mobileBooking ? null : (
               <div
                 ref={bookingOverlayRef}
@@ -800,7 +802,7 @@ export function VenueDetailsScreen({
               </button>
             </aside>
           )}
-          {!tableOrder && venue.category_slug !== "restaurants" && (
+          {!tableOrder && !bookable && (
             <div className="venue-mobile-booking-status" role="status">
               <span>
                 <CalendarDays size={16} />
@@ -867,7 +869,7 @@ export function VenueDetailsScreen({
           </button>
         </div>
       )}
-      {!tableOrder && venue?.category_slug === "restaurants" && (
+      {!tableOrder && bookable && (
         <div className={`venue-mobile-booking-cta ${bookingOpen ? "booking-open" : ""}`}>
           <button
             ref={bookingTriggerRef}

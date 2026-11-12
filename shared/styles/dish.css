@@ -6670,3 +6670,32 @@ body:has(.pocket-dish .dish-tip-dialog[open]) {
     border-radius: 0;
   }
 }
+
+/* Opening hours in "About the venue". */
+.pocket-dish .venue-info-group > p > a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.pocket-dish .venue-opening-hours {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  color: var(--dish-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pocket-dish .venue-opening-hours > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.pocket-dish .venue-opening-hours dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pocket-dish .venue-opening-hours dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
