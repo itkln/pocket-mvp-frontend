@@ -47,9 +47,12 @@ export type TableBill = {
   id: string;
   venue_id: string;
   table_id: string;
+  table_identifier?: string;
   status: "open" | "payment_pending";
   currency: string;
   opened_at: string;
+  // When a guest called the staff to settle; the call is not a payment.
+  payment_requested_at?: string | null;
   subtotal_minor: number;
   tip_minor: number;
   tax_minor: number;
@@ -66,6 +69,9 @@ export type TableBill = {
 };
 export const getTableBill = async (token: string, signal?: AbortSignal) =>
   (await post<{ bill: TableBill | null }>("/public/table-bill", { token }, signal)).bill;
+// Asks the staff to come and settle the current visit. Repeated calls keep the first one.
+export const callTableStaff = async (token: string) =>
+  (await post<{ bill: TableBill }>("/public/table-bill/call-staff", { token })).bill;
 export const issueTableQR = async (venueID: string, identifier: string, rotate = false) =>
   (
     await post<{ qr: TableQRCode }>(`/venues/${encodeURIComponent(venueID)}/table-qr`, {

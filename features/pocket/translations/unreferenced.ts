@@ -3,7 +3,6 @@ import type { TranslationRow } from "./types";
 // Values that come from the API (seeded presets such as cuisines, tags, filters, table notes)
 // or appear only in tests. They do not occur as literals in the app code.
 export const unreferencedTranslations: TranslationRow[] = [
-  ["Обновить счёт", "Refresh bill", "Оновити рахунок", "Obnoviť účet"],
   [
     "Для оплаты обратитесь к сотруднику заведения.",
     "Please ask a staff member to settle the bill.",

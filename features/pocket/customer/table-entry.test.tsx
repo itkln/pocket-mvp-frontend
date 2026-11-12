@@ -5,7 +5,12 @@ import { TableBillPage, TableHomePage } from "../../../shared/dish-screens";
 import { getCurrentUser } from "../../../lib/auth-api";
 import { APIError } from "../../../lib/api-client";
 import { getPublicVenue, type PublicVenue } from "../../../lib/public-catalog-api";
-import { getTableBill, resolveTableQR, type TableBill } from "../../../lib/table-orders-api";
+import {
+  callTableStaff,
+  getTableBill,
+  resolveTableQR,
+  type TableBill,
+} from "../../../lib/table-orders-api";
 import { I18nProvider, translate } from "../i18n";
 
 const { push, replace, segment } = vi.hoisted(() => ({
@@ -23,6 +28,7 @@ vi.mock("../../../lib/auth-api", () => ({ getCurrentUser: vi.fn(), logout: vi.fn
 vi.mock("../../../lib/table-orders-api", () => ({
   resolveTableQR: vi.fn(),
   getTableBill: vi.fn(),
+  callTableStaff: vi.fn(),
 }));
 vi.mock("../../../lib/public-catalog-api", async (original) => ({
   ...(await original<object>()),
@@ -64,6 +70,11 @@ const bill: TableBill = {
       total_minor: 500,
     },
   ],
+};
+// Choosing cash and «Оплатить» calls the staff to settle.
+const payCash = async () => {
+  fireEvent.click(await screen.findByRole("radio", { name: "Оплата наличными" }));
+  fireEvent.click(screen.getByRole("button", { name: /^Оплатить / }));
 };
 const show = (billPage = false) => {
   segment.current = billPage ? "bill" : null;
@@ -151,15 +162,99 @@ it("renders all guests' items and authoritative totals, then clears the settled 
   expect(region.getByText("Паста")).toBeInTheDocument();
   expect(region.getByText("Кофе")).toBeInTheDocument();
   expect(region.getByText(/26,00/)).toBeInTheDocument();
-  expect(region.getByText(/34,50/)).toBeInTheDocument();
+  expect(region.getByText("Итого").nextElementSibling).toHaveTextContent("34,50");
   expect(
     region.queryByText("Для оплаты обратитесь к сотруднику заведения."),
   ).not.toBeInTheDocument();
   await act(async () => {
     document.dispatchEvent(new Event("visibilitychange"));
   });
-  await screen.findByRole("heading", { name: "Пока нет заказов" });
+  await screen.findByRole("heading", { name: "Счёт закрыт" });
   expect(screen.queryByText("Паста")).not.toBeInTheDocument();
+  expect(screen.queryByRole("group", { name: "Способ оплаты" })).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Заказать за стол" })).toBeInTheDocument();
+});
+it("keeps the last bill on a failed refresh, says the connection dropped and retries", async () => {
+  vi.mocked(getTableBill)
+    .mockResolvedValueOnce(bill)
+    .mockRejectedValueOnce(new Error("offline"))
+    .mockResolvedValueOnce({
+      ...bill,
+      total_minor: 3950,
+      items: [...bill.items, { ...bill.items[1], order_id: "three", order_number: 3 }],
+    });
+  show(true);
+  await screen.findByText("Паста");
+  fireEvent.click(screen.getByRole("button", { name: "Обновить счёт" }));
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent("Не удалось обновить счёт");
+  expect(alert).toHaveTextContent("Показан счёт на");
+  expect(screen.getByText("Паста")).toBeInTheDocument();
+  fireEvent.click(within(alert).getByRole("button", { name: "Повторить" }));
+  // Another guest's order shows up with the server's new total.
+  await waitFor(() =>
+    expect(screen.getByText("Итого").nextElementSibling).toHaveTextContent("39,50"),
+  );
+  expect(screen.getByText(/Заказ №3/)).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+it("calls the staff to settle, shows the call and does not treat it as a payment", async () => {
+  const called = { ...bill, payment_requested_at: "2026-11-08T12:30:00Z" };
+  vi.mocked(getTableBill).mockResolvedValue(bill);
+  vi.mocked(callTableStaff).mockResolvedValue(called);
+  show(true);
+  await payCash();
+  expect(callTableStaff).toHaveBeenCalledWith("test-token");
+  const panel = await screen.findByRole("status");
+  expect(panel).toHaveTextContent("Сотрудник вызван · к оплате 34,50");
+  expect(panel).toHaveTextContent("подойдёт к столу 07 для расчёта");
+  expect(panel).toHaveTextContent("Счёт закроется, когда сотрудник подтвердит оплату.");
+  expect(screen.queryByRole("group", { name: "Способ оплаты" })).not.toBeInTheDocument();
+  // The bill is still open: it keeps its dishes until the staff confirms the payment.
+  expect(screen.getByText("Паста")).toBeInTheDocument();
+});
+it("shows the payment method mock-up: four options, split and pay once a method is chosen", async () => {
+  vi.mocked(getTableBill).mockResolvedValue(bill);
+  show(true);
+  const methods = await screen.findByRole("group", { name: "Способ оплаты" });
+  for (const label of ["Apple Pay", "Google Pay", "Банковская карта", "Оплата наличными"])
+    expect(within(methods).getByRole("radio", { name: label })).not.toBeChecked();
+  expect(screen.getByRole("button", { name: "Разделить оплату" })).toBeEnabled();
+  const pay = screen.getByRole("button", { name: /Оплатить 34,50/ });
+  expect(pay).toBeDisabled();
+  fireEvent.click(within(methods).getByRole("radio", { name: "Google Pay" }));
+  expect(within(methods).getByRole("radio", { name: "Google Pay" })).toBeChecked();
+  expect(pay).toBeEnabled();
+  // Online methods are not wired yet: nothing is sent.
+  fireEvent.click(pay);
+  expect(callTableStaff).not.toHaveBeenCalled();
+});
+it("keeps a call made from another phone and confirms the payment with a zero bill", async () => {
+  vi.mocked(getTableBill)
+    .mockResolvedValueOnce({ ...bill, payment_requested_at: "2026-11-08T12:30:00Z" })
+    .mockResolvedValueOnce(null);
+  show(true);
+  expect(await screen.findByText(/Сотрудник вызван/)).toBeInTheDocument();
+  await act(async () => {
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await screen.findByRole("heading", { name: "Оплата подтверждена" });
+  expect(screen.getByText(/Текущий счёт: 0,00/)).toBeInTheDocument();
+  expect(screen.queryByText("Паста")).not.toBeInTheDocument();
+});
+it("says when the staff could not be called and lets the guest try again", async () => {
+  vi.mocked(getTableBill).mockResolvedValue(bill);
+  vi.mocked(callTableStaff).mockRejectedValueOnce(new Error("offline"));
+  show(true);
+  await payCash();
+  expect(await screen.findByRole("alert")).toHaveTextContent("Не удалось вызвать сотрудника");
+  expect(screen.getByRole("button", { name: /^Оплатить / })).toBeEnabled();
+});
+it("shows a bill being settled without the payment button", async () => {
+  vi.mocked(getTableBill).mockResolvedValue({ ...bill, status: "payment_pending" });
+  show(true);
+  expect(await screen.findByText("Счёт передан на оплату")).toBeInTheDocument();
+  expect(screen.queryByRole("group", { name: "Способ оплаты" })).not.toBeInTheDocument();
 });
 it("shows a bill error instead of an empty bill and recovers on returning to the browser", async () => {
   vi.mocked(getTableBill).mockRejectedValueOnce(new Error("offline")).mockResolvedValueOnce(bill);
@@ -210,6 +305,16 @@ it("provides entry and bill labels in every supported language", () => {
       "Общий счёт",
       "Пока нет заказов",
       "Обновить счёт",
+      "Сотрудник подойдёт к столу и примет оплату наличными.",
+      "Счёт закрыт",
+      "Счёт передан на оплату",
+      "Оплата подтверждена",
+      "Банковская карта",
+      "Оплата наличными",
+      "Разделить оплату",
+      "Оплатить {amount}",
+      "Счёт закроется, когда сотрудник подтвердит оплату.",
+      "Не удалось вызвать сотрудника. Проверьте подключение и попробуйте ещё раз.",
     ])
       expect(translate(label, locale)).not.toBe(label);
 });
