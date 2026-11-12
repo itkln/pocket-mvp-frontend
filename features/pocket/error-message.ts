@@ -21,6 +21,8 @@ const errorSourceByCode: Record<string, string> = {
   table_occupied: "За этим столом уже сидят гости",
   table_reserved: "Стол забронирован на это время",
   reservation_not_seatable: "Эту бронь уже нельзя посадить",
+  table_in_use:
+    "Стол нельзя удалить: у него есть предстоящая бронь, гости или открытый счёт. Отмените удаление",
   internal_server_error: "Не удалось выполнить запрос",
   request_failed: "Сервер временно недоступен. Попробуйте еще раз",
 };

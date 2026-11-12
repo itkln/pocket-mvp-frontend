@@ -1,5 +1,8 @@
 export type FloorTable = {
+  // The table number staff and guests see; the backend keys venue tables by it.
   id: string;
+  // The venue table's ID in bookings, bills and Spots, set by the backend on load.
+  table_id?: string;
   seats: number;
   x: number;
   y: number;

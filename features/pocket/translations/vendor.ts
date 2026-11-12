@@ -143,6 +143,12 @@ export const vendorTranslations: TranslationRow[] = [
     "Pri tomto stole už sedia hostia",
   ],
   [
+    "Стол нельзя удалить: у него есть предстоящая бронь, гости или открытый счёт. Отмените удаление",
+    "This table can't be removed: it has an upcoming booking, seated guests or an open bill. Undo the removal",
+    "Стіл не можна видалити: у нього є майбутнє бронювання, гості або відкритий рахунок. Скасуйте видалення",
+    "Stôl nemožno odstrániť: má nadchádzajúcu rezerváciu, hostí alebo otvorený účet. Vráťte odstránenie späť",
+  ],
+  [
     "Стол забронирован на это время",
     "This table is booked for this time",
     "Стіл заброньовано на цей час",
