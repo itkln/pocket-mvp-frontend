@@ -54,6 +54,7 @@ import {
 import { useLocalizedError } from "../error-message";
 
 type OwnerWorkspace = {
+  venueID?: string;
   orderAlerts?: OrderAlertSettings;
   saveOrderAlerts: (value: OrderAlertSettings) => Promise<void>;
   venueTimezone?: string;
@@ -275,6 +276,7 @@ export function OwnerWorkspaceProvider({
   const getOrderDetails = useCallback((id: string) => getOrder(venueID!, id), [venueID]);
   const value = useMemo<OwnerWorkspace>(
     () => ({
+      venueID,
       orderAlerts,
       saveOrderAlerts: async (value) => {
         const saved = await saveOrderAlertSettings(venueID!, value);

@@ -21,6 +21,7 @@ import { useOrderStatusFeedback } from "./use-order-status-feedback";
 import { useOrderArrivals } from "./use-order-arrivals";
 import { isFinalOrder, orderGroup, orderStatusLabels } from "./order-workflow";
 import { OrderDetails } from "./order-details";
+import { TableBillRequests } from "./table-bills";
 
 function waitingDisplay(minutes: number, locale: string) {
   const unit = minutes < 60 ? "minute" : minutes < 1440 ? "hour" : "day";
@@ -48,6 +49,7 @@ export function OrdersScreen({
   request,
 }: { title?: string; request?: OrderOpenRequest } = {}) {
   const {
+    venueID,
     orderAlerts = defaultOrderAlerts,
     saveOrderAlerts,
     getHistoryPage,
@@ -348,6 +350,7 @@ export function OrdersScreen({
           />
         </div>
       </header>
+      {venueID && <TableBillRequests venueID={venueID} />}
       <div className="orders-toolbar">
         <div className="orders-tabs">
           {(

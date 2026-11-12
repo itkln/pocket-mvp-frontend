@@ -18,6 +18,7 @@ vi.mock("../../../lib/owner-api", async (importOriginal) => ({
   getOwnerDashboard: vi.fn(),
   loadOrderQueue: vi.fn(),
   updateOrderStatus: vi.fn(),
+  listOpenBills: vi.fn().mockResolvedValue([]),
 }));
 const notify = vi.fn();
 const order: OwnerOrder = {

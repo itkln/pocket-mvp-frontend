@@ -5665,3 +5665,189 @@
     box-shadow: 0 0 0 0 transparent;
   }
 }
+
+/* V-TBL-05: tables waiting for the bill and the in-person settlement. */
+.table-bill-requests {
+  margin: 0 0 20px;
+  padding: 18px 20px;
+  border-radius: var(--vendor-radius-block, 28px);
+  background: #fff;
+}
+.table-bill-requests.has-calls {
+  box-shadow: inset 0 0 0 2px #f0a43a;
+}
+.table-bill-requests header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.table-bill-requests h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 18px;
+}
+.table-bill-count {
+  min-width: 26px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #f5f6f8;
+  font-size: 14px;
+  text-align: center;
+}
+.has-calls .table-bill-count {
+  background: #f0a43a;
+  color: #fff;
+}
+.table-bill-toggle {
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.table-bill-alert,
+.table-bill-done {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-weight: 600;
+}
+.table-bill-alert {
+  background: #fff4e3;
+  color: #8a4b00;
+}
+.table-bill-done {
+  justify-content: space-between;
+  background: #e8f6ee;
+  color: #1d6b3d;
+}
+.table-bill-error,
+.table-bill-empty {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.table-bill-error {
+  color: #b3261e;
+}
+.table-bill-requests > ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.table-bill-requests > ul > li button {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 18px;
+  background: #f5f6f8;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.table-bill-requests > ul > li.called button {
+  background: #fff4e3;
+}
+.table-bill-requests > ul > li small {
+  color: var(--muted);
+}
+.table-bill-requests > ul > li span {
+  font-size: 18px;
+  font-weight: 700;
+}
+.settle-bill-items {
+  display: grid;
+  gap: 10px;
+  max-height: 40vh;
+  margin: 18px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.settle-bill-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.settle-bill-dialog .settle-bill-items small {
+  display: block;
+  text-align: left;
+}
+.settle-bill-totals {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.settle-bill-totals div {
+  display: flex;
+  justify-content: space-between;
+}
+.settle-bill-totals dd {
+  margin: 0;
+}
+.settle-bill-totals .total {
+  font-size: 22px;
+  font-weight: 700;
+}
+.settle-bill-changed {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff4e3;
+  color: #8a4b00;
+}
+.settle-bill-changed p {
+  margin: 0;
+}
+.settle-bill-methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+}
+.settle-bill-methods legend {
+  margin-bottom: 8px;
+}
+.settle-bill-dialog .settle-bill-methods label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 14px;
+  border-radius: 16px;
+  background: #f5f6f8;
+  cursor: pointer;
+}
+.settle-bill-methods label.selected {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+.settle-bill-methods input {
+  position: absolute;
+  opacity: 0;
+}
+.settle-bill-note {
+  color: var(--muted);
+  font-size: 14px;
+}
+@media (max-width: 760px) {
+  .table-bill-requests header {
+    flex-wrap: wrap;
+  }
+}

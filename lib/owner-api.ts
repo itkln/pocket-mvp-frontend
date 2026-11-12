@@ -388,3 +388,53 @@ export const saveOrderAlertSettings = (venueID: string, settings: OrderAlertSett
     method: "PUT",
     body: JSON.stringify(settings),
   });
+
+// V-TBL-05: the venue's open table bills, the ones whose guests called the staff first, and
+// confirming that a bill was paid in person.
+export type OpenTableBill = {
+  id: string;
+  table_identifier: string;
+  status: "open" | "payment_pending";
+  currency: string;
+  opened_at: string;
+  payment_requested_at?: string | null;
+  subtotal_minor: number;
+  tip_minor: number;
+  tax_minor: number;
+  service_fee_minor: number;
+  total_minor: number;
+  items: {
+    order_id: string;
+    order_number: number;
+    name: string;
+    quantity: number;
+    unit_price_minor: number;
+    total_minor: number;
+  }[];
+};
+export type PaymentMethod = "cash" | "card";
+export type BillSettlement = {
+  bill_id: string;
+  table_identifier: string;
+  status: "paid" | "void";
+  amount_minor: number;
+  currency: string;
+  method?: PaymentMethod;
+  settled_at: string;
+};
+export const listOpenBills = async (venueID: string, signal?: AbortSignal) =>
+  (await apiRequest<{ bills: OpenTableBill[] }>(venuePath(venueID, "/bills"), { signal })).bills;
+export const settleBill = async (
+  venueID: string,
+  billID: string,
+  input: { expected_total_minor: number; method: PaymentMethod },
+) =>
+  (
+    await apiRequest<{ settlement: BillSettlement }>(
+      venuePath(venueID, `/bills/${billID}/settle`),
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    )
+  ).settlement;
