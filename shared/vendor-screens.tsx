@@ -137,7 +137,6 @@ function FloorEditorScreen({ role }: { role: VendorRole }) {
   return (
     <FloorPlan
       key={page.venue.id}
-      mode="owner"
       venueID={page.venue.id}
       venueName={page.venue.name}
       notify={page.notify}
@@ -156,7 +155,14 @@ export function StaffFloorEditorPage() {
 export function StaffFloorPage() {
   const page = useVenuePage("staff", "staff-floor");
   if (!page) return null;
-  return <FloorPlan mode="staff" venueName={page.venue.name} notify={page.notify} />;
+  return (
+    <FloorPlan
+      key={page.venue.id}
+      venueID={page.venue.id}
+      venueName={page.venue.name}
+      notify={page.notify}
+    />
+  );
 }
 
 // The account page works for both roles and without a venue.

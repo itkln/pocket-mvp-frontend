@@ -18,6 +18,9 @@ const errorSourceByCode: Record<string, string> = {
   unauthorized: "Требуется вход в аккаунт",
   not_found: "Объект не найден или недоступен",
   conflict: "Такой объект уже существует или используется",
+  table_occupied: "За этим столом уже сидят гости",
+  table_reserved: "Стол забронирован на это время",
+  reservation_not_seatable: "Эту бронь уже нельзя посадить",
   internal_server_error: "Не удалось выполнить запрос",
   request_failed: "Сервер временно недоступен. Попробуйте еще раз",
 };
