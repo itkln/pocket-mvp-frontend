@@ -152,6 +152,7 @@ export function StaffFloorEditorPage() {
   return <FloorEditorScreen role="staff" />;
 }
 
+// The live floor for waiters: seating guests, freeing tables, bills; no editor or QR codes.
 export function StaffFloorPage() {
   const page = useVenuePage("staff", "staff-floor");
   if (!page) return null;
@@ -161,6 +162,7 @@ export function StaffFloorPage() {
       venueID={page.venue.id}
       venueName={page.venue.name}
       notify={page.notify}
+      canEdit={false}
     />
   );
 }

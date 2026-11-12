@@ -9,7 +9,6 @@ import {
   Sparkles,
   Store,
   PanelsTopLeft,
-  Table2,
   Users,
   UtensilsCrossed,
   WalletCards,
@@ -55,19 +54,22 @@ export const staffNavigation = [
   { id: "service", label: "Сервис", icon: Activity },
   { id: "menu", label: "Меню", icon: UtensilsCrossed },
   { id: "floor", label: "План зала", icon: PanelsTopLeft },
-  { id: "staff-floor", label: "Столы", icon: Table2 },
+  { id: "staff-floor", label: "Зал", icon: PanelsTopLeft },
   { id: "venue", label: "Настройки заведения", icon: Store },
 ];
 // Staff screens beyond the service desk, by venue role (V-BE-02: managers run the menu, the floor
 // and the venue settings).
 export const managerScreens = ["menu", "floor", "venue"];
+// Waiters work the live floor (V-SRV-02: seating, freeing tables, bills) without its editor;
+// managers have it inside "floor".
+export const waiterScreens = ["staff-floor"];
 export const canManageVenueSpace = (venue?: { access_role?: string } | null) =>
   venue?.access_role === "manager" || venue?.access_role === "owner";
 
 export const mobilePrimaryNavigation: Record<Role, string[]> = {
   owner: ["overview", "orders", "menu"],
   customer: ["discover", "browse-menu", "reservation", "history"],
-  staff: ["service", "menu", "floor"],
+  staff: ["service", "staff-floor", "menu", "floor"],
 };
 
 // Sidebar groups. The first group has no title; settings sit at the bottom next to the profile.

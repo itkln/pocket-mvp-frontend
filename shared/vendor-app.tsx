@@ -14,6 +14,7 @@ import {
   canManageVenueSpace,
   managerScreens,
   ownerNavigation,
+  waiterScreens,
   roleForVenue,
   selectedVenueKey,
   staffNavigation,
@@ -47,15 +48,18 @@ const vendorPath = (locale: Locale, role: VendorRole, screen: string) =>
   `/${locale}/${role}/${screen}`;
 
 // The screen an account opens for a URL. Staff work on the service screen: waiters take every
-// order there and pass it to the kitchen outside Pocket; managers also run the menu and the floor.
+// order there and pass it to the kitchen outside Pocket, and work the live floor; managers also run
+// the menu, the floor plan (live floor and editor) and the venue settings.
 export function resolveScreen(
   role: VendorRole,
   routeScreen: string | undefined,
   venue: Venue | null,
 ) {
   if (role !== "staff" || routeScreen === "account") return screenForRole(role, routeScreen);
-  if (routeScreen && managerScreens.includes(routeScreen) && canManageVenueSpace(venue))
-    return routeScreen;
+  const manager = canManageVenueSpace(venue);
+  if (routeScreen && managerScreens.includes(routeScreen) && manager) return routeScreen;
+  if (routeScreen && waiterScreens.includes(routeScreen) && venue)
+    return manager ? "floor" : routeScreen;
   return "service";
 }
 
@@ -227,7 +231,8 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
       : staffNavigation.filter(
           (item) =>
             item.id === "service" ||
-            (managerScreens.includes(item.id) && canManageVenueSpace(venue)),
+            (managerScreens.includes(item.id) && canManageVenueSpace(venue)) ||
+            (waiterScreens.includes(item.id) && Boolean(venue) && !canManageVenueSpace(venue)),
         );
 
   const openOrder = (id: string) => {

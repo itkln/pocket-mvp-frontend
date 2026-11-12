@@ -92,22 +92,25 @@ type FloorView = "live" | "edit";
 
 // The venue floor. "Зал" is the working view: who sits where, today's bookings, seating guests.
 // "Редактор" arranges tables, fixtures and floors and gives every table its QR code; it saves by
-// itself and keeps an undo history for the session.
+// itself and keeps an undo history for the session. Without `canEdit` (waiters) only the working
+// view is shown: no editor and no QR codes.
 export function FloorPlan({
   venueID,
   venueName,
   notify,
   initialView = "live",
+  canEdit = true,
 }: {
   venueID?: string;
   venueName: string;
   notify: (message: string) => void;
   initialView?: FloorView;
+  canEdit?: boolean;
 }) {
   const { confirm } = useConfirm();
   const { t, locale } = useI18n();
   const errorMessage = useLocalizedError();
-  const [view, setView] = useState<FloorView>(initialView);
+  const [view, setView] = useState<FloorView>(canEdit ? initialView : "live");
   const [floors, setFloors] = useState<VenueFloor[]>(initialFloors);
   const [activeFloorId, setActiveFloorId] = useState(initialFloors[0].id);
   const [selected, setSelected] = useState<FloorSelection>(null);
@@ -635,65 +638,67 @@ export function FloorPlan({
   return (
     <div className={`floor-page view-${view}`}>
       <PageHeader
-        title={t("План зала")}
+        title={t(canEdit ? "План зала" : "Зал")}
         subtitle={venueName}
         actions={
-          <>
-            {view === "edit" && (
-              <>
-                <span className={`floor-save-state ${dirty || saving ? "pending" : ""}`}>
-                  {saveState}
-                </span>
-                <div className="floor-history">
-                  <button
-                    type="button"
-                    className="floor-icon-btn"
-                    aria-label={t("Отменить")}
-                    title={t("Отменить")}
-                    disabled={!history.undo}
-                    onClick={() => travel("undo")}
-                  >
-                    <Undo2 size={19} />
-                  </button>
-                  <button
-                    type="button"
-                    className="floor-icon-btn"
-                    aria-label={t("Повторить")}
-                    title={t("Повторить")}
-                    disabled={!history.redo}
-                    onClick={() => travel("redo")}
-                  >
-                    <Redo2 size={19} />
-                  </button>
-                </div>
-              </>
-            )}
-            <button
-              type="button"
-              className="floor-btn white"
-              disabled={loading}
-              onClick={() => setShowQrCodes(true)}
-            >
-              <QrCode size={19} />
-              {t("QR-коды")}
-            </button>
-            <div className="floor-view-switch" role="group" aria-label={t("Режим плана зала")}>
+          canEdit && (
+            <>
+              {view === "edit" && (
+                <>
+                  <span className={`floor-save-state ${dirty || saving ? "pending" : ""}`}>
+                    {saveState}
+                  </span>
+                  <div className="floor-history">
+                    <button
+                      type="button"
+                      className="floor-icon-btn"
+                      aria-label={t("Отменить")}
+                      title={t("Отменить")}
+                      disabled={!history.undo}
+                      onClick={() => travel("undo")}
+                    >
+                      <Undo2 size={19} />
+                    </button>
+                    <button
+                      type="button"
+                      className="floor-icon-btn"
+                      aria-label={t("Повторить")}
+                      title={t("Повторить")}
+                      disabled={!history.redo}
+                      onClick={() => travel("redo")}
+                    >
+                      <Redo2 size={19} />
+                    </button>
+                  </div>
+                </>
+              )}
               <button
                 type="button"
-                aria-pressed={view === "live"}
-                onClick={() => switchView("live")}
+                className="floor-btn white"
+                disabled={loading}
+                onClick={() => setShowQrCodes(true)}
               >
-                {t("Зал")}
+                <QrCode size={19} />
+                {t("QR-коды")}
               </button>
-              <button
-                type="button"
-                aria-pressed={view === "edit"}
-                onClick={() => switchView("edit")}
-              >
-                {t("Редактор")}
-              </button>
-            </div>
-          </>
+              <div className="floor-view-switch" role="group" aria-label={t("Режим плана зала")}>
+                <button
+                  type="button"
+                  aria-pressed={view === "live"}
+                  onClick={() => switchView("live")}
+                >
+                  {t("Зал")}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === "edit"}
+                  onClick={() => switchView("edit")}
+                >
+                  {t("Редактор")}
+                </button>
+              </div>
+            </>
+          )
         }
       />
       <div className="floor-grid">
@@ -973,7 +978,7 @@ export function FloorPlan({
                       <Building2 size={28} />
                       <strong>{activeFloor.name}</strong>
                       <span>{t("План пока пуст")}</span>
-                      {view === "live" && (
+                      {view === "live" && canEdit && (
                         <button
                           type="button"
                           className="floor-btn white"

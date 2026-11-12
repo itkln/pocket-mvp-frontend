@@ -126,6 +126,43 @@ describe("FloorPlan", () => {
     expect(floorSelector).toHaveValue("floor-12");
   });
 
+  it("gives waiters the live floor without the editor or QR codes", async () => {
+    vi.mocked(getFloorPlan).mockResolvedValue([
+      {
+        id: "floor-1",
+        name: "1 этаж",
+        tables: [{ id: "01", seats: 2, x: 5, y: 5, state: "free" }],
+        fixtures: [],
+      },
+    ]);
+    vi.mocked(getLiveFloor).mockResolvedValue(liveFloor({ tables: [] }));
+    vi.mocked(seatWalkIn).mockResolvedValue(
+      liveFloor({ tables: [{ identifier: "01", seats: 2, state: "occupied" }] }),
+    );
+    render(
+      <FloorPlan
+        venueID="venue-1"
+        venueName="Pocket"
+        notify={vi.fn()}
+        initialView="edit"
+        canEdit={false}
+      />,
+    );
+    expect(await screen.findByRole("heading", { name: "Зал" })).toBeInTheDocument();
+    await screen.findByRole("button", { name: "Стол 01, свободен" });
+    expect(screen.queryByRole("button", { name: "Редактор" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "QR-коды" })).not.toBeInTheDocument();
+    // Seating guests stays available.
+    fireEvent.click(screen.getByRole("button", { name: "Посадить гостей" }));
+    await waitFor(() =>
+      expect(seatWalkIn).toHaveBeenCalledWith(
+        "venue-1",
+        expect.objectContaining({ table_identifier: "01" }),
+      ),
+    );
+    expect(saveFloorPlan).not.toHaveBeenCalled();
+  });
+
   it("shows the live floor and seats, moves and releases parties", async () => {
     vi.mocked(getFloorPlan).mockResolvedValue([
       {

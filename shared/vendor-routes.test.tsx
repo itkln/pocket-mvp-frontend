@@ -88,7 +88,10 @@ it("opens the screen the account may use", () => {
   // Staff work on the service screen; the kitchen screen no longer exists.
   expect(resolveScreen("staff", undefined, venue("waiter"))).toBe("service");
   expect(resolveScreen("staff", "kitchen", venue("manager"))).toBe("service");
-  expect(resolveScreen("staff", "staff-floor", venue("manager"))).toBe("service");
+  // Waiters work the live floor (V-SRV-02); managers have it inside the floor plan.
+  expect(resolveScreen("staff", "staff-floor", venue("waiter"))).toBe("staff-floor");
+  expect(resolveScreen("staff", "staff-floor", venue("manager"))).toBe("floor");
+  expect(resolveScreen("staff", "staff-floor", null)).toBe("service");
   expect(resolveScreen("staff", "account", venue("waiter"))).toBe("account");
   // Managers also run the menu, the floor plan and the venue settings (V-BE-02); waiters do not.
   expect(resolveScreen("staff", "menu", venue("manager"))).toBe("menu");
