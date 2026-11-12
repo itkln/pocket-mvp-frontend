@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useLayoutEffect, useRef, type ReactNode } from "react";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import { useI18n } from "./i18n";
+import { motionEnabled } from "./motion-preference";
 
 export function money(value: number, currency = "EUR") {
   return new Intl.NumberFormat("en-US", {
@@ -10,6 +11,51 @@ export function money(value: number, currency = "EUR") {
     currency,
     currencyDisplay: "narrowSymbol",
   }).format(value);
+}
+
+// A number that counts towards its value: from zero when it first appears, from the shown
+// number when the value changes. React renders the final text; the count only rewrites that
+// text node while it runs, and is skipped when animations are off (motion-preference.ts).
+export function CountUp({
+  value,
+  format = (current) => String(Math.round(current)),
+}: {
+  value: number;
+  format?: (value: number) => string;
+}) {
+  const node = useRef<HTMLSpanElement>(null);
+  const shown = useRef(0);
+  const formatter = useRef(format);
+  useLayoutEffect(() => {
+    formatter.current = format;
+  });
+  useLayoutEffect(() => {
+    const text = node.current?.firstChild;
+    const from = shown.current;
+    if (!text || from === value) return;
+    if (!motionEnabled()) {
+      shown.current = value;
+      return;
+    }
+    const started = performance.now();
+    let frame = 0;
+    const step = (now: number) => {
+      // A frame timestamp can be a little earlier than the start: never count backwards.
+      const progress = Math.min(1, Math.max(0, (now - started) / 900));
+      const current = progress === 1 ? value : from + (value - from) * (1 - (1 - progress) ** 4);
+      shown.current = current;
+      text.nodeValue = formatter.current(current);
+      if (progress < 1) frame = requestAnimationFrame(step);
+    };
+    text.nodeValue = formatter.current(from);
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [value]);
+  return (
+    <span className="count-up" ref={node}>
+      {format(value)}
+    </span>
+  );
 }
 
 export function Button({

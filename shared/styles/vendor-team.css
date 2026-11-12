@@ -84,8 +84,60 @@
   background: #f3f4f6;
   border-radius: var(--vendor-radius-control);
 }
+.vendor-team .team-row .icon-button:hover {
+  background: #e9ebee;
+}
+.vendor-team .team-row .icon-button.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+/* Row actions: the same white sheet as the profile menu, one line per action, the destructive
+   action set apart below a divider. */
 .vendor-team .row-actions-menu {
   z-index: 20;
+  top: calc(100% + 8px);
+  width: max-content;
+  min-width: 260px;
+  max-width: calc(100vw - 24px);
+  display: grid;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(23, 33, 43, 0.16);
+}
+.vendor-team .row-actions-menu button {
+  min-height: 48px;
+  gap: 12px;
+  padding: 0 14px 0 12px;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 16px;
+  white-space: nowrap;
+}
+.vendor-team .row-actions-menu button svg {
+  flex-shrink: 0;
+  color: #707579;
+}
+.vendor-team .row-actions-menu button:hover:not(:disabled) {
+  background: #f4f5f7;
+}
+.vendor-team .row-actions-menu button:disabled {
+  color: var(--muted);
+  cursor: progress;
+}
+.vendor-team .row-actions-menu hr {
+  height: 1px;
+  margin: 4px 12px;
+  border: 0;
+  background: var(--line);
+}
+.vendor-team .row-actions-menu button.danger,
+.vendor-team .row-actions-menu button.danger svg {
+  color: #c0392b;
+}
+.vendor-team .row-actions-menu button.danger:hover {
+  background: #fdf0ee;
 }
 .team-invite-modal {
   width: min(520px, 100%);
@@ -164,5 +216,12 @@
   .vendor-team .row-actions {
     grid-column: 3;
     grid-row: 1;
+  }
+  .vendor-team .row-actions-menu {
+    top: auto;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    box-shadow: 0 -8px 40px rgba(23, 33, 43, 0.18);
   }
 }

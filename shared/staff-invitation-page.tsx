@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { BadgeCheck, CalendarClock, Loader2, Store, TriangleAlert, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCurrentUser, logout, AuthAPIError, type AuthUser } from "../lib/auth-api";
@@ -70,11 +71,23 @@ export default function StaffInvitationPage({ token }: { token: string }) {
       setBusy(false);
     }
   };
+  const signOutAndSwitch = async () => {
+    setBusy(true);
+    try {
+      await logout();
+      router.replace(authLink("login"));
+    } catch {
+      setError("Не удалось выйти. Попробуйте ещё раз.");
+      setBusy(false);
+    }
+  };
   return (
-    <main className="auth-screen vendor-auth">
+    <main className="auth-screen vendor-auth invitation-screen">
       <section className="auth-screen-content">
         <Link className="auth-brand" href={`/${locale}`}>
-          <img src="/logo.svg" alt="" width={30} height={30} />
+          <span className="auth-brand-mark">
+            <img src="/logo.svg" alt="" width={72} height={72} />
+          </span>
           <strong>Pocket Vendor</strong>
         </Link>
         <header className="auth-heading">
@@ -82,69 +95,92 @@ export default function StaffInvitationPage({ token }: { token: string }) {
           <p>{t("Войдите с e-mail, на который пришло приглашение, и подтвердите доступ.")}</p>
         </header>
         {loading ? (
-          <p role="status">{t("Проверяем приглашение…")}</p>
+          <p className="invitation-loading" role="status">
+            <Loader2 size={20} aria-hidden="true" />
+            {t("Проверяем приглашение…")}
+          </p>
         ) : (
-          <>
-            {user && (
-              <p>
-                {t("Вы вошли как")} <strong>{user.email}</strong>
-              </p>
-            )}
+          <div className="invitation-body">
             {invitation && (
-              <div className="auth-heading">
-                <h2>{invitation.venue_name}</h2>
-                <p>
-                  {t("Роль:")} {roles[invitation.role]}
-                </p>
-                <p>
-                  {t("Действует до")}{" "}
-                  {new Date(invitation.expires_at).toLocaleString(locale === "ua" ? "uk" : locale)}
-                </p>
-              </div>
+              <article className="invitation-card">
+                <header>
+                  <span className="invitation-card-icon" aria-hidden="true">
+                    <Store size={22} />
+                  </span>
+                  <h2>{invitation.venue_name}</h2>
+                </header>
+                <dl>
+                  <div>
+                    <dt>
+                      <BadgeCheck size={18} aria-hidden="true" />
+                      {t("Роль")}
+                    </dt>
+                    <dd>{t(roles[invitation.role])}</dd>
+                  </div>
+                  <div>
+                    <dt>
+                      <CalendarClock size={18} aria-hidden="true" />
+                      {t("Действует до")}
+                    </dt>
+                    <dd>
+                      {new Date(invitation.expires_at).toLocaleString(
+                        locale === "ua" ? "uk" : locale,
+                        { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" },
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              </article>
+            )}
+            {user && (
+              <p className="invitation-account">
+                <span className="invitation-account-avatar" aria-hidden="true">
+                  <UserRound size={18} />
+                </span>
+                <span>
+                  <small>{t("Вы вошли как")}</small>
+                  <strong>{user.email}</strong>
+                </span>
+              </p>
             )}
             {error && (
-              <p className="auth-error" role="alert">
-                {t(error)}
+              <p className="auth-error invitation-error" role="alert">
+                <TriangleAlert size={18} aria-hidden="true" />
+                <span>{t(error)}</span>
               </p>
             )}
-            {!user && !error && (
-              <div className="auth-form">
-                <Link className="auth-submit" href={authLink("login")}>
-                  {t("Войти")}
-                </Link>
-                <Link href={authLink("register")}>{t("Создать аккаунт")}</Link>
-              </div>
-            )}
-            {user && invitation && (
-              <button className="auth-submit" disabled={busy} onClick={() => void accept()}>
-                {busy ? t("Принимаем…") : t("Принять приглашение")}
-              </button>
-            )}
-            {user && (
-              <p className="auth-switch">
+            <div className="invitation-actions">
+              {!user && !error && (
+                <>
+                  <Link className="auth-submit" href={authLink("login")}>
+                    {t("Войти")}
+                  </Link>
+                  <Link className="invitation-secondary" href={authLink("register")}>
+                    {t("Создать аккаунт")}
+                  </Link>
+                </>
+              )}
+              {user && invitation && (
+                <button className="auth-submit" disabled={busy} onClick={() => void accept()}>
+                  {busy ? t("Принимаем…") : t("Принять приглашение")}
+                </button>
+              )}
+              {error && (
+                <button className="auth-submit" onClick={() => window.location.reload()}>
+                  {t("Проверить снова")}
+                </button>
+              )}
+              {user && (
                 <button
+                  className="invitation-secondary"
                   disabled={busy}
-                  onClick={async () => {
-                    setBusy(true);
-                    try {
-                      await logout();
-                      router.replace(authLink("login"));
-                    } catch {
-                      setError("Не удалось выйти. Попробуйте ещё раз.");
-                      setBusy(false);
-                    }
-                  }}
+                  onClick={() => void signOutAndSwitch()}
                 >
                   {t("Войти в другой аккаунт")}
                 </button>
-              </p>
-            )}
-            {error && (
-              <button className="auth-submit" onClick={() => window.location.reload()}>
-                {t("Проверить снова")}
-              </button>
-            )}
-          </>
+              )}
+            </div>
+          </div>
         )}
       </section>
     </main>

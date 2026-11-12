@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Download, MessageSquareText, Search, Send, Star } from "lucide-react";
 import { type OwnerReview } from "../../../lib/owner-api";
-import { Button, EmptyIllustration, PageHeader, StatCard } from "../ui";
+import { Button, CountUp, EmptyIllustration, PageHeader, StatCard } from "../ui";
 import { localeTags, useI18n } from "../i18n";
 import { useOwnerWorkspace } from "./context";
 
@@ -94,7 +94,7 @@ export function ReviewsScreen({
           title={t("Средняя оценка")}
           value={
             <span className="reviews-average">
-              {average ? average.toFixed(1) : "—"}
+              {average ? <CountUp value={average} format={(value) => value.toFixed(1)} /> : "—"}
               <Star size={22} fill="currentColor" />
             </span>
           }
@@ -102,13 +102,17 @@ export function ReviewsScreen({
         />
         <StatCard
           title={t("Без ответа")}
-          value={unanswered}
+          value={<CountUp value={unanswered} />}
           caption={unanswered ? t("Требуют внимания") : t("На все отзывы есть ответ")}
           tone={unanswered ? "warning" : undefined}
           onClick={unanswered ? () => setFilter("unanswered") : undefined}
           active={filter === "unanswered"}
         />
-        <StatCard title={t("За последние 7 дней")} value={lastWeek} caption={t("Новых отзывов")} />
+        <StatCard
+          title={t("За последние 7 дней")}
+          value={<CountUp value={lastWeek} />}
+          caption={t("Новых отзывов")}
+        />
       </section>
       <section className="vendor-block reviews-block">
         <header className="reviews-toolbar">

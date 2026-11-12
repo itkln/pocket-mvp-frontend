@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CreditCard, Download } from "lucide-react";
 import { type OwnerPayment } from "../../../lib/owner-api";
 import { localeTags, useI18n } from "../i18n";
-import { Button, EmptyIllustration, PageHeader, StatCard, StatusPill, money } from "../ui";
+import { CountUp, Button, EmptyIllustration, PageHeader, StatCard, StatusPill, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 
 type PaymentGroup = "all" | "paid" | "pending" | "refunded" | "failed";
@@ -44,6 +44,7 @@ export function PaymentsScreen({ venueName }: { venueName: string }) {
   const pending = byGroup("pending");
   const refunded = payments.filter((payment) => payment.refunded_minor > 0);
   const currency = payments[0]?.currency ?? "EUR";
+  const inCurrency = (value: number) => money(value, currency);
   const visible = byGroup(filter);
 
   const exportCSV = () => {
@@ -83,14 +84,19 @@ export function PaymentsScreen({ venueName }: { venueName: string }) {
       <section className="vendor-stat-grid overview-stats">
         <StatCard
           title={t("Получено")}
-          value={money(sum(paid, (p) => p.amount_minor - p.refunded_minor) / 100, currency)}
+          value={
+            <CountUp
+              value={sum(paid, (p) => p.amount_minor - p.refunded_minor) / 100}
+              format={inCurrency}
+            />
+          }
           caption={t("Успешных платежей: {count}", { count: paid.length })}
           onClick={() => setFilter("paid")}
           active={filter === "paid"}
         />
         <StatCard
           title={t("В обработке")}
-          value={money(sum(pending, (p) => p.amount_minor) / 100, currency)}
+          value={<CountUp value={sum(pending, (p) => p.amount_minor) / 100} format={inCurrency} />}
           caption={t("Платежей: {count}", { count: pending.length })}
           onClick={() => setFilter("pending")}
           active={filter === "pending"}
@@ -98,17 +104,21 @@ export function PaymentsScreen({ venueName }: { venueName: string }) {
         />
         <StatCard
           title={t("Возвраты")}
-          value={money(sum(refunded, (p) => p.refunded_minor) / 100, currency)}
+          value={
+            <CountUp value={sum(refunded, (p) => p.refunded_minor) / 100} format={inCurrency} />
+          }
           caption={t("Платежей: {count}", { count: refunded.length })}
           onClick={() => setFilter("refunded")}
           active={filter === "refunded"}
         />
         <StatCard
           title={t("Средний платеж")}
-          value={money(
-            paid.length ? sum(paid, (p) => p.amount_minor) / paid.length / 100 : 0,
-            currency,
-          )}
+          value={
+            <CountUp
+              value={paid.length ? sum(paid, (p) => p.amount_minor) / paid.length / 100 : 0}
+              format={inCurrency}
+            />
+          }
           caption={t("По успешным платежам")}
         />
       </section>

@@ -32,6 +32,8 @@ import { useI18n } from "../features/pocket/i18n";
 import { useLocalizedError } from "../features/pocket/error-message";
 import { localeFromPathname, type Locale } from "../features/pocket/locales";
 import { useAppShell } from "./use-app-shell";
+import { usePageMotion } from "../features/pocket/use-page-motion";
+import { applyMotionPreference } from "../features/pocket/motion-preference";
 import { VendorShellContext, type VendorModal, type VendorRole } from "./vendor-shell-context";
 
 const defaultScreen: Record<VendorRole, string> = { owner: "overview", staff: "service" };
@@ -82,6 +84,16 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
   const scope = `${role}:${venue?.id}`;
   const request = orderRequest?.scope === scope ? orderRequest : undefined;
   const [modal, setModal] = useState<VendorModal | null>(null);
+  // The screen being left: its content dims until the next route renders.
+  const [leavingFrom, setLeavingFrom] = useState<string | null>(null);
+  // Renumber when the page content is replaced: another screen, another venue, first render.
+  const pageArea = usePageMotion(`${authReady}:${venue?.id}:${screen}`);
+
+  // The device's choice from the account settings: animations on or off.
+  useEffect(() => {
+    applyMotionPreference();
+    return () => applyMotionPreference(true);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -132,6 +144,13 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
 
   const navigate = (next: string) => {
     setOrderRequest(undefined);
+    if (resolveScreen(role, next, venue) !== screen) {
+      setLeavingFrom(screen);
+      window.setTimeout(
+        () => setLeavingFrom((current) => (current === screen ? null : current)),
+        1500,
+      );
+    }
     router.push(vendorPath(locale, role, next));
     shell.setMobileNav(false);
     window.scrollTo(0, 0);
@@ -261,6 +280,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
             onNavigate={navigate}
             onSignOut={() => void signOut()}
             onAddVenue={() => setModal("venue")}
+            onInviteStaff={role === "owner" && venue ? () => setModal("invite") : undefined}
             onClose={() => shell.setMobileNav(false)}
             onToggleCollapsed={shell.toggleSidebar}
           />
@@ -280,7 +300,10 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
               onNotificationsRead={shell.markNotificationsRead}
               onNotificationsClear={shell.clearNotifications}
             />
-            <div className="page-area">
+            <div
+              ref={pageArea}
+              className={`page-area ${leavingFrom === screen ? "page-leaving" : ""}`}
+            >
               {role === "staff" && !venue && screen !== "account" && (
                 <p role="status">{t("Нет доступных заведений")}</p>
               )}
@@ -292,7 +315,7 @@ export default function VendorApp({ children }: { children?: ReactNode }) {
                   <h1>{t("Добавьте первое заведение")}</h1>
                   <p>{t("После создания откроются меню, команда, заказы и аналитика.")}</p>
                   <Button icon={Plus} onClick={() => setModal("venue")}>
-                    {t("Добавить заведение")}
+                    {t("Новое заведение")}
                   </Button>
                 </section>
               )}

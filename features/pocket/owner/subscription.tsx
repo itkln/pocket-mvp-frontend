@@ -38,6 +38,13 @@ const plans = [
   },
 ] as const;
 
+const statusLabel: Record<OwnerSubscription["status"], string> = {
+  trialing: "Пробный период",
+  active: "Активна",
+  past_due: "Ожидает оплаты",
+  cancelled: "Отменена",
+};
+
 export function SubscriptionScreen({
   venueCount,
   notify,
@@ -80,109 +87,147 @@ export function SubscriptionScreen({
     }
   };
   const selected = plans.find((item) => item.id === plan) ?? plans[1];
+  const current = subscription ? plans.find((item) => item.id === subscription.plan) : undefined;
+  const fitting = plans.find((item) => item.limit >= venueCount) ?? plans[plans.length - 1];
+  const tooSmall = selected.limit < venueCount;
+  const unchanged =
+    !tooSmall &&
+    !!subscription &&
+    subscription.plan === plan &&
+    subscription.billing_cycle === billing;
   return (
     <>
       <PageHeader title={t("Подписка")} />
-      <section className={"subscription-status " + (subscription ? "active" : "")}>
+      <section className={"vendor-block subscription-status " + (subscription ? "active" : "")}>
         <span>
-          <Sparkles size={22} />
+          <Sparkles size={24} />
         </span>
         <div>
-          <strong>{subscription ? "Pocket " + selected.name : t("Подписка не выбрана")}</strong>
+          <strong>
+            {subscription ? "Pocket " + (current ?? selected).name : t("Подписка не выбрана")}
+          </strong>
           <p>
             {subscription?.trial_ends_at
-              ? t(
-                  "Пробный период до " +
-                    new Date(subscription.trial_ends_at).toLocaleDateString(localeTags[locale]),
-                )
+              ? t("Пробный период до {date}", {
+                  date: new Date(subscription.trial_ends_at).toLocaleDateString(localeTags[locale]),
+                })
               : t("Выберите тариф и начните 14-дневный пробный период.")}
           </p>
         </div>
         {subscription && (
-          <b>{subscription.status === "trialing" ? t("Пробный период") : subscription.status}</b>
+          <b className={"subscription-state state-" + subscription.status}>
+            {t(statusLabel[subscription.status])}
+          </b>
         )}
       </section>
-      <div className="subscription-heading">
-        <div>
-          <h2>{t("Выберите тариф")}</h2>
-          <p>{t("Тариф можно изменить по мере роста команды.")}</p>
-        </div>
-        <div className="segmented billing-toggle">
-          <button
-            className={billing === "monthly" ? "active" : ""}
-            onClick={() => setBilling("monthly")}
-          >
-            {t("Ежемесячно")}
-          </button>
-          <button
-            className={billing === "yearly" ? "active" : ""}
-            onClick={() => setBilling("yearly")}
-          >
-            {t("Ежегодно")}
-          </button>
-        </div>
-      </div>
-      <section className="subscription-plans">
-        {plans.map((item) => {
-          const incompatible = item.limit < venueCount;
-          return (
+      <section className="vendor-block subscription-picker">
+        <header className="subscription-heading">
+          <div>
+            <h2>{t("Выберите тариф")}</h2>
+            <p>{t("Тариф можно изменить по мере роста команды.")}</p>
+          </div>
+          <div className="vendor-segmented billing-toggle">
             <button
-              className={
-                "subscription-plan " +
-                (plan === item.id ? "selected" : "") +
-                (incompatible ? " incompatible" : "")
-              }
-              key={item.id}
-              disabled={incompatible}
-              onClick={() => setPlan(item.id)}
+              type="button"
+              className={billing === "monthly" ? "active" : ""}
+              onClick={() => setBilling("monthly")}
             >
-              <div className="plan-title">
-                <div>
-                  <strong>{item.name}</strong>
-                  <span>{t(item.description)}</span>
-                </div>
-                {plan === item.id && <Check size={18} />}
-              </div>
-              <div className="plan-price">
-                <strong>{money(item.price)}</strong>
-                <span>{t("/ месяц")}</span>
-              </div>
-              <ul>
-                {item.features.map((feature) => (
-                  <li key={feature}>
-                    <Check size={15} />
-                    {t(feature)}
-                  </li>
-                ))}
-              </ul>
-              <small>
-                <Store size={14} />
-                {Number.isFinite(item.limit)
-                  ? t("До " + item.limit + " заведений")
-                  : t("Без ограничений")}
-              </small>
+              {t("Ежемесячно")}
             </button>
-          );
-        })}
+            <button
+              type="button"
+              className={billing === "yearly" ? "active" : ""}
+              onClick={() => setBilling("yearly")}
+            >
+              {t("Ежегодно")}
+              <b>−17%</b>
+            </button>
+          </div>
+        </header>
+        <div className="subscription-plans">
+          {plans.map((item) => {
+            const incompatible = item.limit < venueCount;
+            const chosen = plan === item.id;
+            return (
+              <button
+                type="button"
+                aria-pressed={chosen}
+                className={
+                  "subscription-plan " +
+                  (chosen ? "selected" : "") +
+                  (incompatible ? " incompatible" : "")
+                }
+                key={item.id}
+                disabled={incompatible}
+                onClick={() => setPlan(item.id)}
+              >
+                <div className="plan-title">
+                  <div>
+                    <strong>
+                      {item.name}
+                      {current?.id === item.id && <em>{t("Текущий")}</em>}
+                    </strong>
+                    <span>{t(item.description)}</span>
+                  </div>
+                  <i className="plan-radio" aria-hidden="true">
+                    {chosen && <Check size={14} strokeWidth={3} />}
+                  </i>
+                </div>
+                <div className="plan-price">
+                  <strong>{money(item.price)}</strong>
+                  <span>{t("/ месяц")}</span>
+                </div>
+                <p className="plan-yearly">
+                  {billing === "yearly"
+                    ? t("{price} в год", { price: money(item.price * 10) })
+                    : ""}
+                </p>
+                <ul>
+                  {item.features.map((feature) => (
+                    <li key={feature}>
+                      <Check size={16} strokeWidth={2.4} />
+                      {t(feature)}
+                    </li>
+                  ))}
+                </ul>
+                <small>
+                  <Store size={16} />
+                  {incompatible
+                    ? t("Заведений у вас: {count}", { count: venueCount })
+                    : Number.isFinite(item.limit)
+                      ? t("До " + item.limit + " заведений")
+                      : t("Без ограничений")}
+                </small>
+              </button>
+            );
+          })}
+        </div>
+        <footer className="subscription-actions">
+          <p className={tooSmall ? "warning" : ""}>
+            {tooSmall
+              ? t("Для ваших заведений ({count}) подходит тариф {plan}.", {
+                  count: venueCount,
+                  plan: fitting.name,
+                })
+              : billing === "yearly"
+                ? t("При ежегодной оплате два месяца бесплатно.")
+                : t("Списание один раз в месяц.")}
+          </p>
+          <Button
+            icon={unchanged ? Check : Sparkles}
+            disabled={saving || tooSmall || unchanged}
+            onClick={() => void activate()}
+          >
+            {saving
+              ? t("Сохраняем...")
+              : unchanged
+                ? t("Текущий тариф")
+                : subscription
+                  ? t("Изменить тариф")
+                  : t("Начать пробный период")}
+          </Button>
+        </footer>
       </section>
-      <div className="subscription-actions">
-        <p>
-          {billing === "yearly"
-            ? t("При ежегодной оплате два месяца бесплатно.")
-            : t("Списание один раз в месяц.")}
-        </p>
-        <Button
-          icon={Sparkles}
-          disabled={saving || selected.limit < venueCount}
-          onClick={() => void activate()}
-        >
-          {saving
-            ? t("Сохраняем...")
-            : subscription
-              ? t("Изменить тариф")
-              : t("Начать пробный период")}
-        </Button>
-      </div>
     </>
   );
 }

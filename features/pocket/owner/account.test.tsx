@@ -180,4 +180,40 @@ describe("AccountScreen", () => {
     await waitFor(() => expect(screen.getAllByText("Налаштування").length).toBeGreaterThan(0));
     expect(screen.queryByText("Акаунт Pocket")).not.toBeInTheDocument();
   });
+
+  it("switches interface animations off on this device and back on", () => {
+    render(
+      <I18nProvider>
+        <AccountScreen
+          user={user}
+          notify={vi.fn()}
+          onLogout={vi.fn()}
+          onUpdate={vi.fn()}
+          interfaceSettings
+        />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Интерфейс" }));
+    const toggle = screen.getByRole("checkbox");
+    expect(toggle).toBeChecked();
+
+    fireEvent.click(toggle);
+    expect(toggle).not.toBeChecked();
+    expect(document.documentElement.dataset.motion).toBe("off");
+    expect(window.localStorage.getItem("pocket:interface-motion")).toBe("off");
+
+    fireEvent.click(toggle);
+    expect(toggle).toBeChecked();
+    expect(document.documentElement.dataset.motion).toBeUndefined();
+    expect(window.localStorage.getItem("pocket:interface-motion")).toBeNull();
+  });
+
+  it("keeps the interface section out of the shared Dish settings", () => {
+    render(
+      <I18nProvider>
+        <AccountScreen user={user} notify={vi.fn()} onLogout={vi.fn()} onUpdate={vi.fn()} />
+      </I18nProvider>,
+    );
+    expect(screen.queryByRole("button", { name: "Интерфейс" })).not.toBeInTheDocument();
+  });
 });

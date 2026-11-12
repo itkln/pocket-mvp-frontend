@@ -1336,6 +1336,22 @@ thead th {
   line-height: 1.5;
 }
 
+.confirm-dialog-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #fbeceb;
+  color: #c0392b;
+}
+
+.confirm-dialog > .modal-body h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
 .confirm-dialog > .modal-body small {
   display: block;
   margin-top: 7px;

@@ -8,13 +8,23 @@ import {
   updateProfile,
   type AuthUser,
 } from "../../../lib/auth-api";
-import { Bell, Camera, Eye, EyeOff, LogOut, ShieldCheck, UserRound } from "lucide-react";
+import {
+  Bell,
+  Camera,
+  Eye,
+  EyeOff,
+  LogOut,
+  MonitorSmartphone,
+  ShieldCheck,
+  UserRound,
+} from "lucide-react";
 import { userInitials } from "../model";
 import { TooltipContext, Button, PageHeader, PanelTitle, Field } from "../ui";
 import { useI18n } from "../i18n";
 import { useLocalizedError } from "../error-message";
+import { setMotionPreference, useMotionPreference } from "../motion-preference";
 
-type AccountSection = "profile" | "notifications" | "security";
+type AccountSection = "profile" | "notifications" | "interface" | "security";
 type AccountPreferences = { orderUpdates: boolean; productNews: boolean; reviewReplies: boolean };
 const defaultPreferences: AccountPreferences = {
   orderUpdates: true,
@@ -31,6 +41,7 @@ export function AccountScreen({
   initialSection = "profile",
   embedded = false,
   onProfileSaved,
+  interfaceSettings = false,
 }: {
   user: AuthUser;
   notify: (message: string) => void;
@@ -39,10 +50,13 @@ export function AccountScreen({
   initialSection?: AccountSection;
   embedded?: boolean;
   onProfileSaved?: () => void;
+  // Vendor shows the "Interface" section with device settings such as animations.
+  interfaceSettings?: boolean;
 }) {
   const { t } = useI18n();
   const errorMessage = useLocalizedError();
   const showTooltips = useContext(TooltipContext);
+  const motion = useMotionPreference();
   const [section, setSection] = useState<AccountSection>(initialSection);
   const [profile, setProfile] = useState({
     firstName: user.first_name,
@@ -203,6 +217,9 @@ export function AccountScreen({
     [
       { id: "profile", label: "Личные данные", icon: UserRound },
       { id: "notifications", label: "Уведомления", icon: Bell },
+      ...(interfaceSettings
+        ? [{ id: "interface" as const, label: "Интерфейс", icon: MonitorSmartphone }]
+        : []),
       { id: "security", label: "Безопасность", icon: ShieldCheck },
     ];
 
@@ -363,6 +380,19 @@ export function AccountScreen({
                   text={t("Редкие обновления о новых возможностях.")}
                   checked={preferences.productNews}
                   onChange={(value) => updatePreference("productNews", value)}
+                />
+              </div>
+            </div>
+          )}
+          {section === "interface" && interfaceSettings && (
+            <div className="account-preference-panel">
+              <PanelTitle title={t("Интерфейс")} subtitle={t("Настройки этого устройства.")} />
+              <div className="account-setting-rows">
+                <AccountToggle
+                  title={t("Анимации")}
+                  text={t("Плавные переходы между страницами, появление блоков и счётчики цифр.")}
+                  checked={motion}
+                  onChange={setMotionPreference}
                 />
               </div>
             </div>

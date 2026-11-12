@@ -16,6 +16,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
+  UserPlus,
   Search,
   Settings,
   ShoppingBag,
@@ -35,25 +36,8 @@ import { IconButton } from "./ui";
 import { localeOptions, localeTags, useI18n } from "./i18n";
 import { replacePathLocale } from "./locales";
 import { LocaleFlag } from "./locale-flag";
-
-// Closes a popover on an outside pointer press or Escape.
-function useDismiss(open: boolean, area: { current: HTMLElement | null }, close: () => void) {
-  useEffect(() => {
-    if (!open) return;
-    const closeOutside = (event: PointerEvent) => {
-      if (!area.current?.contains(event.target as Node)) close();
-    };
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-    };
-    document.addEventListener("pointerdown", closeOutside);
-    document.addEventListener("keydown", closeOnEscape);
-    return () => {
-      document.removeEventListener("pointerdown", closeOutside);
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [open, area, close]);
-}
+import { useDismiss } from "./use-dismiss";
+import { useNavIndicator } from "./use-nav-indicator";
 
 // The venue switcher at the top of the page. The selected venue decides the workspace: own
 // venues open the owner's screens, venues where the user works open the staff screens.
@@ -141,6 +125,7 @@ export function Sidebar({
   collapsed,
   onNavigate,
   onAddVenue,
+  onInviteStaff,
   onSignOut,
   onClose,
   onToggleCollapsed,
@@ -154,6 +139,7 @@ export function Sidebar({
   collapsed: boolean;
   onNavigate: (id: string) => void;
   onAddVenue: () => void;
+  onInviteStaff?: () => void;
   onSignOut: () => void;
   onClose: () => void;
   onToggleCollapsed: () => void;
@@ -162,6 +148,9 @@ export function Sidebar({
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileMenu = useRef<HTMLDivElement>(null);
   useDismiss(profileMenuOpen, profileMenu, () => setProfileMenuOpen(false));
+  const [sidebarRef, indicatorRef] = useNavIndicator(
+    `${screen}:${navigation.map((item) => item.id).join()}`,
+  );
 
   const toggleNavigation = () => {
     if (window.matchMedia("(min-width: 901px)").matches) onToggleCollapsed();
@@ -185,7 +174,8 @@ export function Sidebar({
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   return (
-    <aside className={`sidebar ${mobileNav ? "open" : ""}`}>
+    <aside className={`sidebar ${mobileNav ? "open" : ""}`} ref={sidebarRef}>
+      <span className="nav-indicator" ref={indicatorRef} aria-hidden="true" />
       <div className="brand-row">
         <button
           className="brand-toggle"
@@ -212,16 +202,26 @@ export function Sidebar({
           className="mobile-sidebar-close"
         />
       </div>
-      <button
-        type="button"
-        className="sidebar-add-venue collapsed-tooltip"
-        data-tooltip={collapsed ? t("Добавить заведение") : undefined}
-        aria-label={collapsed ? t("Добавить заведение") : undefined}
-        onClick={onAddVenue}
-      >
-        <Plus size={20} strokeWidth={1.9} />
-        <span>{t("Добавить заведение")}</span>
-      </button>
+      <div className="sidebar-quick-actions" role="group" aria-label={t("Быстрые действия")}>
+        {[
+          { label: "Новое заведение", icon: Plus, onClick: onAddVenue },
+          ...(onInviteStaff
+            ? [{ label: "Новый сотрудник", icon: UserPlus, onClick: onInviteStaff }]
+            : []),
+        ].map(({ label, icon: Icon, onClick }) => (
+          <button
+            key={label}
+            type="button"
+            className="sidebar-add-venue collapsed-tooltip"
+            data-tooltip={collapsed ? t(label) : undefined}
+            aria-label={collapsed ? t(label) : undefined}
+            onClick={onClick}
+          >
+            <Icon size={20} strokeWidth={1.9} />
+            <span>{t(label)}</span>
+          </button>
+        ))}
+      </div>
       <nav className="side-nav">
         {navigationGroups[role].map((group) => {
           const items = group.ids

@@ -1,0 +1,390 @@
+/* Vendor motion layer. Loaded last. One language for every move: things arrive with a short
+   rise out of a blur and settle on a soft ease-out; nothing loops or bounces for attention.
+   Everything decorative sits behind prefers-reduced-motion, so the interface works the same
+   without it. Keyframes only describe the start: with `backwards` an element rests in its own
+   styles once it has arrived, so no transform or filter stays behind on the page. */
+:root {
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-pop: cubic-bezier(0.2, 1.25, 0.4, 1);
+}
+
+/* Sidebar: one highlight for the active item (placed by use-nav-indicator.ts). While it is
+   shown the item itself stays transparent, otherwise the item keeps its own background. */
+.vendor-shell .sidebar > .nav-indicator {
+  position: absolute;
+  z-index: 0;
+  border-radius: 14px;
+  background: #e7f3fa;
+  opacity: 0;
+  pointer-events: none;
+}
+.vendor-shell .sidebar[data-indicator="on"] .side-nav button {
+  position: relative;
+  z-index: 1;
+}
+.vendor-shell .sidebar[data-indicator="on"] .side-nav button.active,
+.vendor-shell .sidebar[data-indicator="on"] .side-nav button.active:hover {
+  background: transparent;
+}
+.vendor-shell .count-up {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The highlight stretches to the new item and then lets go of the old one: the edge that
+     leads moves first, the other follows. */
+  .vendor-shell .sidebar > .nav-indicator {
+    transition: opacity 0.2s ease;
+  }
+  .vendor-shell .sidebar > .nav-indicator[data-dir="down"] {
+    transition:
+      bottom 0.26s var(--motion-ease),
+      top 0.44s var(--motion-ease) 0.07s,
+      opacity 0.2s ease;
+  }
+  .vendor-shell .sidebar > .nav-indicator[data-dir="up"] {
+    transition:
+      top 0.26s var(--motion-ease),
+      bottom 0.44s var(--motion-ease) 0.07s,
+      opacity 0.2s ease;
+  }
+  .vendor-shell .side-nav button {
+    transition:
+      color 0.2s ease,
+      background-color 0.15s ease;
+  }
+
+  /* Leaving a page: the old content dims and softens while the next route renders. */
+  .vendor-shell .page-area {
+    transition:
+      opacity 0.22s ease,
+      filter 0.22s ease;
+  }
+  .vendor-shell .page-area.page-leaving {
+    opacity: 0.35;
+    filter: blur(3px);
+    pointer-events: none;
+  }
+
+  /* Arriving: the page fades in, the title rises from under its own baseline, the hint and
+     the actions follow. Only opacity moves on the page root, so fixed panels inside a page
+     are never re-anchored. */
+  .vendor-shell .page-area > * {
+    animation: vendor-fade-in 0.35s ease backwards;
+  }
+  .vendor-shell .page-area .page-header h1 {
+    animation: vendor-title-in 0.65s var(--motion-ease) backwards;
+  }
+  .vendor-shell .page-area .page-header h1 + p {
+    animation: vendor-rise-in 0.55s var(--motion-ease) 0.12s backwards;
+  }
+  .vendor-shell .page-area .page-header .header-actions {
+    animation: vendor-rise-in 0.55s var(--motion-ease) 0.16s backwards;
+  }
+
+  /* Blocks arrive one after another in reading order. use-page-motion.ts numbers them
+     (--motion-i); the number is inherited, so rows and bars inside a block wait for it. */
+  .vendor-shell
+    .page-area
+    :is(
+      .vendor-stat-card,
+      .vendor-block,
+      .panel:not(.team-panel),
+      .settings-nav,
+      .list-toolbar,
+      .team-list,
+      .orders-toolbar,
+      .orders-queue,
+      .orders-detail-column,
+      .vendor-menu-stats > button,
+      .vendor-stop-summary,
+      .vendor-category-panel,
+      .vendor-menu-group,
+      .floor-levels,
+      .subscription-plan
+    ) {
+    animation: vendor-rise-in 0.65s var(--motion-ease) backwards;
+    animation-delay: calc(0.06s + var(--motion-i, 0) * 0.06s);
+  }
+
+  /* Rows of tables and lists follow their block, one after another (the first eight). */
+  .vendor-shell
+    .page-area
+    :is(.vendor-block, .panel, .team-list)
+    :is(
+      tbody tr,
+      ul > li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div
+    ) {
+    animation: vendor-row-in 0.5s var(--motion-ease) backwards;
+    animation-delay: calc(0.2s + var(--motion-i, 0) * 0.06s + var(--row-i, 0) * 0.05s);
+  }
+  /* Menu rows can be dragged: they only fade, so no transform ever meets the drag. */
+  .vendor-shell .page-area .vendor-menu-row {
+    animation: vendor-fade-in 0.45s ease backwards;
+    animation-delay: calc(0.2s + var(--motion-i, 0) * 0.06s + var(--row-i, 0) * 0.05s);
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(2) {
+    --row-i: 1;
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(3) {
+    --row-i: 2;
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(4) {
+    --row-i: 3;
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(5) {
+    --row-i: 4;
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(6) {
+    --row-i: 5;
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(7) {
+    --row-i: 6;
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(8) {
+    --row-i: 7;
+  }
+  :is(.vendor-block, .panel, .team-list)
+    :is(
+      tr,
+      li,
+      .team-row,
+      .popular-row,
+      .channel-summary-list > *,
+      .setting-toggles > div,
+      .account-setting-rows > div,
+      .vendor-menu-row
+    ):nth-child(n + 9) {
+    --row-i: 8;
+  }
+
+  /* Progress bars grow from zero after their card and glide to a new value afterwards. */
+  .vendor-shell .vendor-stat-track i {
+    animation: vendor-bar-in 0.9s var(--motion-ease) backwards;
+    animation-delay: calc(0.3s + var(--motion-i, 0) * 0.06s + var(--row-i, 0) * 0.06s);
+    transition: width 0.6s var(--motion-ease);
+  }
+
+  /* Cards answer the pointer: a small lift on hover, a small press on click. */
+  .vendor-shell button.vendor-stat-card,
+  .vendor-shell button.vendor-block {
+    transition:
+      transform 0.25s var(--motion-ease),
+      border-color 0.15s,
+      background 0.15s;
+  }
+  .vendor-shell button.vendor-stat-card:hover,
+  .vendor-shell button.vendor-block:hover {
+    transform: translateY(-2px);
+  }
+  .vendor-shell button.vendor-stat-card:active,
+  .vendor-shell button.vendor-block:active {
+    transform: scale(0.985);
+  }
+  .vendor-shell .button {
+    transition:
+      transform 0.15s var(--motion-ease),
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+  .vendor-shell .button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  /* Popovers open from the control they belong to. */
+  .vendor-shell
+    :is(.venue-menu-popover, .topbar-popover, .topbar-language-menu, .row-actions-menu) {
+    transform-origin: top center;
+    animation: vendor-pop-down 0.24s var(--motion-ease) backwards;
+  }
+  .vendor-shell .profile-menu-popover {
+    transform-origin: bottom center;
+    animation: vendor-pop-up 0.24s var(--motion-ease) backwards;
+  }
+
+  /* The toast jumps up from the bottom edge and sharpens. */
+  .vendor-shell .toast {
+    animation: vendor-toast-in 0.5s var(--motion-pop) backwards;
+  }
+}
+/* Expanding the sidebar: its labels come back with display, while the sidebar is still
+   narrow. They wait until the width has nearly settled and then fade in on one line, so
+   nothing wraps or jumps. Collapsing hides them at once, which reads as calm already. */
+@media (prefers-reduced-motion: no-preference) and (min-width: 901px) {
+  .vendor-shell:not(.sidebar-collapsed)
+    > .sidebar
+    :is(
+      .brand-row strong,
+      .nav-label,
+      .side-nav button span,
+      .side-nav button b,
+      .sidebar-add-venue span,
+      .user-chip > div,
+      .user-chip > svg
+    ) {
+    white-space: nowrap;
+    animation: vendor-label-in 0.24s ease 0.14s backwards;
+  }
+}
+@keyframes vendor-label-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+}
+
+/* Animations switched off in the account settings (motion-preference.ts): every animation and
+   transition stops at its end state. Loading spinners keep turning, they carry meaning.
+   !important is the point here: this switch has to win over every layer. */
+:root[data-motion="off"]
+  *:not(
+    .orders-refresh.spinning svg,
+    .floor-summary.loading svg,
+    .slide-confirm-spinner,
+    .invitation-loading svg
+  ),
+:root[data-motion="off"] *::before,
+:root[data-motion="off"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+:root[data-motion="off"] .vendor-shell .page-area.page-leaving {
+  opacity: 1;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+  .vendor-team .row-actions-menu {
+    transform-origin: bottom center;
+    animation-name: vendor-pop-up;
+  }
+}
+
+@keyframes vendor-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes vendor-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+    filter: blur(6px);
+  }
+}
+@keyframes vendor-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+/* The clip follows the shift, so the mask edge stays on the title's final baseline. */
+@keyframes vendor-title-in {
+  from {
+    transform: translateY(100%);
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes vendor-bar-in {
+  from {
+    width: 0;
+  }
+}
+@keyframes vendor-pop-down {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+@keyframes vendor-pop-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+@keyframes vendor-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.92);
+    filter: blur(6px);
+  }
+}

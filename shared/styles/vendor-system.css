@@ -293,7 +293,7 @@ button.vendor-stat-card:hover,
 /* Section navigation inside a page (venue settings, account). */
 .vendor-shell .settings-nav {
   gap: 4px;
-  padding: 8px;
+  padding: 10px;
   border-radius: var(--vendor-radius-block);
   background: #fff;
 }
@@ -303,7 +303,7 @@ button.vendor-stat-card:hover,
   gap: 12px;
   height: 48px;
   padding: 0 14px;
-  border-radius: 14px;
+  border-radius: 18px;
   font-size: 16px;
   box-shadow: none;
 }
@@ -607,19 +607,35 @@ button.vendor-stat-card:hover,
   padding: 0 12px;
 }
 
-/* Venue creation stays in the sidebar, right under the brand. */
+/* Quick actions sit right under the brand, before the sections: quiet rows that create
+   something (a venue, a staff invite), set apart from the navigation by a hairline. */
+.vendor-shell .sidebar-quick-actions {
+  display: grid;
+  gap: 2px;
+  margin: 16px 0 4px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eef0f2;
+}
 .vendor-shell .sidebar-add-venue {
   width: 100%;
   min-height: 44px;
-  margin: 16px 0 4px;
-  padding: 0 11px;
+  margin: 0;
+  gap: 12px;
+  padding: 0 12px;
   border-radius: 14px;
-  color: var(--accent);
+  color: var(--ink);
   font-size: 16px;
   font-weight: 500;
 }
+.vendor-shell .sidebar-add-venue > svg {
+  color: var(--muted);
+  transition: color 0.15s ease;
+}
 .vendor-shell .sidebar-add-venue:hover {
-  background: var(--accent-soft);
+  background: #f3f4f5;
+}
+.vendor-shell .sidebar-add-venue:hover > svg {
+  color: var(--accent);
 }
 
 /* Collapsed sidebar: centred icons; counters become a small badge on the icon corner. */
@@ -638,6 +654,9 @@ button.vendor-stat-card:hover,
   border-radius: 9px;
   font-size: 11px;
   line-height: 14px;
+}
+.vendor-shell.sidebar-collapsed .sidebar-quick-actions {
+  justify-items: center;
 }
 .vendor-shell.sidebar-collapsed .sidebar-add-venue {
   width: 48px;
@@ -870,5 +889,134 @@ button.vendor-stat-card:hover,
   .vendor-shell .modal > footer,
   .vendor-shell .modal form > footer {
     padding: 8px 20px 24px;
+  }
+}
+
+/* Confirmation: the same 28px sheet as other dialogs, a soft warning mark, a short question and
+   two equal actions. It renders outside .vendor-shell (ConfirmProvider sits at the root), and
+   this file only loads in Vendor, so the selectors stay unscoped. */
+.confirm-backdrop {
+  background: rgba(23, 33, 43, 0.4);
+  backdrop-filter: blur(4px);
+}
+.confirm-dialog {
+  width: min(420px, 100%);
+  border-radius: var(--vendor-radius-block);
+  box-shadow: 0 24px 64px rgba(23, 33, 43, 0.2);
+}
+.confirm-dialog > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 0;
+}
+.confirm-dialog > header .confirm-dialog-mark {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: #fbeceb;
+  color: #c0392b;
+}
+.confirm-dialog > header .icon-button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: #f2f3f5;
+  color: var(--muted);
+}
+.confirm-dialog > header .icon-button:hover {
+  background: #e7e9ec;
+  color: var(--ink);
+}
+.confirm-dialog > .modal-body {
+  display: grid;
+  gap: 8px;
+  padding: 18px 24px 24px;
+}
+.confirm-dialog > .modal-body h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.confirm-dialog > .modal-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.confirm-dialog > footer {
+  gap: 10px;
+  padding: 0 24px 24px;
+  background: transparent;
+}
+.confirm-dialog > footer .button {
+  min-height: 52px;
+  border-radius: var(--vendor-radius-control);
+  font-size: 16px;
+  font-weight: 600;
+}
+.confirm-dialog > footer .button.quiet {
+  background: #f3f4f5;
+  color: var(--ink);
+}
+.confirm-dialog > footer .button.quiet:hover {
+  background: #e9ebed;
+}
+.confirm-dialog > footer .button.danger {
+  background: #c0392b;
+  color: #fff;
+}
+.confirm-dialog > footer .button.danger:hover {
+  background: #a93226;
+}
+@media (max-width: 640px) {
+  .confirm-dialog {
+    width: calc(100% - 32px);
+    border-radius: var(--vendor-radius-block);
+  }
+  .confirm-dialog > header {
+    padding: 20px 20px 0;
+  }
+  .confirm-dialog > .modal-body {
+    padding: 16px 20px 20px;
+  }
+  .confirm-dialog > footer {
+    padding: 0 20px 20px;
+  }
+}
+
+/* Toast: a white floating card with a green check in a soft circle. */
+.vendor-shell .toast {
+  right: 24px;
+  bottom: 24px;
+  min-height: 56px;
+  gap: 12px;
+  padding: 8px 20px 8px 10px;
+  border: 1px solid #eef0f2;
+  border-radius: 20px;
+  background: #fff;
+  color: var(--ink);
+  box-shadow: 0 16px 40px rgba(23, 33, 43, 0.14);
+  font-size: 16px;
+  font-weight: 500;
+}
+.vendor-shell .toast svg {
+  box-sizing: content-box;
+  flex-shrink: 0;
+  padding: 9px;
+  border-radius: 50%;
+  background: #e8f6ef;
+  color: #2f9e6b;
+}
+@media (max-width: 640px) {
+  .vendor-shell .toast {
+    right: 16px;
+    left: 16px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
   }
 }

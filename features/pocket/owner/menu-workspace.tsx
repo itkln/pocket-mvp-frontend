@@ -44,7 +44,7 @@ import {
 import { copyMenuNutrition } from "../../../lib/menu-nutrition";
 import { useConfirm } from "../confirm-dialog";
 import { useI18n } from "../i18n";
-import { Button, EmptyIllustration, IconButton, money } from "../ui";
+import { Button, CountUp, EmptyIllustration, IconButton, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 import { CategoryEditor } from "./menu-categories";
 import { MenuItemDrawer, MenuCoverDrawer } from "./menu-drawers";
@@ -277,7 +277,9 @@ export function MenuManager({
               {t("Фотографии в меню")}
               <ChevronRight size={18} />
             </span>
-            <strong>{photoPercent}%</strong>
+            <strong>
+              <CountUp value={photoPercent} format={(value) => `${Math.round(value)}%`} />
+            </strong>
             <span className="vendor-stat-track">
               <i style={{ width: `${photoPercent}%` }} />
             </span>

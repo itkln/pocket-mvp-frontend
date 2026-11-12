@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "lucide-react";
+import { TriangleAlert, X } from "lucide-react";
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 import { Button, IconButton } from "./ui";
 import { useI18n } from "./i18n";
@@ -50,10 +50,13 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             onMouseDown={(event) => event.stopPropagation()}
           >
             <header>
-              <h2 id="confirm-dialog-title">{options.title ?? t("Удалить?")}</h2>
+              <span className="confirm-dialog-mark" aria-hidden="true">
+                <TriangleAlert size={22} strokeWidth={2} />
+              </span>
               <IconButton icon={X} label={t("Закрыть")} onClick={() => close(false)} />
             </header>
             <div className="modal-body">
+              <h2 id="confirm-dialog-title">{options.title ?? t("Удалить?")}</h2>
               <p id="confirm-dialog-description">{options.description}</p>
             </div>
             <footer>

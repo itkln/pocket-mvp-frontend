@@ -2,10 +2,13 @@
 
 import { CheckCircle2, ChevronRight, Download, Star } from "lucide-react";
 import { type OwnerOrder } from "../../../lib/owner-api";
-import { Button, EmptyIllustration, PageHeader, StatCard, StatusPill, money } from "../ui";
+import { Button, CountUp, EmptyIllustration, PageHeader, StatCard, StatusPill, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 import { localeTags, useI18n } from "../i18n";
 import { isFinalOrder, orderStatusLabels } from "./order-workflow";
+
+const percent = (value: number) => `${Math.round(value)}%`;
+const oneDecimal = (value: number) => value.toFixed(1);
 
 // The owner's start screen: today's numbers, the latest orders and what needs attention now.
 export function OwnerOverview({
@@ -42,13 +45,13 @@ export function OwnerOverview({
       <section className="vendor-stat-grid overview-stats">
         <StatCard
           title={t("Выручка сегодня")}
-          value={money((dashboard?.revenue_minor ?? 0) / 100)}
+          value={<CountUp value={(dashboard?.revenue_minor ?? 0) / 100} format={money} />}
           caption={t("Оплаченные заказы")}
           onClick={() => onNavigate("payments")}
         />
         <StatCard
           title={t("Заказы сегодня")}
-          value={dashboard?.orders_today ?? 0}
+          value={<CountUp value={dashboard?.orders_today ?? 0} />}
           caption={
             activeOrders.length
               ? t("В работе: {count}", { count: activeOrders.length })
@@ -58,12 +61,12 @@ export function OwnerOverview({
         />
         <StatCard
           title={t("Средний чек")}
-          value={money((dashboard?.average_order_minor ?? 0) / 100)}
+          value={<CountUp value={(dashboard?.average_order_minor ?? 0) / 100} format={money} />}
           caption={t("За сегодня")}
         />
         <StatCard
           title={t("Загрузка зала")}
-          value={`${occupancy}%`}
+          value={<CountUp value={occupancy} format={percent} />}
           progress={occupancy}
           caption={t("Занято столов: {active} из {total}", {
             active: dashboard?.active_tables ?? 0,
@@ -180,7 +183,9 @@ function RatingSummary({
         <ChevronRight size={18} />
       </span>
       <div className="overview-rating-score">
-        <strong>{rating.toFixed(1)}</strong>
+        <strong>
+          <CountUp value={rating} format={oneDecimal} />
+        </strong>
         <div>
           <span className="overview-stars" aria-hidden="true">
             {[1, 2, 3, 4, 5].map((star) => (

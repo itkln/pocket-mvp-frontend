@@ -138,7 +138,7 @@ describe("Vendor venue and profile navigation", () => {
     );
 
     expect(screen.queryByText("Текущая роль")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Добавить заведение" }));
+    fireEvent.click(screen.getByRole("button", { name: "Новое заведение" }));
     expect(sidebarProps.onAddVenue).toHaveBeenCalledOnce();
   });
 

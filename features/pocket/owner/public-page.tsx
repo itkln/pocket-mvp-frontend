@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Copy, Download, ExternalLink, QrCode } from "lucide-react";
+import { Copy, Download, ExternalLink, Info, Link2, QrCode } from "lucide-react";
 import { apiRequest } from "../../../lib/api-client";
 import { type OwnerVenue } from "../../../lib/owner-api";
 import { useI18n } from "../i18n";
@@ -78,41 +78,68 @@ export function PublicPageSettings({
       <PanelTitle
         title={t("Страница и QR")}
         subtitle={t("Публичная страница ресторана в Pocket Dish: меню и бронирование.")}
+        action={
+          page && (
+            <span className={"public-page-state " + (page.published ? "published" : "hidden")}>
+              <i />
+              {t(page.published ? "Опубликована" : "Скрыта")}
+            </span>
+          )
+        }
       />
       {error ? (
-        <div role="alert">
+        <div className="public-page-error" role="alert">
           <p>{t("Не удалось загрузить ссылку")}</p>
-          <Button onClick={() => setRevision((value) => value + 1)}>{t("Повторить")}</Button>
+          <Button kind="secondary" onClick={() => setRevision((value) => value + 1)}>
+            {t("Повторить")}
+          </Button>
         </div>
       ) : !page ? (
-        <p role="status">{t("Загрузка...")}</p>
+        <p className="public-page-loading" role="status">
+          {t("Загрузка...")}
+        </p>
       ) : (
         <>
-          <p>
+          <div className="dish-public-link">
+            <label className="dish-public-url">
+              <Link2 size={19} aria-hidden="true" />
+              <input aria-label={t("Публичная ссылка")} readOnly value={page.url} />
+            </label>
+            <Button kind="secondary" icon={Copy} onClick={() => void copy()}>
+              {t("Копировать ссылку")}
+            </Button>
+            <a
+              className="button secondary dish-public-open"
+              href={page.url}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t("Открыть Pocket Dish")}
+              title={t("Открыть Pocket Dish")}
+            >
+              <ExternalLink size={19} />
+            </a>
+          </div>
+          <p className={"public-page-note " + (page.published ? "" : "warning")}>
             {t(
               page.published
                 ? "Страница опубликована. Изменения меню и настроек бронирования появятся у гостей."
                 : "Страница скрыта. Для публикации выберите статус «Открыто» в основных настройках.",
             )}
           </p>
-          <div className="dish-public-link">
-            <input aria-label={t("Публичная ссылка")} readOnly value={page.url} />
-            <Button kind="secondary" icon={Copy} onClick={() => void copy()}>
-              {t("Копировать ссылку")}
-            </Button>
-          </div>
           <div className="dish-public-qr">
-            {image ? (
-              <Image
-                unoptimized
-                src={image}
-                width={180}
-                height={180}
-                alt={t("QR-код страницы ресторана")}
-              />
-            ) : (
-              <QrCode size={100} />
-            )}
+            <span className="dish-public-qr-code">
+              {image ? (
+                <Image
+                  unoptimized
+                  src={image}
+                  width={168}
+                  height={168}
+                  alt={t("QR-код страницы ресторана")}
+                />
+              ) : (
+                <QrCode size={96} />
+              )}
+            </span>
             <div>
               <strong>{venue.name}</strong>
               <p>{t("Этот QR открывает меню и бронирование без привязки к столу.")}</p>
@@ -121,11 +148,10 @@ export function PublicPageSettings({
               </Button>
             </div>
           </div>
-          <a className="button secondary" href={page.url} target="_blank" rel="noreferrer">
-            <ExternalLink size={18} />
-            {t("Открыть Pocket Dish")}
-          </a>
-          <p>{t("QR-коды столов находятся в разделе «План зала».")}</p>
+          <p className="public-page-hint">
+            <Info size={18} aria-hidden="true" />
+            {t("QR-коды столов находятся в разделе «План зала».")}
+          </p>
         </>
       )}
     </section>

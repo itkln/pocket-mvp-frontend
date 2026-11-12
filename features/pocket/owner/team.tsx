@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Ellipsis, Mail, Plus, Search, Trash2, UserX } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Copy, Ellipsis, Plus, Search, Send, Trash2, UserCheck, UserX } from "lucide-react";
 import { type OwnerStaffMember } from "../../../lib/owner-api";
 import { useConfirm } from "../confirm-dialog";
 import { useI18n } from "../i18n";
+import { useDismiss } from "../use-dismiss";
 import { Button, EmptyIllustration, IconButton, PageHeader, StatusPill } from "../ui";
 import { useOwnerWorkspace } from "./context";
 
@@ -27,6 +28,9 @@ export function TeamScreen({
   const [sending, setSending] = useState(false);
   const [query, setQuery] = useState("");
   const [actions, setActions] = useState<string | null>(null);
+  const actionsArea = useRef<HTMLDivElement>(null);
+  const closeActions = useCallback(() => setActions(null), []);
+  useDismiss(actions !== null, actionsArea, closeActions);
   const filtered = useMemo(
     () =>
       staff.filter((person) =>
@@ -109,26 +113,31 @@ export function TeamScreen({
                   <option value="waiter">{t("Официант")}</option>
                 </select>
                 <StatusPill status={statusLabel[person.status]} />
-                <div className="row-actions">
+                <div className="row-actions" ref={actions === person.id ? actionsArea : undefined}>
                   <IconButton
                     icon={Ellipsis}
+                    active={actions === person.id}
                     label={t("Действия с {name}", { name: person.display_name })}
                     onClick={() => setActions(actions === person.id ? null : person.id)}
                   />
                   {actions === person.id && (
-                    <div className="row-actions-menu">
+                    <div className="row-actions-menu" role="menu">
                       <button
+                        type="button"
+                        role="menuitem"
                         onClick={() => {
                           navigator.clipboard?.writeText(person.email);
                           setActions(null);
                           notify("E-mail скопирован");
                         }}
                       >
-                        <Mail size={16} />
+                        <Copy size={18} />
                         {t("Скопировать e-mail")}
                       </button>
                       {person.status === "invited" && (
                         <button
+                          type="button"
+                          role="menuitem"
                           disabled={sending}
                           onClick={async () => {
                             setSending(true);
@@ -143,20 +152,34 @@ export function TeamScreen({
                             }
                           }}
                         >
-                          <Mail size={16} />
-                          {t("Отправить приглашение снова")}
+                          <Send size={18} />
+                          {sending ? t("Отправляем...") : t("Отправить приглашение снова")}
                         </button>
                       )}
                       {person.status !== "invited" && (
-                        <button onClick={() => void deactivate(person)}>
-                          <UserX size={16} />
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => void deactivate(person)}
+                        >
+                          {person.status === "inactive" ? (
+                            <UserCheck size={18} />
+                          ) : (
+                            <UserX size={18} />
+                          )}
                           {person.status === "inactive"
                             ? t("Вернуть доступ")
                             : t("Приостановить доступ")}
                         </button>
                       )}
-                      <button className="danger" onClick={() => void remove(person)}>
-                        <Trash2 size={16} />
+                      <hr />
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="danger"
+                        onClick={() => void remove(person)}
+                      >
+                        <Trash2 size={18} />
                         {t("Удалить из команды")}
                       </button>
                     </div>

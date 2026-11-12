@@ -175,6 +175,7 @@ export function AccountPage() {
       notify={shell.notify}
       onLogout={shell.signOut}
       onUpdate={shell.setUser}
+      interfaceSettings
     />
   );
 }

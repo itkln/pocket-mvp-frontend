@@ -8,7 +8,7 @@ import {
   Utensils,
   type LucideIcon,
 } from "lucide-react";
-import { Button, EmptyIllustration, PageHeader, PanelTitle, StatCard, money } from "../ui";
+import { Button, CountUp, EmptyIllustration, PageHeader, PanelTitle, StatCard, money } from "../ui";
 import { useOwnerWorkspace } from "./context";
 import { useI18n } from "../i18n";
 
@@ -39,23 +39,29 @@ export function AnalyticsScreen() {
       <section className="vendor-stat-grid overview-stats">
         <StatCard
           title={t("Выручка сегодня")}
-          value={money((dashboard?.revenue_minor ?? 0) / 100)}
+          value={<CountUp value={(dashboard?.revenue_minor ?? 0) / 100} format={money} />}
           caption={t("За текущий день")}
         />
         <StatCard
           title={t("Заказов сегодня")}
-          value={dashboard?.orders_today ?? 0}
+          value={<CountUp value={dashboard?.orders_today ?? 0} />}
           caption={t(`Завершено: ${completed.length}`)}
         />
         <StatCard
           title={t("Загрузка зала")}
-          value={`${occupancy}%`}
+          value={<CountUp value={occupancy} format={(value) => `${Math.round(value)}%`} />}
           progress={occupancy}
           caption={t(`Активных столов: ${dashboard?.active_tables ?? 0}`)}
         />
         <StatCard
           title={t("Средняя оценка")}
-          value={dashboard?.average_rating ? dashboard.average_rating.toFixed(1) : "—"}
+          value={
+            dashboard?.average_rating ? (
+              <CountUp value={dashboard.average_rating} format={(value) => value.toFixed(1)} />
+            ) : (
+              "—"
+            )
+          }
           caption={t(`Отзывов: ${reviews.length}`)}
         />
       </section>
